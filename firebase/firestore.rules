@@ -1,0 +1,572 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /* ============================================================
+       BINSIGHT — FIRESTORE SECURITY RULES
+       ------------------------------------------------------------
+       Roles:
+       - admin
+       - organization
+       - user
+       - public / unauthenticated
+
+       Main collections:
+       - users
+       - organizations
+       - areas
+       - locations
+       - waste
+       - reports
+       - content
+       - products
+
+       Security principles:
+       1. Public can only read public/active/verified content.
+       2. Signed-in users can manage their own profile.
+       3. Organization users can manage their own organization data.
+       4. Admins can manage everything.
+       5. Client-side fields are validated wherever practical.
+       ============================================================ */
+
+
+    /* ============================================================
+       COMMON HELPERS
+       ============================================================ */
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isSignedIn()
+        && request.auth.token.role == "admin";
+    }
+
+    function isOrganizationUser() {
+      return isSignedIn()
+        && request.auth.token.role == "organization";
+    }
+
+    function isUser() {
+      return isSignedIn()
+        && request.auth.token.role == "user";
+    }
+
+    function isOwner(userId) {
+      return isSignedIn()
+        && request.auth.uid == userId;
+    }
+
+    function userRole() {
+      return isSignedIn()
+        ? request.auth.token.role
+        : null;
+    }
+
+    function currentUserExists() {
+      return isSignedIn()
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid));
+    }
+
+    function currentUserData() {
+      return get(
+        /databases/$(database)/documents/users/$(request.auth.uid)
+      ).data;
+    }
+
+    function currentUserOrganizationId() {
+      return currentUserData().organizationId;
+    }
+
+    function currentUserIsVerified() {
+      return currentUserData().status == "active"
+        || currentUserData().status == "verified";
+    }
+
+    function isOrganizationMember(organizationId) {
+      return isOrganizationUser()
+        && currentUserExists()
+        && currentUserOrganizationId() == organizationId;
+    }
+
+    function isExistingDocumentOwner(fieldName) {
+      return isSignedIn()
+        && resource.data[fieldName] == request.auth.uid;
+    }
+
+    function isRequestDocumentOwner(fieldName) {
+      return isSignedIn()
+        && request.resource.data[fieldName] == request.auth.uid;
+    }
+
+    function validString(fieldName, maxLength) {
+      return request.resource.data[fieldName] is string
+        && request.resource.data[fieldName].size() > 0
+        && request.resource.data[fieldName].size() <= maxLength;
+    }
+
+    function optionalString(fieldName, maxLength) {
+      return !request.resource.data.keys().hasAny([fieldName])
+        || request.resource.data[fieldName] == null
+        || (
+          request.resource.data[fieldName] is string
+          && request.resource.data[fieldName].size() <= maxLength
+        );
+    }
+
+    function validTimestamp(fieldName) {
+      return request.resource.data[fieldName] is timestamp;
+    }
+
+
+    /* ============================================================
+       USERS
+       ============================================================ */
+
+    match /users/{userId} {
+
+      // Users may read their own profile.
+      // Admins may read every profile.
+      allow read: if isAdmin()
+        || isOwner(userId);
+
+      // A signed-in user can create only their own profile.
+      // Admin-created profiles are also allowed.
+      allow create: if isAdmin()
+        || (
+          isOwner(userId)
+          && request.resource.data.uid == request.auth.uid
+          && request.resource.data.role in [
+            "user",
+            "organization"
+          ]
+        );
+
+      // Users may update limited profile fields.
+      // They cannot elevate themselves to admin.
+      allow update: if isAdmin()
+        || (
+          isOwner(userId)
+          && request.resource.data.uid == resource.data.uid
+          && request.resource.data.role == resource.data.role
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            "name",
+            "displayName",
+            "photoURL",
+            "phone",
+            "address",
+            "areaId",
+            "areaName",
+            "updatedAt"
+          ])
+        );
+
+      // Only admin may delete user profiles.
+      allow delete: if isAdmin();
+    }
+
+
+    /* ============================================================
+       ORGANIZATIONS
+       ============================================================ */
+
+    match /organizations/{organizationId} {
+
+      // Public may read only organizations already published.
+      allow read: if (
+        resource.data.isPublic == true
+        && resource.data.status == "verified"
+      )
+      || isAdmin()
+      || isOrganizationMember(organizationId);
+
+      // Organization users may submit an organization.
+      // Admins may create directly.
+      allow create: if isAdmin()
+        || (
+          isOrganizationUser()
+          && request.resource.data.status == "pending"
+          && request.resource.data.isPublic == false
+        );
+
+      // Organization managers may modify their own organization,
+      // except trust/security fields.
+      allow update: if isAdmin()
+        || (
+          isOrganizationMember(organizationId)
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            "name",
+            "slug",
+            "type",
+            "description",
+            "shortDescription",
+            "logo",
+            "coverImage",
+            "website",
+            "email",
+            "phone",
+            "address",
+            "location",
+            "area",
+            "areaId",
+            "latitude",
+            "longitude",
+            "socialLinks",
+            "services",
+            "wasteManaged",
+            "processes",
+            "products",
+            "updatedAt"
+          ])
+        );
+
+      // Only admins may delete organizations.
+      allow delete: if isAdmin();
+    }
+
+
+    /* ============================================================
+       AREAS
+       ============================================================ */
+
+    match /areas/{areaId} {
+
+      // Active areas are public.
+      allow read: if resource.data.status == "active"
+        || isSignedIn();
+
+      // Area management belongs to admins.
+      allow create: if isAdmin();
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+
+    /* ============================================================
+       LOCATIONS
+       ============================================================ */
+
+    match /locations/{locationId} {
+
+      // Public may read active locations.
+      allow read: if resource.data.status == "active"
+        || isAdmin()
+        || isOrganizationMember(
+          resource.data.organizationId
+        );
+
+      // Admins may create any location.
+      //
+      // Organization users can create a location only for
+      // their own organization.
+      allow create: if isAdmin()
+        || (
+          isOrganizationUser()
+          && request.resource.data.organizationId == currentUserOrganizationId()
+        );
+
+      // Organization users may update only their own locations.
+      // Admins may update everything.
+      allow update: if isAdmin()
+        || (
+          isOrganizationMember(
+            resource.data.organizationId
+          )
+          && request.resource.data.organizationId
+            == resource.data.organizationId
+        );
+
+      allow delete: if isAdmin()
+        || (
+          isOrganizationMember(
+            resource.data.organizationId
+          )
+        );
+    }
+
+
+    /* ============================================================
+       WASTE
+       ============================================================ */
+
+    match /waste/{wasteId} {
+
+      // Public can read only published waste records.
+      allow read: if (
+        resource.data.visibility == "public"
+        && resource.data.status == "active"
+      )
+      || isAdmin()
+      || (
+        isOrganizationUser()
+        && resource.data.organizationId == currentUserOrganizationId()
+      );
+
+      // Admins can create any waste record.
+      //
+      // Organization users can create records owned by
+      // their organization.
+      allow create: if isAdmin()
+        || (
+          isOrganizationUser()
+          && request.resource.data.organizationId
+            == currentUserOrganizationId()
+        );
+
+      // Organization users may modify their own records.
+      allow update: if isAdmin()
+        || (
+          isOrganizationUser()
+          && resource.data.organizationId == currentUserOrganizationId()
+          && request.resource.data.organizationId == resource.data.organizationId
+        );
+
+      allow delete: if isAdmin()
+        || (
+          isOrganizationUser()
+          && resource.data.organizationId == currentUserOrganizationId()
+        );
+    }
+
+
+    /* ============================================================
+       REPORTS
+       ============================================================ */
+
+    match /reports/{reportId} {
+
+      /*
+       * PUBLIC READ
+       * ----------------------------------------------------------
+       * Public/community users can see reports that are:
+       * - verified
+       * - in-progress
+       * - resolved
+       *
+       * Rejected/pending reports remain private.
+       */
+      allow read: if (
+        resource.data.status in [
+          "verified",
+          "in-progress",
+          "resolved"
+        ]
+      )
+      || isAdmin()
+      || isExistingDocumentOwner("reporterId")
+      || (
+        isOrganizationUser()
+        && resource.data.organizationId == currentUserOrganizationId()
+      );
+
+      /*
+       * CREATE
+       * ----------------------------------------------------------
+       * A signed-in user may create a report only for themselves.
+       *
+       * For public anonymous reporting, the application may use
+       * Firebase Authentication with anonymous accounts.
+       */
+      allow create: if isSignedIn()
+        && request.resource.data.reporterId == request.auth.uid
+        && request.resource.data.status == "pending"
+        && request.resource.data.priority in [
+          "low",
+          "medium",
+          "high"
+        ]
+        && request.resource.data.type in [
+          "illegal-dumping",
+          "overflowing-waste",
+          "burning-waste",
+          "hazardous-waste",
+          "environmental-pollution",
+          "other"
+        ]
+        && validString("title", 200)
+        && validString("description", 5000)
+        && optionalString("reporterName", 150)
+        && optionalString("reporterContact", 100)
+        && optionalString("image", 1000);
+
+      /*
+       * UPDATE
+       * ----------------------------------------------------------
+       * Reporter:
+       * - may edit limited fields while report is pending.
+       *
+       * Organization:
+       * - may update operational fields for reports assigned
+       *   to that organization.
+       *
+       * Admin:
+       * - full access.
+       */
+      allow update: if isAdmin()
+
+        || (
+          isExistingDocumentOwner("reporterId")
+          && resource.data.status == "pending"
+          && request.resource.data.reporterId
+            == resource.data.reporterId
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            "title",
+            "description",
+            "type",
+            "category",
+            "location",
+            "reporterName",
+            "reporterContact",
+            "image",
+            "images",
+            "updatedAt"
+          ])
+        )
+
+        || (
+          isOrganizationUser()
+          && resource.data.organizationId == currentUserOrganizationId()
+          && request.resource.data.organizationId
+            == resource.data.organizationId
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            "status",
+            "priority",
+            "notes",
+            "resolution",
+            "verifiedAt",
+            "resolvedAt",
+            "organizationId",
+            "updatedAt"
+          ])
+        );
+
+      // Only admins may delete reports.
+      allow delete: if isAdmin();
+    }
+
+
+    /* ============================================================
+       CONTENT
+       ============================================================ */
+
+    match /content/{contentId} {
+
+      // Public only sees published public content.
+      allow read: if (
+        resource.data.status == "published"
+        && resource.data.visibility == "public"
+      )
+      || isAdmin();
+
+      // Content is managed by admins.
+      allow create: if isAdmin();
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+
+    /* ============================================================
+       PRODUCTS
+       ============================================================ */
+
+    match /products/{productId} {
+
+      // Published public products are publicly visible.
+      allow read: if (
+        resource.data.status == "published"
+        && resource.data.visibility == "public"
+      )
+      || isAdmin()
+      || (
+        isOrganizationUser()
+        && resource.data.organizationId == currentUserOrganizationId()
+      );
+
+      allow create: if isAdmin()
+        || (
+          isOrganizationUser()
+          && request.resource.data.organizationId
+            == currentUserOrganizationId()
+        );
+
+      allow update: if isAdmin()
+        || (
+          isOrganizationUser()
+          && resource.data.organizationId == currentUserOrganizationId()
+          && request.resource.data.organizationId
+            == resource.data.organizationId
+        );
+
+      allow delete: if isAdmin()
+        || (
+          isOrganizationUser()
+          && resource.data.organizationId == currentUserOrganizationId()
+        );
+    }
+
+
+    /* ============================================================
+       OPTIONAL SUBCOLLECTIONS
+       ============================================================ */
+
+    match /organizations/{organizationId}/processes/{processId} {
+
+      allow read: if (
+        get(
+          /databases/$(database)/documents/organizations/$(organizationId)
+        ).data.isPublic == true
+        &&
+        get(
+          /databases/$(database)/documents/organizations/$(organizationId)
+        ).data.status == "verified"
+      )
+      || isAdmin()
+      || isOrganizationMember(organizationId);
+
+      allow create: if isAdmin()
+        || isOrganizationMember(organizationId);
+
+      allow update: if isAdmin()
+        || isOrganizationMember(organizationId);
+
+      allow delete: if isAdmin()
+        || isOrganizationMember(organizationId);
+    }
+
+
+    match /organizations/{organizationId}/products/{productId} {
+
+      allow read: if (
+        get(
+          /databases/$(database)/documents/organizations/$(organizationId)
+        ).data.isPublic == true
+        &&
+        get(
+          /databases/$(database)/documents/organizations/$(organizationId)
+        ).data.status == "verified"
+      )
+      || isAdmin()
+      || isOrganizationMember(organizationId);
+
+      allow create: if isAdmin()
+        || isOrganizationMember(organizationId);
+
+      allow update: if isAdmin()
+        || isOrganizationMember(organizationId);
+
+      allow delete: if isAdmin()
+        || isOrganizationMember(organizationId);
+    }
+
+
+    /* ============================================================
+       DEFAULT DENY
+       ============================================================ */
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -1,0 +1,470 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    /* ============================================================
+       BINSIGHT — FIREBASE STORAGE SECURITY RULES
+       ------------------------------------------------------------
+       Storage layout:
+       - organizations/
+       - waste/
+       - reports/
+       - content/
+       - users/
+
+       Roles:
+       - admin
+       - organization
+       - user
+
+       Security principles:
+       1. Public may download only explicitly public assets.
+       2. Uploads require authentication.
+       3. Organization users may manage files belonging to
+          their own organization.
+       4. Users may manage their own report/profile files.
+       5. Admins have full access.
+       6. File size and content type are validated.
+       ============================================================ */
+
+
+    /* ============================================================
+       COMMON HELPERS
+       ============================================================ */
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isSignedIn()
+        && request.auth.token.role == "admin";
+    }
+
+    function isOrganizationUser() {
+      return isSignedIn()
+        && request.auth.token.role == "organization";
+    }
+
+    function isUser() {
+      return isSignedIn()
+        && request.auth.token.role == "user";
+    }
+
+    function isOwner(uid) {
+      return isSignedIn()
+        && request.auth.uid == uid;
+    }
+
+    function isValidImage() {
+      return request.resource.contentType.matches(
+        "image/(jpeg|jpg|png|webp|gif|svg\\+xml)"
+      );
+    }
+
+    function isValidDocument() {
+      return request.resource.contentType.matches(
+        "application/pdf"
+      );
+    }
+
+    function isValidMedia() {
+      return request.resource.contentType.matches(
+        "(image|video|audio)/.*"
+      );
+    }
+
+    function imageSizeAllowed() {
+      return request.resource.size <= 10 * 1024 * 1024;
+    }
+
+    function documentSizeAllowed() {
+      return request.resource.size <= 20 * 1024 * 1024;
+    }
+
+    function mediaSizeAllowed() {
+      return request.resource.size <= 50 * 1024 * 1024;
+    }
+
+    function validImageUpload() {
+      return isSignedIn()
+        && isValidImage()
+        && imageSizeAllowed();
+    }
+
+    function validDocumentUpload() {
+      return isSignedIn()
+        && isValidDocument()
+        && documentSizeAllowed();
+    }
+
+    function validMediaUpload() {
+      return isSignedIn()
+        && isValidMedia()
+        && mediaSizeAllowed();
+    }
+
+
+    /* ============================================================
+       PUBLIC ASSETS
+       ------------------------------------------------------------
+       These files may be read publicly.
+       Writing remains restricted.
+       ============================================================ */
+
+    match /public/{allPaths=**} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+
+    /* ============================================================
+       ORGANIZATION ASSETS
+       ------------------------------------------------------------
+       Suggested structure:
+       organizations/{organizationId}/logo/*
+       organizations/{organizationId}/cover/*
+       organizations/{organizationId}/gallery/*
+       organizations/{organizationId}/documents/*
+       organizations/{organizationId}/products/*
+       ============================================================ */
+
+    match /organizations/{organizationId}/logo/{fileName} {
+
+      allow read: if true;
+
+      allow create: if isAdmin()
+        || (
+          isOrganizationUser()
+          && request.auth.token.organizationId == organizationId
+          && validImageUpload()
+        );
+
+      allow update: if isAdmin()
+        || (
+          isOrganizationUser()
+          && request.auth.token.organizationId == organizationId
+          && validImageUpload()
+        );
+
+      allow delete: if isAdmin()
+        || (
+          isOrganizationUser()
+          && request.auth.token.organizationId == organizationId
+        );
+    }
+
+
+    match /organizations/{organizationId}/cover/{fileName} {
+
+      allow read: if true;
+
+      allow create: if isAdmin()
+        || (
+          isOrganizationUser()
+          && request.auth.token.organizationId == organizationId
+          && validImageUpload()
+        );
+
+      allow update: if isAdmin()
+        || (
+          isOrganizationUser()
+          && request.auth.token.organizationId == organizationId
+          && validImageUpload()
+        );
+
+      allow delete: if isAdmin()
+        || (
+          isOrganizationUser()
+          && request.auth.token.organizationId == organizationId
+        );
+    }
+
+
+    match /organizations/{organizationId}/gallery/{fileName} {
+
+      allow read: if true;
+
+      allow create: if isAdmin()
+        || (
+          isOrganizationUser()
+          && request.auth.token.organizationId == organizationId
+          && validImageUpload()
+        );
+
+      allow update: if isAdmin()
+        || (
+          isOrganizationUser()
+          && request.auth.token.organizationId == organizationId
+          && validImageUpload()
+        );
+
+      allow delete: if isAdmin()
+        || (
+          isOrganizationUser()
+          && request.auth.token.organizationId == organizationId
+        );
+    }
+
+
+    match /organizations/{organizationId}/products/{fileName} {
+
+      allow read: if true;
+
+      allow create: if isAdmin()
+        || (
+          isOrganizationUser()
+          && request.auth.token.organizationId == organizationId
+          && validImageUpload()
+        );
+
+      allow update: if isAdmin()
+        || (
+          isOrganizationUser()
+          && request.auth.token.organizationId == organizationId
+          && validImageUpload()
+        );
+
+      allow delete: if isAdmin()
+        || (
+          isOrganizationUser()
+          && request.auth.token.organizationId == organizationId
+        );
+    }
+
+
+    match /organizations/{organizationId}/documents/{fileName} {
+
+      allow read: if isAdmin()
+        || (
+          isSignedIn()
+          && request.auth.token.organizationId == organizationId
+        );
+
+      allow create: if isAdmin()
+        || (
+          isOrganizationUser()
+          && request.auth.token.organizationId == organizationId
+          && validDocumentUpload()
+        );
+
+      allow update: if isAdmin()
+        || (
+          isOrganizationUser()
+          && request.auth.token.organizationId == organizationId
+          && validDocumentUpload()
+        );
+
+      allow delete: if isAdmin()
+        || (
+          isOrganizationUser()
+          && request.auth.token.organizationId == organizationId
+        );
+    }
+
+
+    /* ============================================================
+       WASTE ASSETS
+       ------------------------------------------------------------
+       Suggested structure:
+       waste/{wasteId}/images/*
+       waste/{wasteId}/documents/*
+       ============================================================ */
+
+    match /waste/{wasteId}/images/{fileName} {
+
+      allow read: if true;
+
+      allow create: if isAdmin()
+        || (
+          isOrganizationUser()
+          && validImageUpload()
+        );
+
+      allow update: if isAdmin()
+        || (
+          isOrganizationUser()
+          && validImageUpload()
+        );
+
+      allow delete: if isAdmin()
+        || isOrganizationUser();
+    }
+
+
+    match /waste/{wasteId}/documents/{fileName} {
+
+      allow read: if isAdmin()
+        || isOrganizationUser();
+
+      allow create: if isAdmin()
+        || (
+          isOrganizationUser()
+          && validDocumentUpload()
+        );
+
+      allow update: if isAdmin()
+        || (
+          isOrganizationUser()
+          && validDocumentUpload()
+        );
+
+      allow delete: if isAdmin()
+        || isOrganizationUser();
+    }
+
+
+    /* ============================================================
+       REPORT ASSETS
+       ------------------------------------------------------------
+       Suggested structure:
+       reports/{reportId}/images/*
+       reports/{reportId}/attachments/*
+       ============================================================ */
+
+    match /reports/{reportId}/images/{fileName} {
+
+      allow read: if isSignedIn();
+
+      allow create: if isSignedIn()
+        && validImageUpload();
+
+      allow update: if isSignedIn()
+        && validImageUpload();
+
+      allow delete: if isAdmin()
+        || isUser()
+        || isOrganizationUser();
+    }
+
+
+    match /reports/{reportId}/attachments/{fileName} {
+
+      allow read: if isSignedIn();
+
+      allow create: if isSignedIn()
+        && validMediaUpload();
+
+      allow update: if isSignedIn()
+        && validMediaUpload();
+
+      allow delete: if isAdmin()
+        || isUser()
+        || isOrganizationUser();
+    }
+
+
+    /* ============================================================
+       CONTENT / EDUCATION ASSETS
+       ------------------------------------------------------------
+       Suggested structure:
+       content/{contentId}/images/*
+       content/{contentId}/media/*
+       content/{contentId}/documents/*
+       ============================================================ */
+
+    match /content/{contentId}/images/{fileName} {
+
+      allow read: if true;
+
+      allow create: if isAdmin()
+        && validImageUpload();
+
+      allow update: if isAdmin()
+        && validImageUpload();
+
+      allow delete: if isAdmin();
+    }
+
+
+    match /content/{contentId}/media/{fileName} {
+
+      allow read: if true;
+
+      allow create: if isAdmin()
+        && validMediaUpload();
+
+      allow update: if isAdmin()
+        && validMediaUpload();
+
+      allow delete: if isAdmin();
+    }
+
+
+    match /content/{contentId}/documents/{fileName} {
+
+      allow read: if true;
+
+      allow create: if isAdmin()
+        && validDocumentUpload();
+
+      allow update: if isAdmin()
+        && validDocumentUpload();
+
+      allow delete: if isAdmin();
+    }
+
+
+    /* ============================================================
+       USER PROFILE ASSETS
+       ------------------------------------------------------------
+       Suggested structure:
+       users/{uid}/avatar/*
+       users/{uid}/documents/*
+       ============================================================ */
+
+    match /users/{uid}/avatar/{fileName} {
+
+      allow read: if true;
+
+      allow create: if isOwner(uid)
+        && validImageUpload();
+
+      allow update: if isOwner(uid)
+        && validImageUpload();
+
+      allow delete: if isOwner(uid)
+        || isAdmin();
+    }
+
+
+    match /users/{uid}/documents/{fileName} {
+
+      allow read: if isOwner(uid)
+        || isAdmin();
+
+      allow create: if isOwner(uid)
+        && validDocumentUpload();
+
+      allow update: if isOwner(uid)
+        && validDocumentUpload();
+
+      allow delete: if isOwner(uid)
+        || isAdmin();
+    }
+
+
+    /* ============================================================
+       ADMIN AREA
+       ------------------------------------------------------------
+       Anything specifically placed under admin/ is private.
+       ============================================================ */
+
+    match /admin/{allPaths=**} {
+
+      allow read: if isAdmin();
+
+      allow write: if isAdmin();
+    }
+
+
+    /* ============================================================
+       DEFAULT DENY
+       ============================================================ */
+
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}
