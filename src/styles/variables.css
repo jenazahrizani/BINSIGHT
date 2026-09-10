@@ -1,0 +1,684 @@
+/* ==========================================================================
+   BINSIGHT — DESIGN TOKENS
+   ==========================================================================
+   Badung Waste Intelligence
+
+   Single source of truth for:
+   - Brand colors
+   - Semantic colors
+   - Typography
+   - Spacing
+   - Sizing
+   - Radius
+   - Shadows
+   - Borders
+   - Motion
+   - Layout
+   - Z-index
+   - Accessibility preferences
+
+   IMPORTANT
+   ----------
+   Do not place component-specific styling here.
+
+   variables.css defines WHAT the design system is.
+   components.css defines HOW reusable components behave.
+   Component files define component-specific implementation.
+
+   Theme philosophy:
+   - Institutional
+   - Environmental
+   - Data-driven
+   - Clean
+   - Trustworthy
+   - Modern
+   - Accessible
+   ========================================================================== */
+
+
+/* ==========================================================================
+   01. ROOT
+   ========================================================================== */
+
+:root {
+  /* ------------------------------------------------------------------------
+     BRAND
+     ------------------------------------------------------------------------ */
+
+  --color-brand-50: #f0fdf4;
+  --color-brand-100: #dcfce7;
+  --color-brand-200: #bbf7d0;
+  --color-brand-300: #86efac;
+  --color-brand-400: #4ade80;
+  --color-brand-500: #22c55e;
+  --color-brand-600: #16a34a;
+  --color-brand-700: #15803d;
+  --color-brand-800: #166534;
+  --color-brand-900: #14532d;
+  --color-brand-950: #052e16;
+
+  /* Primary brand usage */
+  --color-primary: var(--color-brand-800);
+  --color-primary-hover: var(--color-brand-900);
+  --color-primary-active: var(--color-brand-950);
+  --color-primary-light: var(--color-brand-100);
+  --color-primary-subtle: var(--color-brand-50);
+
+
+  /* ------------------------------------------------------------------------
+     ACCENT
+     ------------------------------------------------------------------------ */
+
+  --color-accent-50: #f7fee7;
+  --color-accent-100: #ecfccb;
+  --color-accent-200: #d9f99d;
+  --color-accent-300: #bef264;
+  --color-accent-400: #a3e635;
+  --color-accent-500: #84cc16;
+  --color-accent-600: #65a30d;
+  --color-accent-700: #4d7c0f;
+  --color-accent-800: #3f6212;
+  --color-accent-900: #365314;
+  --color-accent-950: #1a2e05;
+
+  --color-accent: var(--color-accent-500);
+  --color-accent-hover: var(--color-accent-600);
+  --color-accent-light: var(--color-accent-100);
+
+
+  /* ------------------------------------------------------------------------
+     NEUTRAL / SLATE
+     ------------------------------------------------------------------------ */
+
+  --color-white: #ffffff;
+  --color-black: #000000;
+
+  --color-slate-50: #f8fafc;
+  --color-slate-100: #f1f5f9;
+  --color-slate-200: #e2e8f0;
+  --color-slate-300: #cbd5e1;
+  --color-slate-400: #94a3b8;
+  --color-slate-500: #64748b;
+  --color-slate-600: #475569;
+  --color-slate-700: #334155;
+  --color-slate-800: #1e293b;
+  --color-slate-900: #0f172a;
+  --color-slate-950: #020617;
+
+
+  /* ------------------------------------------------------------------------
+     SURFACE
+     ------------------------------------------------------------------------ */
+
+  --color-background: var(--color-slate-50);
+  --color-surface: var(--color-white);
+  --color-surface-raised: var(--color-white);
+  --color-surface-soft: var(--color-slate-100);
+  --color-surface-muted: var(--color-slate-50);
+
+  --color-overlay: rgb(15 23 42 / 0.56);
+  --color-overlay-heavy: rgb(15 23 42 / 0.72);
+
+
+  /* ------------------------------------------------------------------------
+     TEXT
+     ------------------------------------------------------------------------ */
+
+  --color-text: var(--color-slate-900);
+  --color-text-strong: var(--color-slate-950);
+  --color-text-secondary: var(--color-slate-600);
+  --color-text-muted: var(--color-slate-500);
+  --color-text-subtle: var(--color-slate-400);
+  --color-text-inverse: var(--color-white);
+  --color-text-brand: var(--color-primary);
+
+
+  /* ------------------------------------------------------------------------
+     BORDER
+     ------------------------------------------------------------------------ */
+
+  --color-border: var(--color-slate-200);
+  --color-border-strong: var(--color-slate-300);
+  --color-border-subtle: #edf2f7;
+  --color-border-brand: var(--color-brand-200);
+
+
+  /* ------------------------------------------------------------------------
+     FOCUS
+     ------------------------------------------------------------------------ */
+
+  --color-focus-ring: var(--color-brand-500);
+  --focus-ring-width: 3px;
+  --focus-ring-offset: 2px;
+
+
+  /* ==========================================================================
+     02. SEMANTIC / STATUS COLORS
+     ========================================================================== */
+
+  /* SUCCESS */
+  --color-success-50: #f0fdf4;
+  --color-success-100: #dcfce7;
+  --color-success-500: #22c55e;
+  --color-success-600: #16a34a;
+  --color-success-700: #15803d;
+  --color-success: var(--color-success-600);
+  --color-success-bg: var(--color-success-50);
+  --color-success-border: var(--color-success-100);
+  --color-success-text: var(--color-success-700);
+
+
+  /* WARNING */
+  --color-warning-50: #fffbeb;
+  --color-warning-100: #fef3c7;
+  --color-warning-500: #f59e0b;
+  --color-warning-600: #d97706;
+  --color-warning-700: #b45309;
+  --color-warning: var(--color-warning-600);
+  --color-warning-bg: var(--color-warning-50);
+  --color-warning-border: var(--color-warning-100);
+  --color-warning-text: var(--color-warning-700);
+
+
+  /* DANGER / ERROR */
+  --color-danger-50: #fef2f2;
+  --color-danger-100: #fee2e2;
+  --color-danger-500: #ef4444;
+  --color-danger-600: #dc2626;
+  --color-danger-700: #b91c1c;
+  --color-danger: var(--color-danger-600);
+  --color-danger-bg: var(--color-danger-50);
+  --color-danger-border: var(--color-danger-100);
+  --color-danger-text: var(--color-danger-700);
+
+
+  /* INFO */
+  --color-info-50: #eff6ff;
+  --color-info-100: #dbeafe;
+  --color-info-500: #3b82f6;
+  --color-info-600: #2563eb;
+  --color-info-700: #1d4ed8;
+  --color-info: var(--color-info-600);
+  --color-info-bg: var(--color-info-50);
+  --color-info-border: var(--color-info-100);
+  --color-info-text: var(--color-info-700);
+
+
+  /* ==========================================================================
+     03. WASTE DOMAIN COLORS
+     ========================================================================== */
+
+  /*
+   * These colors are semantic visual identifiers for waste categories.
+   * They make maps, badges, charts, filters, and cards recognizable.
+   */
+
+  --waste-organic: #16a34a;
+  --waste-organic-soft: #dcfce7;
+
+  --waste-plastic: #2563eb;
+  --waste-plastic-soft: #dbeafe;
+
+  --waste-paper: #ca8a04;
+  --waste-paper-soft: #fef3c7;
+
+  --waste-glass: #0891b2;
+  --waste-glass-soft: #cffafe;
+
+  --waste-metal: #64748b;
+  --waste-metal-soft: #e2e8f0;
+
+  --waste-textile: #9333ea;
+  --waste-textile-soft: #f3e8ff;
+
+  --waste-electronic: #7c3aed;
+  --waste-electronic-soft: #ede9fe;
+
+  --waste-hazardous: #dc2626;
+  --waste-hazardous-soft: #fee2e2;
+
+  --waste-other: #475569;
+  --waste-other-soft: #f1f5f9;
+
+
+  /* ==========================================================================
+     04. MAP COLORS
+     ========================================================================== */
+
+  --map-background: #eaf2e8;
+  --map-land: #eef5ea;
+  --map-land-strong: #dcebd7;
+  --map-water: #dceff7;
+  --map-road: #ffffff;
+  --map-road-secondary: #f3f4f6;
+  --map-boundary: #94a3b8;
+
+  --map-organization: var(--color-primary);
+  --map-organization-selected: var(--color-primary-active);
+
+  --map-report: var(--color-danger);
+  --map-report-selected: var(--color-danger-700);
+
+
+  /* ==========================================================================
+     05. DATA VISUALIZATION
+     ========================================================================== */
+
+  /*
+   * Reserved palette for charts.
+   * Avoid using raw colors directly inside chart components.
+   */
+
+  --chart-1: #166534;
+  --chart-2: #2563eb;
+  --chart-3: #84cc16;
+  --chart-4: #f59e0b;
+  --chart-5: #8b5cf6;
+  --chart-6: #0891b2;
+  --chart-7: #ec4899;
+  --chart-8: #64748b;
+
+  --chart-grid: #e2e8f0;
+  --chart-axis: #94a3b8;
+  --chart-label: #64748b;
+  --chart-tooltip-bg: #0f172a;
+  --chart-tooltip-text: #ffffff;
+
+
+  /* ==========================================================================
+     06. TYPOGRAPHY
+     ========================================================================== */
+
+  --font-sans:
+    "Inter",
+    "Segoe UI",
+    Roboto,
+    Helvetica,
+    Arial,
+    sans-serif;
+
+  --font-display:
+    "Inter",
+    "Segoe UI",
+    Roboto,
+    Helvetica,
+    Arial,
+    sans-serif;
+
+  --font-mono:
+    "SFMono-Regular",
+    Consolas,
+    "Liberation Mono",
+    Menlo,
+    monospace;
+
+
+  /* Font sizes */
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-md: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  --font-size-2xl: 1.5rem;
+  --font-size-3xl: 1.875rem;
+  --font-size-4xl: 2.25rem;
+  --font-size-5xl: 3rem;
+  --font-size-6xl: 3.75rem;
+  --font-size-7xl: 4.5rem;
+
+
+  /* Line height */
+  --line-height-none: 1;
+  --line-height-tight: 1.15;
+  --line-height-snug: 1.3;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.65;
+
+
+  /* Font weights */
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --font-weight-extrabold: 800;
+
+
+  /* Letter spacing */
+  --letter-spacing-tight: -0.025em;
+  --letter-spacing-normal: 0;
+  --letter-spacing-wide: 0.025em;
+  --letter-spacing-wider: 0.05em;
+
+
+  /* ==========================================================================
+     07. SPACING
+     ========================================================================== */
+
+  --space-0: 0;
+  --space-0-5: 0.125rem;
+  --space-1: 0.25rem;
+  --space-1-5: 0.375rem;
+  --space-2: 0.5rem;
+  --space-2-5: 0.625rem;
+  --space-3: 0.75rem;
+  --space-3-5: 0.875rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-7: 1.75rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-14: 3.5rem;
+  --space-16: 4rem;
+  --space-20: 5rem;
+  --space-24: 6rem;
+  --space-28: 7rem;
+  --space-32: 8rem;
+
+
+  /* ==========================================================================
+     08. CONTAINER / LAYOUT
+     ========================================================================== */
+
+  --container-xs: 20rem;
+  --container-sm: 30rem;
+  --container-md: 40rem;
+  --container-lg: 48rem;
+  --container-xl: 64rem;
+  --container-2xl: 80rem;
+  --container-3xl: 90rem;
+
+  --container-page: 90rem;
+  --container-reading: 48rem;
+
+
+  /* Page gutters */
+  --page-gutter: 1.25rem;
+  --section-spacing: 5rem;
+
+  /* Header */
+  --header-height: 4.5rem;
+  --header-height-mobile: 4rem;
+
+  /* Dashboard */
+  --sidebar-width: 17rem;
+  --sidebar-collapsed-width: 5rem;
+
+  /* Content */
+  --content-max-width: 90rem;
+
+
+  /* ==========================================================================
+     09. BORDER RADIUS
+     ========================================================================== */
+
+  --radius-none: 0;
+  --radius-xs: 0.25rem;
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.25rem;
+  --radius-2xl: 1.5rem;
+  --radius-3xl: 2rem;
+  --radius-full: 9999px;
+
+
+  /* ==========================================================================
+     10. BORDERS
+     ========================================================================== */
+
+  --border-width-0: 0;
+  --border-width-1: 1px;
+  --border-width-2: 2px;
+  --border-width-3: 3px;
+
+  --border-style: solid;
+
+
+  /* ==========================================================================
+     11. SHADOWS
+     ========================================================================== */
+
+  --shadow-none: none;
+
+  --shadow-xs:
+    0 1px 2px rgb(15 23 42 / 0.04);
+
+  --shadow-sm:
+    0 1px 3px rgb(15 23 42 / 0.06),
+    0 1px 2px rgb(15 23 42 / 0.04);
+
+  --shadow-md:
+    0 4px 10px rgb(15 23 42 / 0.08),
+    0 2px 4px rgb(15 23 42 / 0.04);
+
+  --shadow-lg:
+    0 10px 25px rgb(15 23 42 / 0.10),
+    0 4px 10px rgb(15 23 42 / 0.05);
+
+  --shadow-xl:
+    0 20px 40px rgb(15 23 42 / 0.12),
+    0 8px 16px rgb(15 23 42 / 0.06);
+
+  --shadow-inner:
+    inset 0 1px 2px rgb(15 23 42 / 0.05);
+
+
+  /* ==========================================================================
+     12. TRANSITIONS
+     ========================================================================== */
+
+  --duration-fast: 120ms;
+  --duration-normal: 180ms;
+  --duration-slow: 260ms;
+  --duration-slower: 360ms;
+
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ease-emphasized: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  --transition-fast:
+    var(--duration-fast) var(--ease-standard);
+
+  --transition-normal:
+    var(--duration-normal) var(--ease-standard);
+
+  --transition-slow:
+    var(--duration-slow) var(--ease-standard);
+
+
+  /* ==========================================================================
+     13. Z-INDEX
+     ========================================================================== */
+
+  --z-base: 0;
+  --z-raised: 10;
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-header: 300;
+  --z-overlay: 400;
+  --z-modal: 500;
+  --z-popover: 600;
+  --z-toast: 700;
+  --z-tooltip: 800;
+
+
+  /* ==========================================================================
+     14. CONTROL SIZES
+     ========================================================================== */
+
+  --control-height-sm: 2rem;
+  --control-height-md: 2.5rem;
+  --control-height-lg: 3rem;
+  --control-height-xl: 3.5rem;
+
+  --icon-size-xs: 0.875rem;
+  --icon-size-sm: 1rem;
+  --icon-size-md: 1.25rem;
+  --icon-size-lg: 1.5rem;
+  --icon-size-xl: 2rem;
+  --icon-size-2xl: 2.5rem;
+
+
+  /* ==========================================================================
+     15. COMPONENT TOKENS
+     ========================================================================== */
+
+  /* Cards */
+  --card-background: var(--color-surface);
+  --card-border: var(--color-border);
+  --card-radius: var(--radius-xl);
+  --card-padding: var(--space-6);
+  --card-shadow: var(--shadow-sm);
+
+  /* Buttons */
+  --button-radius: var(--radius-md);
+  --button-font-weight: var(--font-weight-semibold);
+
+  /* Inputs */
+  --input-background: var(--color-white);
+  --input-border: var(--color-border-strong);
+  --input-radius: var(--radius-md);
+  --input-height: var(--control-height-lg);
+
+  /* Badges */
+  --badge-radius: var(--radius-full);
+  --badge-font-weight: var(--font-weight-semibold);
+
+  /* Modal */
+  --modal-radius: var(--radius-2xl);
+  --modal-shadow: var(--shadow-xl);
+
+  /* Navigation */
+  --nav-background: rgb(255 255 255 / 0.92);
+  --nav-border: var(--color-border);
+  --nav-blur: 16px;
+
+
+  /* ==========================================================================
+     16. DATA / MAP MARKER SIZES
+     ========================================================================== */
+
+  --marker-size-sm: 1.75rem;
+  --marker-size-md: 2.25rem;
+  --marker-size-lg: 2.75rem;
+
+  --chart-height-sm: 12rem;
+  --chart-height-md: 18rem;
+  --chart-height-lg: 24rem;
+  --chart-height-xl: 32rem;
+
+
+  /* ==========================================================================
+     17. ACCESSIBILITY
+     ========================================================================== */
+
+  --minimum-touch-target: 2.75rem;
+
+  --focus-transition:
+    outline-color var(--duration-fast) var(--ease-standard),
+    outline-offset var(--duration-fast) var(--ease-standard);
+
+  color-scheme: light;
+}
+
+
+/* ==========================================================================
+   18. RESPONSIVE TOKENS
+   ========================================================================== */
+
+@media (min-width: 640px) {
+  :root {
+    --page-gutter: 1.5rem;
+  }
+}
+
+@media (min-width: 768px) {
+  :root {
+    --page-gutter: 2rem;
+    --section-spacing: 6rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --page-gutter: 2.5rem;
+    --header-height: 5rem;
+  }
+}
+
+@media (min-width: 1280px) {
+  :root {
+    --page-gutter: 3rem;
+    --section-spacing: 7rem;
+  }
+}
+
+
+/* ==========================================================================
+   19. REDUCED MOTION
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-fast: 0ms;
+    --duration-normal: 0ms;
+    --duration-slow: 0ms;
+    --duration-slower: 0ms;
+  }
+}
+
+
+/* ==========================================================================
+   20. DARK-MODE FOUNDATION
+   ==========================================================================
+   BINSIGHT currently ships with a light-first visual system.
+
+   These tokens intentionally remain available for a future dark admin/data
+   experience without forcing dark mode into the public product yet.
+
+   Do not activate this automatically until the application UX is designed
+   around it.
+   ========================================================================== */
+
+[data-theme="dark"] {
+  --color-background: #020617;
+  --color-surface: #0f172a;
+  --color-surface-raised: #1e293b;
+  --color-surface-soft: #172033;
+  --color-surface-muted: #0f172a;
+
+  --color-text: #f8fafc;
+  --color-text-strong: #ffffff;
+  --color-text-secondary: #cbd5e1;
+  --color-text-muted: #94a3b8;
+  --color-text-subtle: #64748b;
+  --color-text-inverse: #0f172a;
+
+  --color-border: #334155;
+  --color-border-strong: #475569;
+  --color-border-subtle: #1e293b;
+
+  --nav-background: rgb(15 23 42 / 0.92);
+
+  --chart-grid: #334155;
+  --chart-axis: #64748b;
+  --chart-label: #94a3b8;
+}
+
+
+/* ==========================================================================
+   21. PRINT FOUNDATION
+   ========================================================================== */
+
+@media print {
+  :root {
+    --color-background: #ffffff;
+    --color-surface: #ffffff;
+    --color-text: #000000;
+    --color-text-secondary: #333333;
+    --color-border: #cccccc;
+    --shadow-none: none;
+  }
+}
