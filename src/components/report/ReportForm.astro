@@ -1,0 +1,1203 @@
+---
+/**
+ * ============================================================================
+ * BINSIGHT — REPORT FORM
+ * ============================================================================
+ * Badung Waste Intelligence
+ *
+ * Form pelaporan kondisi persampahan / lingkungan.
+ *
+ * Prinsip:
+ * - Fokus pada laporan faktual dari masyarakat.
+ * - Tidak meminta data yang tidak diperlukan.
+ * - Tidak membuat klaim volume / tonase.
+ * - Tidak melakukan Firebase operation langsung.
+ * - Submission ditangani oleh page / service layer.
+ * ============================================================================
+ */
+
+import {
+  AlertCircle,
+  Camera,
+  Check,
+  FileText,
+  MapPin,
+  Send,
+} from "@lucide/astro";
+
+import {
+  WASTE_CATEGORY,
+  type WasteCategory,
+} from "@lib/constants/waste";
+
+import type {
+  ReportPriority,
+  ReportType,
+} from "@lib/data/reports";
+
+interface Props {
+  action?: string;
+  method?: "get" | "post";
+  title?: string;
+  description?: string;
+  submitLabel?: string;
+  compact?: boolean;
+  showReporter?: boolean;
+  showPriority?: boolean;
+  showCategory?: boolean;
+
+  initialTitle?: string;
+  initialDescription?: string;
+  initialType?: ReportType;
+  initialCategory?: WasteCategory;
+  initialPriority?: ReportPriority;
+
+  initialAddress?: string;
+  initialAreaId?: string;
+  initialAreaName?: string;
+  initialLatitude?: number;
+  initialLongitude?: number;
+
+  initialReporterName?: string;
+  initialReporterContact?: string;
+  initialImage?: string;
+}
+
+const {
+  action = "/reports",
+  method = "post",
+  title = "Laporkan Kondisi Persampahan",
+  description =
+    "Sampaikan informasi mengenai kondisi persampahan atau lingkungan yang perlu diperhatikan. Laporan akan ditinjau sebelum ditampilkan sebagai informasi publik.",
+  submitLabel = "Kirim laporan",
+  compact = false,
+  showReporter = true,
+  showPriority = true,
+  showCategory = true,
+
+  initialTitle = "",
+  initialDescription = "",
+  initialType,
+  initialCategory,
+  initialPriority = "medium",
+
+  initialAddress = "",
+  initialAreaId = "",
+  initialAreaName = "",
+  initialLatitude,
+  initialLongitude,
+
+  initialReporterName = "",
+  initialReporterContact = "",
+  initialImage = "",
+} = Astro.props;
+
+const reportTypes: Array<{
+  value: ReportType;
+  label: string;
+  description: string;
+}> = [
+  {
+    value: "illegal-dumping",
+    label: "Pembuangan sampah ilegal",
+    description:
+      "Sampah dibuang pada lokasi yang tidak semestinya.",
+  },
+  {
+    value: "overflowing-waste",
+    label: "Sampah menumpuk / meluap",
+    description:
+      "Tumpukan sampah melebihi kondisi normal atau mengganggu lingkungan.",
+  },
+  {
+    value: "burning-waste",
+    label: "Pembakaran sampah",
+    description:
+      "Aktivitas pembakaran sampah yang berpotensi mengganggu lingkungan.",
+  },
+  {
+    value: "hazardous-waste",
+    label: "Sampah berbahaya",
+    description:
+      "Temuan material yang memerlukan penanganan khusus atau berpotensi berbahaya.",
+  },
+  {
+    value: "environmental-pollution",
+    label: "Pencemaran lingkungan",
+    description:
+      "Kondisi lingkungan yang diduga mengalami pencemaran terkait persampahan.",
+  },
+  {
+    value: "other",
+    label: "Lainnya",
+    description:
+      "Kondisi lain yang berkaitan dengan persampahan atau lingkungan.",
+  },
+];
+
+const wasteCategories: Array<{
+  value: WasteCategory;
+  label: string;
+}> = [
+  {
+    value: WASTE_CATEGORY.ORGANIC,
+    label: "Organik",
+  },
+  {
+    value: WASTE_CATEGORY.INORGANIC,
+    label: "Anorganik",
+  },
+  {
+    value: WASTE_CATEGORY.HAZARDOUS,
+    label: "Bahan berbahaya",
+  },
+  {
+    value: WASTE_CATEGORY.ELECTRONIC,
+    label: "Elektronik",
+  },
+  {
+    value: WASTE_CATEGORY.RESIDUAL,
+    label: "Residu",
+  },
+];
+
+const priorityOptions: Array<{
+  value: ReportPriority;
+  label: string;
+  description: string;
+}> = [
+  {
+    value: "low",
+    label: "Rendah",
+    description: "Tidak membutuhkan perhatian segera.",
+  },
+  {
+    value: "medium",
+    label: "Sedang",
+    description: "Perlu diperhatikan dan ditinjau.",
+  },
+  {
+    value: "high",
+    label: "Tinggi",
+    description: "Berpotensi membutuhkan perhatian lebih cepat.",
+  },
+];
+---
+
+<form
+  class:list={[
+    "report-form",
+    compact && "report-form--compact",
+  ]}
+  action={action}
+  method={method}
+>
+  <header class="report-form__header">
+    <div class="report-form__header-icon" aria-hidden="true">
+      <FileText
+        size={22}
+        stroke-width="1.8"
+      />
+    </div>
+
+    <div>
+      <h2>{title}</h2>
+
+      {description && (
+        <p>{description}</p>
+      )}
+    </div>
+  </header>
+
+  <div class="report-form__notice">
+    <AlertCircle
+      size={17}
+      stroke-width="1.8"
+      aria-hidden="true"
+    />
+
+    <p>
+      Cantumkan informasi yang dapat membantu proses
+      verifikasi. Hindari memasukkan data pribadi yang
+      tidak diperlukan.
+    </p>
+  </div>
+
+  <div class="report-form__section">
+    <div class="report-form__section-heading">
+      <span>01</span>
+
+      <div>
+        <h3>Informasi laporan</h3>
+        <p>
+          Jelaskan kondisi yang kamu temukan.
+        </p>
+      </div>
+    </div>
+
+    <div class="report-form__fields">
+      <div class="report-form__field report-form__field--full">
+        <label for="report-title">
+          Judul laporan
+          <span aria-hidden="true">*</span>
+        </label>
+
+        <input
+          id="report-title"
+          name="title"
+          type="text"
+          value={initialTitle}
+          placeholder="Contoh: Tumpukan sampah di sekitar jalan"
+          autocomplete="off"
+          maxlength="160"
+          required
+        />
+
+        <span class="report-form__help">
+          Gunakan judul singkat yang menggambarkan kondisi.
+        </span>
+      </div>
+
+      <div class="report-form__field">
+        <label for="report-type">
+          Jenis laporan
+          <span aria-hidden="true">*</span>
+        </label>
+
+        <select
+          id="report-type"
+          name="type"
+          required
+        >
+          <option value="" disabled selected={!initialType}>
+            Pilih jenis laporan
+          </option>
+
+          {reportTypes.map((item) => (
+            <option
+              value={item.value}
+              selected={initialType === item.value}
+            >
+              {item.label}
+            </option>
+          ))}
+        </select>
+
+        <span class="report-form__help">
+          Pilih jenis kondisi yang paling sesuai.
+        </span>
+      </div>
+
+      {showCategory && (
+        <div class="report-form__field">
+          <label for="report-category">
+            Kategori sampah
+          </label>
+
+          <select
+            id="report-category"
+            name="category"
+          >
+            <option
+              value=""
+              selected={!initialCategory}
+            >
+              Tidak ditentukan
+            </option>
+
+            {wasteCategories.map((item) => (
+              <option
+                value={item.value}
+                selected={initialCategory === item.value}
+              >
+                {item.label}
+              </option>
+            ))}
+          </select>
+
+          <span class="report-form__help">
+            Pilih kategori ketika jenis material diketahui.
+          </span>
+        </div>
+      )}
+
+      <div class="report-form__field report-form__field--full">
+        <label for="report-description">
+          Deskripsi
+          <span aria-hidden="true">*</span>
+        </label>
+
+        <textarea
+          id="report-description"
+          name="description"
+          placeholder="Jelaskan apa yang kamu lihat, kondisi lokasi, dan informasi penting lainnya."
+          maxlength="3000"
+          rows={compact ? 5 : 7}
+          required
+        >{initialDescription}</textarea>
+
+        <div class="report-form__field-footer">
+          <span class="report-form__help">
+            Hindari menambahkan informasi yang tidak dapat
+            kamu pastikan.
+          </span>
+
+          <span
+            class="report-form__counter"
+            data-counter="description"
+          >
+            0 / 3000
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="report-form__section">
+    <div class="report-form__section-heading">
+      <span>02</span>
+
+      <div>
+        <h3>Lokasi</h3>
+        <p>
+          Berikan informasi lokasi sedetail yang tersedia.
+        </p>
+      </div>
+    </div>
+
+    <div class="report-form__location-panel">
+      <div class="report-form__location-icon" aria-hidden="true">
+        <MapPin
+          size={21}
+          stroke-width="1.8"
+        />
+      </div>
+
+      <div class="report-form__location-content">
+        <div class="report-form__field">
+          <label for="report-address">
+            Alamat / keterangan lokasi
+            <span aria-hidden="true">*</span>
+          </label>
+
+          <textarea
+            id="report-address"
+            name="location[address]"
+            placeholder="Contoh: Jalan Raya Mengwi, dekat persimpangan..."
+            rows={3}
+            maxlength="500"
+            required
+          >{initialAddress}</textarea>
+        </div>
+
+        <div class="report-form__fields report-form__fields--location">
+          <div class="report-form__field">
+            <label for="report-area-id">
+              ID area
+            </label>
+
+            <input
+              id="report-area-id"
+              name="location[areaId]"
+              type="text"
+              value={initialAreaId}
+              placeholder="Opsional"
+            />
+          </div>
+
+          <div class="report-form__field">
+            <label for="report-area-name">
+              Nama area
+            </label>
+
+            <input
+              id="report-area-name"
+              name="location[areaName]"
+              type="text"
+              value={initialAreaName}
+              placeholder="Contoh: Mengwi"
+            />
+          </div>
+
+          <div class="report-form__field">
+            <label for="report-latitude">
+              Latitude
+            </label>
+
+            <input
+              id="report-latitude"
+              name="location[coordinates][latitude]"
+              type="number"
+              value={initialLatitude}
+              step="any"
+              min="-90"
+              max="90"
+              placeholder="-8.xxxxx"
+            />
+          </div>
+
+          <div class="report-form__field">
+            <label for="report-longitude">
+              Longitude
+            </label>
+
+            <input
+              id="report-longitude"
+              name="location[coordinates][longitude]"
+              type="number"
+              value={initialLongitude}
+              step="any"
+              min="-180"
+              max="180"
+              placeholder="115.xxxxx"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {showPriority && (
+    <div class="report-form__section">
+      <div class="report-form__section-heading">
+        <span>03</span>
+
+        <div>
+          <h3>Prioritas</h3>
+          <p>
+            Gambarkan tingkat urgensi laporan berdasarkan
+            kondisi yang kamu lihat.
+          </p>
+        </div>
+      </div>
+
+      <div class="report-form__priority-grid">
+        {priorityOptions.map((priority) => (
+          <label class="report-form__priority">
+            <input
+              type="radio"
+              name="priority"
+              value={priority.value}
+              checked={
+                initialPriority === priority.value
+              }
+            />
+
+            <span class="report-form__priority-card">
+              <span class="report-form__priority-mark">
+                <Check
+                  size={14}
+                  stroke-width="2.4"
+                  aria-hidden="true"
+                />
+              </span>
+
+              <span>
+                <strong>
+                  {priority.label}
+                </strong>
+
+                <small>
+                  {priority.description}
+                </small>
+              </span>
+            </span>
+          </label>
+        ))}
+      </div>
+    </div>
+  )}
+
+  {showReporter && (
+    <div class="report-form__section">
+      <div class="report-form__section-heading">
+        <span>{showPriority ? "04" : "03"}</span>
+
+        <div>
+          <h3>Informasi pelapor</h3>
+          <p>
+            Informasi ini membantu komunikasi jika diperlukan.
+          </p>
+        </div>
+      </div>
+
+      <div class="report-form__fields">
+        <div class="report-form__field">
+          <label for="reporter-name">
+            Nama
+          </label>
+
+          <input
+            id="reporter-name"
+            name="reporterName"
+            type="text"
+            value={initialReporterName}
+            placeholder="Nama kamu"
+            autocomplete="name"
+            maxlength="120"
+          />
+        </div>
+
+        <div class="report-form__field">
+          <label for="reporter-contact">
+            Kontak
+          </label>
+
+          <input
+            id="reporter-contact"
+            name="reporterContact"
+            type="text"
+            value={initialReporterContact}
+            placeholder="Email atau nomor yang dapat dihubungi"
+            autocomplete="email"
+            maxlength="160"
+          />
+        </div>
+      </div>
+    </div>
+  )}
+
+  <div class="report-form__section">
+    <div class="report-form__section-heading">
+      <span>{showReporter ? "05" : showPriority ? "04" : "03"}</span>
+
+      <div>
+        <h3>Dokumentasi</h3>
+        <p>
+          Tambahkan referensi gambar jika tersedia.
+        </p>
+      </div>
+    </div>
+
+    <div class="report-form__upload">
+      <Camera
+        size={22}
+        stroke-width="1.8"
+        aria-hidden="true"
+      />
+
+      <div>
+        <strong>
+          Gambar laporan
+        </strong>
+
+        <p>
+          Untuk saat ini gunakan URL gambar yang dapat
+          diakses oleh sistem.
+        </p>
+      </div>
+    </div>
+
+    <div class="report-form__field report-form__field--full">
+      <label for="report-image">
+        URL gambar
+      </label>
+
+      <input
+        id="report-image"
+        name="image"
+        type="url"
+        value={initialImage}
+        placeholder="https://..."
+        autocomplete="off"
+      />
+
+      <span class="report-form__help">
+        Opsional. Upload/storage dapat ditangani pada
+        service layer.
+      </span>
+    </div>
+  </div>
+
+  <div class="report-form__actions">
+    <div class="report-form__required-note">
+      <span aria-hidden="true">*</span>
+      Wajib diisi
+    </div>
+
+    <button
+      type="submit"
+      class="report-form__submit"
+    >
+      <Send
+        size={17}
+        stroke-width="1.9"
+        aria-hidden="true"
+      />
+
+      <span>{submitLabel}</span>
+    </button>
+  </div>
+</form>
+
+<script>
+  const forms = document.querySelectorAll<HTMLFormElement>(
+    "[data-report-form]"
+  );
+
+  if (forms.length === 0) {
+    const reportForms =
+      document.querySelectorAll<HTMLFormElement>(
+        ".report-form"
+      );
+
+    reportForms.forEach((form) => {
+      const textarea =
+        form.querySelector<HTMLTextAreaElement>(
+          "#report-description"
+        );
+
+      const counter =
+        form.querySelector<HTMLElement>(
+          '[data-counter="description"]'
+        );
+
+      if (!textarea || !counter) {
+        return;
+      }
+
+      const updateCounter = () => {
+        counter.textContent =
+          `${textarea.value.length} / ${textarea.maxLength}`;
+      };
+
+      textarea.addEventListener(
+        "input",
+        updateCounter
+      );
+
+      updateCounter();
+    });
+  } else {
+    forms.forEach((form) => {
+      const textarea =
+        form.querySelector<HTMLTextAreaElement>(
+          "#report-description"
+        );
+
+      const counter =
+        form.querySelector<HTMLElement>(
+          '[data-counter="description"]'
+        );
+
+      if (!textarea || !counter) {
+        return;
+      }
+
+      const updateCounter = () => {
+        counter.textContent =
+          `${textarea.value.length} / ${textarea.maxLength}`;
+      };
+
+      textarea.addEventListener(
+        "input",
+        updateCounter
+      );
+
+      updateCounter();
+    });
+  }
+</script>
+
+<style>
+  .report-form {
+    width: 100%;
+    padding: 1.5rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    background: var(--color-surface);
+  }
+
+  .report-form__header {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.9rem;
+    padding-bottom: 1.35rem;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .report-form__header-icon {
+    display: grid;
+    width: 2.7rem;
+    height: 2.7rem;
+    flex: 0 0 2.7rem;
+    place-items: center;
+    border-radius: 0.8rem;
+    background: var(--color-primary-light);
+    color: var(--color-primary-dark);
+  }
+
+  .report-form__header h2 {
+    margin: 0;
+    color: var(--color-text);
+    font-size: 1.3rem;
+    font-weight: 800;
+    line-height: 1.3;
+  }
+
+  .report-form__header p {
+    max-width: 760px;
+    margin: 0.45rem 0 0;
+    color: var(--color-text-secondary);
+    font-size: 0.87rem;
+    line-height: 1.65;
+  }
+
+  .report-form__notice {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.65rem;
+    margin-top: 1.15rem;
+    padding: 0.85rem 1rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background: var(--color-background);
+    color: var(--color-text-secondary);
+  }
+
+  .report-form__notice svg {
+    flex: 0 0 auto;
+    margin-top: 0.05rem;
+    color: var(--color-info);
+  }
+
+  .report-form__notice p {
+    margin: 0;
+    font-size: 0.77rem;
+    line-height: 1.55;
+  }
+
+  .report-form__section {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--color-border);
+  }
+
+  .report-form__section-heading {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .report-form__section-heading > span {
+    display: grid;
+    width: 1.85rem;
+    height: 1.85rem;
+    flex: 0 0 1.85rem;
+    place-items: center;
+    border-radius: 0.55rem;
+    background: var(--color-primary-light);
+    color: var(--color-primary-dark);
+    font-size: 0.67rem;
+    font-weight: 800;
+  }
+
+  .report-form__section-heading h3 {
+    margin: 0;
+    color: var(--color-text);
+    font-size: 0.96rem;
+    font-weight: 750;
+    line-height: 1.4;
+  }
+
+  .report-form__section-heading p {
+    margin: 0.2rem 0 0;
+    color: var(--color-text-secondary);
+    font-size: 0.76rem;
+    line-height: 1.5;
+  }
+
+  .report-form__fields {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+  }
+
+  .report-form__fields--location {
+    margin-top: 1rem;
+  }
+
+  .report-form__field {
+    min-width: 0;
+  }
+
+  .report-form__field--full {
+    grid-column: 1 / -1;
+  }
+
+  .report-form__field label {
+    display: flex;
+    align-items: center;
+    gap: 0.2rem;
+    margin-bottom: 0.4rem;
+    color: var(--color-text);
+    font-size: 0.78rem;
+    font-weight: 700;
+  }
+
+  .report-form__field label > span {
+    color: var(--color-danger);
+  }
+
+  .report-form__field input,
+  .report-form__field textarea,
+  .report-form__field select {
+    display: block;
+    width: 100%;
+    border: 1px solid var(--color-border);
+    border-radius: 0.7rem;
+    background: var(--color-surface);
+    color: var(--color-text);
+    font: inherit;
+    font-size: 0.82rem;
+    outline: none;
+    transition:
+      border-color 160ms ease,
+      box-shadow 160ms ease,
+      background 160ms ease;
+  }
+
+  .report-form__field input,
+  .report-form__field select {
+    min-height: 2.7rem;
+    padding: 0.65rem 0.75rem;
+  }
+
+  .report-form__field textarea {
+    min-height: 7rem;
+    padding: 0.7rem 0.75rem;
+    resize: vertical;
+    line-height: 1.55;
+  }
+
+  .report-form__field input::placeholder,
+  .report-form__field textarea::placeholder {
+    color: var(--color-text-secondary);
+    opacity: 0.7;
+  }
+
+  .report-form__field input:hover,
+  .report-form__field textarea:hover,
+  .report-form__field select:hover {
+    border-color: var(--color-primary-light);
+  }
+
+  .report-form__field input:focus,
+  .report-form__field textarea:focus,
+  .report-form__field select:focus {
+    border-color: var(--color-primary);
+    box-shadow:
+      0 0 0 3px
+      rgba(22, 101, 52, 0.1);
+  }
+
+  .report-form__field select {
+    cursor: pointer;
+  }
+
+  .report-form__help {
+    display: block;
+    margin-top: 0.35rem;
+    color: var(--color-text-secondary);
+    font-size: 0.67rem;
+    line-height: 1.45;
+  }
+
+  .report-form__field-footer {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+
+  .report-form__counter {
+    flex: 0 0 auto;
+    margin-top: 0.35rem;
+    color: var(--color-text-secondary);
+    font-size: 0.66rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .report-form__location-panel {
+    display: grid;
+    grid-template-columns: 2.7rem minmax(0, 1fr);
+    gap: 0.85rem;
+    padding: 1rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background: var(--color-background);
+  }
+
+  .report-form__location-icon {
+    display: grid;
+    width: 2.7rem;
+    height: 2.7rem;
+    place-items: center;
+    border-radius: 0.75rem;
+    background: var(--color-primary-light);
+    color: var(--color-primary-dark);
+  }
+
+  .report-form__location-content {
+    min-width: 0;
+  }
+
+  .report-form__priority-grid {
+    display: grid;
+    grid-template-columns: repeat(
+      3,
+      minmax(0, 1fr)
+    );
+    gap: 0.75rem;
+  }
+
+  .report-form__priority {
+    display: block;
+    cursor: pointer;
+  }
+
+  .report-form__priority input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+  }
+
+  .report-form__priority-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    height: 100%;
+    padding: 0.85rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background: var(--color-surface);
+    transition:
+      border-color 160ms ease,
+      background 160ms ease,
+      box-shadow 160ms ease;
+  }
+
+  .report-form__priority:hover
+    .report-form__priority-card {
+    border-color: var(--color-primary-light);
+  }
+
+  .report-form__priority
+    input:focus-visible
+    + .report-form__priority-card {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+  }
+
+  .report-form__priority
+    input:checked
+    + .report-form__priority-card {
+    border-color: var(--color-primary);
+    background: var(--color-primary-light);
+    box-shadow:
+      0 0 0 1px
+      rgba(22, 101, 52, 0.08);
+  }
+
+  .report-form__priority-mark {
+    display: grid;
+    width: 1.35rem;
+    height: 1.35rem;
+    flex: 0 0 1.35rem;
+    place-items: center;
+    border: 1px solid var(--color-border);
+    border-radius: 50%;
+    background: var(--color-surface);
+    color: transparent;
+  }
+
+  .report-form__priority
+    input:checked
+    + .report-form__priority-card
+    .report-form__priority-mark {
+    border-color: var(--color-primary);
+    background: var(--color-primary);
+    color: #fff;
+  }
+
+  .report-form__priority-card strong {
+    display: block;
+    color: var(--color-text);
+    font-size: 0.78rem;
+    font-weight: 750;
+  }
+
+  .report-form__priority-card small {
+    display: block;
+    margin-top: 0.25rem;
+    color: var(--color-text-secondary);
+    font-size: 0.67rem;
+    line-height: 1.45;
+  }
+
+  .report-form__upload {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.7rem;
+    margin-bottom: 0.9rem;
+    padding: 0.85rem 1rem;
+    border: 1px dashed var(--color-border);
+    border-radius: var(--radius-lg);
+    background: var(--color-background);
+    color: var(--color-text-secondary);
+  }
+
+  .report-form__upload > svg {
+    flex: 0 0 auto;
+    margin-top: 0.05rem;
+    color: var(--color-primary);
+  }
+
+  .report-form__upload strong {
+    display: block;
+    color: var(--color-text);
+    font-size: 0.78rem;
+    font-weight: 750;
+  }
+
+  .report-form__upload p {
+    margin: 0.2rem 0 0;
+    font-size: 0.7rem;
+    line-height: 1.5;
+  }
+
+  .report-form__actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 1.5rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--color-border);
+  }
+
+  .report-form__required-note {
+    color: var(--color-text-secondary);
+    font-size: 0.7rem;
+  }
+
+  .report-form__required-note span {
+    color: var(--color-danger);
+  }
+
+  .report-form__submit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 2.8rem;
+    padding: 0.7rem 1rem;
+    border: 1px solid var(--color-primary);
+    border-radius: 0.7rem;
+    background: var(--color-primary);
+    color: #fff;
+    font: inherit;
+    font-size: 0.78rem;
+    font-weight: 750;
+    cursor: pointer;
+    transition:
+      background 160ms ease,
+      border-color 160ms ease,
+      transform 160ms ease,
+      box-shadow 160ms ease;
+  }
+
+  .report-form__submit:hover {
+    border-color: var(--color-primary-dark);
+    background: var(--color-primary-dark);
+    box-shadow: var(--shadow-sm);
+    transform: translateY(-1px);
+  }
+
+  .report-form__submit:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 3px;
+  }
+
+  .report-form--compact {
+    padding: 1.15rem;
+  }
+
+  .report-form--compact
+    .report-form__section {
+    margin-top: 1.15rem;
+    padding-top: 1.15rem;
+  }
+
+  .report-form--compact
+    .report-form__header {
+    padding-bottom: 1.1rem;
+  }
+
+  @media (max-width: 760px) {
+    .report-form {
+      padding: 1.15rem;
+    }
+
+    .report-form__fields {
+      grid-template-columns: 1fr;
+    }
+
+    .report-form__field--full {
+      grid-column: auto;
+    }
+
+    .report-form__priority-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .report-form__actions {
+      align-items: stretch;
+      flex-direction: column;
+    }
+
+    .report-form__submit {
+      width: 100%;
+    }
+  }
+
+  @media (max-width: 520px) {
+    .report-form__header {
+      gap: 0.7rem;
+    }
+
+    .report-form__header-icon {
+      width: 2.4rem;
+      height: 2.4rem;
+      flex-basis: 2.4rem;
+    }
+
+    .report-form__location-panel {
+      grid-template-columns: 1fr;
+    }
+
+    .report-form__location-icon {
+      width: 2.4rem;
+      height: 2.4rem;
+    }
+
+    .report-form__field-footer {
+      flex-direction: column;
+      gap: 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .report-form__field input,
+    .report-form__field textarea,
+    .report-form__field select,
+    .report-form__priority-card,
+    .report-form__submit {
+      transition: none;
+    }
+  }
+</style>

@@ -1,0 +1,492 @@
+---
+/**
+ * ============================================================================
+ * BINSIGHT — REPORT LOCATION
+ * ============================================================================
+ * Badung Waste Intelligence
+ *
+ * Komponen presentasi lokasi laporan.
+ *
+ * Prinsip:
+ * - Mengikuti ReportLocation dari src/lib/data/reports.ts.
+ * - Tidak melakukan fetch Firebase.
+ * - Tidak mengarang lokasi.
+ * - Mendukung area, alamat, dan koordinat.
+ * - Aman digunakan pada halaman create, detail, maupun card laporan.
+ * ============================================================================
+ */
+
+import {
+  Copy,
+  ExternalLink,
+  MapPin,
+} from "@lucide/astro";
+
+import type {
+  ReportLocation as ReportLocationData,
+} from "@lib/data/reports";
+
+interface Props {
+  location: ReportLocationData;
+  title?: string;
+  compact?: boolean;
+  showCoordinates?: boolean;
+  showMapLink?: boolean;
+}
+
+const {
+  location,
+  title = "Lokasi laporan",
+  compact = false,
+  showCoordinates = true,
+  showMapLink = true,
+} = Astro.props;
+
+const hasAddress =
+  Boolean(location.address?.trim());
+
+const hasArea =
+  Boolean(location.areaName?.trim());
+
+const hasCoordinates =
+  typeof location.coordinates?.lat === "number" &&
+  typeof location.coordinates?.lng === "number";
+
+const hasLocationData =
+  hasAddress ||
+  hasArea ||
+  hasCoordinates;
+
+const coordinateText =
+  hasCoordinates
+    ? `${location.coordinates.lat.toFixed(6)}, ${location.coordinates.lng.toFixed(6)}`
+    : "";
+
+const mapUrl =
+  hasCoordinates
+    ? `https://www.google.com/maps/search/?api=1&query=${location.coordinates.lat},${location.coordinates.lng}`
+    : hasAddress
+      ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(location.address)}`
+      : "";
+
+const mapLabel =
+  hasCoordinates
+    ? "Buka koordinat di peta"
+    : "Cari lokasi di peta";
+---
+
+<section
+  class:list={[
+    "report-location",
+    compact && "report-location--compact",
+  ]}
+  aria-labelledby="report-location-title"
+>
+  <header class="report-location__header">
+    <div class="report-location__heading">
+      <span
+        class="report-location__icon"
+        aria-hidden="true"
+      >
+        <MapPin
+          size={20}
+          stroke-width="1.8"
+        />
+      </span>
+
+      <div>
+        <span class="report-location__eyebrow">
+          Lokasi
+        </span>
+
+        <h2 id="report-location-title">
+          {title}
+        </h2>
+      </div>
+    </div>
+  </header>
+
+  {hasLocationData ? (
+    <div class="report-location__content">
+      {hasArea && (
+        <div class="report-location__area">
+          <span class="report-location__label">
+            Area
+          </span>
+
+          <strong>
+            {location.areaName}
+          </strong>
+        </div>
+      )}
+
+      {hasAddress && (
+        <div class="report-location__address">
+          <span class="report-location__label">
+            Alamat / keterangan
+          </span>
+
+          <p>
+            {location.address}
+          </p>
+        </div>
+      )}
+
+      {showCoordinates && hasCoordinates && (
+        <div class="report-location__coordinates">
+          <div>
+            <span class="report-location__label">
+              Koordinat
+            </span>
+
+            <code>
+              {coordinateText}
+            </code>
+          </div>
+
+          <button
+            type="button"
+            class="report-location__copy"
+            data-copy-coordinates={coordinateText}
+            aria-label="Salin koordinat"
+          >
+            <Copy
+              size={15}
+              stroke-width="1.8"
+              aria-hidden="true"
+            />
+
+            <span>Salin</span>
+          </button>
+        </div>
+      )}
+
+      {showMapLink && mapUrl && (
+        <a
+          class="report-location__map-link"
+          href={mapUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <MapPin
+            size={16}
+            stroke-width="1.8"
+            aria-hidden="true"
+          />
+
+          <span>{mapLabel}</span>
+
+          <ExternalLink
+            size={14}
+            stroke-width="1.8"
+            aria-hidden="true"
+          />
+        </a>
+      )}
+    </div>
+  ) : (
+    <div class="report-location__empty">
+      <MapPin
+        size={19}
+        stroke-width="1.8"
+        aria-hidden="true"
+      />
+
+      <div>
+        <strong>
+          Lokasi belum tersedia
+        </strong>
+
+        <p>
+          Informasi lokasi untuk laporan ini belum
+          dilengkapi.
+        </p>
+      </div>
+    </div>
+  )}
+</section>
+
+<script>
+  const copyButtons =
+    document.querySelectorAll<HTMLButtonElement>(
+      "[data-copy-coordinates]"
+    );
+
+  copyButtons.forEach((button) => {
+    button.addEventListener(
+      "click",
+      async () => {
+        const value =
+          button.dataset["copyCoordinates"];
+
+        if (!value) {
+          return;
+        }
+
+        try {
+          await navigator.clipboard.writeText(
+            value
+          );
+
+          const label =
+            button.querySelector("span");
+
+          if (!label) {
+            return;
+          }
+
+          const original =
+            label.textContent;
+
+          label.textContent = "Tersalin";
+
+          window.setTimeout(() => {
+            label.textContent =
+              original ?? "Salin";
+          }, 1400);
+        } catch {
+          /* Clipboard mungkin tidak tersedia. */
+        }
+      }
+    );
+  });
+</script>
+
+<style>
+  .report-location {
+    width: 100%;
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    background: var(--color-surface);
+  }
+
+  .report-location__header {
+    padding: 1.1rem 1.25rem;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .report-location__heading {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .report-location__icon {
+    display: grid;
+    width: 2.5rem;
+    height: 2.5rem;
+    flex: 0 0 2.5rem;
+    place-items: center;
+    border-radius: 0.75rem;
+    background: var(--color-primary-light);
+    color: var(--color-primary-dark);
+  }
+
+  .report-location__eyebrow {
+    display: block;
+    margin-bottom: 0.15rem;
+    color: var(--color-primary);
+    font-size: 0.65rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .report-location__heading h2 {
+    margin: 0;
+    color: var(--color-text);
+    font-size: 1rem;
+    font-weight: 750;
+    line-height: 1.35;
+  }
+
+  .report-location__content {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .report-location__area,
+  .report-location__address,
+  .report-location__coordinates {
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .report-location__label {
+    display: block;
+    margin-bottom: 0.3rem;
+    color: var(--color-text-secondary);
+    font-size: 0.67rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+  }
+
+  .report-location__area strong {
+    display: block;
+    color: var(--color-text);
+    font-size: 0.88rem;
+    font-weight: 700;
+    line-height: 1.45;
+  }
+
+  .report-location__address p {
+    margin: 0;
+    color: var(--color-text);
+    font-size: 0.84rem;
+    line-height: 1.6;
+  }
+
+  .report-location__coordinates {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .report-location__coordinates code {
+    display: block;
+    color: var(--color-text);
+    font-family:
+      ui-monospace,
+      SFMono-Regular,
+      Menlo,
+      Monaco,
+      Consolas,
+      monospace;
+    font-size: 0.75rem;
+    line-height: 1.45;
+    overflow-wrap: anywhere;
+  }
+
+  .report-location__copy {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    min-height: 2rem;
+    flex: 0 0 auto;
+    padding: 0.45rem 0.6rem;
+    border: 1px solid var(--color-border);
+    border-radius: 0.55rem;
+    background: var(--color-background);
+    color: var(--color-text-secondary);
+    font: inherit;
+    font-size: 0.68rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition:
+      color 160ms ease,
+      border-color 160ms ease,
+      background 160ms ease;
+  }
+
+  .report-location__copy:hover {
+    border-color: var(--color-primary-light);
+    background: var(--color-primary-light);
+    color: var(--color-primary-dark);
+  }
+
+  .report-location__copy:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+  }
+
+  .report-location__map-link {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.85rem 1.25rem;
+    color: var(--color-primary);
+    font-size: 0.76rem;
+    font-weight: 750;
+    text-decoration: none;
+    transition:
+      background 160ms ease,
+      color 160ms ease;
+  }
+
+  .report-location__map-link svg:first-child {
+    flex: 0 0 auto;
+  }
+
+  .report-location__map-link svg:last-child {
+    margin-left: auto;
+  }
+
+  .report-location__map-link:hover {
+    background: var(--color-primary-light);
+    color: var(--color-primary-dark);
+  }
+
+  .report-location__empty {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.7rem;
+    padding: 1.1rem 1.25rem;
+    color: var(--color-text-secondary);
+  }
+
+  .report-location__empty > svg {
+    flex: 0 0 auto;
+    margin-top: 0.05rem;
+    color: var(--color-primary);
+  }
+
+  .report-location__empty strong {
+    display: block;
+    color: var(--color-text);
+    font-size: 0.8rem;
+    font-weight: 700;
+  }
+
+  .report-location__empty p {
+    margin: 0.2rem 0 0;
+    font-size: 0.72rem;
+    line-height: 1.5;
+  }
+
+  .report-location--compact
+    .report-location__header {
+    padding: 0.9rem 1rem;
+  }
+
+  .report-location--compact
+    .report-location__icon {
+    width: 2.25rem;
+    height: 2.25rem;
+    flex-basis: 2.25rem;
+  }
+
+  .report-location--compact
+    .report-location__area,
+  .report-location--compact
+    .report-location__address,
+  .report-location--compact
+    .report-location__coordinates {
+    padding: 0.8rem 1rem;
+  }
+
+  .report-location--compact
+    .report-location__map-link {
+    padding: 0.7rem 1rem;
+  }
+
+  @media (max-width: 520px) {
+    .report-location__coordinates {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+
+    .report-location__copy {
+      width: 100%;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .report-location__copy,
+    .report-location__map-link {
+      transition: none;
+    }
+  }
+</style>

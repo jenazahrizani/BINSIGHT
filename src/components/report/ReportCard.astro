@@ -1,0 +1,707 @@
+---
+/**
+ * ============================================================================
+ * BINSIGHT — REPORT CARD
+ * ============================================================================
+ * Badung Waste Intelligence
+ *
+ * Ringkasan laporan untuk listing publik, dashboard, dan related reports.
+ *
+ * Report model yang digunakan:
+ * - id
+ * - title
+ * - description
+ * - type
+ * - category
+ * - status
+ * - priority
+ * - location
+ * - reporterName
+ * - reporterContact
+ * - image
+ * - images
+ * - notes
+ * - resolution
+ * - verifiedAt
+ * - resolvedAt
+ * - createdAt
+ * - updatedAt
+ *
+ * Prinsip:
+ * - Tidak mengarang volume / tonase.
+ * - Tidak mengubah data laporan.
+ * - Tidak melakukan Firebase operation.
+ * - Presentation layer saja.
+ * ============================================================================
+ */
+
+import {
+  ArrowRight,
+  CalendarDays,
+  Camera,
+  CircleAlert,
+  CircleCheck,
+  Clock3,
+  ExternalLink,
+  FileText,
+  MapPin,
+  ShieldCheck,
+  TriangleAlert,
+} from "@lucide/astro";
+
+import type {
+  Report,
+  ReportPriority,
+  ReportStatus,
+  ReportType,
+} from "@lib/data/reports";
+
+interface Props {
+  report: Report;
+  href?: string;
+  compact?: boolean;
+  showDescription?: boolean;
+  showPriority?: boolean;
+  showDate?: boolean;
+  showImage?: boolean;
+}
+
+const {
+  report,
+  href = `/reports/${report.id}`,
+  compact = false,
+  showDescription = true,
+  showPriority = true,
+  showDate = true,
+  showImage = true,
+} = Astro.props;
+
+const typeLabels: Record<ReportType, string> = {
+  "illegal-dumping": "Pembuangan ilegal",
+  "overflowing-waste": "Sampah menumpuk",
+  "burning-waste": "Pembakaran sampah",
+  "hazardous-waste": "Sampah berbahaya",
+  "environmental-pollution": "Pencemaran lingkungan",
+  other: "Lainnya",
+};
+
+const statusLabels: Record<ReportStatus, string> = {
+  pending: "Menunggu verifikasi",
+  verified: "Terverifikasi",
+  "in-progress": "Ditindaklanjuti",
+  resolved: "Selesai",
+  rejected: "Ditolak",
+};
+
+const priorityLabels: Record<ReportPriority, string> = {
+  low: "Rendah",
+  medium: "Sedang",
+  high: "Tinggi",
+};
+
+const statusIcons: Record<
+  ReportStatus,
+  typeof Clock3
+> = {
+  pending: Clock3,
+  verified: ShieldCheck,
+  "in-progress": Clock3,
+  resolved: CircleCheck,
+  rejected: CircleAlert,
+};
+
+const StatusIcon = statusIcons[report.status];
+
+const hasImage =
+  showImage &&
+  Boolean(
+    report.image ||
+      report.images?.length,
+  );
+
+const imageSource =
+  report.image ||
+  report.images?.[0] ||
+  "";
+
+const description =
+  report.description.trim();
+
+const locationArea =
+  report.location.areaName?.trim() ||
+  "";
+
+const locationAddress =
+  report.location.address.trim();
+
+const hasLocation =
+  Boolean(locationArea) ||
+  Boolean(locationAddress);
+
+const formatDate = (
+  value: string,
+): string => {
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return value;
+  }
+
+  return new Intl.DateTimeFormat(
+    "id-ID",
+    {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    },
+  ).format(date);
+};
+
+const dateLabel =
+  formatDate(report.createdAt);
+
+const typeLabel =
+  typeLabels[report.type];
+
+const statusLabel =
+  statusLabels[report.status];
+
+const priorityLabel =
+  priorityLabels[report.priority];
+---
+
+<article
+  class:list={[
+    "report-card",
+    compact && "report-card--compact",
+    `report-card--status-${report.status}`,
+    `report-card--priority-${report.priority}`,
+  ]}
+>
+  <a
+    href={href}
+    class="report-card__link"
+    aria-label={`Lihat laporan: ${report.title}`}
+  >
+    {hasImage && (
+      <div class="report-card__media">
+        <img
+          src={imageSource}
+          alt=""
+          class="report-card__image"
+          loading="lazy"
+        />
+
+        <div
+          class="report-card__media-overlay"
+          aria-hidden="true"
+        ></div>
+
+        {report.images &&
+          report.images.length > 0 && (
+            <span class="report-card__image-count">
+              <Camera
+                size={13}
+                stroke-width="1.8"
+                aria-hidden="true"
+              />
+              {report.images.length}
+            </span>
+          )}
+
+        <span class="report-card__type">
+          {typeLabel}
+        </span>
+      </div>
+    )}
+
+    {!hasImage && (
+      <div
+        class="report-card__media report-card__media--placeholder"
+        aria-hidden="true"
+      >
+        <FileText
+          size={30}
+          stroke-width="1.7"
+        />
+
+        <span class="report-card__type">
+          {typeLabel}
+        </span>
+      </div>
+    )}
+
+    <div class="report-card__body">
+      <div class="report-card__top">
+        <div class="report-card__status">
+          <StatusIcon
+            size={15}
+            stroke-width="1.9"
+            aria-hidden="true"
+          />
+
+          <span>
+            {statusLabel}
+          </span>
+        </div>
+
+        {showPriority && (
+          <span class="report-card__priority">
+            {priorityLabel}
+          </span>
+        )}
+      </div>
+
+      <div class="report-card__heading">
+        <h3>
+          {report.title}
+        </h3>
+
+        <span
+          class="report-card__heading-arrow"
+          aria-hidden="true"
+        >
+          <ArrowRight
+            size={16}
+            stroke-width="1.8"
+          />
+        </span>
+      </div>
+
+      {showDescription && (
+        <p class="report-card__description">
+          {description}
+        </p>
+      )}
+
+      <div class="report-card__meta">
+        {hasLocation && (
+          <span class="report-card__meta-item">
+            <MapPin
+              size={14}
+              stroke-width="1.8"
+              aria-hidden="true"
+            />
+
+            <span>
+              {locationArea ||
+                locationAddress}
+            </span>
+          </span>
+        )}
+
+        {showDate && (
+          <span class="report-card__meta-item">
+            <CalendarDays
+              size={14}
+              stroke-width="1.8"
+              aria-hidden="true"
+            />
+
+            <span>
+              {dateLabel}
+            </span>
+          </span>
+        )}
+      </div>
+
+      {report.category && (
+        <div class="report-card__category">
+          <span>
+            Kategori
+          </span>
+
+          <strong>
+            {report.category}
+          </strong>
+        </div>
+      )}
+
+      <div class="report-card__footer">
+        <span>
+          Lihat detail laporan
+        </span>
+
+        <span
+          class="report-card__footer-icon"
+          aria-hidden="true"
+        >
+          <ExternalLink
+            size={14}
+            stroke-width="1.8"
+          />
+        </span>
+      </div>
+    </div>
+  </a>
+</article>
+
+<style>
+  .report-card {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    background: var(--color-surface);
+    transition:
+      border-color 160ms ease,
+      box-shadow 160ms ease,
+      transform 160ms ease;
+  }
+
+  .report-card:hover {
+    border-color: var(--color-primary-light);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+  }
+
+  .report-card__link {
+    display: flex;
+    height: 100%;
+    flex-direction: column;
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .report-card__media {
+    position: relative;
+    min-height: 11rem;
+    overflow: hidden;
+    background:
+      radial-gradient(
+        circle at 85% 20%,
+        rgba(132, 204, 22, 0.2),
+        transparent 36%
+      ),
+      linear-gradient(
+        135deg,
+        var(--color-primary-dark),
+        var(--color-primary)
+      );
+  }
+
+  .report-card__image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    min-height: 11rem;
+    object-fit: cover;
+  }
+
+  .report-card__media-overlay {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      linear-gradient(
+        to bottom,
+        rgba(0, 0, 0, 0.02),
+        rgba(0, 0, 0, 0.28)
+      );
+  }
+
+  .report-card__media--placeholder {
+    display: grid;
+    min-height: 8rem;
+    place-items: center;
+    color: rgba(255, 255, 255, 0.9);
+  }
+
+  .report-card__media--placeholder
+    > svg {
+    opacity: 0.72;
+  }
+
+  .report-card__type {
+    position: absolute;
+    top: 0.85rem;
+    left: 0.85rem;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    padding: 0.38rem 0.62rem;
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.92);
+    color: var(--color-primary-dark);
+    font-size: 0.68rem;
+    font-weight: 750;
+    line-height: 1;
+  }
+
+  .report-card__image-count {
+    position: absolute;
+    right: 0.85rem;
+    bottom: 0.85rem;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.35rem 0.52rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 999px;
+    background: rgba(15, 23, 42, 0.62);
+    color: #fff;
+    font-size: 0.66rem;
+    font-weight: 700;
+  }
+
+  .report-card__body {
+    display: flex;
+    flex: 1;
+    min-width: 0;
+    flex-direction: column;
+    padding: 1.15rem;
+  }
+
+  .report-card__top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.65rem;
+    margin-bottom: 0.7rem;
+  }
+
+  .report-card__status {
+    display: inline-flex;
+    min-width: 0;
+    align-items: center;
+    gap: 0.38rem;
+    color: var(--color-text-secondary);
+    font-size: 0.7rem;
+    font-weight: 700;
+  }
+
+  .report-card__status svg {
+    flex: 0 0 auto;
+  }
+
+  .report-card--status-pending
+    .report-card__status {
+    color: var(--color-warning);
+  }
+
+  .report-card--status-verified
+    .report-card__status,
+  .report-card--status-in-progress
+    .report-card__status {
+    color: var(--color-info);
+  }
+
+  .report-card--status-resolved
+    .report-card__status {
+    color: var(--color-primary);
+  }
+
+  .report-card--status-rejected
+    .report-card__status {
+    color: var(--color-danger);
+  }
+
+  .report-card__priority {
+    flex: 0 0 auto;
+    padding: 0.3rem 0.5rem;
+    border-radius: 999px;
+    background: var(--color-background);
+    color: var(--color-text-secondary);
+    font-size: 0.64rem;
+    font-weight: 700;
+  }
+
+  .report-card--priority-high
+    .report-card__priority {
+    background: rgba(220, 38, 38, 0.08);
+    color: var(--color-danger);
+  }
+
+  .report-card--priority-medium
+    .report-card__priority {
+    background: rgba(245, 158, 11, 0.1);
+    color: var(--color-warning);
+  }
+
+  .report-card__heading {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.7rem;
+  }
+
+  .report-card__heading h3 {
+    min-width: 0;
+    flex: 1;
+    margin: 0;
+    overflow-wrap: anywhere;
+    color: var(--color-text);
+    font-size: 1rem;
+    font-weight: 750;
+    line-height: 1.4;
+  }
+
+  .report-card__heading-arrow {
+    display: grid;
+    width: 1.95rem;
+    height: 1.95rem;
+    flex: 0 0 1.95rem;
+    place-items: center;
+    border: 1px solid var(--color-border);
+    border-radius: 0.55rem;
+    background: var(--color-background);
+    color: var(--color-text-secondary);
+    transition:
+      border-color 160ms ease,
+      color 160ms ease,
+      background 160ms ease,
+      transform 160ms ease;
+  }
+
+  .report-card:hover
+    .report-card__heading-arrow {
+    border-color: var(--color-primary-light);
+    background: var(--color-primary-light);
+    color: var(--color-primary-dark);
+    transform: translateX(2px);
+  }
+
+  .report-card__description {
+    display: -webkit-box;
+    overflow: hidden;
+    margin: 0.65rem 0 0;
+    color: var(--color-text-secondary);
+    font-size: 0.8rem;
+    line-height: 1.6;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+  }
+
+  .report-card__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem 0.85rem;
+    margin-top: 0.9rem;
+  }
+
+  .report-card__meta-item {
+    display: inline-flex;
+    min-width: 0;
+    align-items: center;
+    gap: 0.32rem;
+    color: var(--color-text-secondary);
+    font-size: 0.68rem;
+    line-height: 1.4;
+  }
+
+  .report-card__meta-item svg {
+    flex: 0 0 auto;
+    color: var(--color-primary);
+  }
+
+  .report-card__meta-item span {
+    max-width: 15rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .report-card__category {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-top: 0.85rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--color-border);
+  }
+
+  .report-card__category span {
+    color: var(--color-text-secondary);
+    font-size: 0.67rem;
+    font-weight: 600;
+  }
+
+  .report-card__category strong {
+    max-width: 60%;
+    overflow: hidden;
+    color: var(--color-text);
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-align: right;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .report-card__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.6rem;
+    margin-top: auto;
+    padding-top: 1rem;
+    color: var(--color-primary);
+    font-size: 0.73rem;
+    font-weight: 750;
+  }
+
+  .report-card__footer-icon {
+    display: grid;
+    width: 1.8rem;
+    height: 1.8rem;
+    place-items: center;
+    border-radius: 0.5rem;
+    background: var(--color-primary-light);
+    color: var(--color-primary-dark);
+  }
+
+  .report-card--compact
+    .report-card__media {
+    min-height: 8rem;
+  }
+
+  .report-card--compact
+    .report-card__image {
+    min-height: 8rem;
+  }
+
+  .report-card--compact
+    .report-card__body {
+    padding: 0.95rem;
+  }
+
+  .report-card--compact
+    .report-card__description {
+    -webkit-line-clamp: 2;
+  }
+
+  .report-card--compact
+    .report-card__meta {
+    margin-top: 0.7rem;
+  }
+
+  @media (max-width: 640px) {
+    .report-card__media {
+      min-height: 9.5rem;
+    }
+
+    .report-card__image {
+      min-height: 9.5rem;
+    }
+
+    .report-card__body {
+      padding: 1rem;
+    }
+
+    .report-card__heading-arrow {
+      width: 1.8rem;
+      height: 1.8rem;
+      flex-basis: 1.8rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .report-card,
+    .report-card__heading-arrow {
+      transition: none;
+    }
+  }
+</style>

@@ -1,0 +1,524 @@
+---
+/**
+ * ============================================================================
+ * BINSIGHT — REPORT STATUS
+ * ============================================================================
+ * Badung Waste Intelligence
+ *
+ * Menampilkan status dan tahapan penanganan laporan.
+ *
+ * ReportStatus mengikuti model:
+ * - pending
+ * - verified
+ * - in-progress
+ * - resolved
+ * - rejected
+ *
+ * Prinsip:
+ * - Tidak mengubah status data.
+ * - Tidak melakukan Firebase operation.
+ * - Hanya presentation layer.
+ * - Status disampaikan secara jelas kepada pengguna.
+ * ============================================================================
+ */
+
+import {
+  CircleCheck,
+  CircleDot,
+  CircleX,
+  Clock3,
+  LoaderCircle,
+} from "@lucide/astro";
+
+import type {
+  ReportStatus as ReportStatusValue,
+} from "@lib/data/reports";
+
+interface Props {
+  status: ReportStatusValue;
+  title?: string;
+  description?: string;
+  compact?: boolean;
+  showTimeline?: boolean;
+}
+
+const {
+  status,
+  title = "Status laporan",
+  description,
+  compact = false,
+  showTimeline = true,
+} = Astro.props;
+
+const statusMeta: Record<
+  ReportStatusValue,
+  {
+    label: string;
+    description: string;
+    icon: typeof Clock3;
+    modifier: string;
+  }
+> = {
+  pending: {
+    label: "Menunggu verifikasi",
+    description:
+      "Laporan telah diterima dan menunggu proses peninjauan.",
+    icon: Clock3,
+    modifier: "pending",
+  },
+
+  verified: {
+    label: "Terverifikasi",
+    description:
+      "Laporan telah ditinjau dan dinyatakan valid untuk diproses.",
+    icon: CircleCheck,
+    modifier: "verified",
+  },
+
+  "in-progress": {
+    label: "Sedang ditindaklanjuti",
+    description:
+      "Laporan sedang dalam proses penanganan.",
+    icon: LoaderCircle,
+    modifier: "in-progress",
+  },
+
+  resolved: {
+    label: "Selesai",
+    description:
+      "Laporan telah dinyatakan selesai ditangani.",
+    icon: CircleCheck,
+    modifier: "resolved",
+  },
+
+  rejected: {
+    label: "Ditolak",
+    description:
+      "Laporan tidak dapat dilanjutkan berdasarkan hasil peninjauan.",
+    icon: CircleX,
+    modifier: "rejected",
+  },
+};
+
+const timeline: Array<{
+  status: ReportStatusValue;
+  label: string;
+}> = [
+  {
+    status: "pending",
+    label: "Diterima",
+  },
+  {
+    status: "verified",
+    label: "Terverifikasi",
+  },
+  {
+    status: "in-progress",
+    label: "Ditindaklanjuti",
+  },
+  {
+    status: "resolved",
+    label: "Selesai",
+  },
+];
+
+const currentIndex =
+  status === "rejected"
+    ? -1
+    : timeline.findIndex(
+        (item) => item.status === status,
+      );
+
+const meta = statusMeta[status];
+const StatusIcon = meta.icon;
+
+const isRejected = status === "rejected";
+
+const stepState = (
+  stepStatus: ReportStatusValue,
+): "complete" | "current" | "upcoming" | "inactive" => {
+  if (isRejected) {
+    return "inactive";
+  }
+
+  const stepIndex = timeline.findIndex(
+    (item) => item.status === stepStatus,
+  );
+
+  if (stepIndex < currentIndex) {
+    return "complete";
+  }
+
+  if (stepIndex === currentIndex) {
+    return "current";
+  }
+
+  return "upcoming";
+};
+---
+
+<section
+  class:list={[
+    "report-status",
+    `report-status--${meta.modifier}`,
+    compact && "report-status--compact",
+  ]}
+  aria-labelledby="report-status-title"
+>
+  <header class="report-status__header">
+    <div class="report-status__heading">
+      <div
+        class="report-status__icon"
+        aria-hidden="true"
+      >
+        <StatusIcon
+          size={compact ? 19 : 22}
+          stroke-width="1.8"
+        />
+      </div>
+
+      <div>
+        <span class="report-status__eyebrow">
+          {title}
+        </span>
+
+        <h2 id="report-status-title">
+          {meta.label}
+        </h2>
+      </div>
+    </div>
+  </header>
+
+  <div class="report-status__body">
+    <p class="report-status__description">
+      {description ?? meta.description}
+    </p>
+
+    {showTimeline && !compact && !isRejected && (
+      <ol
+        class="report-status__timeline"
+        aria-label="Tahapan status laporan"
+      >
+        {timeline.map((item, index) => {
+          const state = stepState(item.status);
+
+          return (
+            <li
+              class:list={[
+                "report-status__timeline-item",
+                `report-status__timeline-item--${state}`,
+              ]}
+            >
+              <div class="report-status__timeline-marker">
+                {state === "complete" ? (
+                  <CircleCheck
+                    size={15}
+                    stroke-width="2"
+                    aria-hidden="true"
+                  />
+                ) : (
+                  <CircleDot
+                    size={15}
+                    stroke-width="1.8"
+                    aria-hidden="true"
+                  />
+                )}
+              </div>
+
+              <span class="report-status__timeline-label">
+                {item.label}
+              </span>
+
+              {index < timeline.length - 1 && (
+                <span
+                  class="report-status__timeline-line"
+                  aria-hidden="true"
+                ></span>
+              )}
+            </li>
+          );
+        })}
+      </ol>
+    )}
+
+    {isRejected && (
+      <div class="report-status__rejected">
+        <CircleX
+          size={17}
+          stroke-width="1.8"
+          aria-hidden="true"
+        />
+
+        <span>
+          Laporan berhenti pada proses peninjauan.
+        </span>
+      </div>
+    )}
+  </div>
+</section>
+
+<style>
+  .report-status {
+    width: 100%;
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    background: var(--color-surface);
+  }
+
+  .report-status__header {
+    padding: 1.1rem 1.25rem;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .report-status__heading {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .report-status__icon {
+    display: grid;
+    width: 2.65rem;
+    height: 2.65rem;
+    flex: 0 0 2.65rem;
+    place-items: center;
+    border: 1px solid var(--color-border);
+    border-radius: 0.75rem;
+    background: var(--color-background);
+    color: var(--color-text-secondary);
+  }
+
+  .report-status__eyebrow {
+    display: block;
+    margin-bottom: 0.15rem;
+    color: var(--color-text-secondary);
+    font-size: 0.64rem;
+    font-weight: 800;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+  }
+
+  .report-status__heading h2 {
+    margin: 0;
+    color: var(--color-text);
+    font-size: 1rem;
+    font-weight: 750;
+    line-height: 1.35;
+  }
+
+  .report-status__body {
+    padding: 1.1rem 1.25rem 1.25rem;
+  }
+
+  .report-status__description {
+    margin: 0;
+    color: var(--color-text-secondary);
+    font-size: 0.8rem;
+    line-height: 1.6;
+  }
+
+  .report-status--pending
+    .report-status__icon {
+    border-color: rgba(245, 158, 11, 0.22);
+    background: rgba(245, 158, 11, 0.1);
+    color: var(--color-warning);
+  }
+
+  .report-status--verified
+    .report-status__icon,
+  .report-status--resolved
+    .report-status__icon {
+    border-color: var(--color-primary-light);
+    background: var(--color-primary-light);
+    color: var(--color-primary-dark);
+  }
+
+  .report-status--in-progress
+    .report-status__icon {
+    border-color: rgba(37, 99, 235, 0.2);
+    background: rgba(37, 99, 235, 0.08);
+    color: var(--color-info);
+  }
+
+  .report-status--rejected
+    .report-status__icon {
+    border-color: rgba(220, 38, 38, 0.2);
+    background: rgba(220, 38, 38, 0.08);
+    color: var(--color-danger);
+  }
+
+  .report-status__timeline {
+    display: grid;
+    grid-template-columns: repeat(
+      4,
+      minmax(0, 1fr)
+    );
+    margin: 1.35rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .report-status__timeline-item {
+    position: relative;
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.45rem;
+    text-align: center;
+  }
+
+  .report-status__timeline-marker {
+    position: relative;
+    z-index: 2;
+    display: grid;
+    width: 2rem;
+    height: 2rem;
+    place-items: center;
+    border: 1px solid var(--color-border);
+    border-radius: 50%;
+    background: var(--color-surface);
+    color: var(--color-text-secondary);
+  }
+
+  .report-status__timeline-item--complete
+    .report-status__timeline-marker {
+    border-color: var(--color-primary);
+    background: var(--color-primary);
+    color: #fff;
+  }
+
+  .report-status__timeline-item--current
+    .report-status__timeline-marker {
+    border-color: var(--color-primary);
+    background: var(--color-primary-light);
+    color: var(--color-primary-dark);
+    box-shadow:
+      0 0 0 4px
+      rgba(22, 101, 52, 0.08);
+  }
+
+  .report-status__timeline-label {
+    max-width: 6.5rem;
+    color: var(--color-text-secondary);
+    font-size: 0.67rem;
+    font-weight: 650;
+    line-height: 1.35;
+  }
+
+  .report-status__timeline-item--complete
+    .report-status__timeline-label,
+  .report-status__timeline-item--current
+    .report-status__timeline-label {
+    color: var(--color-text);
+  }
+
+  .report-status__timeline-line {
+    position: absolute;
+    top: 1rem;
+    right: 50%;
+    left: -50%;
+    height: 1px;
+    z-index: 1;
+    background: var(--color-border);
+  }
+
+  .report-status__timeline-item--complete
+    .report-status__timeline-line {
+    background: var(--color-primary);
+  }
+
+  .report-status__timeline-item:first-child
+    .report-status__timeline-line {
+    left: 50%;
+  }
+
+  .report-status__timeline-item:last-child
+    .report-status__timeline-line {
+    right: 50%;
+  }
+
+  .report-status__rejected {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.55rem;
+    margin-top: 1rem;
+    padding: 0.75rem 0.85rem;
+    border: 1px solid rgba(220, 38, 38, 0.18);
+    border-radius: var(--radius-lg);
+    background: rgba(220, 38, 38, 0.05);
+    color: var(--color-danger);
+    font-size: 0.74rem;
+    line-height: 1.5;
+  }
+
+  .report-status__rejected svg {
+    flex: 0 0 auto;
+    margin-top: 0.05rem;
+  }
+
+  .report-status--compact
+    .report-status__header {
+    padding: 0.85rem 1rem;
+  }
+
+  .report-status--compact
+    .report-status__body {
+    padding: 0.85rem 1rem 1rem;
+  }
+
+  .report-status--compact
+    .report-status__icon {
+    width: 2.35rem;
+    height: 2.35rem;
+    flex-basis: 2.35rem;
+  }
+
+  @media (max-width: 640px) {
+    .report-status__timeline {
+      grid-template-columns: 1fr;
+      gap: 0;
+      margin-top: 1.1rem;
+    }
+
+    .report-status__timeline-item {
+      display: grid;
+      grid-template-columns: 2rem minmax(0, 1fr);
+      gap: 0.65rem;
+      align-items: center;
+      min-height: 2.6rem;
+      text-align: left;
+    }
+
+    .report-status__timeline-label {
+      max-width: none;
+    }
+
+    .report-status__timeline-line {
+      top: 2rem;
+      bottom: -0.6rem;
+      left: 1rem !important;
+      right: auto !important;
+      width: 1px;
+      height: auto;
+      background: var(--color-border);
+    }
+
+    .report-status__timeline-item:last-child
+      .report-status__timeline-line {
+      display: none;
+    }
+
+    .report-status__timeline-item--complete
+      .report-status__timeline-line {
+      background: var(--color-primary);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .report-status__timeline-marker {
+      box-shadow: none;
+    }
+  }
+</style>
