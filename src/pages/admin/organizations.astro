@@ -1,0 +1,3279 @@
+---
+import {
+  ArrowRight,
+  Building2,
+  CircleCheck,
+  Eye,
+  Filter,
+  MapPin,
+  Pencil,
+  Plus,
+  RefreshCw,
+  Search,
+  ShieldCheck,
+  Trash2,
+  TriangleAlert,
+  UserRound,
+  X,
+} from "@lucide/astro";
+
+import AdminLayout from "../../layouts/AdminLayout.astro";
+
+type OrganizationStatus =
+  | "verified"
+  | "pending"
+  | "unverified";
+
+type OrganizationType =
+  | "government"
+  | "community"
+  | "private"
+  | "social-enterprise"
+  | "cooperative"
+  | "educational"
+  | "nonprofit"
+  | "other";
+
+interface OrganizationRecord {
+  id: string;
+  name: string;
+  slug: string;
+  type: OrganizationType;
+  status: OrganizationStatus;
+  area: string;
+  address: string;
+  description: string;
+  manager: string;
+  isPublic: boolean;
+  updatedAt: string;
+  locationCount: number;
+}
+
+const organizations: OrganizationRecord[] = [
+  {
+    id: "org-demo-001",
+    name: "Dinas Lingkungan Hidup dan Kebersihan Kabupaten Badung",
+    slug: "dlhk-badung",
+    type: "government",
+    status: "verified",
+    area: "Mengwi",
+    address: "Kabupaten Badung, Bali",
+    description:
+      "Instansi pemerintah daerah yang berkaitan dengan pengelolaan lingkungan dan persampahan Kabupaten Badung.",
+    manager: "Administrator Instansi",
+    isPublic: true,
+    updatedAt: "10 Sep 2026",
+    locationCount: 3,
+  },
+  {
+    id: "org-demo-002",
+    name: "Bank Sampah Unit Badung",
+    slug: "bank-sampah-unit-badung",
+    type: "community",
+    status: "pending",
+    area: "Kuta Utara",
+    address: "Badung, Bali",
+    description:
+      "Organisasi masyarakat yang mengelola pemilahan dan pengumpulan material yang masih memiliki nilai guna.",
+    manager: "Pengelola Organisasi",
+    isPublic: false,
+    updatedAt: "9 Sep 2026",
+    locationCount: 1,
+  },
+  {
+    id: "org-demo-003",
+    name: "Bali Recycle Hub",
+    slug: "bali-recycle-hub",
+    type: "private",
+    status: "verified",
+    area: "Kuta",
+    address: "Kuta, Badung, Bali",
+    description:
+      "Organisasi yang berfokus pada pengelolaan material yang dapat dipulihkan dan diproses kembali.",
+    manager: "Manager Operasional",
+    isPublic: true,
+    updatedAt: "8 Sep 2026",
+    locationCount: 2,
+  },
+  {
+    id: "org-demo-004",
+    name: "Komunitas Hijau Badung",
+    slug: "komunitas-hijau-badung",
+    type: "nonprofit",
+    status: "pending",
+    area: "Abiansemal",
+    address: "Abiansemal, Badung, Bali",
+    description:
+      "Komunitas lingkungan yang menjalankan kegiatan edukasi dan pengelolaan material berbasis masyarakat.",
+    manager: "Koordinator Komunitas",
+    isPublic: false,
+    updatedAt: "7 Sep 2026",
+    locationCount: 1,
+  },
+  {
+    id: "org-demo-005",
+    name: "Koperasi Daur Ulang Badung",
+    slug: "koperasi-daur-ulang-badung",
+    type: "cooperative",
+    status: "unverified",
+    area: "Mengwi",
+    address: "Mengwi, Badung, Bali",
+    description:
+      "Koperasi yang mengembangkan kegiatan pemilahan dan pemanfaatan material yang dapat diproses kembali.",
+    manager: "Pengurus Koperasi",
+    isPublic: false,
+    updatedAt: "6 Sep 2026",
+    locationCount: 0,
+  },
+];
+
+const statusLabels: Record<
+  OrganizationStatus,
+  string
+> = {
+  verified: "Terverifikasi",
+  pending: "Menunggu",
+  unverified: "Belum diverifikasi",
+};
+
+const typeLabels: Record<
+  OrganizationType,
+  string
+> = {
+  government: "Pemerintah",
+  community: "Komunitas",
+  private: "Swasta",
+  "social-enterprise": "Social enterprise",
+  cooperative: "Koperasi",
+  educational: "Pendidikan",
+  nonprofit: "Nirlaba",
+  other: "Lainnya",
+};
+
+const totalOrganizations = organizations.length;
+const verifiedCount = organizations.filter(
+  (organization) =>
+    organization.status === "verified",
+).length;
+const pendingCount = organizations.filter(
+  (organization) =>
+    organization.status === "pending",
+).length;
+const publicCount = organizations.filter(
+  (organization) =>
+    organization.isPublic,
+).length;
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "CollectionPage",
+  name: "Organisasi — Admin BINSIGHT",
+  description:
+    "Administrasi organisasi BINSIGHT untuk verifikasi, pengelolaan data, dan visibilitas publik.",
+  url: "https://binsight.id/admin/organizations",
+  isPartOf: {
+    "@type": "WebSite",
+    name: "BINSIGHT — Badung Waste Intelligence",
+    url: "https://binsight.id",
+  },
+};
+---
+
+<AdminLayout
+  title="Organisasi"
+  description="Verifikasi dan kelola organisasi yang menjadi bagian dari ekosistem BINSIGHT."
+>
+  <script
+    type="application/ld+json"
+    is:inline
+    set:html={JSON.stringify(jsonLd)}
+  />
+
+  <main
+    class="organizations-page"
+    data-organizations-page
+  >
+    <header class="page-top">
+      <div class="page-top__main">
+        <div class="page-top__eyebrow">
+          <span class="page-top__eyebrow-icon">
+            <Building2
+              size={15}
+              stroke-width={2}
+              aria-hidden="true"
+            />
+          </span>
+
+          <span>
+            ORGANIZATION MANAGEMENT
+          </span>
+        </div>
+
+        <h1>
+          Organisasi
+        </h1>
+
+        <p>
+          Verifikasi, kelola, dan pantau organisasi yang ditampilkan dalam
+          ekosistem data BINSIGHT.
+        </p>
+      </div>
+
+      <div class="page-top__actions">
+        <button
+          type="button"
+          class="button button--secondary"
+          data-refresh
+        >
+          <RefreshCw
+            size={16}
+            stroke-width={2}
+            aria-hidden="true"
+          />
+
+          <span>
+            Refresh
+          </span>
+        </button>
+
+        <a
+          href="/organizations"
+          class="button button--ghost"
+        >
+          <Eye
+            size={16}
+            stroke-width={2}
+            aria-hidden="true"
+          />
+
+          <span>
+            Lihat publik
+          </span>
+        </a>
+
+        <button
+          type="button"
+          class="button button--primary"
+          data-create
+        >
+          <Plus
+            size={17}
+            stroke-width={2}
+            aria-hidden="true"
+          />
+
+          <span>
+            Tambah organisasi
+          </span>
+        </button>
+      </div>
+    </header>
+
+    <section
+      class="summary-grid"
+      aria-label="Ringkasan organisasi"
+    >
+      <article class="summary-card">
+        <div class="summary-card__top">
+          <span class="summary-card__label">
+            Total organisasi
+          </span>
+
+          <span class="summary-card__icon summary-card__icon--green">
+            <Building2
+              size={18}
+              stroke-width={1.9}
+              aria-hidden="true"
+            />
+          </span>
+        </div>
+
+        <strong
+          class="summary-card__value"
+          data-total-count
+        >
+          {totalOrganizations}
+        </strong>
+
+        <span class="summary-card__meta">
+          Record dalam workspace
+        </span>
+      </article>
+
+      <article class="summary-card">
+        <div class="summary-card__top">
+          <span class="summary-card__label">
+            Terverifikasi
+          </span>
+
+          <span class="summary-card__icon summary-card__icon--verified">
+            <CircleCheck
+              size={18}
+              stroke-width={1.9}
+              aria-hidden="true"
+            />
+          </span>
+        </div>
+
+        <strong
+          class="summary-card__value"
+          data-verified-count
+        >
+          {verifiedCount}
+        </strong>
+
+        <span class="summary-card__meta">
+          Siap untuk visibilitas publik
+        </span>
+      </article>
+
+      <article class="summary-card">
+        <div class="summary-card__top">
+          <span class="summary-card__label">
+            Menunggu
+          </span>
+
+          <span class="summary-card__icon summary-card__icon--pending">
+            <ShieldCheck
+              size={18}
+              stroke-width={1.9}
+              aria-hidden="true"
+            />
+          </span>
+        </div>
+
+        <strong
+          class="summary-card__value"
+          data-pending-count
+        >
+          {pendingCount}
+        </strong>
+
+        <span class="summary-card__meta">
+          Perlu pemeriksaan admin
+        </span>
+      </article>
+
+      <article class="summary-card">
+        <div class="summary-card__top">
+          <span class="summary-card__label">
+            Publik
+          </span>
+
+          <span class="summary-card__icon summary-card__icon--public">
+            <Eye
+              size={18}
+              stroke-width={1.9}
+              aria-hidden="true"
+            />
+          </span>
+        </div>
+
+        <strong
+          class="summary-card__value"
+          data-public-count
+        >
+          {publicCount}
+        </strong>
+
+        <span class="summary-card__meta">
+          Ditandai dapat dilihat publik
+        </span>
+      </article>
+    </section>
+
+    <section class="workspace-card">
+      <div class="toolbar">
+        <div class="toolbar__search">
+          <Search
+            size={17}
+            stroke-width={1.9}
+            aria-hidden="true"
+          />
+
+          <label
+            class="sr-only"
+            for="organization-search"
+          >
+            Cari organisasi
+          </label>
+
+          <input
+            id="organization-search"
+            type="search"
+            placeholder="Cari nama organisasi, wilayah, atau pengelola..."
+            autocomplete="off"
+            data-search
+          />
+
+          <button
+            type="button"
+            class="toolbar__clear"
+            aria-label="Hapus pencarian"
+            data-clear-search
+            hidden
+          >
+            <X
+              size={15}
+              stroke-width={2}
+              aria-hidden="true"
+            />
+          </button>
+        </div>
+
+        <div class="toolbar__filters">
+          <label class="filter-control">
+            <span class="sr-only">
+              Filter status
+            </span>
+
+            <select
+              aria-label="Filter status"
+              data-status-filter
+            >
+              <option value="all">
+                Semua status
+              </option>
+
+              <option value="verified">
+                Terverifikasi
+              </option>
+
+              <option value="pending">
+                Menunggu
+              </option>
+
+              <option value="unverified">
+                Belum diverifikasi
+              </option>
+            </select>
+          </label>
+
+          <label class="filter-control">
+            <span class="sr-only">
+              Filter tipe organisasi
+            </span>
+
+            <select
+              aria-label="Filter tipe organisasi"
+              data-type-filter
+            >
+              <option value="all">
+                Semua tipe
+              </option>
+
+              {
+                Object.entries(
+                  typeLabels,
+                ).map(
+                  ([value, label]) => (
+                    <option value={value}>
+                      {label}
+                    </option>
+                  ),
+                )
+              }
+            </select>
+          </label>
+
+          <button
+            type="button"
+            class="filter-button"
+            data-filter-toggle
+            aria-expanded="false"
+          >
+            <Filter
+              size={16}
+              stroke-width={1.9}
+              aria-hidden="true"
+            />
+
+            <span>
+              Filter
+            </span>
+          </button>
+        </div>
+      </div>
+
+      <div
+        class="filter-panel"
+        data-filter-panel
+        hidden
+      >
+        <div class="filter-panel__header">
+          <div>
+            <span class="filter-panel__eyebrow">
+              FILTER DATA
+            </span>
+
+            <h2>
+              Penyaringan organisasi
+            </h2>
+          </div>
+
+          <button
+            type="button"
+            class="filter-panel__close"
+            aria-label="Tutup filter"
+            data-filter-close
+          >
+            <X
+              size={16}
+              stroke-width={2}
+              aria-hidden="true"
+            />
+          </button>
+        </div>
+
+        <div class="filter-panel__body">
+          <div class="filter-info">
+            <ShieldCheck
+              size={17}
+              stroke-width={1.9}
+              aria-hidden="true"
+            />
+
+            <p>
+              Gunakan status untuk memprioritaskan organisasi yang membutuhkan
+              pemeriksaan sebelum informasi ditampilkan ke publik.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            class="filter-reset"
+            data-filter-reset
+          >
+            Reset semua filter
+          </button>
+        </div>
+      </div>
+
+      <div class="table-head">
+        <div>
+          <span class="table-head__eyebrow">
+            DIRECTORY
+          </span>
+
+          <h2>
+            Daftar organisasi
+          </h2>
+        </div>
+
+        <div class="table-head__right">
+          <span
+            class="result-count"
+            data-result-count
+          >
+            {totalOrganizations} organisasi
+          </span>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table class="organizations-table">
+          <caption class="sr-only">
+            Daftar organisasi BINSIGHT
+          </caption>
+
+          <thead>
+            <tr>
+              <th scope="col">
+                Organisasi
+              </th>
+
+              <th scope="col">
+                Tipe
+              </th>
+
+              <th scope="col">
+                Wilayah
+              </th>
+
+              <th scope="col">
+                Status
+              </th>
+
+              <th scope="col">
+                Visibilitas
+              </th>
+
+              <th scope="col">
+                Diperbarui
+              </th>
+
+              <th scope="col">
+                <span class="sr-only">
+                  Aksi
+                </span>
+              </th>
+            </tr>
+          </thead>
+
+          <tbody data-table-body>
+            {
+              organizations.map(
+                (organization) => (
+                  <tr
+                    data-organization-row
+                    data-id={organization.id}
+                    data-name={organization.name.toLowerCase()}
+                    data-area={organization.area.toLowerCase()}
+                    data-manager={organization.manager.toLowerCase()}
+                    data-status={organization.status}
+                    data-type={organization.type}
+                  >
+                    <td>
+                      <div class="organization-cell">
+                        <span class="organization-cell__icon">
+                          <Building2
+                            size={17}
+                            stroke-width={1.9}
+                            aria-hidden="true"
+                          />
+                        </span>
+
+                        <div class="organization-cell__copy">
+                          <strong>
+                            {organization.name}
+                          </strong>
+
+                          <span>
+                            {organization.address}
+                          </span>
+                        </div>
+                      </div>
+                    </td>
+
+                    <td>
+                      <span class="type-label">
+                        {typeLabels[organization.type]}
+                      </span>
+                    </td>
+
+                    <td>
+                      <div class="area-cell">
+                        <MapPin
+                          size={14}
+                          stroke-width={1.9}
+                          aria-hidden="true"
+                        />
+
+                        <span>
+                          {organization.area}
+                        </span>
+                      </div>
+                    </td>
+
+                    <td>
+                      <span
+                        class:list={[
+                          "status-badge",
+                          `status-badge--${organization.status}`,
+                        ]}
+                      >
+                        {
+                          organization.status ===
+                          "verified" ? (
+                            <CircleCheck
+                              size={13}
+                              stroke-width={2}
+                              aria-hidden="true"
+                            />
+                          ) : organization.status ===
+                            "pending" ? (
+                            <ShieldCheck
+                              size={13}
+                              stroke-width={2}
+                              aria-hidden="true"
+                            />
+                          ) : (
+                            <TriangleAlert
+                              size={13}
+                              stroke-width={2}
+                              aria-hidden="true"
+                            />
+                          )
+                        }
+
+                        <span>
+                          {statusLabels[organization.status]}
+                        </span>
+                      </span>
+                    </td>
+
+                    <td>
+                      <span
+                        class:list={[
+                          "visibility-badge",
+                          organization.isPublic
+                            ? "visibility-badge--public"
+                            : "visibility-badge--private",
+                        ]}
+                      >
+                        {organization.isPublic
+                          ? "Publik"
+                          : "Privat"}
+                      </span>
+                    </td>
+
+                    <td>
+                      <span class="updated-label">
+                        {organization.updatedAt}
+                      </span>
+                    </td>
+
+                    <td>
+                      <div class="row-actions">
+                        <button
+                          type="button"
+                          class="row-action"
+                          aria-label={`Lihat ${organization.name}`}
+                          data-view
+                          data-record={organization.id}
+                        >
+                          <Eye
+                            size={15}
+                            stroke-width={1.9}
+                            aria-hidden="true"
+                          />
+                        </button>
+
+                        <button
+                          type="button"
+                          class="row-action"
+                          aria-label={`Edit ${organization.name}`}
+                          data-edit
+                          data-record={organization.id}
+                        >
+                          <Pencil
+                            size={15}
+                            stroke-width={1.9}
+                            aria-hidden="true"
+                          />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ),
+              )
+            }
+          </tbody>
+        </table>
+
+        <div
+          class="empty-state"
+          data-empty-state
+          hidden
+        >
+          <span class="empty-state__icon">
+            <Search
+              size={23}
+              stroke-width={1.8}
+              aria-hidden="true"
+            />
+          </span>
+
+          <h3>
+            Tidak ada organisasi yang cocok
+          </h3>
+
+          <p>
+            Coba ubah kata pencarian atau filter yang digunakan.
+          </p>
+
+          <button
+            type="button"
+            class="button button--secondary"
+            data-empty-reset
+          >
+            Reset pencarian
+          </button>
+        </div>
+      </div>
+
+      <footer class="table-footer">
+        <span>
+          <strong data-footer-count>
+            {totalOrganizations}
+          </strong>
+          organisasi ditampilkan
+        </span>
+
+        <span>
+          Data admin
+        </span>
+      </footer>
+    </section>
+
+    <section class="verification-banner">
+      <div class="verification-banner__icon">
+        <ShieldCheck
+          size={22}
+          stroke-width={1.9}
+          aria-hidden="true"
+        />
+      </div>
+
+      <div class="verification-banner__content">
+        <span class="verification-banner__eyebrow">
+          GOVERNANCE
+        </span>
+
+        <h2>
+          Verifikasi sebelum publikasi
+        </h2>
+
+        <p>
+          Pastikan nama, tipe, wilayah, deskripsi, dan keterhubungan lokasi
+          organisasi telah diperiksa sebelum organisasi ditandai terverifikasi
+          dan dapat ditampilkan kepada masyarakat.
+        </p>
+      </div>
+
+      <a
+        href="/admin/locations"
+        class="verification-banner__link"
+      >
+        Periksa lokasi
+
+        <ArrowRight
+          size={16}
+          stroke-width={1.9}
+          aria-hidden="true"
+        />
+      </a>
+    </section>
+
+    <div
+      class="drawer-backdrop"
+      data-drawer-backdrop
+      hidden
+    ></div>
+
+    <aside
+      class="organization-drawer"
+      data-drawer
+      aria-hidden="true"
+      aria-labelledby="drawer-title"
+    >
+      <div class="drawer__header">
+        <div>
+          <span class="drawer__eyebrow">
+            ORGANIZATION DETAIL
+          </span>
+
+          <h2 id="drawer-title">
+            Detail organisasi
+          </h2>
+        </div>
+
+        <button
+          type="button"
+          class="drawer__close"
+          aria-label="Tutup detail"
+          data-drawer-close
+        >
+          <X
+            size={18}
+            stroke-width={2}
+            aria-hidden="true"
+          />
+        </button>
+      </div>
+
+      <div class="drawer__body">
+        <div class="drawer-identity">
+          <span class="drawer-identity__icon">
+            <Building2
+              size={22}
+              stroke-width={1.9}
+              aria-hidden="true"
+            />
+          </span>
+
+          <div>
+            <h3 data-drawer-name>
+              -
+            </h3>
+
+            <span data-drawer-type>
+              -
+            </span>
+          </div>
+        </div>
+
+        <div class="drawer-status-row">
+          <span
+            class="status-badge"
+            data-drawer-status
+          >
+            -
+          </span>
+
+          <span
+            class="visibility-badge"
+            data-drawer-visibility
+          >
+            -
+          </span>
+        </div>
+
+        <div class="drawer-section">
+          <span class="drawer-section__label">
+            INFORMASI
+          </span>
+
+          <dl class="detail-list">
+            <div>
+              <dt>
+                Wilayah
+              </dt>
+
+              <dd data-drawer-area>
+                -
+              </dd>
+            </div>
+
+            <div>
+              <dt>
+                Alamat
+              </dt>
+
+              <dd data-drawer-address>
+                -
+              </dd>
+            </div>
+
+            <div>
+              <dt>
+                Pengelola
+              </dt>
+
+              <dd data-drawer-manager>
+                -
+              </dd>
+            </div>
+
+            <div>
+              <dt>
+                Lokasi terhubung
+              </dt>
+
+              <dd data-drawer-location-count>
+                -
+              </dd>
+            </div>
+          </dl>
+        </div>
+
+        <div class="drawer-section">
+          <span class="drawer-section__label">
+            DESKRIPSI
+          </span>
+
+          <p
+            class="drawer-description"
+            data-drawer-description
+          >
+            -
+          </p>
+        </div>
+
+        <div
+          class="drawer-warning"
+          data-drawer-warning
+          hidden
+        >
+          <TriangleAlert
+            size={17}
+            stroke-width={1.9}
+            aria-hidden="true"
+          />
+
+          <p>
+            Organisasi ini belum terverifikasi. Periksa informasi sebelum
+            mengubah status menjadi terverifikasi.
+          </p>
+        </div>
+      </div>
+
+      <div class="drawer__footer">
+        <button
+          type="button"
+          class="button button--danger"
+          data-drawer-delete
+        >
+          <Trash2
+            size={16}
+            stroke-width={1.9}
+            aria-hidden="true"
+          />
+
+          <span>
+            Hapus
+          </span>
+        </button>
+
+        <div class="drawer__footer-right">
+          <button
+            type="button"
+            class="button button--secondary"
+            data-drawer-edit
+          >
+            <Pencil
+              size={16}
+              stroke-width={1.9}
+              aria-hidden="true"
+            />
+
+            <span>
+              Edit
+            </span>
+          </button>
+
+          <button
+            type="button"
+            class="button button--primary"
+            data-drawer-verify
+          >
+            <ShieldCheck
+              size={16}
+              stroke-width={1.9}
+              aria-hidden="true"
+            />
+
+            <span>
+              Verifikasi
+            </span>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <div
+      class="toast"
+      data-toast
+      hidden
+      role="status"
+      aria-live="polite"
+    >
+      <CircleCheck
+        size={17}
+        stroke-width={2}
+        aria-hidden="true"
+      />
+
+      <span data-toast-message>
+        Berhasil
+      </span>
+    </div>
+  </main>
+</AdminLayout>
+
+<style>
+  .organizations-page {
+    position: relative;
+    min-height: 100%;
+    padding: 30px 30px 50px;
+    background:
+      radial-gradient(
+        circle at 95% 0%,
+        rgba(132, 204, 22, 0.065),
+        transparent 31rem
+      ),
+      var(--color-background);
+  }
+
+  .page-top {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 28px;
+  }
+
+  .page-top__eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--color-primary);
+    font-size: 0.62rem;
+    font-weight: 900;
+    letter-spacing: 0.12em;
+  }
+
+  .page-top__eyebrow-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 27px;
+    height: 27px;
+    border-radius: 8px;
+    background: var(--color-primary-soft);
+  }
+
+  .page-top h1 {
+    margin: 12px 0 0;
+    color: var(--color-text-strong);
+    font-size: clamp(1.7rem, 3vw, 2.4rem);
+    font-weight: 900;
+    letter-spacing: -0.03em;
+    line-height: 1.08;
+  }
+
+  .page-top__main > p {
+    max-width: 690px;
+    margin: 9px 0 0;
+    color: var(--color-text-muted);
+    font-size: 0.77rem;
+    line-height: 1.7;
+  }
+
+  .page-top__actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    min-height: 41px;
+    padding: 0 13px;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    font: inherit;
+    font-size: 0.68rem;
+    font-weight: 800;
+    text-decoration: none;
+    cursor: pointer;
+    white-space: nowrap;
+    transition:
+      transform 150ms ease,
+      background 150ms ease,
+      border-color 150ms ease,
+      box-shadow 150ms ease;
+  }
+
+  .button:hover {
+    transform: translateY(-1px);
+  }
+
+  .button:focus-visible,
+  .filter-button:focus-visible,
+  .row-action:focus-visible,
+  .drawer__close:focus-visible,
+  .filter-panel__close:focus-visible,
+  .filter-reset:focus-visible {
+    outline: 3px solid var(--color-primary-ring);
+    outline-offset: 2px;
+  }
+
+  .button--primary {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    color: #ffffff;
+    box-shadow: var(--shadow-xs);
+  }
+
+  .button--primary:hover {
+    background: var(--color-primary-dark);
+    border-color: var(--color-primary-dark);
+  }
+
+  .button--secondary {
+    background: var(--color-surface);
+    border-color: var(--color-border);
+    color: var(--color-text-strong);
+  }
+
+  .button--secondary:hover {
+    border-color: var(--color-border-strong);
+    background: var(--color-surface-soft);
+  }
+
+  .button--ghost {
+    background: transparent;
+    border-color: transparent;
+    color: var(--color-text-muted);
+  }
+
+  .button--ghost:hover {
+    background: var(--color-surface);
+    color: var(--color-text-strong);
+  }
+
+  .button--danger {
+    background: transparent;
+    border-color: rgba(220, 38, 38, 0.2);
+    color: var(--color-danger);
+  }
+
+  .button--danger:hover {
+    background: rgba(220, 38, 38, 0.06);
+    border-color: rgba(220, 38, 38, 0.3);
+  }
+
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+    margin-top: 28px;
+  }
+
+  .summary-card {
+    padding: 17px;
+    border: 1px solid var(--color-border);
+    border-radius: 16px;
+    background: var(--color-surface);
+    box-shadow: var(--shadow-xs);
+  }
+
+  .summary-card__top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .summary-card__label {
+    color: var(--color-text-muted);
+    font-size: 0.67rem;
+    font-weight: 750;
+  }
+
+  .summary-card__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 37px;
+    height: 37px;
+    border-radius: 10px;
+  }
+
+  .summary-card__icon--green,
+  .summary-card__icon--verified {
+    background: var(--color-primary-soft);
+    color: var(--color-primary);
+  }
+
+  .summary-card__icon--pending {
+    background: rgba(245, 158, 11, 0.1);
+    color: #d97706;
+  }
+
+  .summary-card__icon--public {
+    background: rgba(37, 99, 235, 0.09);
+    color: var(--color-info);
+  }
+
+  .summary-card__value {
+    display: block;
+    margin-top: 15px;
+    color: var(--color-text-strong);
+    font-size: 1.55rem;
+    font-weight: 900;
+    line-height: 1;
+  }
+
+  .summary-card__meta {
+    display: block;
+    margin-top: 6px;
+    color: var(--color-text-faint);
+    font-size: 0.61rem;
+    line-height: 1.5;
+  }
+
+  .workspace-card {
+    margin-top: 20px;
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+    border-radius: 18px;
+    background: var(--color-surface);
+    box-shadow: var(--shadow-xs);
+  }
+
+  .toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 15px;
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-surface-soft);
+  }
+
+  .toolbar__search {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    flex: 1;
+    min-width: 0;
+    max-width: 560px;
+    min-height: 40px;
+    padding: 0 12px;
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    background: var(--color-surface);
+    color: var(--color-text-faint);
+  }
+
+  .toolbar__search:focus-within {
+    border-color: var(--color-primary);
+    box-shadow:
+      0 0 0 3px var(--color-primary-ring);
+  }
+
+  .toolbar__search input {
+    width: 100%;
+    min-width: 0;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: var(--color-text-strong);
+    font: inherit;
+    font-size: 0.69rem;
+  }
+
+  .toolbar__search input::placeholder {
+    color: var(--color-text-faint);
+  }
+
+  .toolbar__clear {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 25px;
+    height: 25px;
+    padding: 0;
+    border: 0;
+    border-radius: 7px;
+    background: transparent;
+    color: var(--color-text-muted);
+    cursor: pointer;
+  }
+
+  .toolbar__clear:hover {
+    background: var(--color-surface-soft);
+    color: var(--color-text-strong);
+  }
+
+  .toolbar__filters {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+
+  .filter-control select {
+    min-height: 40px;
+    max-width: 180px;
+    padding: 0 30px 0 11px;
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    background: var(--color-surface);
+    color: var(--color-text-strong);
+    font: inherit;
+    font-size: 0.67rem;
+    cursor: pointer;
+  }
+
+  .filter-control select:focus {
+    border-color: var(--color-primary);
+    outline: none;
+    box-shadow:
+      0 0 0 3px var(--color-primary-ring);
+  }
+
+  .filter-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    min-height: 40px;
+    padding: 0 11px;
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    background: var(--color-surface);
+    color: var(--color-text-muted);
+    font: inherit;
+    font-size: 0.67rem;
+    font-weight: 750;
+    cursor: pointer;
+  }
+
+  .filter-button:hover,
+  .filter-button[aria-expanded="true"] {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+    background: var(--color-primary-soft);
+  }
+
+  .filter-panel {
+    padding: 15px;
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-surface-soft);
+  }
+
+  .filter-panel__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 20px;
+  }
+
+  .filter-panel__eyebrow,
+  .table-head__eyebrow,
+  .verification-banner__eyebrow,
+  .drawer__eyebrow,
+  .drawer-section__label {
+    display: block;
+    color: var(--color-primary);
+    font-size: 0.59rem;
+    font-weight: 900;
+    letter-spacing: 0.1em;
+  }
+
+  .filter-panel h2 {
+    margin: 4px 0 0;
+    color: var(--color-text-strong);
+    font-size: 0.86rem;
+    font-weight: 820;
+  }
+
+  .filter-panel__close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 31px;
+    height: 31px;
+    border: 1px solid var(--color-border);
+    border-radius: 9px;
+    background: var(--color-surface);
+    color: var(--color-text-muted);
+    cursor: pointer;
+  }
+
+  .filter-panel__body {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    margin-top: 12px;
+  }
+
+  .filter-info {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    color: var(--color-text-muted);
+  }
+
+  .filter-info svg {
+    flex: 0 0 auto;
+    margin-top: 2px;
+    color: var(--color-primary);
+  }
+
+  .filter-info p {
+    max-width: 760px;
+    margin: 0;
+    font-size: 0.65rem;
+    line-height: 1.6;
+  }
+
+  .filter-reset {
+    flex: 0 0 auto;
+    border: 0;
+    background: transparent;
+    color: var(--color-primary);
+    font: inherit;
+    font-size: 0.64rem;
+    font-weight: 800;
+    cursor: pointer;
+  }
+
+  .table-head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 18px;
+    padding: 18px 18px 15px;
+  }
+
+  .table-head h2 {
+    margin: 4px 0 0;
+    color: var(--color-text-strong);
+    font-size: 0.98rem;
+    font-weight: 850;
+  }
+
+  .result-count {
+    color: var(--color-text-faint);
+    font-size: 0.64rem;
+    font-weight: 700;
+  }
+
+  .table-wrap {
+    overflow-x: auto;
+    border-top: 1px solid var(--color-border);
+  }
+
+  .organizations-table {
+    width: 100%;
+    min-width: 900px;
+    border-collapse: collapse;
+    text-align: left;
+  }
+
+  .organizations-table th {
+    padding: 11px 18px;
+    background: var(--color-surface-soft);
+    color: var(--color-text-faint);
+    font-size: 0.59rem;
+    font-weight: 850;
+    letter-spacing: 0.055em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .organizations-table td {
+    padding: 13px 18px;
+    border-top: 1px solid var(--color-border);
+    vertical-align: middle;
+  }
+
+  .organizations-table tbody tr {
+    transition: background 120ms ease;
+  }
+
+  .organizations-table tbody tr:hover {
+    background: rgba(248, 250, 252, 0.9);
+  }
+
+  .organizations-table tbody tr[data-hidden="true"] {
+    display: none;
+  }
+
+  .organization-cell {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 280px;
+  }
+
+  .organization-cell__icon {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    width: 37px;
+    height: 37px;
+    border-radius: 10px;
+    background: var(--color-primary-soft);
+    color: var(--color-primary);
+  }
+
+  .organization-cell__copy {
+    min-width: 0;
+  }
+
+  .organization-cell__copy strong,
+  .organization-cell__copy span {
+    display: block;
+  }
+
+  .organization-cell__copy strong {
+    max-width: 380px;
+    overflow: hidden;
+    color: var(--color-text-strong);
+    font-size: 0.7rem;
+    font-weight: 800;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .organization-cell__copy span {
+    margin-top: 3px;
+    color: var(--color-text-faint);
+    font-size: 0.6rem;
+  }
+
+  .type-label {
+    display: inline-block;
+    color: var(--color-text-muted);
+    font-size: 0.63rem;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .area-cell {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    color: var(--color-text-muted);
+    font-size: 0.63rem;
+    white-space: nowrap;
+  }
+
+  .area-cell svg {
+    color: var(--color-text-faint);
+  }
+
+  .status-badge,
+  .visibility-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    min-height: 25px;
+    padding: 0 8px;
+    border-radius: 999px;
+    font-size: 0.58rem;
+    font-weight: 800;
+    white-space: nowrap;
+  }
+
+  .status-badge--verified {
+    background: var(--color-primary-soft);
+    color: var(--color-primary-dark);
+  }
+
+  .status-badge--pending {
+    background: rgba(245, 158, 11, 0.1);
+    color: #b45309;
+  }
+
+  .status-badge--unverified {
+    background: rgba(220, 38, 38, 0.08);
+    color: #b91c1c;
+  }
+
+  .visibility-badge--public {
+    background: rgba(37, 99, 235, 0.08);
+    color: #1d4ed8;
+  }
+
+  .visibility-badge--private {
+    background: var(--color-surface-soft);
+    color: var(--color-text-muted);
+  }
+
+  .updated-label {
+    color: var(--color-text-muted);
+    font-size: 0.61rem;
+    white-space: nowrap;
+  }
+
+  .row-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 4px;
+  }
+
+  .row-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--color-text-muted);
+    cursor: pointer;
+  }
+
+  .row-action:hover {
+    border-color: var(--color-border);
+    background: var(--color-surface-soft);
+    color: var(--color-primary);
+  }
+
+  .empty-state {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    min-height: 290px;
+    padding: 30px;
+    text-align: center;
+  }
+
+  .empty-state__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 54px;
+    height: 54px;
+    border-radius: 15px;
+    background: var(--color-surface-soft);
+    color: var(--color-text-faint);
+  }
+
+  .empty-state h3 {
+    margin: 13px 0 0;
+    color: var(--color-text-strong);
+    font-size: 0.9rem;
+    font-weight: 820;
+  }
+
+  .empty-state p {
+    max-width: 390px;
+    margin: 5px 0 16px;
+    color: var(--color-text-muted);
+    font-size: 0.67rem;
+    line-height: 1.6;
+  }
+
+  .table-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 18px;
+    border-top: 1px solid var(--color-border);
+    color: var(--color-text-faint);
+    font-size: 0.61rem;
+  }
+
+  .table-footer strong {
+    color: var(--color-text-strong);
+    font-weight: 850;
+  }
+
+  .verification-banner {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-top: 18px;
+    padding: 18px;
+    border: 1px solid var(--color-primary-soft);
+    border-radius: 16px;
+    background:
+      linear-gradient(
+        135deg,
+        var(--color-primary-soft),
+        var(--color-surface)
+      );
+  }
+
+  .verification-banner__icon {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    width: 45px;
+    height: 45px;
+    border-radius: 12px;
+    background: var(--color-surface);
+    color: var(--color-primary);
+  }
+
+  .verification-banner__content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .verification-banner__content h2 {
+    margin: 4px 0 0;
+    color: var(--color-text-strong);
+    font-size: 0.85rem;
+    font-weight: 820;
+  }
+
+  .verification-banner__content p {
+    max-width: 850px;
+    margin: 4px 0 0;
+    color: var(--color-text-muted);
+    font-size: 0.64rem;
+    line-height: 1.6;
+  }
+
+  .verification-banner__link {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 6px;
+    color: var(--color-primary);
+    font-size: 0.66rem;
+    font-weight: 800;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .verification-banner__link:hover {
+    color: var(--color-primary-dark);
+  }
+
+  .drawer-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 80;
+    background: rgba(15, 23, 42, 0.28);
+    backdrop-filter: blur(2px);
+  }
+
+  .drawer-backdrop[hidden],
+  .organization-drawer[hidden] {
+    display: none;
+  }
+
+  .organization-drawer {
+    position: fixed;
+    top: 0;
+    right: 0;
+    z-index: 81;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    width: min(460px, 100%);
+    height: 100dvh;
+    border-left: 1px solid var(--color-border);
+    background: var(--color-surface);
+    box-shadow:
+      -18px 0 48px rgba(15, 23, 42, 0.13);
+    transform: translateX(100%);
+    transition: transform 180ms ease;
+  }
+
+  .organization-drawer[data-open="true"] {
+    transform: translateX(0);
+  }
+
+  .drawer__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 20px;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .drawer__header h2 {
+    margin: 5px 0 0;
+    color: var(--color-text-strong);
+    font-size: 1.05rem;
+    font-weight: 850;
+  }
+
+  .drawer__close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 35px;
+    height: 35px;
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    background: var(--color-surface);
+    color: var(--color-text-muted);
+    cursor: pointer;
+  }
+
+  .drawer__close:hover {
+    color: var(--color-text-strong);
+    background: var(--color-surface-soft);
+  }
+
+  .drawer__body {
+    overflow-y: auto;
+    padding: 20px;
+  }
+
+  .drawer-identity {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .drawer-identity__icon {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    width: 49px;
+    height: 49px;
+    border-radius: 14px;
+    background: var(--color-primary-soft);
+    color: var(--color-primary);
+  }
+
+  .drawer-identity h3 {
+    margin: 2px 0 0;
+    color: var(--color-text-strong);
+    font-size: 0.92rem;
+    font-weight: 850;
+    line-height: 1.4;
+  }
+
+  .drawer-identity div > span {
+    display: block;
+    margin-top: 3px;
+    color: var(--color-text-muted);
+    font-size: 0.64rem;
+  }
+
+  .drawer-status-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin-top: 15px;
+  }
+
+  .drawer-section {
+    margin-top: 25px;
+    padding-top: 19px;
+    border-top: 1px solid var(--color-border);
+  }
+
+  .detail-list {
+    display: grid;
+    gap: 0;
+    margin: 10px 0 0;
+  }
+
+  .detail-list > div {
+    display: grid;
+    grid-template-columns: 120px minmax(0, 1fr);
+    gap: 12px;
+    padding: 9px 0;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .detail-list > div:last-child {
+    border-bottom: 0;
+  }
+
+  .detail-list dt {
+    color: var(--color-text-faint);
+    font-size: 0.62rem;
+  }
+
+  .detail-list dd {
+    margin: 0;
+    color: var(--color-text-strong);
+    font-size: 0.65rem;
+    font-weight: 700;
+    line-height: 1.5;
+  }
+
+  .drawer-description {
+    margin: 10px 0 0;
+    color: var(--color-text-muted);
+    font-size: 0.67rem;
+    line-height: 1.7;
+  }
+
+  .drawer-warning {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin-top: 20px;
+    padding: 12px;
+    border: 1px solid rgba(245, 158, 11, 0.22);
+    border-radius: 11px;
+    background: var(--color-warning-soft);
+    color: var(--color-warning-text);
+  }
+
+  .drawer-warning svg {
+    flex: 0 0 auto;
+    margin-top: 1px;
+  }
+
+  .drawer-warning p {
+    margin: 0;
+    font-size: 0.64rem;
+    line-height: 1.6;
+  }
+
+  .drawer__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 14px 20px;
+    border-top: 1px solid var(--color-border);
+    background: var(--color-surface);
+  }
+
+  .drawer__footer-right {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 7px;
+  }
+
+  .toast {
+    position: fixed;
+    right: 24px;
+    bottom: 24px;
+    z-index: 100;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    max-width: min(390px, calc(100vw - 30px));
+    padding: 11px 14px;
+    border: 1px solid var(--color-primary-soft);
+    border-radius: 11px;
+    background: var(--color-surface);
+    color: var(--color-text-strong);
+    box-shadow:
+      0 15px 35px rgba(15, 23, 42, 0.14);
+    font-size: 0.66rem;
+    font-weight: 750;
+  }
+
+  .toast svg {
+    color: var(--color-primary);
+  }
+
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  @media (max-width: 1100px) {
+    .summary-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .page-top {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+
+    .page-top__actions {
+      justify-content: flex-start;
+    }
+  }
+
+  @media (max-width: 760px) {
+    .organizations-page {
+      padding: 20px 16px 36px;
+    }
+
+    .toolbar {
+      align-items: stretch;
+      flex-direction: column;
+    }
+
+    .toolbar__search {
+      max-width: none;
+    }
+
+    .toolbar__filters {
+      justify-content: flex-start;
+    }
+
+    .filter-panel__body {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+
+    .verification-banner {
+      align-items: flex-start;
+      flex-wrap: wrap;
+    }
+
+    .verification-banner__link {
+      width: 100%;
+      padding-left: 59px;
+    }
+  }
+
+  @media (max-width: 540px) {
+    .summary-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .page-top__actions {
+      width: 100%;
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .page-top__actions .button {
+      width: 100%;
+    }
+
+    .toolbar__filters {
+      display: grid;
+      grid-template-columns: 1fr;
+      width: 100%;
+    }
+
+    .filter-control select,
+    .filter-button {
+      width: 100%;
+      max-width: none;
+    }
+
+    .table-head {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+
+    .drawer__footer {
+      align-items: stretch;
+      flex-direction: column;
+    }
+
+    .drawer__footer-right {
+      width: 100%;
+    }
+
+    .drawer__footer-right .button,
+    .drawer__footer > .button {
+      flex: 1;
+    }
+  }
+</style>
+
+<script>
+// @ts-nocheck
+
+  const organizations = [
+    {
+      id: "org-demo-001",
+      name: "Dinas Lingkungan Hidup dan Kebersihan Kabupaten Badung",
+      slug: "dlhk-badung",
+      type: "government",
+      typeLabel: "Pemerintah",
+      status: "verified",
+      statusLabel: "Terverifikasi",
+      area: "Mengwi",
+      address: "Kabupaten Badung, Bali",
+      description:
+        "Instansi pemerintah daerah yang berkaitan dengan pengelolaan lingkungan dan persampahan Kabupaten Badung.",
+      manager: "Administrator Instansi",
+      isPublic: true,
+      updatedAt: "10 Sep 2026",
+      locationCount: 3,
+    },
+    {
+      id: "org-demo-002",
+      name: "Bank Sampah Unit Badung",
+      slug: "bank-sampah-unit-badung",
+      type: "community",
+      typeLabel: "Komunitas",
+      status: "pending",
+      statusLabel: "Menunggu",
+      area: "Kuta Utara",
+      address: "Badung, Bali",
+      description:
+        "Organisasi masyarakat yang mengelola pemilahan dan pengumpulan material yang masih memiliki nilai guna.",
+      manager: "Pengelola Organisasi",
+      isPublic: false,
+      updatedAt: "9 Sep 2026",
+      locationCount: 1,
+    },
+    {
+      id: "org-demo-003",
+      name: "Bali Recycle Hub",
+      slug: "bali-recycle-hub",
+      type: "private",
+      typeLabel: "Swasta",
+      status: "verified",
+      statusLabel: "Terverifikasi",
+      area: "Kuta",
+      address: "Kuta, Badung, Bali",
+      description:
+        "Organisasi yang berfokus pada pengelolaan material yang dapat dipulihkan dan diproses kembali.",
+      manager: "Manager Operasional",
+      isPublic: true,
+      updatedAt: "8 Sep 2026",
+      locationCount: 2,
+    },
+    {
+      id: "org-demo-004",
+      name: "Komunitas Hijau Badung",
+      slug: "komunitas-hijau-badung",
+      type: "nonprofit",
+      typeLabel: "Nirlaba",
+      status: "pending",
+      statusLabel: "Menunggu",
+      area: "Abiansemal",
+      address: "Abiansemal, Badung, Bali",
+      description:
+        "Komunitas lingkungan yang menjalankan kegiatan edukasi dan pengelolaan material berbasis masyarakat.",
+      manager: "Koordinator Komunitas",
+      isPublic: false,
+      updatedAt: "7 Sep 2026",
+      locationCount: 1,
+    },
+    {
+      id: "org-demo-005",
+      name: "Koperasi Daur Ulang Badung",
+      slug: "koperasi-daur-ulang-badung",
+      type: "cooperative",
+      typeLabel: "Koperasi",
+      status: "unverified",
+      statusLabel: "Belum diverifikasi",
+      area: "Mengwi",
+      address: "Mengwi, Badung, Bali",
+      description:
+        "Koperasi yang mengembangkan kegiatan pemilahan dan pemanfaatan material yang dapat diproses kembali.",
+      manager: "Pengurus Koperasi",
+      isPublic: false,
+      updatedAt: "6 Sep 2026",
+      locationCount: 0,
+    },
+  ];
+
+  const page =
+    document.querySelector(
+      "[data-organizations-page]",
+    );
+
+  if (!(page instanceof HTMLElement)) {
+    throw new Error(
+      "BINSIGHT organizations page root not found.",
+    );
+  }
+
+  const searchInput =
+    page.querySelector(
+      "[data-search]",
+    );
+
+  const clearSearchButton =
+    page.querySelector(
+      "[data-clear-search]",
+    );
+
+  const statusFilter =
+    page.querySelector(
+      "[data-status-filter]",
+    );
+
+  const typeFilter =
+    page.querySelector(
+      "[data-type-filter]",
+    );
+
+  const filterToggle =
+    page.querySelector(
+      "[data-filter-toggle]",
+    );
+
+  const filterPanel =
+    page.querySelector(
+      "[data-filter-panel]",
+    );
+
+  const filterClose =
+    page.querySelector(
+      "[data-filter-close]",
+    );
+
+  const filterReset =
+    page.querySelector(
+      "[data-filter-reset]",
+    );
+
+  const rows =
+    Array.from(
+      page.querySelectorAll(
+        "[data-organization-row]",
+      ),
+    );
+
+  const resultCount =
+    page.querySelector(
+      "[data-result-count]",
+    );
+
+  const footerCount =
+    page.querySelector(
+      "[data-footer-count]",
+    );
+
+  const emptyState =
+    page.querySelector(
+      "[data-empty-state]",
+    );
+
+  const emptyReset =
+    page.querySelector(
+      "[data-empty-reset]",
+    );
+
+  const drawer =
+    page.querySelector(
+      "[data-drawer]",
+    );
+
+  const drawerBackdrop =
+    page.querySelector(
+      "[data-drawer-backdrop]",
+    );
+
+  const drawerClose =
+    page.querySelector(
+      "[data-drawer-close]",
+    );
+
+  const drawerName =
+    page.querySelector(
+      "[data-drawer-name]",
+    );
+
+  const drawerType =
+    page.querySelector(
+      "[data-drawer-type]",
+    );
+
+  const drawerStatus =
+    page.querySelector(
+      "[data-drawer-status]",
+    );
+
+  const drawerVisibility =
+    page.querySelector(
+      "[data-drawer-visibility]",
+    );
+
+  const drawerArea =
+    page.querySelector(
+      "[data-drawer-area]",
+    );
+
+  const drawerAddress =
+    page.querySelector(
+      "[data-drawer-address]",
+    );
+
+  const drawerManager =
+    page.querySelector(
+      "[data-drawer-manager]",
+    );
+
+  const drawerLocationCount =
+    page.querySelector(
+      "[data-drawer-location-count]",
+    );
+
+  const drawerDescription =
+    page.querySelector(
+      "[data-drawer-description]",
+    );
+
+  const drawerWarning =
+    page.querySelector(
+      "[data-drawer-warning]",
+    );
+
+  const drawerVerify =
+    page.querySelector(
+      "[data-drawer-verify]",
+    );
+
+  const drawerEdit =
+    page.querySelector(
+      "[data-drawer-edit]",
+    );
+
+  const drawerDelete =
+    page.querySelector(
+      "[data-drawer-delete]",
+    );
+
+  const toast =
+    page.querySelector(
+      "[data-toast]",
+    );
+
+  const toastMessage =
+    page.querySelector(
+      "[data-toast-message]",
+    );
+
+  const totalCount =
+    page.querySelector(
+      "[data-total-count]",
+    );
+
+  const verifiedCount =
+    page.querySelector(
+      "[data-verified-count]",
+    );
+
+  const pendingCount =
+    page.querySelector(
+      "[data-pending-count]",
+    );
+
+  const publicCount =
+    page.querySelector(
+      "[data-public-count]",
+    );
+
+  let selectedOrganizationId =
+    null;
+
+  let toastTimer = null;
+
+  function getOrganization(
+    id,
+  ) {
+    return organizations.find(
+      (organization) =>
+        organization.id === id,
+    );
+  }
+
+  function setSummaryValues() {
+    const total =
+      organizations.length;
+
+    const verified =
+      organizations.filter(
+        (organization) =>
+          organization.status ===
+          "verified",
+      ).length;
+
+    const pending =
+      organizations.filter(
+        (organization) =>
+          organization.status ===
+          "pending",
+      ).length;
+
+    const publicOrganizations =
+      organizations.filter(
+        (organization) =>
+          organization.isPublic,
+      ).length;
+
+    if (
+      totalCount instanceof HTMLElement
+    ) {
+      totalCount.textContent =
+        String(total);
+    }
+
+    if (
+      verifiedCount instanceof HTMLElement
+    ) {
+      verifiedCount.textContent =
+        String(verified);
+    }
+
+    if (
+      pendingCount instanceof HTMLElement
+    ) {
+      pendingCount.textContent =
+        String(pending);
+    }
+
+    if (
+      publicCount instanceof HTMLElement
+    ) {
+      publicCount.textContent =
+        String(publicOrganizations);
+    }
+  }
+
+  function getVisibleRows() {
+    const query =
+      searchInput instanceof
+      HTMLInputElement
+        ? searchInput.value
+            .trim()
+            .toLowerCase()
+        : "";
+
+    const status =
+      statusFilter instanceof
+      HTMLSelectElement
+        ? statusFilter.value
+        : "all";
+
+    const type =
+      typeFilter instanceof
+      HTMLSelectElement
+        ? typeFilter.value
+        : "all";
+
+    return rows.filter(
+      (row) => {
+        const name =
+          row.getAttribute(
+            "data-name",
+          ) ?? "";
+
+        const area =
+          row.getAttribute(
+            "data-area",
+          ) ?? "";
+
+        const manager =
+          row.getAttribute(
+            "data-manager",
+          ) ?? "";
+
+        const rowStatus =
+          row.getAttribute(
+            "data-status",
+          ) ?? "";
+
+        const rowType =
+          row.getAttribute(
+            "data-type",
+          ) ?? "";
+
+        const matchesSearch =
+          query === "" ||
+          name.includes(query) ||
+          area.includes(query) ||
+          manager.includes(query);
+
+        const matchesStatus =
+          status === "all" ||
+          rowStatus === status;
+
+        const matchesType =
+          type === "all" ||
+          rowType === type;
+
+        return (
+          matchesSearch &&
+          matchesStatus &&
+          matchesType
+        );
+      },
+    );
+  }
+
+  function applyFilters() {
+    const visibleRows =
+      getVisibleRows();
+
+    rows.forEach(
+      (row) => {
+        const visible =
+          visibleRows.includes(
+            row,
+          );
+
+        row.setAttribute(
+          "data-hidden",
+          visible
+            ? "false"
+            : "true",
+        );
+      },
+    );
+
+    const count =
+      visibleRows.length;
+
+    if (
+      resultCount instanceof HTMLElement
+    ) {
+      resultCount.textContent =
+        `${count} organisasi`;
+    }
+
+    if (
+      footerCount instanceof HTMLElement
+    ) {
+      footerCount.textContent =
+        String(count);
+    }
+
+    if (
+      emptyState instanceof HTMLElement
+    ) {
+      emptyState.hidden =
+        count !== 0;
+    }
+
+    if (
+      clearSearchButton instanceof
+      HTMLButtonElement
+    ) {
+      const hasSearch =
+        searchInput instanceof
+        HTMLInputElement &&
+        searchInput.value.length >
+          0;
+
+      clearSearchButton.hidden =
+        !hasSearch;
+    }
+  }
+
+  function resetFilters() {
+    if (
+      searchInput instanceof
+      HTMLInputElement
+    ) {
+      searchInput.value = "";
+    }
+
+    if (
+      statusFilter instanceof
+      HTMLSelectElement
+    ) {
+      statusFilter.value =
+        "all";
+    }
+
+    if (
+      typeFilter instanceof
+      HTMLSelectElement
+    ) {
+      typeFilter.value =
+        "all";
+    }
+
+    applyFilters();
+  }
+
+  function setStatusBadge(
+    element,
+    organization,
+  ) {
+    if (
+      !(element instanceof HTMLElement)
+    ) {
+      return;
+    }
+
+    element.className =
+      `status-badge status-badge--${organization.status}`;
+
+    element.innerHTML = "";
+
+    let iconMarkup = "";
+
+    if (
+      organization.status ===
+      "verified"
+    ) {
+      iconMarkup =
+        "<svg width=\"13\" height=\"13\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m5 12 4 4L19 6\"/></svg>";
+    } else if (
+      organization.status ===
+      "pending"
+    ) {
+      iconMarkup =
+        "<svg width=\"13\" height=\"13\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20Z\"/><path d=\"M12 6v6l4 2\"/></svg>";
+    } else {
+      iconMarkup =
+        "<svg width=\"13\" height=\"13\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m10.3 2.6-8.1 14A2 2 0 0 0 4 19.6h16a2 2 0 0 0 1.7-3l-8.1-14a2 2 0 0 0-3.3 0Z\"/><path d=\"M12 9v4\"/><path d=\"M12 17h.01\"/></svg>";
+    }
+
+    element.innerHTML =
+      `${iconMarkup}<span>${organization.statusLabel}</span>`;
+  }
+
+  function updateDrawer(
+    organization,
+  ) {
+    if (!organization) {
+      return;
+    }
+
+    if (
+      drawerName instanceof HTMLElement
+    ) {
+      drawerName.textContent =
+        organization.name;
+    }
+
+    if (
+      drawerType instanceof HTMLElement
+    ) {
+      drawerType.textContent =
+        organization.typeLabel;
+    }
+
+    setStatusBadge(
+      drawerStatus,
+      organization,
+    );
+
+    if (
+      drawerVisibility instanceof
+      HTMLElement
+    ) {
+      drawerVisibility.className =
+        organization.isPublic
+          ? "visibility-badge visibility-badge--public"
+          : "visibility-badge visibility-badge--private";
+
+      drawerVisibility.textContent =
+        organization.isPublic
+          ? "Publik"
+          : "Privat";
+    }
+
+    if (
+      drawerArea instanceof HTMLElement
+    ) {
+      drawerArea.textContent =
+        organization.area;
+    }
+
+    if (
+      drawerAddress instanceof
+      HTMLElement
+    ) {
+      drawerAddress.textContent =
+        organization.address;
+    }
+
+    if (
+      drawerManager instanceof
+      HTMLElement
+    ) {
+      drawerManager.textContent =
+        organization.manager;
+    }
+
+    if (
+      drawerLocationCount instanceof
+      HTMLElement
+    ) {
+      drawerLocationCount.textContent =
+        `${organization.locationCount} lokasi`;
+    }
+
+    if (
+      drawerDescription instanceof
+      HTMLElement
+    ) {
+      drawerDescription.textContent =
+        organization.description;
+    }
+
+    if (
+      drawerWarning instanceof HTMLElement
+    ) {
+      drawerWarning.hidden =
+        organization.status ===
+        "verified";
+    }
+
+    if (
+      drawerVerify instanceof
+      HTMLButtonElement
+    ) {
+      drawerVerify.hidden =
+        organization.status ===
+        "verified";
+
+      drawerVerify.innerHTML =
+        organization.status ===
+        "verified"
+          ? `
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="m5 12 4 4L19 6"/>
+            </svg>
+            <span>Terverifikasi</span>
+          `
+          : `
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20Z"/>
+              <path d="m9 12 2 2 4-4"/>
+            </svg>
+            <span>Verifikasi</span>
+          `;
+    }
+  }
+
+  function openDrawer(
+    organizationId,
+  ) {
+    const organization =
+      getOrganization(
+        organizationId,
+      );
+
+    if (
+      !organization ||
+      !(drawer instanceof HTMLElement) ||
+      !(drawerBackdrop instanceof HTMLElement)
+    ) {
+      return;
+    }
+
+    selectedOrganizationId =
+      organizationId;
+
+    updateDrawer(
+      organization,
+    );
+
+    drawer.hidden = false;
+    drawerBackdrop.hidden =
+      false;
+
+    window.requestAnimationFrame(
+      () => {
+        drawer.setAttribute(
+          "data-open",
+          "true",
+        );
+
+        drawer.setAttribute(
+          "aria-hidden",
+          "false",
+        );
+      },
+    );
+
+    document.documentElement.style.overflow =
+      "hidden";
+  }
+
+  function closeDrawer() {
+    if (
+      !(drawer instanceof HTMLElement) ||
+      !(drawerBackdrop instanceof HTMLElement)
+    ) {
+      return;
+    }
+
+    drawer.setAttribute(
+      "data-open",
+      "false",
+    );
+
+    drawer.setAttribute(
+      "aria-hidden",
+      "true",
+    );
+
+    window.setTimeout(
+      () => {
+        drawer.hidden = true;
+        drawerBackdrop.hidden =
+          true;
+      },
+      190,
+    );
+
+    document.documentElement.style.overflow =
+      "";
+    selectedOrganizationId =
+      null;
+  }
+
+  function showToast(
+    message,
+  ) {
+    if (
+      !(toast instanceof HTMLElement) ||
+      !(toastMessage instanceof HTMLElement)
+    ) {
+      return;
+    }
+
+    toastMessage.textContent =
+      message;
+
+    toast.hidden = false;
+
+    if (toastTimer !== null) {
+      window.clearTimeout(
+        toastTimer,
+      );
+    }
+
+    toastTimer =
+      window.setTimeout(
+        () => {
+          toast.hidden = true;
+          toastTimer = null;
+        },
+        3000,
+      );
+  }
+
+  function refreshView() {
+    applyFilters();
+    setSummaryValues();
+
+    showToast(
+      "Data organisasi diperbarui.",
+    );
+  }
+
+  function editOrganization(
+    organizationId,
+  ) {
+    const organization =
+      getOrganization(
+        organizationId,
+      );
+
+    if (!organization) {
+      return;
+    }
+
+    window.dispatchEvent(
+      new CustomEvent(
+        "binsight:admin-organization-edit",
+        {
+          detail: organization,
+        },
+      ),
+    );
+
+    showToast(
+      `Mode edit untuk ${organization.name} dipersiapkan.`,
+    );
+  }
+
+  function createOrganization() {
+    window.dispatchEvent(
+      new CustomEvent(
+        "binsight:admin-organization-create",
+      ),
+    );
+
+    showToast(
+      "Form organisasi baru dipersiapkan.",
+    );
+  }
+
+  function verifySelectedOrganization() {
+    if (!selectedOrganizationId) {
+      return;
+    }
+
+    const organization =
+      getOrganization(
+        selectedOrganizationId,
+      );
+
+    if (!organization) {
+      return;
+    }
+
+    organization.status =
+      "verified";
+
+    organization.statusLabel =
+      "Terverifikasi";
+
+    organization.isPublic =
+      true;
+
+    updateDrawer(
+      organization,
+    );
+
+    setSummaryValues();
+    applyFilters();
+
+    window.dispatchEvent(
+      new CustomEvent(
+        "binsight:admin-organization-verify",
+        {
+          detail: {
+            ...organization,
+          },
+        },
+      ),
+    );
+
+    showToast(
+      `${organization.name} ditandai terverifikasi.`,
+    );
+  }
+
+  function deleteSelectedOrganization() {
+    if (!selectedOrganizationId) {
+      return;
+    }
+
+    const organization =
+      getOrganization(
+        selectedOrganizationId,
+      );
+
+    if (!organization) {
+      return;
+    }
+
+    const shouldDelete =
+      window.confirm(
+        `Hapus organisasi "${organization.name}" dari daftar admin?`,
+      );
+
+    if (!shouldDelete) {
+      return;
+    }
+
+    const row =
+      rows.find(
+        (candidate) =>
+          candidate.getAttribute(
+            "data-id",
+          ) ===
+          selectedOrganizationId,
+      );
+
+    if (
+      row instanceof HTMLElement
+    ) {
+      row.remove();
+    }
+
+    const index =
+      organizations.findIndex(
+        (item) =>
+          item.id ===
+          selectedOrganizationId,
+      );
+
+    if (index >= 0) {
+      organizations.splice(
+        index,
+        1,
+      );
+    }
+
+    closeDrawer();
+    setSummaryValues();
+    applyFilters();
+
+    window.dispatchEvent(
+      new CustomEvent(
+        "binsight:admin-organization-delete",
+        {
+          detail: {
+            id: organization.id,
+          },
+        },
+      ),
+    );
+
+    showToast(
+      `${organization.name} dihapus dari daftar.`,
+    );
+  }
+
+  searchInput?.addEventListener(
+    "input",
+    applyFilters,
+  );
+
+  statusFilter?.addEventListener(
+    "change",
+    applyFilters,
+  );
+
+  typeFilter?.addEventListener(
+    "change",
+    applyFilters,
+  );
+
+  clearSearchButton?.addEventListener(
+    "click",
+    () => {
+      if (
+        searchInput instanceof
+        HTMLInputElement
+      ) {
+        searchInput.value = "";
+        searchInput.focus();
+      }
+
+      applyFilters();
+    },
+  );
+
+  emptyReset?.addEventListener(
+    "click",
+    resetFilters,
+  );
+
+  filterReset?.addEventListener(
+    "click",
+    resetFilters,
+  );
+
+  filterToggle?.addEventListener(
+    "click",
+    () => {
+      if (
+        !(filterPanel instanceof
+          HTMLElement) ||
+        !(filterToggle instanceof
+          HTMLButtonElement)
+      ) {
+        return;
+      }
+
+      const isOpen =
+        filterToggle.getAttribute(
+          "aria-expanded",
+        ) === "true";
+
+      filterToggle.setAttribute(
+        "aria-expanded",
+        isOpen
+          ? "false"
+          : "true",
+      );
+
+      filterPanel.hidden =
+        isOpen;
+    },
+  );
+
+  filterClose?.addEventListener(
+    "click",
+    () => {
+      if (
+        filterPanel instanceof HTMLElement &&
+        filterToggle instanceof HTMLButtonElement
+      ) {
+        filterPanel.hidden =
+          true;
+
+        filterToggle.setAttribute(
+          "aria-expanded",
+          "false",
+        );
+      }
+    },
+  );
+
+  page
+    .querySelectorAll(
+      "[data-view]",
+    )
+    .forEach(
+      (button) => {
+        button.addEventListener(
+          "click",
+          () => {
+            const id =
+              button.getAttribute(
+                "data-record",
+              );
+
+            if (id) {
+              openDrawer(id);
+            }
+          },
+        );
+      },
+    );
+
+  page
+    .querySelectorAll(
+      "[data-edit]",
+    )
+    .forEach(
+      (button) => {
+        button.addEventListener(
+          "click",
+          () => {
+            const id =
+              button.getAttribute(
+                "data-record",
+              );
+
+            if (id) {
+              editOrganization(id);
+            }
+          },
+        );
+      },
+    );
+
+  drawerClose?.addEventListener(
+    "click",
+    closeDrawer,
+  );
+
+  drawerBackdrop?.addEventListener(
+    "click",
+    closeDrawer,
+  );
+
+  drawerVerify?.addEventListener(
+    "click",
+    verifySelectedOrganization,
+  );
+
+  drawerEdit?.addEventListener(
+    "click",
+    () => {
+      if (
+        selectedOrganizationId
+      ) {
+        editOrganization(
+          selectedOrganizationId,
+        );
+      }
+    },
+  );
+
+  drawerDelete?.addEventListener(
+    "click",
+    deleteSelectedOrganization,
+  );
+
+  document.addEventListener(
+    "keydown",
+    (event) => {
+      if (
+        event.key === "Escape"
+      ) {
+        if (
+          drawer instanceof HTMLElement &&
+          drawer.getAttribute(
+            "data-open",
+          ) === "true"
+        ) {
+          closeDrawer();
+        }
+      }
+    },
+  );
+
+  page
+    .querySelector(
+      "[data-refresh]",
+    )
+    ?.addEventListener(
+      "click",
+      refreshView,
+    );
+
+  page
+    .querySelector(
+      "[data-create]",
+    )
+    ?.addEventListener(
+      "click",
+      createOrganization,
+    );
+
+  setSummaryValues();
+  applyFilters();
+</script>

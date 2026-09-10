@@ -1,0 +1,1328 @@
+---
+import {
+  Activity,
+  ArrowRight,
+  Building2,
+  ChartColumn,
+  CircleCheck,
+  Clock3,
+  FileText,
+  FolderKanban,
+  LayoutDashboard,
+  MapPinned,
+  Recycle,
+  ShieldCheck,
+  TriangleAlert,
+  Users,
+} from "@lucide/astro";
+
+import AdminLayout from "../../layouts/AdminLayout.astro";
+
+const managementSections = [
+  {
+    title: "Organisasi",
+    description:
+      "Verifikasi organisasi, periksa profil, dan kelola visibilitas organisasi publik.",
+    href: "/admin/organizations",
+    icon: Building2,
+    accent: "green",
+  },
+  {
+    title: "Lokasi",
+    description:
+      "Kelola titik pengelolaan, lokasi fasilitas, dan informasi wilayah BINSIGHT.",
+    href: "/admin/locations",
+    icon: MapPinned,
+    accent: "blue",
+  },
+  {
+    title: "Jenis sampah",
+    description:
+      "Kelola referensi kategori, material, karakteristik, dan metode pengelolaan.",
+    href: "/admin/waste",
+    icon: Recycle,
+    accent: "lime",
+  },
+  {
+    title: "Laporan",
+    description:
+      "Tinjau laporan masyarakat, verifikasi informasi, dan pantau status penyelesaian.",
+    href: "/admin/reports",
+    icon: FileText,
+    accent: "orange",
+  },
+  {
+    title: "Pengguna",
+    description:
+      "Kelola pengguna platform dan akses berbasis peran.",
+    href: "/admin/users",
+    icon: Users,
+    accent: "purple",
+  },
+  {
+    title: "Konten",
+    description:
+      "Kelola materi informasi dan konten publik yang ditampilkan di BINSIGHT.",
+    href: "/admin/content",
+    icon: FolderKanban,
+    accent: "slate",
+  },
+];
+
+const workflowSteps = [
+  {
+    number: "01",
+    label: "Verify",
+    description:
+      "Pastikan organisasi, lokasi, dan informasi publik telah diperiksa sebelum ditampilkan.",
+    icon: ShieldCheck,
+  },
+  {
+    number: "02",
+    label: "Manage",
+    description:
+      "Kelola data ekosistem BINSIGHT melalui modul organisasi, lokasi, sampah, dan laporan.",
+    icon: FolderKanban,
+  },
+  {
+    number: "03",
+    label: "Monitor",
+    description:
+      "Pantau kualitas data, laporan masyarakat, dan konsistensi informasi platform.",
+    icon: Activity,
+  },
+];
+
+const quickLinks = [
+  {
+    label: "Kelola organisasi",
+    href: "/admin/organizations",
+    icon: Building2,
+  },
+  {
+    label: "Tinjau laporan",
+    href: "/admin/reports",
+    icon: FileText,
+  },
+  {
+    label: "Kelola lokasi",
+    href: "/admin/locations",
+    icon: MapPinned,
+  },
+  {
+    label: "Kelola pengguna",
+    href: "/admin/users",
+    icon: Users,
+  },
+];
+
+const systemChecks = [
+  {
+    label: "Platform",
+    value: "Aktif",
+    status: "positive",
+    icon: LayoutDashboard,
+  },
+  {
+    label: "Data",
+    value: "Siap dikelola",
+    status: "positive",
+    icon: ChartColumn,
+  },
+  {
+    label: "Verifikasi",
+    value: "Manual",
+    status: "neutral",
+    icon: ShieldCheck,
+  },
+];
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  name: "Admin — BINSIGHT",
+  description:
+    "Dashboard administrasi BINSIGHT untuk verifikasi, pengelolaan, dan monitoring ekosistem data persampahan Kabupaten Badung.",
+  url: "https://binsight.id/admin",
+  isPartOf: {
+    "@type": "WebSite",
+    name: "BINSIGHT — Badung Waste Intelligence",
+    url: "https://binsight.id",
+  },
+};
+---
+
+<AdminLayout
+  title="Overview"
+  description="Verifikasi, kelola, dan monitor data ekosistem BINSIGHT."
+>
+  <script
+    type="application/ld+json"
+    is:inline
+    set:html={JSON.stringify(jsonLd)}
+  />
+
+  <main class="admin-overview">
+    <section class="overview-hero">
+      <div class="overview-hero__content">
+        <div class="overview-hero__eyebrow">
+          <span class="overview-hero__eyebrow-icon">
+            <ShieldCheck
+              size={15}
+              stroke-width={2}
+              aria-hidden="true"
+            />
+          </span>
+
+          <span>ADMIN WORKSPACE</span>
+        </div>
+
+        <h1>
+          Overview BINSIGHT
+        </h1>
+
+        <p>
+          Pusat kendali untuk memastikan data, organisasi, lokasi, laporan,
+          dan konten BINSIGHT tetap terpercaya, terstruktur, dan siap
+          digunakan publik.
+        </p>
+
+        <div class="overview-hero__actions">
+          <a
+            class="button button--primary"
+            href="/admin/organizations"
+          >
+            <Building2
+              size={17}
+              stroke-width={2}
+              aria-hidden="true"
+            />
+
+            <span>
+              Kelola organisasi
+            </span>
+
+            <ArrowRight
+              size={16}
+              stroke-width={2}
+              aria-hidden="true"
+            />
+          </a>
+
+          <a
+            class="button button--secondary"
+            href="/admin/reports"
+          >
+            <FileText
+              size={17}
+              stroke-width={2}
+              aria-hidden="true"
+            />
+
+            <span>
+              Tinjau laporan
+            </span>
+          </a>
+        </div>
+      </div>
+
+      <div
+        class="overview-hero__status"
+        aria-label="Status sistem"
+      >
+        <div class="overview-hero__status-label">
+          <span class="status-dot status-dot--active"></span>
+          <span>
+            WORKSPACE STATUS
+          </span>
+        </div>
+
+        <strong>
+          Operational
+        </strong>
+
+        <span>
+          BINSIGHT administration
+        </span>
+
+        <div class="overview-hero__status-divider"></div>
+
+        <div class="overview-hero__status-row">
+          <span>
+            Mode
+          </span>
+
+          <strong>
+            Controlled
+          </strong>
+        </div>
+
+        <div class="overview-hero__status-row">
+          <span>
+            Visibility
+          </span>
+
+          <strong>
+            Admin
+          </strong>
+        </div>
+      </div>
+    </section>
+
+    <section
+      class="system-summary"
+      aria-labelledby="system-summary-title"
+    >
+      <div class="section-heading">
+        <div>
+          <span class="section-heading__eyebrow">
+            SYSTEM CONTROL
+          </span>
+
+          <h2 id="system-summary-title">
+            Kondisi workspace
+          </h2>
+        </div>
+
+        <span class="section-heading__meta">
+          Administrator only
+        </span>
+      </div>
+
+      <div class="system-summary__grid">
+        {
+          systemChecks.map((item) => (
+            <article class="system-card">
+              <div class="system-card__top">
+                <div
+                  class:list={[
+                    "system-card__icon",
+                    `system-card__icon--${item.status}`,
+                  ]}
+                >
+                  <item.icon
+                    size={19}
+                    stroke-width={1.9}
+                    aria-hidden="true"
+                  />
+                </div>
+
+                <span
+                  class:list={[
+                    "system-card__indicator",
+                    `system-card__indicator--${item.status}`,
+                  ]}
+                  aria-hidden="true"
+                ></span>
+              </div>
+
+              <span class="system-card__label">
+                {item.label}
+              </span>
+
+              <strong class="system-card__value">
+                {item.value}
+              </strong>
+            </article>
+          ))
+        }
+      </div>
+    </section>
+
+    <section
+      class="management-section"
+      aria-labelledby="management-title"
+    >
+      <div class="section-heading">
+        <div>
+          <span class="section-heading__eyebrow">
+            MANAGEMENT
+          </span>
+
+          <h2 id="management-title">
+            Area pengelolaan
+          </h2>
+
+          <p>
+            Akses modul administrasi utama dari satu workspace.
+          </p>
+        </div>
+      </div>
+
+      <div class="management-grid">
+        {
+          managementSections.map((section) => (
+            <a
+              class="management-card"
+              href={section.href}
+            >
+              <div
+                class:list={[
+                  "management-card__icon",
+                  `management-card__icon--${section.accent}`,
+                ]}
+              >
+                <section.icon
+                  size={20}
+                  stroke-width={1.9}
+                  aria-hidden="true"
+                />
+              </div>
+
+              <div class="management-card__body">
+                <div class="management-card__title-row">
+                  <h3>
+                    {section.title}
+                  </h3>
+
+                  <ArrowRight
+                    size={17}
+                    stroke-width={1.9}
+                    aria-hidden="true"
+                  />
+                </div>
+
+                <p>
+                  {section.description}
+                </p>
+              </div>
+            </a>
+          ))
+        }
+      </div>
+    </section>
+
+    <section
+      class="workflow-section"
+      aria-labelledby="workflow-title"
+    >
+      <div class="workflow-section__header">
+        <div class="section-heading">
+          <div>
+            <span class="section-heading__eyebrow">
+              GOVERNANCE
+            </span>
+
+            <h2 id="workflow-title">
+              Alur kerja admin
+            </h2>
+
+            <p>
+              Prinsip dasar pengelolaan data BINSIGHT.
+            </p>
+          </div>
+        </div>
+
+        <div class="workflow-section__note">
+          <TriangleAlert
+            size={16}
+            stroke-width={1.9}
+            aria-hidden="true"
+          />
+
+          <span>
+            Data publik harus melalui pemeriksaan yang sesuai.
+          </span>
+        </div>
+      </div>
+
+      <div class="workflow-grid">
+        {
+          workflowSteps.map((step, index) => (
+            <article class="workflow-card">
+              <div class="workflow-card__number">
+                {step.number}
+              </div>
+
+              <div class="workflow-card__icon">
+                <step.icon
+                  size={19}
+                  stroke-width={1.9}
+                  aria-hidden="true"
+                />
+              </div>
+
+              <span class="workflow-card__label">
+                {step.label}
+              </span>
+
+              <p>
+                {step.description}
+              </p>
+
+              {
+                index < workflowSteps.length - 1 && (
+                  <div
+                    class="workflow-card__connector"
+                    aria-hidden="true"
+                  >
+                    <ArrowRight
+                      size={16}
+                      stroke-width={1.8}
+                    />
+                  </div>
+                )
+              }
+            </article>
+          ))
+        }
+      </div>
+    </section>
+
+    <section
+      class="quick-section"
+      aria-labelledby="quick-title"
+    >
+      <div class="section-heading">
+        <div>
+          <span class="section-heading__eyebrow">
+            QUICK ACCESS
+          </span>
+
+          <h2 id="quick-title">
+            Aksi cepat
+          </h2>
+        </div>
+      </div>
+
+      <div class="quick-grid">
+        {
+          quickLinks.map((item) => (
+            <a
+              class="quick-link"
+              href={item.href}
+            >
+              <span class="quick-link__icon">
+                <item.icon
+                  size={17}
+                  stroke-width={1.9}
+                  aria-hidden="true"
+                />
+              </span>
+
+              <span>
+                {item.label}
+              </span>
+
+              <ArrowRight
+                size={15}
+                stroke-width={1.9}
+                aria-hidden="true"
+              />
+            </a>
+          ))
+        }
+      </div>
+    </section>
+
+    <section
+      class="principles-section"
+      aria-labelledby="principles-title"
+    >
+      <div class="principles-section__main">
+        <span class="section-heading__eyebrow">
+          DATA PRINCIPLES
+        </span>
+
+        <h2 id="principles-title">
+          BINSIGHT memprioritaskan
+          <span>
+            kualitas data.
+          </span>
+        </h2>
+
+        <p>
+          Dashboard admin bukan tempat untuk mengarang metrik. Gunakan data
+          yang telah tersedia, terverifikasi, dan memiliki konteks yang jelas
+          sebelum dipublikasikan sebagai informasi ekosistem persampahan.
+        </p>
+      </div>
+
+      <div class="principles-list">
+        <div class="principle-row">
+          <div class="principle-row__icon">
+            <CircleCheck
+              size={17}
+              stroke-width={2}
+              aria-hidden="true"
+            />
+          </div>
+
+          <div>
+            <strong>
+              Verified before public
+            </strong>
+
+            <span>
+              Informasi penting diperiksa sebelum masuk ke area publik.
+            </span>
+          </div>
+        </div>
+
+        <div class="principle-row">
+          <div class="principle-row__icon">
+            <CircleCheck
+              size={17}
+              stroke-width={2}
+              aria-hidden="true"
+            />
+          </div>
+
+          <div>
+            <strong>
+              Context over volume
+            </strong>
+
+            <span>
+              Gunakan konteks dan kualitas informasi, bukan angka yang tidak
+              memiliki sumber.
+            </span>
+          </div>
+        </div>
+
+        <div class="principle-row">
+          <div class="principle-row__icon">
+            <Clock3
+              size={17}
+              stroke-width={2}
+              aria-hidden="true"
+            />
+          </div>
+
+          <div>
+            <strong>
+              Keep information current
+            </strong>
+
+            <span>
+              Data yang berubah perlu diperiksa dan diperbarui secara berkala.
+            </span>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</AdminLayout>
+
+<style>
+  .admin-overview {
+    min-height: 100%;
+    padding: 30px 30px 48px;
+    background:
+      radial-gradient(
+        circle at 90% 0%,
+        rgba(132, 204, 22, 0.08),
+        transparent 32rem
+      ),
+      var(--color-background);
+  }
+
+  .overview-hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 300px;
+    gap: 28px;
+    padding: 30px;
+    border: 1px solid var(--color-border);
+    border-radius: 24px;
+    background:
+      linear-gradient(
+        135deg,
+        var(--color-primary-dark),
+        var(--color-primary)
+      );
+    box-shadow:
+      0 20px 48px rgba(15, 23, 42, 0.12);
+    overflow: hidden;
+  }
+
+  .overview-hero__content {
+    max-width: 760px;
+  }
+
+  .overview-hero__eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: rgba(255, 255, 255, 0.76);
+    font-size: 0.65rem;
+    font-weight: 850;
+    letter-spacing: 0.12em;
+  }
+
+  .overview-hero__eyebrow-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 9px;
+    background: rgba(255, 255, 255, 0.08);
+    color: #ffffff;
+  }
+
+  .overview-hero h1 {
+    margin: 13px 0 0;
+    color: #ffffff;
+    font-size: clamp(1.8rem, 4vw, 3rem);
+    font-weight: 900;
+    line-height: 1.05;
+    letter-spacing: -0.035em;
+  }
+
+  .overview-hero__content > p {
+    max-width: 700px;
+    margin: 13px 0 0;
+    color: rgba(255, 255, 255, 0.78);
+    font-size: 0.88rem;
+    line-height: 1.7;
+  }
+
+  .overview-hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 24px;
+  }
+
+  .button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 43px;
+    padding: 0 15px;
+    border-radius: 11px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-decoration: none;
+    transition:
+      transform 150ms ease,
+      box-shadow 150ms ease,
+      background 150ms ease;
+  }
+
+  .button:hover {
+    transform: translateY(-1px);
+  }
+
+  .button--primary {
+    background: #ffffff;
+    color: var(--color-primary-dark);
+    box-shadow:
+      0 8px 20px rgba(0, 0, 0, 0.12);
+  }
+
+  .button--primary:hover {
+    box-shadow:
+      0 12px 26px rgba(0, 0, 0, 0.16);
+  }
+
+  .button--secondary {
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    background: rgba(255, 255, 255, 0.08);
+    color: #ffffff;
+  }
+
+  .button--secondary:hover {
+    background: rgba(255, 255, 255, 0.14);
+  }
+
+  .overview-hero__status {
+    align-self: stretch;
+    padding: 19px;
+    border: 1px solid rgba(255, 255, 255, 0.13);
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.07);
+    backdrop-filter: blur(9px);
+  }
+
+  .overview-hero__status-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.61rem;
+    font-weight: 850;
+    letter-spacing: 0.1em;
+  }
+
+  .status-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+  }
+
+  .status-dot--active {
+    background: #bef264;
+    box-shadow:
+      0 0 0 4px rgba(190, 242, 100, 0.11);
+  }
+
+  .overview-hero__status > strong {
+    display: block;
+    margin-top: 15px;
+    color: #ffffff;
+    font-size: 1.3rem;
+    font-weight: 850;
+  }
+
+  .overview-hero__status > span:not(.overview-hero__status-label) {
+    display: block;
+    margin-top: 3px;
+    color: rgba(255, 255, 255, 0.58);
+    font-size: 0.68rem;
+  }
+
+  .overview-hero__status-divider {
+    height: 1px;
+    margin: 18px 0;
+    background: rgba(255, 255, 255, 0.11);
+  }
+
+  .overview-hero__status-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 10px;
+  }
+
+  .overview-hero__status-row:first-of-type {
+    margin-top: 0;
+  }
+
+  .overview-hero__status-row span {
+    color: rgba(255, 255, 255, 0.52);
+    font-size: 0.67rem;
+  }
+
+  .overview-hero__status-row strong {
+    color: #ffffff;
+    font-size: 0.69rem;
+    font-weight: 800;
+  }
+
+  .section-heading {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 20px;
+  }
+
+  .section-heading__eyebrow {
+    display: block;
+    color: var(--color-primary);
+    font-size: 0.61rem;
+    font-weight: 900;
+    letter-spacing: 0.11em;
+  }
+
+  .section-heading h2 {
+    margin: 5px 0 0;
+    color: var(--color-text-strong);
+    font-size: 1.15rem;
+    font-weight: 850;
+    letter-spacing: -0.018em;
+  }
+
+  .section-heading p {
+    margin: 5px 0 0;
+    color: var(--color-text-muted);
+    font-size: 0.73rem;
+    line-height: 1.6;
+  }
+
+  .section-heading__meta {
+    color: var(--color-text-faint);
+    font-size: 0.65rem;
+    font-weight: 750;
+  }
+
+  .system-summary {
+    margin-top: 34px;
+  }
+
+  .system-summary__grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+    margin-top: 15px;
+  }
+
+  .system-card {
+    padding: 17px;
+    border: 1px solid var(--color-border);
+    border-radius: 16px;
+    background: var(--color-surface);
+    box-shadow: var(--shadow-xs);
+  }
+
+  .system-card__top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .system-card__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 11px;
+  }
+
+  .system-card__icon--positive {
+    background: var(--color-primary-soft);
+    color: var(--color-primary);
+  }
+
+  .system-card__icon--neutral {
+    background: var(--color-surface-soft);
+    color: var(--color-text-muted);
+  }
+
+  .system-card__indicator {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+  }
+
+  .system-card__indicator--positive {
+    background: var(--color-primary);
+    box-shadow:
+      0 0 0 4px var(--color-primary-soft);
+  }
+
+  .system-card__indicator--neutral {
+    background: var(--color-text-faint);
+  }
+
+  .system-card__label {
+    display: block;
+    margin-top: 16px;
+    color: var(--color-text-muted);
+    font-size: 0.68rem;
+    font-weight: 700;
+  }
+
+  .system-card__value {
+    display: block;
+    margin-top: 3px;
+    color: var(--color-text-strong);
+    font-size: 0.95rem;
+    font-weight: 850;
+  }
+
+  .management-section {
+    margin-top: 36px;
+  }
+
+  .management-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+    margin-top: 15px;
+  }
+
+  .management-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 13px;
+    min-width: 0;
+    padding: 17px;
+    border: 1px solid var(--color-border);
+    border-radius: 16px;
+    background: var(--color-surface);
+    color: inherit;
+    text-decoration: none;
+    box-shadow: var(--shadow-xs);
+    transition:
+      transform 150ms ease,
+      border-color 150ms ease,
+      box-shadow 150ms ease;
+  }
+
+  .management-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--color-primary);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .management-card__icon {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+  }
+
+  .management-card__icon--green {
+    background: var(--color-primary-soft);
+    color: var(--color-primary);
+  }
+
+  .management-card__icon--blue {
+    background: rgba(37, 99, 235, 0.09);
+    color: var(--color-info);
+  }
+
+  .management-card__icon--lime {
+    background: rgba(132, 204, 22, 0.12);
+    color: #65a30d;
+  }
+
+  .management-card__icon--orange {
+    background: rgba(245, 158, 11, 0.11);
+    color: #d97706;
+  }
+
+  .management-card__icon--purple {
+    background: rgba(124, 58, 237, 0.09);
+    color: #7c3aed;
+  }
+
+  .management-card__icon--slate {
+    background: var(--color-surface-soft);
+    color: var(--color-text-muted);
+  }
+
+  .management-card__body {
+    min-width: 0;
+    flex: 1;
+  }
+
+  .management-card__title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .management-card__title-row h3 {
+    margin: 0;
+    color: var(--color-text-strong);
+    font-size: 0.83rem;
+    font-weight: 820;
+  }
+
+  .management-card__title-row svg {
+    flex: 0 0 auto;
+    color: var(--color-text-faint);
+    transition: transform 150ms ease;
+  }
+
+  .management-card:hover
+    .management-card__title-row
+    svg {
+    color: var(--color-primary);
+    transform: translateX(2px);
+  }
+
+  .management-card p {
+    margin: 5px 0 0;
+    color: var(--color-text-muted);
+    font-size: 0.67rem;
+    line-height: 1.6;
+  }
+
+  .workflow-section {
+    margin-top: 38px;
+  }
+
+  .workflow-section__header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 20px;
+  }
+
+  .workflow-section__note {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    max-width: 350px;
+    padding: 9px 11px;
+    border: 1px solid rgba(245, 158, 11, 0.2);
+    border-radius: 10px;
+    background: var(--color-warning-soft);
+    color: var(--color-warning-text);
+    font-size: 0.63rem;
+    font-weight: 700;
+    line-height: 1.45;
+  }
+
+  .workflow-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+    margin-top: 15px;
+  }
+
+  .workflow-card {
+    position: relative;
+    min-height: 218px;
+    padding: 18px;
+    border: 1px solid var(--color-border);
+    border-radius: 16px;
+    background: var(--color-surface);
+    box-shadow: var(--shadow-xs);
+  }
+
+  .workflow-card__number {
+    position: absolute;
+    top: 17px;
+    right: 17px;
+    color: var(--color-border-strong);
+    font-size: 0.7rem;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+  }
+
+  .workflow-card__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 11px;
+    background: var(--color-primary-soft);
+    color: var(--color-primary);
+  }
+
+  .workflow-card__label {
+    display: block;
+    margin-top: 21px;
+    color: var(--color-text-strong);
+    font-size: 0.86rem;
+    font-weight: 850;
+  }
+
+  .workflow-card p {
+    margin: 6px 0 0;
+    color: var(--color-text-muted);
+    font-size: 0.68rem;
+    line-height: 1.65;
+  }
+
+  .workflow-card__connector {
+    position: absolute;
+    top: 48%;
+    right: -18px;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border: 1px solid var(--color-border);
+    border-radius: 50%;
+    background: var(--color-surface);
+    color: var(--color-text-faint);
+  }
+
+  .quick-section {
+    margin-top: 38px;
+  }
+
+  .quick-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+    margin-top: 15px;
+  }
+
+  .quick-link {
+    display: grid;
+    grid-template-columns: 32px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 9px;
+    min-width: 0;
+    padding: 11px;
+    border: 1px solid var(--color-border);
+    border-radius: 13px;
+    background: var(--color-surface);
+    color: var(--color-text-strong);
+    font-size: 0.69rem;
+    font-weight: 750;
+    text-decoration: none;
+    transition:
+      border-color 150ms ease,
+      transform 150ms ease;
+  }
+
+  .quick-link:hover {
+    transform: translateY(-1px);
+    border-color: var(--color-primary);
+  }
+
+  .quick-link__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 9px;
+    background: var(--color-primary-soft);
+    color: var(--color-primary);
+  }
+
+  .quick-link > svg {
+    color: var(--color-text-faint);
+  }
+
+  .quick-link:hover > svg {
+    color: var(--color-primary);
+  }
+
+  .principles-section {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(300px, 0.8fr);
+    gap: 34px;
+    margin-top: 38px;
+    padding: 25px;
+    border: 1px solid var(--color-border);
+    border-radius: 20px;
+    background:
+      linear-gradient(
+        135deg,
+        var(--color-surface),
+        var(--color-surface-soft)
+      );
+  }
+
+  .principles-section__main h2 {
+    max-width: 620px;
+    margin: 8px 0 0;
+    color: var(--color-text-strong);
+    font-size: clamp(1.35rem, 2.5vw, 2rem);
+    font-weight: 900;
+    line-height: 1.14;
+    letter-spacing: -0.028em;
+  }
+
+  .principles-section__main h2 span {
+    color: var(--color-primary);
+  }
+
+  .principles-section__main p {
+    max-width: 660px;
+    margin: 11px 0 0;
+    color: var(--color-text-muted);
+    font-size: 0.74rem;
+    line-height: 1.7;
+  }
+
+  .principles-list {
+    display: grid;
+    align-content: center;
+    gap: 11px;
+  }
+
+  .principle-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px;
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    background: var(--color-surface);
+  }
+
+  .principle-row__icon {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 9px;
+    background: var(--color-primary-soft);
+    color: var(--color-primary);
+  }
+
+  .principle-row strong {
+    display: block;
+    color: var(--color-text-strong);
+    font-size: 0.7rem;
+    font-weight: 800;
+  }
+
+  .principle-row span {
+    display: block;
+    margin-top: 3px;
+    color: var(--color-text-muted);
+    font-size: 0.63rem;
+    line-height: 1.55;
+  }
+
+  @media (max-width: 1100px) {
+    .overview-hero {
+      grid-template-columns: 1fr;
+    }
+
+    .management-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .quick-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .principles-section {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 820px) {
+    .admin-overview {
+      padding: 20px 18px 36px;
+    }
+
+    .system-summary__grid,
+    .workflow-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .workflow-card {
+      min-height: auto;
+    }
+
+    .workflow-card__connector {
+      display: none;
+    }
+
+    .workflow-section__header {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+  }
+
+  @media (max-width: 620px) {
+    .overview-hero {
+      padding: 22px;
+      border-radius: 19px;
+    }
+
+    .overview-hero__actions {
+      align-items: stretch;
+      flex-direction: column;
+    }
+
+    .button {
+      width: 100%;
+    }
+
+    .management-grid,
+    .quick-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .principles-section {
+      padding: 20px;
+    }
+  }
+</style>

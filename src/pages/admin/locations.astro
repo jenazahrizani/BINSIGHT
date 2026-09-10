@@ -1,0 +1,3262 @@
+---
+import {
+  Activity,
+  ArrowRight,
+  Building2,
+  CircleCheck,
+  Eye,
+  Filter,
+  MapPin,
+  Pencil,
+  Plus,
+  RefreshCw,
+  Search,
+  ShieldCheck,
+  TriangleAlert,
+  X,
+} from "@lucide/astro";
+
+import AdminLayout from "../../layouts/AdminLayout.astro";
+
+type LocationStatus = "active" | "inactive";
+
+type LocationType =
+  | "collection-point"
+  | "recycling-center"
+  | "waste-bank"
+  | "processing-facility"
+  | "drop-point"
+  | "other";
+
+interface WasteLocationRecord {
+  id: string;
+  slug: string;
+  name: string;
+  description: string;
+  address: string;
+  areaId: string;
+  areaName: string;
+  type: LocationType;
+  status: LocationStatus;
+  coordinates: {
+    lat: number;
+    lng: number;
+  };
+  organizationIds: string[];
+  tags: string[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+const locations: WasteLocationRecord[] = [
+  {
+    id: "loc-demo-001",
+    slug: "titik-pengelolaan-mengwi",
+    name: "Titik Pengelolaan Sampah Mengwi",
+    description:
+      "Lokasi pengelolaan yang terhubung dengan aktivitas pemilahan dan pengumpulan material.",
+    address: "Mengwi, Kabupaten Badung, Bali",
+    areaId: "mengwi",
+    areaName: "Mengwi",
+    type: "collection-point",
+    status: "active",
+    coordinates: {
+      lat: -8.544,
+      lng: 115.171,
+    },
+    organizationIds: ["org-demo-001"],
+    tags: ["pengumpulan", "pemilahan"],
+    createdAt: "2026-09-01",
+    updatedAt: "2026-09-10",
+  },
+  {
+    id: "loc-demo-002",
+    slug: "hub-daur-ulang-kuta",
+    name: "Hub Daur Ulang Kuta",
+    description:
+      "Fasilitas yang menangani material yang dapat dipulihkan dan diproses kembali.",
+    address: "Kuta, Kabupaten Badung, Bali",
+    areaId: "kuta",
+    areaName: "Kuta",
+    type: "recycling-center",
+    status: "active",
+    coordinates: {
+      lat: -8.727,
+      lng: 115.171,
+    },
+    organizationIds: ["org-demo-003"],
+    tags: ["recycling", "material-recovery"],
+    createdAt: "2026-09-02",
+    updatedAt: "2026-09-08",
+  },
+  {
+    id: "loc-demo-003",
+    slug: "bank-sampah-kuta-utara",
+    name: "Bank Sampah Kuta Utara",
+    description:
+      "Titik berbasis masyarakat untuk penerimaan, pemilahan, dan pengelolaan material tertentu.",
+    address: "Kuta Utara, Kabupaten Badung, Bali",
+    areaId: "kuta-utara",
+    areaName: "Kuta Utara",
+    type: "waste-bank",
+    status: "active",
+    coordinates: {
+      lat: -8.66,
+      lng: 115.168,
+    },
+    organizationIds: ["org-demo-002"],
+    tags: ["bank-sampah", "komunitas"],
+    createdAt: "2026-09-03",
+    updatedAt: "2026-09-09",
+  },
+  {
+    id: "loc-demo-004",
+    slug: "fasilitas-pengolahan-abiansemal",
+    name: "Fasilitas Pengolahan Abiansemal",
+    description:
+      "Lokasi fasilitas pengolahan yang sedang dipersiapkan untuk informasi operasional.",
+    address: "Abiansemal, Kabupaten Badung, Bali",
+    areaId: "abiansemal",
+    areaName: "Abiansemal",
+    type: "processing-facility",
+    status: "inactive",
+    coordinates: {
+      lat: -8.55,
+      lng: 115.206,
+    },
+    organizationIds: ["org-demo-004"],
+    tags: ["pengolahan"],
+    createdAt: "2026-09-04",
+    updatedAt: "2026-09-07",
+  },
+  {
+    id: "loc-demo-005",
+    slug: "drop-point-mengwi",
+    name: "Drop Point Mengwi",
+    description:
+      "Titik penerimaan material dengan cakupan layanan yang terbatas.",
+    address: "Mengwi, Kabupaten Badung, Bali",
+    areaId: "mengwi",
+    areaName: "Mengwi",
+    type: "drop-point",
+    status: "active",
+    coordinates: {
+      lat: -8.536,
+      lng: 115.173,
+    },
+    organizationIds: [],
+    tags: ["drop-point"],
+    createdAt: "2026-09-05",
+    updatedAt: "2026-09-06",
+  },
+];
+
+const typeLabels: Record<LocationType, string> = {
+  "collection-point": "Titik pengumpulan",
+  "recycling-center": "Pusat daur ulang",
+  "waste-bank": "Bank sampah",
+  "processing-facility": "Fasilitas pengolahan",
+  "drop-point": "Drop point",
+  other: "Lainnya",
+};
+
+const statusLabels: Record<LocationStatus, string> = {
+  active: "Aktif",
+  inactive: "Tidak aktif",
+};
+
+const totalLocations = locations.length;
+const activeLocations = locations.filter(
+  (location) => location.status === "active",
+).length;
+const inactiveLocations = locations.filter(
+  (location) => location.status === "inactive",
+).length;
+const linkedLocations = locations.filter(
+  (location) => location.organizationIds.length > 0,
+).length;
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "CollectionPage",
+  name: "Lokasi — Admin BINSIGHT",
+  description:
+    "Administrasi lokasi pengelolaan persampahan BINSIGHT.",
+  url: "https://binsight.id/admin/locations",
+  isPartOf: {
+    "@type": "WebSite",
+    name: "BINSIGHT — Badung Waste Intelligence",
+    url: "https://binsight.id",
+  },
+};
+---
+
+<AdminLayout
+  title="Lokasi"
+  description="Kelola titik lokasi pengelolaan persampahan dalam ekosistem BINSIGHT."
+>
+  <script
+    type="application/ld+json"
+    is:inline
+    set:html={JSON.stringify(jsonLd)}
+  />
+
+  <main
+    class="locations-page"
+    data-locations-page
+  >
+    <header class="page-top">
+      <div class="page-top__main">
+        <div class="page-top__eyebrow">
+          <span class="page-top__eyebrow-icon">
+            <MapPin
+              size={15}
+              stroke-width={2}
+              aria-hidden="true"
+            />
+          </span>
+
+          <span>
+            LOCATION MANAGEMENT
+          </span>
+        </div>
+
+        <h1>
+          Lokasi
+        </h1>
+
+        <p>
+          Kelola titik pengumpulan, bank sampah, fasilitas pengolahan, dan
+          lokasi lain yang menjadi bagian dari peta ekosistem BINSIGHT.
+        </p>
+      </div>
+
+      <div class="page-top__actions">
+        <button
+          type="button"
+          class="button button--secondary"
+          data-refresh
+        >
+          <RefreshCw
+            size={16}
+            stroke-width={2}
+            aria-hidden="true"
+          />
+
+          <span>
+            Refresh
+          </span>
+        </button>
+
+        <a
+          href="/map"
+          class="button button--ghost"
+        >
+          <Eye
+            size={16}
+            stroke-width={2}
+            aria-hidden="true"
+          />
+
+          <span>
+            Lihat peta
+          </span>
+        </a>
+
+        <button
+          type="button"
+          class="button button--primary"
+          data-create
+        >
+          <Plus
+            size={17}
+            stroke-width={2}
+            aria-hidden="true"
+          />
+
+          <span>
+            Tambah lokasi
+          </span>
+        </button>
+      </div>
+    </header>
+
+    <section
+      class="summary-grid"
+      aria-label="Ringkasan lokasi"
+    >
+      <article class="summary-card">
+        <div class="summary-card__top">
+          <span class="summary-card__label">
+            Total lokasi
+          </span>
+
+          <span class="summary-card__icon summary-card__icon--green">
+            <MapPin
+              size={18}
+              stroke-width={1.9}
+              aria-hidden="true"
+            />
+          </span>
+        </div>
+
+        <strong
+          class="summary-card__value"
+          data-total-count
+        >
+          {totalLocations}
+        </strong>
+
+        <span class="summary-card__meta">
+          Record lokasi dalam workspace
+        </span>
+      </article>
+
+      <article class="summary-card">
+        <div class="summary-card__top">
+          <span class="summary-card__label">
+            Aktif
+          </span>
+
+          <span class="summary-card__icon summary-card__icon--active">
+            <CircleCheck
+              size={18}
+              stroke-width={1.9}
+              aria-hidden="true"
+            />
+          </span>
+        </div>
+
+        <strong
+          class="summary-card__value"
+          data-active-count
+        >
+          {activeLocations}
+        </strong>
+
+        <span class="summary-card__meta">
+          Lokasi yang aktif
+        </span>
+      </article>
+
+      <article class="summary-card">
+        <div class="summary-card__top">
+          <span class="summary-card__label">
+            Tidak aktif
+          </span>
+
+          <span class="summary-card__icon summary-card__icon--inactive">
+            <TriangleAlert
+              size={18}
+              stroke-width={1.9}
+              aria-hidden="true"
+            />
+          </span>
+        </div>
+
+        <strong
+          class="summary-card__value"
+          data-inactive-count
+        >
+          {inactiveLocations}
+        </strong>
+
+        <span class="summary-card__meta">
+          Perlu diperiksa kembali
+        </span>
+      </article>
+
+      <article class="summary-card">
+        <div class="summary-card__top">
+          <span class="summary-card__label">
+            Terhubung organisasi
+          </span>
+
+          <span class="summary-card__icon summary-card__icon--linked">
+            <Building2
+              size={18}
+              stroke-width={1.9}
+              aria-hidden="true"
+            />
+          </span>
+        </div>
+
+        <strong
+          class="summary-card__value"
+          data-linked-count
+        >
+          {linkedLocations}
+        </strong>
+
+        <span class="summary-card__meta">
+          Memiliki organisasi terkait
+        </span>
+      </article>
+    </section>
+
+    <section class="workspace-card">
+      <div class="toolbar">
+        <div class="toolbar__search">
+          <Search
+            size={17}
+            stroke-width={1.9}
+            aria-hidden="true"
+          />
+
+          <label
+            class="sr-only"
+            for="location-search"
+          >
+            Cari lokasi
+          </label>
+
+          <input
+            id="location-search"
+            type="search"
+            placeholder="Cari lokasi, wilayah, alamat, atau tag..."
+            autocomplete="off"
+            data-search
+          />
+
+          <button
+            type="button"
+            class="toolbar__clear"
+            aria-label="Hapus pencarian"
+            data-clear-search
+            hidden
+          >
+            <X
+              size={15}
+              stroke-width={2}
+              aria-hidden="true"
+            />
+          </button>
+        </div>
+
+        <div class="toolbar__filters">
+          <label class="filter-control">
+            <span class="sr-only">
+              Filter status lokasi
+            </span>
+
+            <select
+              aria-label="Filter status lokasi"
+              data-status-filter
+            >
+              <option value="all">
+                Semua status
+              </option>
+
+              <option value="active">
+                Aktif
+              </option>
+
+              <option value="inactive">
+                Tidak aktif
+              </option>
+            </select>
+          </label>
+
+          <label class="filter-control">
+            <span class="sr-only">
+              Filter tipe lokasi
+            </span>
+
+            <select
+              aria-label="Filter tipe lokasi"
+              data-type-filter
+            >
+              <option value="all">
+                Semua tipe
+              </option>
+
+              {
+                Object.entries(typeLabels).map(
+                  ([value, label]) => (
+                    <option value={value}>
+                      {label}
+                    </option>
+                  ),
+                )
+              }
+            </select>
+          </label>
+
+          <label class="filter-control">
+            <span class="sr-only">
+              Filter wilayah
+            </span>
+
+            <select
+              aria-label="Filter wilayah"
+              data-area-filter
+            >
+              <option value="all">
+                Semua wilayah
+              </option>
+
+              <option value="abiansemal">
+                Abiansemal
+              </option>
+
+              <option value="kuta">
+                Kuta
+              </option>
+
+              <option value="kuta-utara">
+                Kuta Utara
+              </option>
+
+              <option value="mengwi">
+                Mengwi
+              </option>
+            </select>
+          </label>
+
+          <button
+            type="button"
+            class="filter-button"
+            data-filter-toggle
+            aria-expanded="false"
+          >
+            <Filter
+              size={16}
+              stroke-width={1.9}
+              aria-hidden="true"
+            />
+
+            <span>
+              Filter
+            </span>
+          </button>
+        </div>
+      </div>
+
+      <div
+        class="filter-panel"
+        data-filter-panel
+        hidden
+      >
+        <div class="filter-panel__header">
+          <div>
+            <span class="filter-panel__eyebrow">
+              FILTER DATA
+            </span>
+
+            <h2>
+              Penyaringan lokasi
+            </h2>
+          </div>
+
+          <button
+            type="button"
+            class="filter-panel__close"
+            aria-label="Tutup filter"
+            data-filter-close
+          >
+            <X
+              size={16}
+              stroke-width={2}
+              aria-hidden="true"
+            />
+          </button>
+        </div>
+
+        <div class="filter-panel__body">
+          <div class="filter-info">
+            <ShieldCheck
+              size={17}
+              stroke-width={1.9}
+              aria-hidden="true"
+            />
+
+            <p>
+              Pastikan setiap lokasi memiliki nama, alamat, wilayah, status,
+              dan koordinat yang benar sebelum digunakan sebagai bagian dari
+              peta publik.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            class="filter-reset"
+            data-filter-reset
+          >
+            Reset semua filter
+          </button>
+        </div>
+      </div>
+
+      <div class="table-head">
+        <div>
+          <span class="table-head__eyebrow">
+            LOCATION DIRECTORY
+          </span>
+
+          <h2>
+            Daftar lokasi
+          </h2>
+        </div>
+
+        <span
+          class="result-count"
+          data-result-count
+        >
+          {totalLocations} lokasi
+        </span>
+      </div>
+
+      <div class="table-wrap">
+        <table class="locations-table">
+          <caption class="sr-only">
+            Daftar lokasi pengelolaan persampahan BINSIGHT
+          </caption>
+
+          <thead>
+            <tr>
+              <th scope="col">
+                Lokasi
+              </th>
+
+              <th scope="col">
+                Tipe
+              </th>
+
+              <th scope="col">
+                Wilayah
+              </th>
+
+              <th scope="col">
+                Status
+              </th>
+
+              <th scope="col">
+                Organisasi
+              </th>
+
+              <th scope="col">
+                Koordinat
+              </th>
+
+              <th scope="col">
+                Diperbarui
+              </th>
+
+              <th scope="col">
+                <span class="sr-only">
+                  Aksi
+                </span>
+              </th>
+            </tr>
+          </thead>
+
+          <tbody data-table-body>
+            {
+              locations.map((location) => (
+                <tr
+                  data-location-row
+                  data-id={location.id}
+                  data-name={location.name.toLowerCase()}
+                  data-area-id={location.areaId}
+                  data-area={location.areaName.toLowerCase()}
+                  data-address={location.address.toLowerCase()}
+                  data-tags={location.tags
+                    .join(" ")
+                    .toLowerCase()}
+                  data-status={location.status}
+                  data-type={location.type}
+                >
+                  <td>
+                    <div class="location-cell">
+                      <span class="location-cell__icon">
+                        <MapPin
+                          size={17}
+                          stroke-width={1.9}
+                          aria-hidden="true"
+                        />
+                      </span>
+
+                      <div class="location-cell__copy">
+                        <strong>
+                          {location.name}
+                        </strong>
+
+                        <span>
+                          {location.address}
+                        </span>
+                      </div>
+                    </div>
+                  </td>
+
+                  <td>
+                    <span class="type-label">
+                      {typeLabels[location.type]}
+                    </span>
+                  </td>
+
+                  <td>
+                    <span class="area-label">
+                      {location.areaName}
+                    </span>
+                  </td>
+
+                  <td>
+                    <span
+                      class:list={[
+                        "status-badge",
+                        `status-badge--${location.status}`,
+                      ]}
+                    >
+                      {
+                        location.status === "active" ? (
+                          <CircleCheck
+                            size={13}
+                            stroke-width={2}
+                            aria-hidden="true"
+                          />
+                        ) : (
+                          <TriangleAlert
+                            size={13}
+                            stroke-width={2}
+                            aria-hidden="true"
+                          />
+                        )
+                      }
+
+                      <span>
+                        {statusLabels[location.status]}
+                      </span>
+                    </span>
+                  </td>
+
+                  <td>
+                    <span class="organization-count">
+                      {location.organizationIds.length}
+                      {" "}
+                      organisasi
+                    </span>
+                  </td>
+
+                  <td>
+                    <span class="coordinate-label">
+                      {location.coordinates.lat.toFixed(4)},
+                      {" "}
+                      {location.coordinates.lng.toFixed(4)}
+                    </span>
+                  </td>
+
+                  <td>
+                    <span class="updated-label">
+                      {location.updatedAt}
+                    </span>
+                  </td>
+
+                  <td>
+                    <div class="row-actions">
+                      <button
+                        type="button"
+                        class="row-action"
+                        aria-label={`Lihat ${location.name}`}
+                        data-view
+                        data-record={location.id}
+                      >
+                        <Eye
+                          size={15}
+                          stroke-width={1.9}
+                          aria-hidden="true"
+                        />
+                      </button>
+
+                      <button
+                        type="button"
+                        class="row-action"
+                        aria-label={`Edit ${location.name}`}
+                        data-edit
+                        data-record={location.id}
+                      >
+                        <Pencil
+                          size={15}
+                          stroke-width={1.9}
+                          aria-hidden="true"
+                        />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            }
+          </tbody>
+        </table>
+
+        <div
+          class="empty-state"
+          data-empty-state
+          hidden
+        >
+          <span class="empty-state__icon">
+            <Search
+              size={23}
+              stroke-width={1.8}
+              aria-hidden="true"
+            />
+          </span>
+
+          <h3>
+            Tidak ada lokasi yang cocok
+          </h3>
+
+          <p>
+            Coba ubah kata pencarian atau filter yang digunakan.
+          </p>
+
+          <button
+            type="button"
+            class="button button--secondary"
+            data-empty-reset
+          >
+            Reset pencarian
+          </button>
+        </div>
+      </div>
+
+      <footer class="table-footer">
+        <span>
+          <strong data-footer-count>
+            {totalLocations}
+          </strong>
+          lokasi ditampilkan
+        </span>
+
+        <span>
+          Data admin
+        </span>
+      </footer>
+    </section>
+
+    <section class="map-banner">
+      <div class="map-banner__icon">
+        <MapPin
+          size={22}
+          stroke-width={1.9}
+          aria-hidden="true"
+        />
+      </div>
+
+      <div class="map-banner__content">
+        <span class="map-banner__eyebrow">
+          MAP GOVERNANCE
+        </span>
+
+        <h2>
+          Lokasi adalah fondasi peta BINSIGHT
+        </h2>
+
+        <p>
+          Pastikan koordinat, wilayah, alamat, dan keterhubungan organisasi
+          konsisten agar setiap titik pada peta publik memiliki konteks yang
+          jelas.
+        </p>
+      </div>
+
+      <a
+        href="/map"
+        class="map-banner__link"
+      >
+        Buka peta
+
+        <ArrowRight
+          size={16}
+          stroke-width={1.9}
+          aria-hidden="true"
+        />
+      </a>
+    </section>
+
+    <aside
+      class="location-drawer"
+      data-drawer
+      aria-hidden="true"
+      hidden
+      aria-labelledby="drawer-title"
+    >
+      <div class="drawer__header">
+        <div>
+          <span class="drawer__eyebrow">
+            LOCATION DETAIL
+          </span>
+
+          <h2 id="drawer-title">
+            Detail lokasi
+          </h2>
+        </div>
+
+        <button
+          type="button"
+          class="drawer__close"
+          aria-label="Tutup detail"
+          data-drawer-close
+        >
+          <X
+            size={18}
+            stroke-width={2}
+            aria-hidden="true"
+          />
+        </button>
+      </div>
+
+      <div class="drawer__body">
+        <div class="drawer-identity">
+          <span class="drawer-identity__icon">
+            <MapPin
+              size={22}
+              stroke-width={1.9}
+              aria-hidden="true"
+            />
+          </span>
+
+          <div>
+            <h3 data-drawer-name>
+              -
+            </h3>
+
+            <span data-drawer-type>
+              -
+            </span>
+          </div>
+        </div>
+
+        <div class="drawer-status-row">
+          <span
+            class="status-badge"
+            data-drawer-status
+          >
+            -
+          </span>
+        </div>
+
+        <div class="drawer-section">
+          <span class="drawer-section__label">
+            INFORMASI
+          </span>
+
+          <dl class="detail-list">
+            <div>
+              <dt>
+                Wilayah
+              </dt>
+
+              <dd data-drawer-area>
+                -
+              </dd>
+            </div>
+
+            <div>
+              <dt>
+                Alamat
+              </dt>
+
+              <dd data-drawer-address>
+                -
+              </dd>
+            </div>
+
+            <div>
+              <dt>
+                Koordinat
+              </dt>
+
+              <dd data-drawer-coordinates>
+                -
+              </dd>
+            </div>
+
+            <div>
+              <dt>
+                Organisasi
+              </dt>
+
+              <dd data-drawer-organization-count>
+                -
+              </dd>
+            </div>
+
+            <div>
+              <dt>
+                Tag
+              </dt>
+
+              <dd data-drawer-tags>
+                -
+              </dd>
+            </div>
+          </dl>
+        </div>
+
+        <div class="drawer-section">
+          <span class="drawer-section__label">
+            DESKRIPSI
+          </span>
+
+          <p
+            class="drawer-description"
+            data-drawer-description
+          >
+            -
+          </p>
+        </div>
+
+        <div
+          class="drawer-warning"
+          data-drawer-warning
+          hidden
+        >
+          <TriangleAlert
+            size={17}
+            stroke-width={1.9}
+            aria-hidden="true"
+          />
+
+          <p>
+            Lokasi ini berstatus tidak aktif. Periksa kembali informasi
+            operasional dan keterhubungannya sebelum diaktifkan.
+          </p>
+        </div>
+      </div>
+
+      <div class="drawer__footer">
+        <a
+          href="/map"
+          class="button button--secondary"
+          data-drawer-map
+        >
+          <MapPin
+            size={16}
+            stroke-width={1.9}
+            aria-hidden="true"
+          />
+
+          <span>
+            Buka peta
+          </span>
+        </a>
+
+        <div class="drawer__footer-right">
+          <button
+            type="button"
+            class="button button--secondary"
+            data-drawer-edit
+          >
+            <Pencil
+              size={16}
+              stroke-width={1.9}
+              aria-hidden="true"
+            />
+
+            <span>
+              Edit
+            </span>
+          </button>
+
+          <button
+            type="button"
+            class="button button--primary"
+            data-drawer-status-action
+          >
+            <Activity
+              size={16}
+              stroke-width={1.9}
+              aria-hidden="true"
+            />
+
+            <span>
+              Aktifkan
+            </span>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <div
+      class="drawer-backdrop"
+      data-drawer-backdrop
+      hidden
+    ></div>
+
+    <div
+      class="toast"
+      data-toast
+      hidden
+      role="status"
+      aria-live="polite"
+    >
+      <CircleCheck
+        size={17}
+        stroke-width={2}
+        aria-hidden="true"
+      />
+
+      <span data-toast-message>
+        Berhasil
+      </span>
+    </div>
+  </main>
+</AdminLayout>
+
+<style>
+  .locations-page {
+    position: relative;
+    min-height: 100%;
+    padding: 30px 30px 50px;
+    background:
+      radial-gradient(
+        circle at 95% 0%,
+        rgba(132, 204, 22, 0.065),
+        transparent 31rem
+      ),
+      var(--color-background);
+  }
+
+  .page-top {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 28px;
+  }
+
+  .page-top__eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--color-primary);
+    font-size: 0.62rem;
+    font-weight: 900;
+    letter-spacing: 0.12em;
+  }
+
+  .page-top__eyebrow-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 27px;
+    height: 27px;
+    border-radius: 8px;
+    background: var(--color-primary-soft);
+  }
+
+  .page-top h1 {
+    margin: 12px 0 0;
+    color: var(--color-text-strong);
+    font-size: clamp(1.7rem, 3vw, 2.4rem);
+    font-weight: 900;
+    letter-spacing: -0.03em;
+    line-height: 1.08;
+  }
+
+  .page-top__main > p {
+    max-width: 730px;
+    margin: 9px 0 0;
+    color: var(--color-text-muted);
+    font-size: 0.77rem;
+    line-height: 1.7;
+  }
+
+  .page-top__actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    min-height: 41px;
+    padding: 0 13px;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    font: inherit;
+    font-size: 0.68rem;
+    font-weight: 800;
+    text-decoration: none;
+    cursor: pointer;
+    white-space: nowrap;
+    transition:
+      transform 150ms ease,
+      background 150ms ease,
+      border-color 150ms ease,
+      box-shadow 150ms ease;
+  }
+
+  .button:hover {
+    transform: translateY(-1px);
+  }
+
+  .button:focus-visible,
+  .filter-button:focus-visible,
+  .row-action:focus-visible,
+  .drawer__close:focus-visible,
+  .filter-panel__close:focus-visible,
+  .filter-reset:focus-visible {
+    outline: 3px solid var(--color-primary-ring);
+    outline-offset: 2px;
+  }
+
+  .button--primary {
+    border-color: var(--color-primary);
+    background: var(--color-primary);
+    color: #ffffff;
+    box-shadow: var(--shadow-xs);
+  }
+
+  .button--primary:hover {
+    border-color: var(--color-primary-dark);
+    background: var(--color-primary-dark);
+  }
+
+  .button--secondary {
+    border-color: var(--color-border);
+    background: var(--color-surface);
+    color: var(--color-text-strong);
+  }
+
+  .button--secondary:hover {
+    border-color: var(--color-border-strong);
+    background: var(--color-surface-soft);
+  }
+
+  .button--ghost {
+    border-color: transparent;
+    background: transparent;
+    color: var(--color-text-muted);
+  }
+
+  .button--ghost:hover {
+    background: var(--color-surface);
+    color: var(--color-text-strong);
+  }
+
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+    margin-top: 28px;
+  }
+
+  .summary-card {
+    padding: 17px;
+    border: 1px solid var(--color-border);
+    border-radius: 16px;
+    background: var(--color-surface);
+    box-shadow: var(--shadow-xs);
+  }
+
+  .summary-card__top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .summary-card__label {
+    color: var(--color-text-muted);
+    font-size: 0.67rem;
+    font-weight: 750;
+  }
+
+  .summary-card__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 37px;
+    height: 37px;
+    border-radius: 10px;
+  }
+
+  .summary-card__icon--green,
+  .summary-card__icon--active {
+    background: var(--color-primary-soft);
+    color: var(--color-primary);
+  }
+
+  .summary-card__icon--inactive {
+    background: rgba(245, 158, 11, 0.1);
+    color: #d97706;
+  }
+
+  .summary-card__icon--linked {
+    background: rgba(37, 99, 235, 0.09);
+    color: var(--color-info);
+  }
+
+  .summary-card__value {
+    display: block;
+    margin-top: 15px;
+    color: var(--color-text-strong);
+    font-size: 1.55rem;
+    font-weight: 900;
+    line-height: 1;
+  }
+
+  .summary-card__meta {
+    display: block;
+    margin-top: 6px;
+    color: var(--color-text-faint);
+    font-size: 0.61rem;
+    line-height: 1.5;
+  }
+
+  .workspace-card {
+    margin-top: 20px;
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+    border-radius: 18px;
+    background: var(--color-surface);
+    box-shadow: var(--shadow-xs);
+  }
+
+  .toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 15px;
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-surface-soft);
+  }
+
+  .toolbar__search {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    flex: 1;
+    min-width: 0;
+    max-width: 500px;
+    min-height: 40px;
+    padding: 0 12px;
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    background: var(--color-surface);
+    color: var(--color-text-faint);
+  }
+
+  .toolbar__search:focus-within {
+    border-color: var(--color-primary);
+    box-shadow:
+      0 0 0 3px var(--color-primary-ring);
+  }
+
+  .toolbar__search input {
+    width: 100%;
+    min-width: 0;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: var(--color-text-strong);
+    font: inherit;
+    font-size: 0.69rem;
+  }
+
+  .toolbar__search input::placeholder {
+    color: var(--color-text-faint);
+  }
+
+  .toolbar__clear {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 25px;
+    height: 25px;
+    padding: 0;
+    border: 0;
+    border-radius: 7px;
+    background: transparent;
+    color: var(--color-text-muted);
+    cursor: pointer;
+  }
+
+  .toolbar__clear:hover {
+    background: var(--color-surface-soft);
+    color: var(--color-text-strong);
+  }
+
+  .toolbar__filters {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+
+  .filter-control select {
+    min-height: 40px;
+    max-width: 170px;
+    padding: 0 28px 0 11px;
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    background: var(--color-surface);
+    color: var(--color-text-strong);
+    font: inherit;
+    font-size: 0.66rem;
+    cursor: pointer;
+  }
+
+  .filter-control select:focus {
+    border-color: var(--color-primary);
+    outline: none;
+    box-shadow:
+      0 0 0 3px var(--color-primary-ring);
+  }
+
+  .filter-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    min-height: 40px;
+    padding: 0 11px;
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    background: var(--color-surface);
+    color: var(--color-text-muted);
+    font: inherit;
+    font-size: 0.67rem;
+    font-weight: 750;
+    cursor: pointer;
+  }
+
+  .filter-button:hover,
+  .filter-button[aria-expanded="true"] {
+    border-color: var(--color-primary);
+    background: var(--color-primary-soft);
+    color: var(--color-primary);
+  }
+
+  .filter-panel {
+    padding: 15px;
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-surface-soft);
+  }
+
+  .filter-panel__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 20px;
+  }
+
+  .filter-panel__eyebrow,
+  .table-head__eyebrow,
+  .map-banner__eyebrow,
+  .drawer__eyebrow,
+  .drawer-section__label {
+    display: block;
+    color: var(--color-primary);
+    font-size: 0.59rem;
+    font-weight: 900;
+    letter-spacing: 0.1em;
+  }
+
+  .filter-panel h2 {
+    margin: 4px 0 0;
+    color: var(--color-text-strong);
+    font-size: 0.86rem;
+    font-weight: 820;
+  }
+
+  .filter-panel__close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 31px;
+    height: 31px;
+    border: 1px solid var(--color-border);
+    border-radius: 9px;
+    background: var(--color-surface);
+    color: var(--color-text-muted);
+    cursor: pointer;
+  }
+
+  .filter-panel__body {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    margin-top: 12px;
+  }
+
+  .filter-info {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    color: var(--color-text-muted);
+  }
+
+  .filter-info svg {
+    flex: 0 0 auto;
+    margin-top: 2px;
+    color: var(--color-primary);
+  }
+
+  .filter-info p {
+    max-width: 780px;
+    margin: 0;
+    font-size: 0.65rem;
+    line-height: 1.6;
+  }
+
+  .filter-reset {
+    flex: 0 0 auto;
+    border: 0;
+    background: transparent;
+    color: var(--color-primary);
+    font: inherit;
+    font-size: 0.64rem;
+    font-weight: 800;
+    cursor: pointer;
+  }
+
+  .table-head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 18px;
+    padding: 18px 18px 15px;
+  }
+
+  .table-head h2 {
+    margin: 4px 0 0;
+    color: var(--color-text-strong);
+    font-size: 0.98rem;
+    font-weight: 850;
+  }
+
+  .result-count {
+    color: var(--color-text-faint);
+    font-size: 0.64rem;
+    font-weight: 700;
+  }
+
+  .table-wrap {
+    overflow-x: auto;
+    border-top: 1px solid var(--color-border);
+  }
+
+  .locations-table {
+    width: 100%;
+    min-width: 1120px;
+    border-collapse: collapse;
+    text-align: left;
+  }
+
+  .locations-table th {
+    padding: 11px 18px;
+    background: var(--color-surface-soft);
+    color: var(--color-text-faint);
+    font-size: 0.59rem;
+    font-weight: 850;
+    letter-spacing: 0.055em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .locations-table td {
+    padding: 13px 18px;
+    border-top: 1px solid var(--color-border);
+    vertical-align: middle;
+  }
+
+  .locations-table tbody tr {
+    transition: background 120ms ease;
+  }
+
+  .locations-table tbody tr:hover {
+    background: rgba(248, 250, 252, 0.9);
+  }
+
+  .locations-table tbody tr[data-hidden="true"] {
+    display: none;
+  }
+
+  .location-cell {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 310px;
+  }
+
+  .location-cell__icon {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    width: 37px;
+    height: 37px;
+    border-radius: 10px;
+    background: var(--color-primary-soft);
+    color: var(--color-primary);
+  }
+
+  .location-cell__copy {
+    min-width: 0;
+  }
+
+  .location-cell__copy strong,
+  .location-cell__copy span {
+    display: block;
+  }
+
+  .location-cell__copy strong {
+    max-width: 380px;
+    overflow: hidden;
+    color: var(--color-text-strong);
+    font-size: 0.7rem;
+    font-weight: 800;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .location-cell__copy span {
+    margin-top: 3px;
+    color: var(--color-text-faint);
+    font-size: 0.6rem;
+  }
+
+  .type-label,
+  .area-label,
+  .organization-count,
+  .coordinate-label,
+  .updated-label {
+    display: inline-block;
+    color: var(--color-text-muted);
+    font-size: 0.62rem;
+    white-space: nowrap;
+  }
+
+  .type-label {
+    font-weight: 700;
+  }
+
+  .organization-count {
+    font-weight: 750;
+  }
+
+  .coordinate-label {
+    font-variant-numeric: tabular-nums;
+  }
+
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    min-height: 25px;
+    padding: 0 8px;
+    border-radius: 999px;
+    font-size: 0.58rem;
+    font-weight: 800;
+    white-space: nowrap;
+  }
+
+  .status-badge--active {
+    background: var(--color-primary-soft);
+    color: var(--color-primary-dark);
+  }
+
+  .status-badge--inactive {
+    background: rgba(245, 158, 11, 0.1);
+    color: #b45309;
+  }
+
+  .row-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 4px;
+  }
+
+  .row-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--color-text-muted);
+    cursor: pointer;
+  }
+
+  .row-action:hover {
+    border-color: var(--color-border);
+    background: var(--color-surface-soft);
+    color: var(--color-primary);
+  }
+
+  .empty-state {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    min-height: 280px;
+    padding: 30px;
+    text-align: center;
+  }
+
+  .empty-state__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 54px;
+    height: 54px;
+    border-radius: 15px;
+    background: var(--color-surface-soft);
+    color: var(--color-text-faint);
+  }
+
+  .empty-state h3 {
+    margin: 13px 0 0;
+    color: var(--color-text-strong);
+    font-size: 0.9rem;
+    font-weight: 820;
+  }
+
+  .empty-state p {
+    max-width: 390px;
+    margin: 5px 0 16px;
+    color: var(--color-text-muted);
+    font-size: 0.67rem;
+    line-height: 1.6;
+  }
+
+  .table-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 18px;
+    border-top: 1px solid var(--color-border);
+    color: var(--color-text-faint);
+    font-size: 0.61rem;
+  }
+
+  .table-footer strong {
+    color: var(--color-text-strong);
+    font-weight: 850;
+  }
+
+  .map-banner {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-top: 18px;
+    padding: 18px;
+    border: 1px solid var(--color-primary-soft);
+    border-radius: 16px;
+    background:
+      linear-gradient(
+        135deg,
+        var(--color-primary-soft),
+        var(--color-surface)
+      );
+  }
+
+  .map-banner__icon {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    width: 45px;
+    height: 45px;
+    border-radius: 12px;
+    background: var(--color-surface);
+    color: var(--color-primary);
+  }
+
+  .map-banner__content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .map-banner__content h2 {
+    margin: 4px 0 0;
+    color: var(--color-text-strong);
+    font-size: 0.85rem;
+    font-weight: 820;
+  }
+
+  .map-banner__content p {
+    max-width: 860px;
+    margin: 4px 0 0;
+    color: var(--color-text-muted);
+    font-size: 0.64rem;
+    line-height: 1.6;
+  }
+
+  .map-banner__link {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 6px;
+    color: var(--color-primary);
+    font-size: 0.66rem;
+    font-weight: 800;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .map-banner__link:hover {
+    color: var(--color-primary-dark);
+  }
+
+  .drawer-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 80;
+    background: rgba(15, 23, 42, 0.28);
+    backdrop-filter: blur(2px);
+  }
+
+  .drawer-backdrop[hidden] {
+    display: none;
+  }
+
+  .location-drawer {
+    position: fixed;
+    top: 0;
+    right: 0;
+    z-index: 81;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    width: min(470px, 100%);
+    height: 100dvh;
+    border-left: 1px solid var(--color-border);
+    background: var(--color-surface);
+    box-shadow:
+      -18px 0 48px rgba(15, 23, 42, 0.13);
+    transform: translateX(100%);
+    transition: transform 180ms ease;
+  }
+
+  .location-drawer[hidden] {
+    display: grid;
+  }
+
+  .location-drawer[data-open="true"] {
+    transform: translateX(0);
+  }
+
+  .drawer__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 20px;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .drawer__header h2 {
+    margin: 5px 0 0;
+    color: var(--color-text-strong);
+    font-size: 1.05rem;
+    font-weight: 850;
+  }
+
+  .drawer__close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 35px;
+    height: 35px;
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    background: var(--color-surface);
+    color: var(--color-text-muted);
+    cursor: pointer;
+  }
+
+  .drawer__close:hover {
+    background: var(--color-surface-soft);
+    color: var(--color-text-strong);
+  }
+
+  .drawer__body {
+    overflow-y: auto;
+    padding: 20px;
+  }
+
+  .drawer-identity {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .drawer-identity__icon {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    width: 49px;
+    height: 49px;
+    border-radius: 14px;
+    background: var(--color-primary-soft);
+    color: var(--color-primary);
+  }
+
+  .drawer-identity h3 {
+    margin: 2px 0 0;
+    color: var(--color-text-strong);
+    font-size: 0.92rem;
+    font-weight: 850;
+    line-height: 1.4;
+  }
+
+  .drawer-identity div > span {
+    display: block;
+    margin-top: 3px;
+    color: var(--color-text-muted);
+    font-size: 0.64rem;
+  }
+
+  .drawer-status-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin-top: 15px;
+  }
+
+  .drawer-section {
+    margin-top: 25px;
+    padding-top: 19px;
+    border-top: 1px solid var(--color-border);
+  }
+
+  .detail-list {
+    display: grid;
+    gap: 0;
+    margin: 10px 0 0;
+  }
+
+  .detail-list > div {
+    display: grid;
+    grid-template-columns: 115px minmax(0, 1fr);
+    gap: 12px;
+    padding: 9px 0;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .detail-list > div:last-child {
+    border-bottom: 0;
+  }
+
+  .detail-list dt {
+    color: var(--color-text-faint);
+    font-size: 0.62rem;
+  }
+
+  .detail-list dd {
+    margin: 0;
+    color: var(--color-text-strong);
+    font-size: 0.65rem;
+    font-weight: 700;
+    line-height: 1.5;
+    word-break: break-word;
+  }
+
+  .drawer-description {
+    margin: 10px 0 0;
+    color: var(--color-text-muted);
+    font-size: 0.67rem;
+    line-height: 1.7;
+  }
+
+  .drawer-warning {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin-top: 20px;
+    padding: 12px;
+    border: 1px solid rgba(245, 158, 11, 0.22);
+    border-radius: 11px;
+    background: var(--color-warning-soft);
+    color: var(--color-warning-text);
+  }
+
+  .drawer-warning svg {
+    flex: 0 0 auto;
+    margin-top: 1px;
+  }
+
+  .drawer-warning p {
+    margin: 0;
+    font-size: 0.64rem;
+    line-height: 1.6;
+  }
+
+  .drawer__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 14px 20px;
+    border-top: 1px solid var(--color-border);
+    background: var(--color-surface);
+  }
+
+  .drawer__footer-right {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 7px;
+  }
+
+  .toast {
+    position: fixed;
+    right: 24px;
+    bottom: 24px;
+    z-index: 100;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    max-width: min(390px, calc(100vw - 30px));
+    padding: 11px 14px;
+    border: 1px solid var(--color-primary-soft);
+    border-radius: 11px;
+    background: var(--color-surface);
+    color: var(--color-text-strong);
+    box-shadow:
+      0 15px 35px rgba(15, 23, 42, 0.14);
+    font-size: 0.66rem;
+    font-weight: 750;
+  }
+
+  .toast[hidden] {
+    display: none;
+  }
+
+  .toast svg {
+    color: var(--color-primary);
+  }
+
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  @media (max-width: 1200px) {
+    .summary-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .page-top {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+
+    .page-top__actions {
+      justify-content: flex-start;
+    }
+
+    .toolbar {
+      align-items: stretch;
+      flex-direction: column;
+    }
+
+    .toolbar__search {
+      max-width: none;
+    }
+
+    .toolbar__filters {
+      justify-content: flex-start;
+    }
+  }
+
+  @media (max-width: 760px) {
+    .locations-page {
+      padding: 20px 16px 36px;
+    }
+
+    .toolbar__filters {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      width: 100%;
+    }
+
+    .filter-control select,
+    .filter-button {
+      width: 100%;
+      max-width: none;
+    }
+
+    .filter-button {
+      grid-column: span 2;
+    }
+
+    .filter-panel__body {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+
+    .map-banner {
+      align-items: flex-start;
+      flex-wrap: wrap;
+    }
+
+    .map-banner__link {
+      width: 100%;
+      padding-left: 59px;
+    }
+  }
+
+  @media (max-width: 540px) {
+    .summary-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .page-top__actions {
+      width: 100%;
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .page-top__actions .button {
+      width: 100%;
+    }
+
+    .toolbar__filters {
+      grid-template-columns: 1fr;
+    }
+
+    .filter-button {
+      grid-column: auto;
+    }
+
+    .table-head {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+
+    .drawer__footer {
+      align-items: stretch;
+      flex-direction: column;
+    }
+
+    .drawer__footer-right {
+      width: 100%;
+    }
+
+    .drawer__footer-right .button,
+    .drawer__footer > .button {
+      flex: 1;
+    }
+
+    .toast {
+      right: 15px;
+      bottom: 15px;
+    }
+  }
+</style>
+
+<script>
+// @ts-nocheck
+
+  const locations = [
+    {
+      id: "loc-demo-001",
+      slug: "titik-pengelolaan-mengwi",
+      name: "Titik Pengelolaan Sampah Mengwi",
+      description:
+        "Lokasi pengelolaan yang terhubung dengan aktivitas pemilahan dan pengumpulan material.",
+      address: "Mengwi, Kabupaten Badung, Bali",
+      areaId: "mengwi",
+      areaName: "Mengwi",
+      type: "collection-point",
+      typeLabel: "Titik pengumpulan",
+      status: "active",
+      statusLabel: "Aktif",
+      coordinates: {
+        lat: -8.544,
+        lng: 115.171,
+      },
+      organizationIds: ["org-demo-001"],
+      tags: ["pengumpulan", "pemilahan"],
+      createdAt: "2026-09-01",
+      updatedAt: "2026-09-10",
+    },
+    {
+      id: "loc-demo-002",
+      slug: "hub-daur-ulang-kuta",
+      name: "Hub Daur Ulang Kuta",
+      description:
+        "Fasilitas yang menangani material yang dapat dipulihkan dan diproses kembali.",
+      address: "Kuta, Kabupaten Badung, Bali",
+      areaId: "kuta",
+      areaName: "Kuta",
+      type: "recycling-center",
+      typeLabel: "Pusat daur ulang",
+      status: "active",
+      statusLabel: "Aktif",
+      coordinates: {
+        lat: -8.727,
+        lng: 115.171,
+      },
+      organizationIds: ["org-demo-003"],
+      tags: ["recycling", "material-recovery"],
+      createdAt: "2026-09-02",
+      updatedAt: "2026-09-08",
+    },
+    {
+      id: "loc-demo-003",
+      slug: "bank-sampah-kuta-utara",
+      name: "Bank Sampah Kuta Utara",
+      description:
+        "Titik berbasis masyarakat untuk penerimaan, pemilahan, dan pengelolaan material tertentu.",
+      address: "Kuta Utara, Kabupaten Badung, Bali",
+      areaId: "kuta-utara",
+      areaName: "Kuta Utara",
+      type: "waste-bank",
+      typeLabel: "Bank sampah",
+      status: "active",
+      statusLabel: "Aktif",
+      coordinates: {
+        lat: -8.66,
+        lng: 115.168,
+      },
+      organizationIds: ["org-demo-002"],
+      tags: ["bank-sampah", "komunitas"],
+      createdAt: "2026-09-03",
+      updatedAt: "2026-09-09",
+    },
+    {
+      id: "loc-demo-004",
+      slug: "fasilitas-pengolahan-abiansemal",
+      name: "Fasilitas Pengolahan Abiansemal",
+      description:
+        "Lokasi fasilitas pengolahan yang sedang dipersiapkan untuk informasi operasional.",
+      address: "Abiansemal, Kabupaten Badung, Bali",
+      areaId: "abiansemal",
+      areaName: "Abiansemal",
+      type: "processing-facility",
+      typeLabel: "Fasilitas pengolahan",
+      status: "inactive",
+      statusLabel: "Tidak aktif",
+      coordinates: {
+        lat: -8.55,
+        lng: 115.206,
+      },
+      organizationIds: ["org-demo-004"],
+      tags: ["pengolahan"],
+      createdAt: "2026-09-04",
+      updatedAt: "2026-09-07",
+    },
+    {
+      id: "loc-demo-005",
+      slug: "drop-point-mengwi",
+      name: "Drop Point Mengwi",
+      description:
+        "Titik penerimaan material dengan cakupan layanan yang terbatas.",
+      address: "Mengwi, Kabupaten Badung, Bali",
+      areaId: "mengwi",
+      areaName: "Mengwi",
+      type: "drop-point",
+      typeLabel: "Drop point",
+      status: "active",
+      statusLabel: "Aktif",
+      coordinates: {
+        lat: -8.536,
+        lng: 115.173,
+      },
+      organizationIds: [],
+      tags: ["drop-point"],
+      createdAt: "2026-09-05",
+      updatedAt: "2026-09-06",
+    },
+  ];
+
+  const page =
+    document.querySelector(
+      "[data-locations-page]",
+    );
+
+  if (!(page instanceof HTMLElement)) {
+    throw new Error(
+      "BINSIGHT locations page root not found.",
+    );
+  }
+
+  const searchInput =
+    page.querySelector(
+      "[data-search]",
+    );
+
+  const clearSearchButton =
+    page.querySelector(
+      "[data-clear-search]",
+    );
+
+  const statusFilter =
+    page.querySelector(
+      "[data-status-filter]",
+    );
+
+  const typeFilter =
+    page.querySelector(
+      "[data-type-filter]",
+    );
+
+  const areaFilter =
+    page.querySelector(
+      "[data-area-filter]",
+    );
+
+  const filterToggle =
+    page.querySelector(
+      "[data-filter-toggle]",
+    );
+
+  const filterPanel =
+    page.querySelector(
+      "[data-filter-panel]",
+    );
+
+  const filterClose =
+    page.querySelector(
+      "[data-filter-close]",
+    );
+
+  const filterReset =
+    page.querySelector(
+      "[data-filter-reset]",
+    );
+
+  const emptyReset =
+    page.querySelector(
+      "[data-empty-reset]",
+    );
+
+  const rows =
+    Array.from(
+      page.querySelectorAll(
+        "[data-location-row]",
+      ),
+    );
+
+  const resultCount =
+    page.querySelector(
+      "[data-result-count]",
+    );
+
+  const footerCount =
+    page.querySelector(
+      "[data-footer-count]",
+    );
+
+  const emptyState =
+    page.querySelector(
+      "[data-empty-state]",
+    );
+
+  const totalCount =
+    page.querySelector(
+      "[data-total-count]",
+    );
+
+  const activeCount =
+    page.querySelector(
+      "[data-active-count]",
+    );
+
+  const inactiveCount =
+    page.querySelector(
+      "[data-inactive-count]",
+    );
+
+  const linkedCount =
+    page.querySelector(
+      "[data-linked-count]",
+    );
+
+  const drawer =
+    page.querySelector(
+      "[data-drawer]",
+    );
+
+  const drawerBackdrop =
+    page.querySelector(
+      "[data-drawer-backdrop]",
+    );
+
+  const drawerClose =
+    page.querySelector(
+      "[data-drawer-close]",
+    );
+
+  const drawerName =
+    page.querySelector(
+      "[data-drawer-name]",
+    );
+
+  const drawerType =
+    page.querySelector(
+      "[data-drawer-type]",
+    );
+
+  const drawerStatus =
+    page.querySelector(
+      "[data-drawer-status]",
+    );
+
+  const drawerArea =
+    page.querySelector(
+      "[data-drawer-area]",
+    );
+
+  const drawerAddress =
+    page.querySelector(
+      "[data-drawer-address]",
+    );
+
+  const drawerCoordinates =
+    page.querySelector(
+      "[data-drawer-coordinates]",
+    );
+
+  const drawerOrganizationCount =
+    page.querySelector(
+      "[data-drawer-organization-count]",
+    );
+
+  const drawerTags =
+    page.querySelector(
+      "[data-drawer-tags]",
+    );
+
+  const drawerDescription =
+    page.querySelector(
+      "[data-drawer-description]",
+    );
+
+  const drawerWarning =
+    page.querySelector(
+      "[data-drawer-warning]",
+    );
+
+  const drawerEdit =
+    page.querySelector(
+      "[data-drawer-edit]",
+    );
+
+  const drawerStatusAction =
+    page.querySelector(
+      "[data-drawer-status-action]",
+    );
+
+  const drawerMap =
+    page.querySelector(
+      "[data-drawer-map]",
+    );
+
+  const toast =
+    page.querySelector(
+      "[data-toast]",
+    );
+
+  const toastMessage =
+    page.querySelector(
+      "[data-toast-message]",
+    );
+
+  let selectedLocationId =
+    null;
+
+  let toastTimer = null;
+
+  function getLocation(
+    id,
+  ) {
+    return locations.find(
+      (location) =>
+        location.id === id,
+    );
+  }
+
+  function setSummaryValues() {
+    const total =
+      locations.length;
+
+    const active =
+      locations.filter(
+        (location) =>
+          location.status === "active",
+      ).length;
+
+    const inactive =
+      locations.filter(
+        (location) =>
+          location.status === "inactive",
+      ).length;
+
+    const linked =
+      locations.filter(
+        (location) =>
+          location.organizationIds.length > 0,
+      ).length;
+
+    if (
+      totalCount instanceof HTMLElement
+    ) {
+      totalCount.textContent =
+        String(total);
+    }
+
+    if (
+      activeCount instanceof HTMLElement
+    ) {
+      activeCount.textContent =
+        String(active);
+    }
+
+    if (
+      inactiveCount instanceof HTMLElement
+    ) {
+      inactiveCount.textContent =
+        String(inactive);
+    }
+
+    if (
+      linkedCount instanceof HTMLElement
+    ) {
+      linkedCount.textContent =
+        String(linked);
+    }
+  }
+
+  function getVisibleRows() {
+    const query =
+      searchInput instanceof
+      HTMLInputElement
+        ? searchInput.value
+            .trim()
+            .toLowerCase()
+        : "";
+
+    const status =
+      statusFilter instanceof
+      HTMLSelectElement
+        ? statusFilter.value
+        : "all";
+
+    const type =
+      typeFilter instanceof
+      HTMLSelectElement
+        ? typeFilter.value
+        : "all";
+
+    const area =
+      areaFilter instanceof
+      HTMLSelectElement
+        ? areaFilter.value
+        : "all";
+
+    return rows.filter(
+      (row) => {
+        const name =
+          row.getAttribute(
+            "data-name",
+          ) ?? "";
+
+        const rowArea =
+          row.getAttribute(
+            "data-area",
+          ) ?? "";
+
+        const address =
+          row.getAttribute(
+            "data-address",
+          ) ?? "";
+
+        const tags =
+          row.getAttribute(
+            "data-tags",
+          ) ?? "";
+
+        const rowStatus =
+          row.getAttribute(
+            "data-status",
+          ) ?? "";
+
+        const rowType =
+          row.getAttribute(
+            "data-type",
+          ) ?? "";
+
+        const rowAreaId =
+          row.getAttribute(
+            "data-area-id",
+          ) ?? "";
+
+        const matchesSearch =
+          query === "" ||
+          name.includes(query) ||
+          rowArea.includes(query) ||
+          address.includes(query) ||
+          tags.includes(query);
+
+        const matchesStatus =
+          status === "all" ||
+          rowStatus === status;
+
+        const matchesType =
+          type === "all" ||
+          rowType === type;
+
+        const matchesArea =
+          area === "all" ||
+          rowAreaId === area;
+
+        return (
+          matchesSearch &&
+          matchesStatus &&
+          matchesType &&
+          matchesArea
+        );
+      },
+    );
+  }
+
+  function applyFilters() {
+    const visibleRows =
+      getVisibleRows();
+
+    rows.forEach(
+      (row) => {
+        row.setAttribute(
+          "data-hidden",
+          visibleRows.includes(row)
+            ? "false"
+            : "true",
+        );
+      },
+    );
+
+    const count =
+      visibleRows.length;
+
+    if (
+      resultCount instanceof HTMLElement
+    ) {
+      resultCount.textContent =
+        `${count} lokasi`;
+    }
+
+    if (
+      footerCount instanceof HTMLElement
+    ) {
+      footerCount.textContent =
+        String(count);
+    }
+
+    if (
+      emptyState instanceof HTMLElement
+    ) {
+      emptyState.hidden =
+        count !== 0;
+    }
+
+    if (
+      clearSearchButton instanceof
+      HTMLButtonElement
+    ) {
+      const hasSearch =
+        searchInput instanceof
+        HTMLInputElement &&
+        searchInput.value.length > 0;
+
+      clearSearchButton.hidden =
+        !hasSearch;
+    }
+  }
+
+  function resetFilters() {
+    if (
+      searchInput instanceof HTMLInputElement
+    ) {
+      searchInput.value = "";
+    }
+
+    if (
+      statusFilter instanceof HTMLSelectElement
+    ) {
+      statusFilter.value = "all";
+    }
+
+    if (
+      typeFilter instanceof HTMLSelectElement
+    ) {
+      typeFilter.value = "all";
+    }
+
+    if (
+      areaFilter instanceof HTMLSelectElement
+    ) {
+      areaFilter.value = "all";
+    }
+
+    applyFilters();
+  }
+
+  function setDrawerStatus(
+    location,
+  ) {
+    if (
+      !(drawerStatus instanceof HTMLElement)
+    ) {
+      return;
+    }
+
+    drawerStatus.className =
+      `status-badge status-badge--${location.status}`;
+
+    if (
+      location.status === "active"
+    ) {
+      drawerStatus.innerHTML = `
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="m5 12 4 4L19 6"/>
+        </svg>
+        <span>Aktif</span>
+      `;
+    } else {
+      drawerStatus.innerHTML = `
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="m10.3 2.6-8.1 14A2 2 0 0 0 4 19.6h16a2 2 0 0 0 1.7-3l-8.1-14a2 2 0 0 0-3.3 0Z"/>
+          <path d="M12 9v4"/>
+          <path d="M12 17h.01"/>
+        </svg>
+        <span>Tidak aktif</span>
+      `;
+    }
+  }
+
+  function updateDrawer(
+    location,
+  ) {
+    if (!location) {
+      return;
+    }
+
+    if (
+      drawerName instanceof HTMLElement
+    ) {
+      drawerName.textContent =
+        location.name;
+    }
+
+    if (
+      drawerType instanceof HTMLElement
+    ) {
+      drawerType.textContent =
+        location.typeLabel;
+    }
+
+    setDrawerStatus(
+      location,
+    );
+
+    if (
+      drawerArea instanceof HTMLElement
+    ) {
+      drawerArea.textContent =
+        location.areaName;
+    }
+
+    if (
+      drawerAddress instanceof HTMLElement
+    ) {
+      drawerAddress.textContent =
+        location.address;
+    }
+
+    if (
+      drawerCoordinates instanceof
+      HTMLElement
+    ) {
+      drawerCoordinates.textContent =
+        `${location.coordinates.lat.toFixed(6)}, ${location.coordinates.lng.toFixed(6)}`;
+    }
+
+    if (
+      drawerOrganizationCount instanceof
+      HTMLElement
+    ) {
+      drawerOrganizationCount.textContent =
+        `${location.organizationIds.length} organisasi`;
+    }
+
+    if (
+      drawerTags instanceof HTMLElement
+    ) {
+      drawerTags.textContent =
+        location.tags.length > 0
+          ? location.tags.join(", ")
+          : "Tidak ada tag";
+    }
+
+    if (
+      drawerDescription instanceof
+      HTMLElement
+    ) {
+      drawerDescription.textContent =
+        location.description;
+    }
+
+    if (
+      drawerWarning instanceof HTMLElement
+    ) {
+      drawerWarning.hidden =
+        location.status === "active";
+    }
+
+    if (
+      drawerStatusAction instanceof
+      HTMLButtonElement
+    ) {
+      drawerStatusAction.innerHTML =
+        location.status === "active"
+          ? `
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M6 6h12v12H6z"/>
+            </svg>
+            <span>Nonaktifkan</span>
+          `
+          : `
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="m5 12 4 4L19 6"/>
+            </svg>
+            <span>Aktifkan</span>
+          `;
+    }
+
+    if (
+      drawerMap instanceof HTMLAnchorElement
+    ) {
+      drawerMap.href =
+        `/map#${location.slug}`;
+    }
+  }
+
+  function openDrawer(
+    locationId,
+  ) {
+    const location =
+      getLocation(
+        locationId,
+      );
+
+    if (
+      !location ||
+      !(drawer instanceof HTMLElement) ||
+      !(drawerBackdrop instanceof HTMLElement)
+    ) {
+      return;
+    }
+
+    selectedLocationId =
+      locationId;
+
+    updateDrawer(
+      location,
+    );
+
+    drawer.hidden = false;
+    drawerBackdrop.hidden =
+      false;
+
+    window.requestAnimationFrame(
+      () => {
+        drawer.setAttribute(
+          "data-open",
+          "true",
+        );
+
+        drawer.setAttribute(
+          "aria-hidden",
+          "false",
+        );
+      },
+    );
+
+    document.documentElement.style.overflow =
+      "hidden";
+  }
+
+  function closeDrawer() {
+    if (
+      !(drawer instanceof HTMLElement) ||
+      !(drawerBackdrop instanceof HTMLElement)
+    ) {
+      return;
+    }
+
+    drawer.setAttribute(
+      "data-open",
+      "false",
+    );
+
+    drawer.setAttribute(
+      "aria-hidden",
+      "true",
+    );
+
+    window.setTimeout(
+      () => {
+        drawer.hidden = true;
+        drawerBackdrop.hidden =
+          true;
+      },
+      190,
+    );
+
+    document.documentElement.style.overflow =
+      "";
+
+    selectedLocationId =
+      null;
+  }
+
+  function showToast(
+    message,
+  ) {
+    if (
+      !(toast instanceof HTMLElement) ||
+      !(toastMessage instanceof HTMLElement)
+    ) {
+      return;
+    }
+
+    toastMessage.textContent =
+      message;
+
+    toast.hidden = false;
+
+    if (
+      toastTimer !== null
+    ) {
+      window.clearTimeout(
+        toastTimer,
+      );
+    }
+
+    toastTimer =
+      window.setTimeout(
+        () => {
+          toast.hidden = true;
+          toastTimer = null;
+        },
+        3000,
+      );
+  }
+
+  function refreshLocations() {
+    applyFilters();
+    setSummaryValues();
+
+    showToast(
+      "Data lokasi diperbarui.",
+    );
+  }
+
+  function createLocation() {
+    window.dispatchEvent(
+      new CustomEvent(
+        "binsight:admin-location-create",
+      ),
+    );
+
+    showToast(
+      "Form lokasi baru dipersiapkan.",
+    );
+  }
+
+  function editLocation(
+    locationId,
+  ) {
+    const location =
+      getLocation(
+        locationId,
+      );
+
+    if (!location) {
+      return;
+    }
+
+    window.dispatchEvent(
+      new CustomEvent(
+        "binsight:admin-location-edit",
+        {
+          detail: location,
+        },
+      ),
+    );
+
+    showToast(
+      `Mode edit untuk ${location.name} dipersiapkan.`,
+    );
+  }
+
+  function toggleSelectedLocationStatus() {
+    if (!selectedLocationId) {
+      return;
+    }
+
+    const location =
+      getLocation(
+        selectedLocationId,
+      );
+
+    if (!location) {
+      return;
+    }
+
+    location.status =
+      location.status === "active"
+        ? "inactive"
+        : "active";
+
+    location.statusLabel =
+      location.status === "active"
+        ? "Aktif"
+        : "Tidak aktif";
+
+    location.updatedAt =
+      "10 Sep 2026";
+
+    updateDrawer(
+      location,
+    );
+
+    setSummaryValues();
+    applyFilters();
+
+    window.dispatchEvent(
+      new CustomEvent(
+        "binsight:admin-location-status-change",
+        {
+          detail: {
+            ...location,
+          },
+        },
+      ),
+    );
+
+    showToast(
+      `${location.name} sekarang ${location.statusLabel.toLowerCase()}.`,
+    );
+  }
+
+  searchInput?.addEventListener(
+    "input",
+    applyFilters,
+  );
+
+  statusFilter?.addEventListener(
+    "change",
+    applyFilters,
+  );
+
+  typeFilter?.addEventListener(
+    "change",
+    applyFilters,
+  );
+
+  areaFilter?.addEventListener(
+    "change",
+    applyFilters,
+  );
+
+  clearSearchButton?.addEventListener(
+    "click",
+    () => {
+      if (
+        searchInput instanceof HTMLInputElement
+      ) {
+        searchInput.value = "";
+        searchInput.focus();
+      }
+
+      applyFilters();
+    },
+  );
+
+  filterReset?.addEventListener(
+    "click",
+    resetFilters,
+  );
+
+  emptyReset?.addEventListener(
+    "click",
+    resetFilters,
+  );
+
+  filterToggle?.addEventListener(
+    "click",
+    () => {
+      if (
+        !(filterPanel instanceof HTMLElement) ||
+        !(filterToggle instanceof HTMLButtonElement)
+      ) {
+        return;
+      }
+
+      const isOpen =
+        filterToggle.getAttribute(
+          "aria-expanded",
+        ) === "true";
+
+      filterToggle.setAttribute(
+        "aria-expanded",
+        isOpen
+          ? "false"
+          : "true",
+      );
+
+      filterPanel.hidden =
+        isOpen;
+    },
+  );
+
+  filterClose?.addEventListener(
+    "click",
+    () => {
+      if (
+        filterPanel instanceof HTMLElement &&
+        filterToggle instanceof HTMLButtonElement
+      ) {
+        filterPanel.hidden = true;
+
+        filterToggle.setAttribute(
+          "aria-expanded",
+          "false",
+        );
+      }
+    },
+  );
+
+  page
+    .querySelectorAll(
+      "[data-view]",
+    )
+    .forEach(
+      (button) => {
+        button.addEventListener(
+          "click",
+          () => {
+            const id =
+              button.getAttribute(
+                "data-record",
+              );
+
+            if (id) {
+              openDrawer(id);
+            }
+          },
+        );
+      },
+    );
+
+  page
+    .querySelectorAll(
+      "[data-edit]",
+    )
+    .forEach(
+      (button) => {
+        button.addEventListener(
+          "click",
+          () => {
+            const id =
+              button.getAttribute(
+                "data-record",
+              );
+
+            if (id) {
+              editLocation(id);
+            }
+          },
+        );
+      },
+    );
+
+  drawerClose?.addEventListener(
+    "click",
+    closeDrawer,
+  );
+
+  drawerBackdrop?.addEventListener(
+    "click",
+    closeDrawer,
+  );
+
+  drawerEdit?.addEventListener(
+    "click",
+    () => {
+      if (selectedLocationId) {
+        editLocation(
+          selectedLocationId,
+        );
+      }
+    },
+  );
+
+  drawerStatusAction?.addEventListener(
+    "click",
+    toggleSelectedLocationStatus,
+  );
+
+  page
+    .querySelector(
+      "[data-refresh]",
+    )
+    ?.addEventListener(
+      "click",
+      refreshLocations,
+    );
+
+  page
+    .querySelector(
+      "[data-create]",
+    )
+    ?.addEventListener(
+      "click",
+      createLocation,
+    );
+
+  document.addEventListener(
+    "keydown",
+    (event) => {
+      if (
+        event.key === "Escape" &&
+        drawer instanceof HTMLElement &&
+        drawer.getAttribute(
+          "data-open",
+        ) === "true"
+      ) {
+        closeDrawer();
+      }
+    },
+  );
+
+  setSummaryValues();
+  applyFilters();
+</script>

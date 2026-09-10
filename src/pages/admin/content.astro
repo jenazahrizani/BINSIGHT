@@ -1,0 +1,3828 @@
+---
+import {
+  CircleCheck,
+  Clock3,
+  Eye,
+  FileText,
+  FolderOpen,
+  Globe,
+  Image,
+  Link2,
+  Pencil,
+  Plus,
+  RefreshCw,
+  Search,
+  ShieldCheck,
+  Trash2,
+  X,
+} from "@lucide/astro";
+
+import AdminLayout from "../../layouts/AdminLayout.astro";
+
+type ContentStatus =
+  | "published"
+  | "draft"
+  | "archived";
+
+type ContentType =
+  | "page"
+  | "article"
+  | "guide"
+  | "media";
+
+interface ContentRecord {
+  id: string;
+  title: string;
+  description: string;
+  type: ContentType;
+  typeLabel: string;
+  status: ContentStatus;
+  statusLabel: string;
+  author: string;
+  updatedAt: string;
+  createdAt: string;
+  visibility: "public" | "private";
+}
+
+const contents: ContentRecord[] = [
+  {
+    id: "content-demo-001",
+    title: "Tentang BINSIGHT",
+    description:
+      "Informasi mengenai tujuan, fungsi, dan peran BINSIGHT dalam ekosistem persampahan Badung.",
+    type: "page",
+    typeLabel: "Halaman",
+    status: "published",
+    statusLabel: "Terbit",
+    author: "Admin BINSIGHT",
+    updatedAt: "10 Sep 2026, 09:40",
+    createdAt: "1 Sep 2026",
+    visibility: "public",
+  },
+  {
+    id: "content-demo-002",
+    title: "Panduan Pemilahan Sampah Rumah Tangga",
+    description:
+      "Panduan dasar untuk memahami dan memilah sampah sebelum diserahkan kepada pengelola.",
+    type: "guide",
+    typeLabel: "Panduan",
+    status: "published",
+    statusLabel: "Terbit",
+    author: "Editor Konten",
+    updatedAt: "9 Sep 2026, 15:25",
+    createdAt: "3 Sep 2026",
+    visibility: "public",
+  },
+  {
+    id: "content-demo-003",
+    title: "Mengenal Sampah Elektronik",
+    description:
+      "Konten edukasi tentang perangkat elektronik dan pentingnya penanganan khusus.",
+    type: "article",
+    typeLabel: "Artikel",
+    status: "draft",
+    statusLabel: "Draft",
+    author: "Editor Konten",
+    updatedAt: "9 Sep 2026, 12:10",
+    createdAt: "7 Sep 2026",
+    visibility: "public",
+  },
+  {
+    id: "content-demo-004",
+    title: "Peta dan Data Persampahan",
+    description:
+      "Penjelasan mengenai cara menggunakan peta dan membaca data ekosistem BINSIGHT.",
+    type: "article",
+    typeLabel: "Artikel",
+    status: "published",
+    statusLabel: "Terbit",
+    author: "Admin BINSIGHT",
+    updatedAt: "8 Sep 2026, 17:05",
+    createdAt: "2 Sep 2026",
+    visibility: "public",
+  },
+  {
+    id: "content-demo-005",
+    title: "Materi Program Lama",
+    description:
+      "Konten lama yang tidak lagi menjadi bagian dari informasi publik utama.",
+    type: "page",
+    typeLabel: "Halaman",
+    status: "archived",
+    statusLabel: "Arsip",
+    author: "Admin BINSIGHT",
+    updatedAt: "5 Sep 2026, 10:35",
+    createdAt: "1 Sep 2026",
+    visibility: "private",
+  },
+  {
+    id: "content-demo-006",
+    title: "Asset Foto Ekosistem Badung",
+    description:
+      "Kumpulan media pendukung untuk kebutuhan konten dan visualisasi platform.",
+    type: "media",
+    typeLabel: "Media",
+    status: "published",
+    statusLabel: "Terbit",
+    author: "Admin BINSIGHT",
+    updatedAt: "4 Sep 2026, 14:22",
+    createdAt: "2 Sep 2026",
+    visibility: "private",
+  },
+];
+
+const statusLabels: Record<
+  ContentStatus,
+  string
+> = {
+  published: "Terbit",
+  draft: "Draft",
+  archived: "Arsip",
+};
+
+const typeLabels: Record<
+  ContentType,
+  string
+> = {
+  page: "Halaman",
+  article: "Artikel",
+  guide: "Panduan",
+  media: "Media",
+};
+
+const totalContent = contents.length;
+
+const publishedCount = contents.filter(
+  (item) =>
+    item.status === "published",
+).length;
+
+const draftCount = contents.filter(
+  (item) =>
+    item.status === "draft",
+).length;
+
+const archivedCount = contents.filter(
+  (item) =>
+    item.status === "archived",
+).length;
+
+const publicCount = contents.filter(
+  (item) =>
+    item.visibility === "public",
+).length;
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "CollectionPage",
+  name: "Konten — Admin BINSIGHT",
+  description:
+    "Administrasi konten BINSIGHT untuk halaman, artikel, panduan, dan media.",
+  url: "https://binsight.id/admin/content",
+  isPartOf: {
+    "@type": "WebSite",
+    name: "BINSIGHT — Badung Waste Intelligence",
+    url: "https://binsight.id",
+  },
+};
+---
+
+<AdminLayout
+  title="Konten"
+  description="Kelola halaman, artikel, panduan, dan media BINSIGHT."
+>
+  <script
+    type="application/ld+json"
+    is:inline
+    set:html={JSON.stringify(jsonLd)}
+  />
+
+  <main
+    class="content-page"
+    data-content-page
+  >
+    <header class="page-top">
+      <div class="page-top__main">
+        <div class="page-top__eyebrow">
+          <span class="page-top__eyebrow-icon">
+            <FolderOpen
+              size={15}
+              stroke-width={2}
+              aria-hidden="true"
+            />
+          </span>
+
+          <span>CONTENT MANAGEMENT</span>
+        </div>
+
+        <h1>Konten</h1>
+
+        <p>
+          Kelola materi informasi BINSIGHT yang digunakan untuk edukasi,
+          navigasi publik, dan komunikasi platform.
+        </p>
+      </div>
+
+      <div class="page-top__actions">
+        <button
+          type="button"
+          class="button button--secondary"
+          data-refresh
+        >
+          <RefreshCw
+            size={16}
+            stroke-width={2}
+            aria-hidden="true"
+          />
+
+          <span>Refresh</span>
+        </button>
+
+        <a
+          href="/"
+          class="button button--ghost"
+        >
+          <Eye
+            size={16}
+            stroke-width={1.9}
+            aria-hidden="true"
+          />
+
+          <span>Lihat publik</span>
+        </a>
+
+        <button
+          type="button"
+          class="button button--primary"
+          data-create-content
+        >
+          <Plus
+            size={17}
+            stroke-width={2}
+            aria-hidden="true"
+          />
+
+          <span>Tambah konten</span>
+        </button>
+      </div>
+    </header>
+
+    <section
+      class="summary-grid"
+      aria-label="Ringkasan konten"
+    >
+      <article class="summary-card">
+        <div class="summary-card__top">
+          <span class="summary-card__label">
+            Total konten
+          </span>
+
+          <span class="summary-card__icon summary-card__icon--green">
+            <FileText
+              size={18}
+              stroke-width={1.9}
+              aria-hidden="true"
+            />
+          </span>
+        </div>
+
+        <strong class="summary-card__value">
+          {totalContent}
+        </strong>
+
+        <span class="summary-card__meta">
+          Semua record konten
+        </span>
+      </article>
+
+      <article class="summary-card">
+        <div class="summary-card__top">
+          <span class="summary-card__label">
+            Terbit
+          </span>
+
+          <span class="summary-card__icon summary-card__icon--published">
+            <CircleCheck
+              size={18}
+              stroke-width={1.9}
+              aria-hidden="true"
+            />
+          </span>
+        </div>
+
+        <strong class="summary-card__value">
+          {publishedCount}
+        </strong>
+
+        <span class="summary-card__meta">
+          Konten tersedia untuk publik
+        </span>
+      </article>
+
+      <article class="summary-card">
+        <div class="summary-card__top">
+          <span class="summary-card__label">
+            Draft
+          </span>
+
+          <span class="summary-card__icon summary-card__icon--draft">
+            <Clock3
+              size={18}
+              stroke-width={1.9}
+              aria-hidden="true"
+            />
+          </span>
+        </div>
+
+        <strong class="summary-card__value">
+          {draftCount}
+        </strong>
+
+        <span class="summary-card__meta">
+          Belum dipublikasikan
+        </span>
+      </article>
+
+      <article class="summary-card">
+        <div class="summary-card__top">
+          <span class="summary-card__label">
+            Arsip
+          </span>
+
+          <span class="summary-card__icon summary-card__icon--archived">
+            <FolderOpen
+              size={18}
+              stroke-width={1.9}
+              aria-hidden="true"
+            />
+          </span>
+        </div>
+
+        <strong class="summary-card__value">
+          {archivedCount}
+        </strong>
+
+        <span class="summary-card__meta">
+          Tidak menjadi konten aktif
+        </span>
+      </article>
+    </section>
+
+    <section class="publication-strip">
+      <div class="publication-strip__icon">
+        <Globe
+          size={21}
+          stroke-width={1.9}
+          aria-hidden="true"
+        />
+      </div>
+
+      <div class="publication-strip__content">
+        <span class="publication-strip__eyebrow">
+          PUBLICATION CONTROL
+        </span>
+
+        <strong>
+          {publicCount} konten ditandai publik
+        </strong>
+
+        <p>
+          Hanya konten yang sudah diperiksa dan berstatus terbit yang
+          seharusnya digunakan sebagai informasi publik utama.
+        </p>
+      </div>
+
+      <span class="publication-strip__status">
+        <ShieldCheck
+          size={14}
+          stroke-width={2}
+          aria-hidden="true"
+        />
+
+        Editorial workflow
+      </span>
+    </section>
+
+    <section class="workspace-card">
+      <div class="toolbar">
+        <div class="toolbar__search">
+          <Search
+            size={17}
+            stroke-width={1.9}
+            aria-hidden="true"
+          />
+
+          <label
+            class="sr-only"
+            for="content-search"
+          >
+            Cari konten
+          </label>
+
+          <input
+            id="content-search"
+            type="search"
+            placeholder="Cari judul, deskripsi, tipe, atau author..."
+            autocomplete="off"
+            data-search
+          />
+
+          <button
+            type="button"
+            class="toolbar__clear"
+            aria-label="Hapus pencarian"
+            data-clear-search
+            hidden
+          >
+            <X
+              size={15}
+              stroke-width={2}
+              aria-hidden="true"
+            />
+          </button>
+        </div>
+
+        <div class="toolbar__filters">
+          <label class="filter-control">
+            <span class="sr-only">
+              Filter status
+            </span>
+
+            <select
+              aria-label="Filter status konten"
+              data-status-filter
+            >
+              <option value="all">
+                Semua status
+              </option>
+
+              {
+                Object.entries(statusLabels).map(
+                  ([value, label]) => (
+                    <option value={value}>
+                      {label}
+                    </option>
+                  ),
+                )
+              }
+            </select>
+          </label>
+
+          <label class="filter-control">
+            <span class="sr-only">
+              Filter tipe
+            </span>
+
+            <select
+              aria-label="Filter tipe konten"
+              data-type-filter
+            >
+              <option value="all">
+                Semua tipe
+              </option>
+
+              {
+                Object.entries(typeLabels).map(
+                  ([value, label]) => (
+                    <option value={value}>
+                      {label}
+                    </option>
+                  ),
+                )
+              }
+            </select>
+          </label>
+
+          <label class="filter-control">
+            <span class="sr-only">
+              Filter visibility
+            </span>
+
+            <select
+              aria-label="Filter visibilitas"
+              data-visibility-filter
+            >
+              <option value="all">
+                Semua visibilitas
+              </option>
+
+              <option value="public">
+                Publik
+              </option>
+
+              <option value="private">
+                Privat
+              </option>
+            </select>
+          </label>
+        </div>
+      </div>
+
+      <div class="table-head">
+        <div>
+          <span class="table-head__eyebrow">
+            CONTENT DIRECTORY
+          </span>
+
+          <h2>
+            Daftar konten
+          </h2>
+        </div>
+
+        <span
+          class="result-count"
+          data-result-count
+        >
+          {totalContent} konten
+        </span>
+      </div>
+
+      <div class="table-wrap">
+        <table class="content-table">
+          <caption class="sr-only">
+            Daftar konten BINSIGHT
+          </caption>
+
+          <thead>
+            <tr>
+              <th scope="col">
+                Konten
+              </th>
+
+              <th scope="col">
+                Tipe
+              </th>
+
+              <th scope="col">
+                Author
+              </th>
+
+              <th scope="col">
+                Visibilitas
+              </th>
+
+              <th scope="col">
+                Status
+              </th>
+
+              <th scope="col">
+                Diperbarui
+              </th>
+
+              <th scope="col">
+                <span class="sr-only">
+                  Aksi
+                </span>
+              </th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {
+              contents.map((content) => (
+                <tr
+                  data-content-row
+                  data-id={content.id}
+                  data-title={content.title.toLowerCase()}
+                  data-description={content.description.toLowerCase()}
+                  data-type={content.type}
+                  data-type-label={content.typeLabel.toLowerCase()}
+                  data-status={content.status}
+                  data-author={content.author.toLowerCase()}
+                  data-visibility={content.visibility}
+                >
+                  <td>
+                    <div class="content-cell">
+                      <span
+                        class:list={[
+                          "content-cell__icon",
+                          `content-cell__icon--${content.type}`,
+                        ]}
+                      >
+                        {content.type === "media" ? (
+                          <Image
+                            size={17}
+                            stroke-width={1.9}
+                            aria-hidden="true"
+                          />
+                        ) : content.type === "guide" ? (
+                          <FolderOpen
+                            size={17}
+                            stroke-width={1.9}
+                            aria-hidden="true"
+                          />
+                        ) : (
+                          <FileText
+                            size={17}
+                            stroke-width={1.9}
+                            aria-hidden="true"
+                          />
+                        )}
+                      </span>
+
+                      <div class="content-cell__copy">
+                        <strong>
+                          {content.title}
+                        </strong>
+
+                        <span>
+                          {content.description}
+                        </span>
+                      </div>
+                    </div>
+                  </td>
+
+                  <td>
+                    <span class="type-label">
+                      {content.typeLabel}
+                    </span>
+                  </td>
+
+                  <td>
+                    <span class="author-label">
+                      {content.author}
+                    </span>
+                  </td>
+
+                  <td>
+                    <span
+                      class:list={[
+                        "visibility-badge",
+                        `visibility-badge--${content.visibility}`,
+                      ]}
+                    >
+                      {content.visibility ===
+                      "public" ? (
+                        <Globe
+                          size={13}
+                          stroke-width={2}
+                          aria-hidden="true"
+                        />
+                      ) : (
+                        <ShieldCheck
+                          size={13}
+                          stroke-width={2}
+                          aria-hidden="true"
+                        />
+                      )}
+
+                      <span>
+                        {
+                          content.visibility ===
+                          "public"
+                            ? "Publik"
+                            : "Privat"
+                        }
+                      </span>
+                    </span>
+                  </td>
+
+                  <td>
+                    <span
+                      class:list={[
+                        "status-badge",
+                        `status-badge--${content.status}`,
+                      ]}
+                    >
+                      {content.status ===
+                      "published" ? (
+                        <CircleCheck
+                          size={13}
+                          stroke-width={2}
+                          aria-hidden="true"
+                        />
+                      ) : content.status ===
+                        "draft" ? (
+                        <Clock3
+                          size={13}
+                          stroke-width={2}
+                          aria-hidden="true"
+                        />
+                      ) : (
+                        <FolderOpen
+                          size={13}
+                          stroke-width={2}
+                          aria-hidden="true"
+                        />
+                      )}
+
+                      <span>
+                        {content.statusLabel}
+                      </span>
+                    </span>
+                  </td>
+
+                  <td>
+                    <span class="updated-label">
+                      {content.updatedAt}
+                    </span>
+                  </td>
+
+                  <td>
+                    <div class="row-actions">
+                      <button
+                        type="button"
+                        class="row-action"
+                        aria-label={`Lihat ${content.title}`}
+                        data-view
+                        data-record={content.id}
+                      >
+                        <Eye
+                          size={15}
+                          stroke-width={1.9}
+                          aria-hidden="true"
+                        />
+                      </button>
+
+                      <button
+                        type="button"
+                        class="row-action"
+                        aria-label={`Edit ${content.title}`}
+                        data-edit
+                        data-record={content.id}
+                      >
+                        <Pencil
+                          size={15}
+                          stroke-width={1.9}
+                          aria-hidden="true"
+                        />
+                      </button>
+
+                      <button
+                        type="button"
+                        class="row-action row-action--danger"
+                        aria-label={`Arsipkan ${content.title}`}
+                        data-archive
+                        data-record={content.id}
+                      >
+                        <Trash2
+                          size={15}
+                          stroke-width={1.9}
+                          aria-hidden="true"
+                        />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            }
+          </tbody>
+        </table>
+
+        <div
+          class="empty-state"
+          data-empty-state
+          hidden
+        >
+          <span class="empty-state__icon">
+            <Search
+              size={23}
+              stroke-width={1.8}
+              aria-hidden="true"
+            />
+          </span>
+
+          <h3>
+            Konten tidak ditemukan
+          </h3>
+
+          <p>
+            Tidak ada konten yang cocok dengan pencarian atau filter
+            yang digunakan.
+          </p>
+
+          <button
+            type="button"
+            class="button button--secondary"
+            data-empty-reset
+          >
+            Reset filter
+          </button>
+        </div>
+      </div>
+
+      <footer class="table-footer">
+        <span>
+          <strong data-footer-count>
+            {totalContent}
+          </strong>
+          konten ditampilkan
+        </span>
+
+        <span>
+          Content directory
+        </span>
+      </footer>
+    </section>
+
+    <section class="workflow-grid">
+      <article class="workflow-card">
+        <div class="workflow-card__icon workflow-card__icon--draft">
+          <Pencil
+            size={19}
+            stroke-width={1.9}
+            aria-hidden="true"
+          />
+        </div>
+
+        <div>
+          <span class="workflow-card__eyebrow">
+            01 · DRAFT
+          </span>
+
+          <h2>
+            Tulis dan revisi
+          </h2>
+
+          <p>
+            Materi baru sebaiknya disimpan sebagai draft sampai isi,
+            struktur, dan tautan diperiksa.
+          </p>
+        </div>
+      </article>
+
+      <article class="workflow-card">
+        <div class="workflow-card__icon workflow-card__icon--review">
+          <ShieldCheck
+            size={19}
+            stroke-width={1.9}
+            aria-hidden="true"
+          />
+        </div>
+
+        <div>
+          <span class="workflow-card__eyebrow">
+            02 · REVIEW
+          </span>
+
+          <h2>
+            Periksa sebelum terbit
+          </h2>
+
+          <p>
+            Pastikan informasi sesuai konteks BINSIGHT dan tidak
+            menyajikan data yang tidak terverifikasi.
+          </p>
+        </div>
+      </article>
+
+      <article class="workflow-card">
+        <div class="workflow-card__icon workflow-card__icon--published">
+          <Globe
+            size={19}
+            stroke-width={1.9}
+            aria-hidden="true"
+          />
+        </div>
+
+        <div>
+          <span class="workflow-card__eyebrow">
+            03 · PUBLISHED
+          </span>
+
+          <h2>
+            Publikasikan
+          </h2>
+
+          <p>
+            Konten terbit menjadi bagian dari pengalaman publik dan
+            harus dijaga relevansinya dari waktu ke waktu.
+          </p>
+        </div>
+      </article>
+    </section>
+
+    <aside
+      class="content-drawer"
+      data-drawer
+      aria-hidden="true"
+      hidden
+      aria-labelledby="drawer-title"
+    >
+      <div class="drawer__header">
+        <div>
+          <span class="drawer__eyebrow">
+            CONTENT DETAIL
+          </span>
+
+          <h2 id="drawer-title">
+            Detail konten
+          </h2>
+        </div>
+
+        <button
+          type="button"
+          class="drawer__close"
+          aria-label="Tutup detail konten"
+          data-drawer-close
+        >
+          <X
+            size={18}
+            stroke-width={2}
+            aria-hidden="true"
+          />
+        </button>
+      </div>
+
+      <div class="drawer__body">
+        <div class="drawer-identity">
+          <span
+            class="drawer-identity__icon"
+            data-drawer-icon
+          >
+            <FileText
+              size={21}
+              stroke-width={1.9}
+              aria-hidden="true"
+            />
+          </span>
+
+          <div>
+            <h3 data-drawer-title>
+              -
+            </h3>
+
+            <span data-drawer-type>
+              -
+            </span>
+          </div>
+        </div>
+
+        <div class="drawer-badges">
+          <span
+            class="status-badge"
+            data-drawer-status
+          >
+            -
+          </span>
+
+          <span
+            class="visibility-badge"
+            data-drawer-visibility
+          >
+            -
+          </span>
+        </div>
+
+        <div class="drawer-section">
+          <span class="drawer-section__label">
+            INFORMASI
+          </span>
+
+          <p
+            class="drawer-description"
+            data-drawer-description
+          >
+            -
+          </p>
+
+          <dl class="detail-list">
+            <div>
+              <dt>
+                Author
+              </dt>
+
+              <dd data-drawer-author>
+                -
+              </dd>
+            </div>
+
+            <div>
+              <dt>
+                Dibuat
+              </dt>
+
+              <dd data-drawer-created>
+                -
+              </dd>
+            </div>
+
+            <div>
+              <dt>
+                Diperbarui
+              </dt>
+
+              <dd data-drawer-updated>
+                -
+              </dd>
+            </div>
+          </dl>
+        </div>
+
+        <div class="drawer-section">
+          <span class="drawer-section__label">
+            PUBLICATION
+          </span>
+
+          <div class="publication-box">
+            <div class="publication-box__icon">
+              <Globe
+                size={18}
+                stroke-width={1.9}
+                aria-hidden="true"
+              />
+            </div>
+
+            <div>
+              <strong data-drawer-publication-title>
+                Publik
+              </strong>
+
+              <p data-drawer-publication-copy>
+                Konten tersedia untuk pengalaman publik.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="drawer-section">
+          <span class="drawer-section__label">
+            LINK
+          </span>
+
+          <div class="preview-link">
+            <Link2
+              size={16}
+              stroke-width={1.9}
+              aria-hidden="true"
+            />
+
+            <span data-drawer-link>
+              /content
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="drawer__footer">
+        <button
+          type="button"
+          class="button button--secondary"
+          data-drawer-edit
+        >
+          <Pencil
+            size={16}
+            stroke-width={1.9}
+            aria-hidden="true"
+          />
+
+          <span>
+            Edit
+          </span>
+        </button>
+
+        <button
+          type="button"
+          class="button button--primary"
+          data-drawer-publish
+        >
+          <Globe
+            size={16}
+            stroke-width={1.9}
+            aria-hidden="true"
+          />
+
+          <span>
+            Terbitkan
+          </span>
+        </button>
+      </div>
+    </aside>
+
+    <div
+      class="drawer-backdrop"
+      data-drawer-backdrop
+      hidden
+    ></div>
+
+    <div
+      class="modal"
+      data-create-modal
+      hidden
+      aria-hidden="true"
+    >
+      <div
+        class="modal__backdrop"
+        data-create-close
+      ></div>
+
+      <div
+        class="modal__panel"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="create-content-title"
+      >
+        <div class="modal__header">
+          <div>
+            <span class="modal__eyebrow">
+              CONTENT MANAGEMENT
+            </span>
+
+            <h2 id="create-content-title">
+              Tambah konten
+            </h2>
+
+            <p>
+              Siapkan metadata dasar untuk konten baru.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            class="modal__close"
+            aria-label="Tutup form"
+            data-create-close
+          >
+            <X
+              size={18}
+              stroke-width={2}
+              aria-hidden="true"
+            />
+          </button>
+        </div>
+
+        <form
+          class="content-form"
+          data-create-form
+        >
+          <label class="form-field">
+            <span>
+              Judul
+            </span>
+
+            <input
+              type="text"
+              name="title"
+              placeholder="Judul konten"
+              required
+              autocomplete="off"
+            />
+          </label>
+
+          <label class="form-field">
+            <span>
+              Deskripsi
+            </span>
+
+            <textarea
+              name="description"
+              rows="4"
+              placeholder="Ringkasan singkat konten..."
+              required
+            ></textarea>
+          </label>
+
+          <div class="form-grid">
+            <label class="form-field">
+              <span>
+                Tipe
+              </span>
+
+              <select
+                name="type"
+                required
+              >
+                <option value="page">
+                  Halaman
+                </option>
+
+                <option value="article">
+                  Artikel
+                </option>
+
+                <option value="guide">
+                  Panduan
+                </option>
+
+                <option value="media">
+                  Media
+                </option>
+              </select>
+            </label>
+
+            <label class="form-field">
+              <span>
+                Visibilitas
+              </span>
+
+              <select
+                name="visibility"
+                required
+              >
+                <option value="public">
+                  Publik
+                </option>
+
+                <option value="private">
+                  Privat
+                </option>
+              </select>
+            </label>
+          </div>
+
+          <div class="form-note">
+            <ShieldCheck
+              size={16}
+              stroke-width={1.9}
+              aria-hidden="true"
+            />
+
+            <span>
+              Penyimpanan konten ke backend belum diaktifkan pada halaman
+              ini. Submit hanya menyiapkan event untuk layer data.
+            </span>
+          </div>
+
+          <div class="modal__footer">
+            <button
+              type="button"
+              class="button button--secondary"
+              data-create-close
+            >
+              Batal
+            </button>
+
+            <button
+              type="submit"
+              class="button button--primary"
+            >
+              <Plus
+                size={16}
+                stroke-width={2}
+                aria-hidden="true"
+              />
+
+              <span>
+                Siapkan konten
+              </span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div
+      class="toast"
+      data-toast
+      hidden
+      role="status"
+      aria-live="polite"
+    >
+      <CircleCheck
+        size={17}
+        stroke-width={2}
+        aria-hidden="true"
+      />
+
+      <span data-toast-message>
+        Berhasil
+      </span>
+    </div>
+  </main>
+</AdminLayout>
+
+<style>
+  .content-page {
+    position: relative;
+    min-height: 100%;
+    padding: 30px 30px 50px;
+    background:
+      radial-gradient(
+        circle at 95% 0%,
+        rgba(132, 204, 22, 0.065),
+        transparent 31rem
+      ),
+      var(--color-background);
+  }
+
+  .page-top {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 28px;
+  }
+
+  .page-top__eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--color-primary);
+    font-size: 0.62rem;
+    font-weight: 900;
+    letter-spacing: 0.12em;
+  }
+
+  .page-top__eyebrow-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 27px;
+    height: 27px;
+    border-radius: 8px;
+    background: var(--color-primary-soft);
+  }
+
+  .page-top h1 {
+    margin: 12px 0 0;
+    color: var(--color-text-strong);
+    font-size: clamp(1.7rem, 3vw, 2.4rem);
+    font-weight: 900;
+    letter-spacing: -0.03em;
+    line-height: 1.08;
+  }
+
+  .page-top__main > p {
+    max-width: 760px;
+    margin: 9px 0 0;
+    color: var(--color-text-muted);
+    font-size: 0.77rem;
+    line-height: 1.7;
+  }
+
+  .page-top__actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    min-height: 41px;
+    padding: 0 13px;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    font: inherit;
+    font-size: 0.68rem;
+    font-weight: 800;
+    text-decoration: none;
+    cursor: pointer;
+    white-space: nowrap;
+    transition:
+      transform 150ms ease,
+      background 150ms ease,
+      border-color 150ms ease,
+      box-shadow 150ms ease;
+  }
+
+  .button:hover {
+    transform: translateY(-1px);
+  }
+
+  .button:focus-visible,
+  .row-action:focus-visible,
+  .drawer__close:focus-visible,
+  .modal__close:focus-visible,
+  .toolbar__clear:focus-visible {
+    outline: 3px solid var(--color-primary-ring);
+    outline-offset: 2px;
+  }
+
+  .button--primary {
+    border-color: var(--color-primary);
+    background: var(--color-primary);
+    color: #ffffff;
+    box-shadow: var(--shadow-xs);
+  }
+
+  .button--primary:hover {
+    border-color: var(--color-primary-dark);
+    background: var(--color-primary-dark);
+  }
+
+  .button--secondary {
+    border-color: var(--color-border);
+    background: var(--color-surface);
+    color: var(--color-text-strong);
+  }
+
+  .button--secondary:hover {
+    border-color: var(--color-border-strong);
+    background: var(--color-surface-soft);
+  }
+
+  .button--ghost {
+    border-color: transparent;
+    background: transparent;
+    color: var(--color-text-muted);
+  }
+
+  .button--ghost:hover {
+    background: var(--color-surface);
+    color: var(--color-text-strong);
+  }
+
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+    margin-top: 28px;
+  }
+
+  .summary-card {
+    padding: 17px;
+    border: 1px solid var(--color-border);
+    border-radius: 16px;
+    background: var(--color-surface);
+    box-shadow: var(--shadow-xs);
+  }
+
+  .summary-card__top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .summary-card__label {
+    color: var(--color-text-muted);
+    font-size: 0.67rem;
+    font-weight: 750;
+  }
+
+  .summary-card__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 37px;
+    height: 37px;
+    border-radius: 10px;
+  }
+
+  .summary-card__icon--green,
+  .summary-card__icon--published {
+    background: var(--color-primary-soft);
+    color: var(--color-primary);
+  }
+
+  .summary-card__icon--draft {
+    background: rgba(245, 158, 11, 0.1);
+    color: #d97706;
+  }
+
+  .summary-card__icon--archived {
+    background: var(--color-surface-soft);
+    color: var(--color-text-muted);
+  }
+
+  .summary-card__value {
+    display: block;
+    margin-top: 15px;
+    color: var(--color-text-strong);
+    font-size: 1.55rem;
+    font-weight: 900;
+    line-height: 1;
+  }
+
+  .summary-card__meta {
+    display: block;
+    margin-top: 6px;
+    color: var(--color-text-faint);
+    font-size: 0.61rem;
+    line-height: 1.5;
+  }
+
+  .publication-strip {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    margin-top: 18px;
+    padding: 14px 16px;
+    border: 1px solid rgba(22, 101, 52, 0.13);
+    border-radius: 15px;
+    background:
+      linear-gradient(
+        135deg,
+        var(--color-primary-soft),
+        var(--color-surface)
+      );
+  }
+
+  .publication-strip__icon {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    width: 43px;
+    height: 43px;
+    border-radius: 12px;
+    background: var(--color-surface);
+    color: var(--color-primary);
+  }
+
+  .publication-strip__content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .publication-strip__eyebrow,
+  .table-head__eyebrow,
+  .workflow-card__eyebrow,
+  .drawer__eyebrow,
+  .drawer-section__label,
+  .modal__eyebrow {
+    display: block;
+    color: var(--color-primary);
+    font-size: 0.59rem;
+    font-weight: 900;
+    letter-spacing: 0.1em;
+  }
+
+  .publication-strip__content strong {
+    display: block;
+    margin-top: 3px;
+    color: var(--color-text-strong);
+    font-size: 0.78rem;
+    font-weight: 850;
+  }
+
+  .publication-strip__content p {
+    margin: 2px 0 0;
+    color: var(--color-text-muted);
+    font-size: 0.62rem;
+    line-height: 1.5;
+  }
+
+  .publication-strip__status {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 5px;
+    min-height: 28px;
+    padding: 0 9px;
+    border-radius: 999px;
+    background: rgba(22, 101, 52, 0.08);
+    color: var(--color-primary-dark);
+    font-size: 0.59rem;
+    font-weight: 800;
+  }
+
+  .workspace-card {
+    margin-top: 18px;
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+    border-radius: 18px;
+    background: var(--color-surface);
+    box-shadow: var(--shadow-xs);
+  }
+
+  .toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 15px;
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-surface-soft);
+  }
+
+  .toolbar__search {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    flex: 1;
+    min-width: 0;
+    max-width: 500px;
+    min-height: 40px;
+    padding: 0 12px;
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    background: var(--color-surface);
+    color: var(--color-text-faint);
+  }
+
+  .toolbar__search:focus-within {
+    border-color: var(--color-primary);
+    box-shadow:
+      0 0 0 3px var(--color-primary-ring);
+  }
+
+  .toolbar__search input {
+    width: 100%;
+    min-width: 0;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: var(--color-text-strong);
+    font: inherit;
+    font-size: 0.69rem;
+  }
+
+  .toolbar__search input::placeholder {
+    color: var(--color-text-faint);
+  }
+
+  .toolbar__clear {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 25px;
+    height: 25px;
+    padding: 0;
+    border: 0;
+    border-radius: 7px;
+    background: transparent;
+    color: var(--color-text-muted);
+    cursor: pointer;
+  }
+
+  .toolbar__clear:hover {
+    background: var(--color-surface-soft);
+    color: var(--color-text-strong);
+  }
+
+  .toolbar__filters {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .filter-control select {
+    min-height: 40px;
+    min-width: 138px;
+    padding: 0 28px 0 11px;
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    background: var(--color-surface);
+    color: var(--color-text-strong);
+    font: inherit;
+    font-size: 0.65rem;
+    cursor: pointer;
+  }
+
+  .filter-control select:focus {
+    border-color: var(--color-primary);
+    outline: none;
+    box-shadow:
+      0 0 0 3px var(--color-primary-ring);
+  }
+
+  .table-head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 18px;
+    padding: 18px 18px 15px;
+  }
+
+  .table-head h2 {
+    margin: 4px 0 0;
+    color: var(--color-text-strong);
+    font-size: 0.98rem;
+    font-weight: 850;
+  }
+
+  .result-count {
+    color: var(--color-text-faint);
+    font-size: 0.64rem;
+    font-weight: 700;
+  }
+
+  .table-wrap {
+    overflow-x: auto;
+    border-top: 1px solid var(--color-border);
+  }
+
+  .content-table {
+    width: 100%;
+    min-width: 1120px;
+    border-collapse: collapse;
+    text-align: left;
+  }
+
+  .content-table th {
+    padding: 11px 18px;
+    background: var(--color-surface-soft);
+    color: var(--color-text-faint);
+    font-size: 0.59rem;
+    font-weight: 850;
+    letter-spacing: 0.055em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .content-table td {
+    padding: 13px 18px;
+    border-top: 1px solid var(--color-border);
+    vertical-align: middle;
+  }
+
+  .content-table tbody tr {
+    transition: background 120ms ease;
+  }
+
+  .content-table tbody tr:hover {
+    background: rgba(248, 250, 252, 0.9);
+  }
+
+  .content-table tbody tr[data-hidden="true"] {
+    display: none;
+  }
+
+  .content-cell {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 360px;
+  }
+
+  .content-cell__icon {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    width: 39px;
+    height: 39px;
+    border-radius: 11px;
+  }
+
+  .content-cell__icon--page,
+  .content-cell__icon--article {
+    background: var(--color-primary-soft);
+    color: var(--color-primary);
+  }
+
+  .content-cell__icon--guide {
+    background: rgba(37, 99, 235, 0.08);
+    color: #1d4ed8;
+  }
+
+  .content-cell__icon--media {
+    background: rgba(124, 58, 237, 0.09);
+    color: #6d28d9;
+  }
+
+  .content-cell__copy {
+    min-width: 0;
+  }
+
+  .content-cell__copy strong,
+  .content-cell__copy span {
+    display: block;
+  }
+
+  .content-cell__copy strong {
+    max-width: 440px;
+    overflow: hidden;
+    color: var(--color-text-strong);
+    font-size: 0.7rem;
+    font-weight: 800;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .content-cell__copy span {
+    max-width: 440px;
+    margin-top: 3px;
+    overflow: hidden;
+    color: var(--color-text-faint);
+    font-size: 0.6rem;
+    line-height: 1.45;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .type-label,
+  .author-label,
+  .updated-label {
+    color: var(--color-text-muted);
+    font-size: 0.62rem;
+    white-space: nowrap;
+  }
+
+  .author-label {
+    display: block;
+    max-width: 190px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .visibility-badge,
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    min-height: 25px;
+    padding: 0 8px;
+    border-radius: 999px;
+    font-size: 0.58rem;
+    font-weight: 800;
+    white-space: nowrap;
+  }
+
+  .visibility-badge--public {
+    background: var(--color-primary-soft);
+    color: var(--color-primary-dark);
+  }
+
+  .visibility-badge--private {
+    background: var(--color-surface-soft);
+    color: var(--color-text-muted);
+    border: 1px solid var(--color-border);
+  }
+
+  .status-badge--published {
+    background: var(--color-primary-soft);
+    color: var(--color-primary-dark);
+  }
+
+  .status-badge--draft {
+    background: rgba(245, 158, 11, 0.1);
+    color: #b45309;
+  }
+
+  .status-badge--archived {
+    background: var(--color-surface-soft);
+    color: var(--color-text-muted);
+  }
+
+  .row-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 4px;
+  }
+
+  .row-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--color-text-muted);
+    cursor: pointer;
+  }
+
+  .row-action:hover {
+    border-color: var(--color-border);
+    background: var(--color-surface-soft);
+    color: var(--color-primary);
+  }
+
+  .row-action--danger:hover {
+    border-color: rgba(220, 38, 38, 0.15);
+    background: rgba(220, 38, 38, 0.06);
+    color: #b91c1c;
+  }
+
+  .empty-state {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    min-height: 280px;
+    padding: 30px;
+    text-align: center;
+  }
+
+  .empty-state__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 54px;
+    height: 54px;
+    border-radius: 15px;
+    background: var(--color-surface-soft);
+    color: var(--color-text-faint);
+  }
+
+  .empty-state h3 {
+    margin: 13px 0 0;
+    color: var(--color-text-strong);
+    font-size: 0.9rem;
+    font-weight: 820;
+  }
+
+  .empty-state p {
+    max-width: 390px;
+    margin: 5px 0 16px;
+    color: var(--color-text-muted);
+    font-size: 0.67rem;
+    line-height: 1.6;
+  }
+
+  .table-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 18px;
+    border-top: 1px solid var(--color-border);
+    color: var(--color-text-faint);
+    font-size: 0.61rem;
+  }
+
+  .table-footer strong {
+    color: var(--color-text-strong);
+    font-weight: 850;
+  }
+
+  .workflow-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+    margin-top: 18px;
+  }
+
+  .workflow-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 17px;
+    border: 1px solid var(--color-border);
+    border-radius: 16px;
+    background: var(--color-surface);
+    box-shadow: var(--shadow-xs);
+  }
+
+  .workflow-card__icon {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+  }
+
+  .workflow-card__icon--draft {
+    background: rgba(245, 158, 11, 0.1);
+    color: #d97706;
+  }
+
+  .workflow-card__icon--review {
+    background: rgba(37, 99, 235, 0.08);
+    color: #1d4ed8;
+  }
+
+  .workflow-card__icon--published {
+    background: var(--color-primary-soft);
+    color: var(--color-primary);
+  }
+
+  .workflow-card h2 {
+    margin: 4px 0 0;
+    color: var(--color-text-strong);
+    font-size: 0.8rem;
+    font-weight: 820;
+  }
+
+  .workflow-card p {
+    margin: 5px 0 0;
+    color: var(--color-text-muted);
+    font-size: 0.63rem;
+    line-height: 1.6;
+  }
+
+  .content-drawer {
+    position: fixed;
+    top: 0;
+    right: 0;
+    z-index: 81;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    width: min(480px, 100%);
+    height: 100dvh;
+    border-left: 1px solid var(--color-border);
+    background: var(--color-surface);
+    box-shadow:
+      -18px 0 48px rgba(15, 23, 42, 0.13);
+    transform: translateX(100%);
+    transition: transform 180ms ease;
+  }
+
+  .content-drawer[hidden] {
+    display: grid;
+  }
+
+  .content-drawer[data-open="true"] {
+    transform: translateX(0);
+  }
+
+  .drawer-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 80;
+    background: rgba(15, 23, 42, 0.28);
+    backdrop-filter: blur(2px);
+  }
+
+  .drawer-backdrop[hidden] {
+    display: none;
+  }
+
+  .drawer__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 20px;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .drawer__header h2 {
+    margin: 5px 0 0;
+    color: var(--color-text-strong);
+    font-size: 1.05rem;
+    font-weight: 850;
+  }
+
+  .drawer__close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 35px;
+    height: 35px;
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    background: var(--color-surface);
+    color: var(--color-text-muted);
+    cursor: pointer;
+  }
+
+  .drawer__close:hover {
+    background: var(--color-surface-soft);
+    color: var(--color-text-strong);
+  }
+
+  .drawer__body {
+    overflow-y: auto;
+    padding: 20px;
+  }
+
+  .drawer-identity {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .drawer-identity__icon {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    width: 49px;
+    height: 49px;
+    border-radius: 14px;
+    background: var(--color-primary-soft);
+    color: var(--color-primary);
+  }
+
+  .drawer-identity h3 {
+    margin: 2px 0 0;
+    color: var(--color-text-strong);
+    font-size: 0.92rem;
+    font-weight: 850;
+    line-height: 1.4;
+  }
+
+  .drawer-identity div > span {
+    display: block;
+    margin-top: 3px;
+    color: var(--color-text-muted);
+    font-size: 0.64rem;
+  }
+
+  .drawer-badges {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin-top: 15px;
+  }
+
+  .drawer-section {
+    margin-top: 25px;
+    padding-top: 19px;
+    border-top: 1px solid var(--color-border);
+  }
+
+  .detail-list {
+    display: grid;
+    gap: 0;
+    margin: 10px 0 0;
+  }
+
+  .detail-list > div {
+    display: grid;
+    grid-template-columns: 90px minmax(0, 1fr);
+    gap: 12px;
+    padding: 9px 0;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .detail-list > div:last-child {
+    border-bottom: 0;
+  }
+
+  .detail-list dt {
+    color: var(--color-text-faint);
+    font-size: 0.62rem;
+  }
+
+  .detail-list dd {
+    margin: 0;
+    color: var(--color-text-strong);
+    font-size: 0.65rem;
+    font-weight: 700;
+    line-height: 1.5;
+    word-break: break-word;
+  }
+
+  .drawer-description {
+    margin: 10px 0 0;
+    color: var(--color-text-muted);
+    font-size: 0.67rem;
+    line-height: 1.7;
+  }
+
+  .publication-box {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-top: 10px;
+    padding: 13px;
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    background: var(--color-surface-soft);
+  }
+
+  .publication-box__icon {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: var(--color-primary-soft);
+    color: var(--color-primary);
+  }
+
+  .publication-box strong {
+    display: block;
+    color: var(--color-text-strong);
+    font-size: 0.68rem;
+    font-weight: 800;
+  }
+
+  .publication-box p {
+    margin: 3px 0 0;
+    color: var(--color-text-muted);
+    font-size: 0.61rem;
+    line-height: 1.55;
+  }
+
+  .preview-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+    padding: 11px 12px;
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    background: var(--color-surface-soft);
+    color: var(--color-primary);
+    font-size: 0.63rem;
+    font-weight: 700;
+    word-break: break-all;
+  }
+
+  .drawer__footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    padding: 14px 20px;
+    border-top: 1px solid var(--color-border);
+    background: var(--color-surface);
+  }
+
+  .modal {
+    position: fixed;
+    inset: 0;
+    z-index: 90;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .modal[hidden] {
+    display: none;
+  }
+
+  .modal__backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.38);
+    backdrop-filter: blur(3px);
+  }
+
+  .modal__panel {
+    position: relative;
+    width: min(620px, 100%);
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+    border-radius: 18px;
+    background: var(--color-surface);
+    box-shadow:
+      0 30px 80px rgba(15, 23, 42, 0.2);
+  }
+
+  .modal__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 20px;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .modal__header h2 {
+    margin: 5px 0 0;
+    color: var(--color-text-strong);
+    font-size: 1rem;
+    font-weight: 850;
+  }
+
+  .modal__header p {
+    max-width: 450px;
+    margin: 5px 0 0;
+    color: var(--color-text-muted);
+    font-size: 0.64rem;
+    line-height: 1.55;
+  }
+
+  .modal__close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 35px;
+    height: 35px;
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    background: var(--color-surface);
+    color: var(--color-text-muted);
+    cursor: pointer;
+  }
+
+  .content-form {
+    padding: 20px;
+  }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 13px;
+  }
+
+  .form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 13px;
+  }
+
+  .form-field:first-child {
+    margin-top: 0;
+  }
+
+  .form-grid .form-field {
+    margin-top: 0;
+  }
+
+  .form-field > span {
+    color: var(--color-text-strong);
+    font-size: 0.63rem;
+    font-weight: 780;
+  }
+
+  .form-field input,
+  .form-field textarea,
+  .form-field select {
+    width: 100%;
+    padding: 10px 11px;
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    background: var(--color-surface);
+    color: var(--color-text-strong);
+    font: inherit;
+    font-size: 0.66rem;
+    outline: none;
+  }
+
+  .form-field input,
+  .form-field select {
+    min-height: 42px;
+  }
+
+  .form-field textarea {
+    resize: vertical;
+  }
+
+  .form-field input:focus,
+  .form-field textarea:focus,
+  .form-field select:focus {
+    border-color: var(--color-primary);
+    box-shadow:
+      0 0 0 3px var(--color-primary-ring);
+  }
+
+  .form-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin-top: 15px;
+    padding: 12px;
+    border-radius: 11px;
+    background: var(--color-surface-soft);
+    color: var(--color-text-muted);
+  }
+
+  .form-note svg {
+    flex: 0 0 auto;
+    margin-top: 1px;
+    color: var(--color-primary);
+  }
+
+  .form-note span {
+    font-size: 0.61rem;
+    line-height: 1.6;
+  }
+
+  .modal__footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 18px;
+  }
+
+  .toast {
+    position: fixed;
+    right: 24px;
+    bottom: 24px;
+    z-index: 100;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    max-width: min(390px, calc(100vw - 30px));
+    padding: 11px 14px;
+    border: 1px solid var(--color-primary-soft);
+    border-radius: 11px;
+    background: var(--color-surface);
+    color: var(--color-text-strong);
+    box-shadow:
+      0 15px 35px rgba(15, 23, 42, 0.14);
+    font-size: 0.66rem;
+    font-weight: 750;
+  }
+
+  .toast[hidden] {
+    display: none;
+  }
+
+  .toast svg {
+    color: var(--color-primary);
+  }
+
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  @media (max-width: 1200px) {
+    .page-top {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+
+    .page-top__actions {
+      justify-content: flex-start;
+    }
+
+    .summary-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .toolbar {
+      align-items: stretch;
+      flex-direction: column;
+    }
+
+    .toolbar__search {
+      max-width: none;
+    }
+
+    .toolbar__filters {
+      justify-content: flex-start;
+    }
+
+    .workflow-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 820px) {
+    .content-page {
+      padding: 20px 16px 36px;
+    }
+
+    .publication-strip {
+      align-items: flex-start;
+      flex-wrap: wrap;
+    }
+
+    .publication-strip__status {
+      margin-left: 56px;
+    }
+
+    .form-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 600px) {
+    .summary-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .page-top__actions {
+      width: 100%;
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .page-top__actions .button {
+      width: 100%;
+    }
+
+    .toolbar__filters {
+      display: grid;
+      grid-template-columns: 1fr;
+    }
+
+    .filter-control select {
+      width: 100%;
+      min-width: 0;
+    }
+
+    .table-head {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+
+    .drawer__footer {
+      align-items: stretch;
+    }
+
+    .drawer__footer .button {
+      flex: 1;
+    }
+
+    .modal {
+      padding: 12px;
+    }
+
+    .modal__panel {
+      max-height: calc(100dvh - 24px);
+      overflow-y: auto;
+    }
+
+    .modal__footer {
+      flex-direction: column-reverse;
+    }
+
+    .modal__footer .button {
+      width: 100%;
+    }
+
+    .toast {
+      right: 15px;
+      bottom: 15px;
+    }
+  }
+</style>
+
+<script>
+// @ts-nocheck
+
+  const contents = [
+    {
+      id: "content-demo-001",
+      title: "Tentang BINSIGHT",
+      description:
+        "Informasi mengenai tujuan, fungsi, dan peran BINSIGHT dalam ekosistem persampahan Badung.",
+      type: "page",
+      typeLabel: "Halaman",
+      status: "published",
+      statusLabel: "Terbit",
+      author: "Admin BINSIGHT",
+      updatedAt: "10 Sep 2026, 09:40",
+      createdAt: "1 Sep 2026",
+      visibility: "public",
+    },
+    {
+      id: "content-demo-002",
+      title: "Panduan Pemilahan Sampah Rumah Tangga",
+      description:
+        "Panduan dasar untuk memahami dan memilah sampah sebelum diserahkan kepada pengelola.",
+      type: "guide",
+      typeLabel: "Panduan",
+      status: "published",
+      statusLabel: "Terbit",
+      author: "Editor Konten",
+      updatedAt: "9 Sep 2026, 15:25",
+      createdAt: "3 Sep 2026",
+      visibility: "public",
+    },
+    {
+      id: "content-demo-003",
+      title: "Mengenal Sampah Elektronik",
+      description:
+        "Konten edukasi tentang perangkat elektronik dan pentingnya penanganan khusus.",
+      type: "article",
+      typeLabel: "Artikel",
+      status: "draft",
+      statusLabel: "Draft",
+      author: "Editor Konten",
+      updatedAt: "9 Sep 2026, 12:10",
+      createdAt: "7 Sep 2026",
+      visibility: "public",
+    },
+    {
+      id: "content-demo-004",
+      title: "Peta dan Data Persampahan",
+      description:
+        "Penjelasan mengenai cara menggunakan peta dan membaca data ekosistem BINSIGHT.",
+      type: "article",
+      typeLabel: "Artikel",
+      status: "published",
+      statusLabel: "Terbit",
+      author: "Admin BINSIGHT",
+      updatedAt: "8 Sep 2026, 17:05",
+      createdAt: "2 Sep 2026",
+      visibility: "public",
+    },
+    {
+      id: "content-demo-005",
+      title: "Materi Program Lama",
+      description:
+        "Konten lama yang tidak lagi menjadi bagian dari informasi publik utama.",
+      type: "page",
+      typeLabel: "Halaman",
+      status: "archived",
+      statusLabel: "Arsip",
+      author: "Admin BINSIGHT",
+      updatedAt: "5 Sep 2026, 10:35",
+      createdAt: "1 Sep 2026",
+      visibility: "private",
+    },
+    {
+      id: "content-demo-006",
+      title: "Asset Foto Ekosistem Badung",
+      description:
+        "Kumpulan media pendukung untuk kebutuhan konten dan visualisasi platform.",
+      type: "media",
+      typeLabel: "Media",
+      status: "published",
+      statusLabel: "Terbit",
+      author: "Admin BINSIGHT",
+      updatedAt: "4 Sep 2026, 14:22",
+      createdAt: "2 Sep 2026",
+      visibility: "private",
+    },
+  ];
+
+  const page =
+    document.querySelector(
+      "[data-content-page]",
+    );
+
+  if (!(page instanceof HTMLElement)) {
+    throw new Error(
+      "BINSIGHT content admin page root not found.",
+    );
+  }
+
+  const searchInput =
+    page.querySelector(
+      "[data-search]",
+    );
+
+  const clearSearch =
+    page.querySelector(
+      "[data-clear-search]",
+    );
+
+  const statusFilter =
+    page.querySelector(
+      "[data-status-filter]",
+    );
+
+  const typeFilter =
+    page.querySelector(
+      "[data-type-filter]",
+    );
+
+  const visibilityFilter =
+    page.querySelector(
+      "[data-visibility-filter]",
+    );
+
+  const resultCount =
+    page.querySelector(
+      "[data-result-count]",
+    );
+
+  const footerCount =
+    page.querySelector(
+      "[data-footer-count]",
+    );
+
+  const emptyState =
+    page.querySelector(
+      "[data-empty-state]",
+    );
+
+  const emptyReset =
+    page.querySelector(
+      "[data-empty-reset]",
+    );
+
+  const rows =
+    Array.from(
+      page.querySelectorAll(
+        "[data-content-row]",
+      ),
+    );
+
+  const drawer =
+    page.querySelector(
+      "[data-drawer]",
+    );
+
+  const drawerBackdrop =
+    page.querySelector(
+      "[data-drawer-backdrop]",
+    );
+
+  const drawerClose =
+    page.querySelector(
+      "[data-drawer-close]",
+    );
+
+  const drawerTitle =
+    page.querySelector(
+      "[data-drawer-title]",
+    );
+
+  const drawerType =
+    page.querySelector(
+      "[data-drawer-type]",
+    );
+
+  const drawerStatus =
+    page.querySelector(
+      "[data-drawer-status]",
+    );
+
+  const drawerVisibility =
+    page.querySelector(
+      "[data-drawer-visibility]",
+    );
+
+  const drawerDescription =
+    page.querySelector(
+      "[data-drawer-description]",
+    );
+
+  const drawerAuthor =
+    page.querySelector(
+      "[data-drawer-author]",
+    );
+
+  const drawerCreated =
+    page.querySelector(
+      "[data-drawer-created]",
+    );
+
+  const drawerUpdated =
+    page.querySelector(
+      "[data-drawer-updated]",
+    );
+
+  const drawerPublicationTitle =
+    page.querySelector(
+      "[data-drawer-publication-title]",
+    );
+
+  const drawerPublicationCopy =
+    page.querySelector(
+      "[data-drawer-publication-copy]",
+    );
+
+  const drawerLink =
+    page.querySelector(
+      "[data-drawer-link]",
+    );
+
+  const drawerEdit =
+    page.querySelector(
+      "[data-drawer-edit]",
+    );
+
+  const drawerPublish =
+    page.querySelector(
+      "[data-drawer-publish]",
+    );
+
+  const createModal =
+    page.querySelector(
+      "[data-create-modal]",
+    );
+
+  const createForm =
+    page.querySelector(
+      "[data-create-form]",
+    );
+
+  const createContentButton =
+    page.querySelector(
+      "[data-create-content]",
+    );
+
+  const createCloseButtons =
+    Array.from(
+      page.querySelectorAll(
+        "[data-create-close]",
+      ),
+    );
+
+  const toast =
+    page.querySelector(
+      "[data-toast]",
+    );
+
+  const toastMessage =
+    page.querySelector(
+      "[data-toast-message]",
+    );
+
+  let selectedContentId = null;
+  let toastTimer = null;
+
+  function getContent(id) {
+    return contents.find(
+      (content) =>
+        content.id === id,
+    );
+  }
+
+  function updateFilters() {
+    const query =
+      searchInput instanceof
+      HTMLInputElement
+        ? searchInput.value
+            .trim()
+            .toLowerCase()
+        : "";
+
+    const status =
+      statusFilter instanceof
+      HTMLSelectElement
+        ? statusFilter.value
+        : "all";
+
+    const type =
+      typeFilter instanceof
+      HTMLSelectElement
+        ? typeFilter.value
+        : "all";
+
+    const visibility =
+      visibilityFilter instanceof
+      HTMLSelectElement
+        ? visibilityFilter.value
+        : "all";
+
+    const visibleRows =
+      rows.filter(
+        (row) => {
+          const title =
+            row.getAttribute(
+              "data-title",
+            ) ?? "";
+
+          const description =
+            row.getAttribute(
+              "data-description",
+            ) ?? "";
+
+          const typeValue =
+            row.getAttribute(
+              "data-type",
+            ) ?? "";
+
+          const typeLabel =
+            row.getAttribute(
+              "data-type-label",
+            ) ?? "";
+
+          const rowStatus =
+            row.getAttribute(
+              "data-status",
+            ) ?? "";
+
+          const author =
+            row.getAttribute(
+              "data-author",
+            ) ?? "";
+
+          const rowVisibility =
+            row.getAttribute(
+              "data-visibility",
+            ) ?? "";
+
+          const matchesSearch =
+            query === "" ||
+            title.includes(query) ||
+            description.includes(query) ||
+            typeLabel.includes(query) ||
+            author.includes(query);
+
+          const matchesStatus =
+            status === "all" ||
+            rowStatus === status;
+
+          const matchesType =
+            type === "all" ||
+            typeValue === type;
+
+          const matchesVisibility =
+            visibility === "all" ||
+            rowVisibility === visibility;
+
+          return (
+            matchesSearch &&
+            matchesStatus &&
+            matchesType &&
+            matchesVisibility
+          );
+        },
+      );
+
+    rows.forEach(
+      (row) => {
+        row.setAttribute(
+          "data-hidden",
+          visibleRows.includes(
+            row,
+          )
+            ? "false"
+            : "true",
+        );
+      },
+    );
+
+    if (
+      resultCount instanceof HTMLElement
+    ) {
+      resultCount.textContent =
+        `${visibleRows.length} konten`;
+    }
+
+    if (
+      footerCount instanceof HTMLElement
+    ) {
+      footerCount.textContent =
+        String(
+          visibleRows.length,
+        );
+    }
+
+    if (
+      emptyState instanceof HTMLElement
+    ) {
+      emptyState.hidden =
+        visibleRows.length !== 0;
+    }
+
+    if (
+      clearSearch instanceof HTMLButtonElement
+    ) {
+      clearSearch.hidden =
+        !(
+          searchInput instanceof HTMLInputElement &&
+          searchInput.value.length > 0
+        );
+    }
+  }
+
+  function resetFilters() {
+    if (
+      searchInput instanceof HTMLInputElement
+    ) {
+      searchInput.value = "";
+    }
+
+    if (
+      statusFilter instanceof HTMLSelectElement
+    ) {
+      statusFilter.value = "all";
+    }
+
+    if (
+      typeFilter instanceof HTMLSelectElement
+    ) {
+      typeFilter.value = "all";
+    }
+
+    if (
+      visibilityFilter instanceof HTMLSelectElement
+    ) {
+      visibilityFilter.value = "all";
+    }
+
+    updateFilters();
+  }
+
+  function showToast(message) {
+    if (
+      !(toast instanceof HTMLElement) ||
+      !(toastMessage instanceof HTMLElement)
+    ) {
+      return;
+    }
+
+    toastMessage.textContent =
+      message;
+
+    toast.hidden = false;
+
+    if (
+      toastTimer !== null
+    ) {
+      window.clearTimeout(
+        toastTimer,
+      );
+    }
+
+    toastTimer =
+      window.setTimeout(
+        () => {
+          toast.hidden = true;
+          toastTimer = null;
+        },
+        2800,
+      );
+  }
+
+  function setStatusBadge(
+    element,
+    content,
+  ) {
+    if (
+      !(element instanceof HTMLElement)
+    ) {
+      return;
+    }
+
+    element.className =
+      `status-badge status-badge--${content.status}`;
+
+    element.textContent =
+      content.statusLabel;
+  }
+
+  function setVisibilityBadge(
+    element,
+    content,
+  ) {
+    if (
+      !(element instanceof HTMLElement)
+    ) {
+      return;
+    }
+
+    element.className =
+      `visibility-badge visibility-badge--${content.visibility}`;
+
+    element.textContent =
+      content.visibility ===
+      "public"
+        ? "Publik"
+        : "Privat";
+  }
+
+  function updateDrawerAction(
+    content,
+  ) {
+    if (
+      !(drawerPublish instanceof HTMLButtonElement)
+    ) {
+      return;
+    }
+
+    drawerPublish.disabled =
+      false;
+
+    drawerPublish.className =
+      "button button--primary";
+
+    if (
+      content.status ===
+      "published"
+    ) {
+      drawerPublish.innerHTML = `
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="9"/>
+          <path d="m9 12 2 2 4-4"/>
+        </svg>
+        <span>Sudah terbit</span>
+      `;
+
+      drawerPublish.disabled =
+        true;
+
+      return;
+    }
+
+    if (
+      content.status ===
+      "archived"
+    ) {
+      drawerPublish.className =
+        "button button--secondary";
+
+      drawerPublish.innerHTML = `
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M3 6h18"/>
+          <path d="M8 6V4h8v2"/>
+          <path d="M19 6v14H5V6"/>
+        </svg>
+        <span>Diarsipkan</span>
+      `;
+
+      drawerPublish.disabled =
+        true;
+
+      return;
+    }
+
+    drawerPublish.innerHTML = `
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M12 3v12"/>
+        <path d="m7 8 5-5 5 5"/>
+        <path d="M5 21h14"/>
+      </svg>
+      <span>Terbitkan</span>
+    `;
+  }
+
+  function populateDrawer(
+    content,
+  ) {
+    if (!content) {
+      return;
+    }
+
+    if (
+      drawerTitle instanceof HTMLElement
+    ) {
+      drawerTitle.textContent =
+        content.title;
+    }
+
+    if (
+      drawerType instanceof HTMLElement
+    ) {
+      drawerType.textContent =
+        content.typeLabel;
+    }
+
+    setStatusBadge(
+      drawerStatus,
+      content,
+    );
+
+    setVisibilityBadge(
+      drawerVisibility,
+      content,
+    );
+
+    if (
+      drawerDescription instanceof HTMLElement
+    ) {
+      drawerDescription.textContent =
+        content.description;
+    }
+
+    if (
+      drawerAuthor instanceof HTMLElement
+    ) {
+      drawerAuthor.textContent =
+        content.author;
+    }
+
+    if (
+      drawerCreated instanceof HTMLElement
+    ) {
+      drawerCreated.textContent =
+        content.createdAt;
+    }
+
+    if (
+      drawerUpdated instanceof HTMLElement
+    ) {
+      drawerUpdated.textContent =
+        content.updatedAt;
+    }
+
+    if (
+      drawerPublicationTitle instanceof HTMLElement
+    ) {
+      drawerPublicationTitle.textContent =
+        content.visibility ===
+        "public"
+          ? "Konten publik"
+          : "Konten privat";
+    }
+
+    if (
+      drawerPublicationCopy instanceof HTMLElement
+    ) {
+      drawerPublicationCopy.textContent =
+        content.visibility ===
+        "public"
+          ? "Konten ini ditujukan untuk pengalaman publik BINSIGHT."
+          : "Konten ini tidak ditujukan sebagai informasi publik utama.";
+    }
+
+    if (
+      drawerLink instanceof HTMLElement
+    ) {
+      drawerLink.textContent =
+        `/content/${content.id}`;
+    }
+
+    updateDrawerAction(
+      content,
+    );
+  }
+
+  function openDrawer(id) {
+    const content =
+      getContent(id);
+
+    if (
+      !content ||
+      !(drawer instanceof HTMLElement) ||
+      !(drawerBackdrop instanceof HTMLElement)
+    ) {
+      return;
+    }
+
+    selectedContentId =
+      id;
+
+    populateDrawer(
+      content,
+    );
+
+    drawer.hidden =
+      false;
+
+    drawerBackdrop.hidden =
+      false;
+
+    window.requestAnimationFrame(
+      () => {
+        drawer.setAttribute(
+          "data-open",
+          "true",
+        );
+
+        drawer.setAttribute(
+          "aria-hidden",
+          "false",
+        );
+      },
+    );
+
+    document.documentElement.style.overflow =
+      "hidden";
+  }
+
+  function closeDrawer() {
+    if (
+      !(drawer instanceof HTMLElement) ||
+      !(drawerBackdrop instanceof HTMLElement)
+    ) {
+      return;
+    }
+
+    drawer.setAttribute(
+      "data-open",
+      "false",
+    );
+
+    drawer.setAttribute(
+      "aria-hidden",
+      "true",
+    );
+
+    window.setTimeout(
+      () => {
+        drawer.hidden =
+          true;
+
+        drawerBackdrop.hidden =
+          true;
+      },
+      190,
+    );
+
+    document.documentElement.style.overflow =
+      "";
+
+    selectedContentId =
+      null;
+  }
+
+  function editContent(id) {
+    const content =
+      getContent(id);
+
+    if (!content) {
+      return;
+    }
+
+    window.dispatchEvent(
+      new CustomEvent(
+        "binsight:admin-content-edit",
+        {
+          detail: {
+            ...content,
+          },
+        },
+      ),
+    );
+
+    showToast(
+      `Mode edit untuk "${content.title}" dipersiapkan.`,
+    );
+  }
+
+  function publishContent() {
+    if (!selectedContentId) {
+      return;
+    }
+
+    const content =
+      getContent(
+        selectedContentId,
+      );
+
+    if (!content) {
+      return;
+    }
+
+    if (
+      content.status ===
+      "published"
+    ) {
+      showToast(
+        "Konten ini sudah berstatus terbit.",
+      );
+      return;
+    }
+
+    if (
+      content.status ===
+      "archived"
+    ) {
+      showToast(
+        "Konten arsip tidak dapat langsung diterbitkan.",
+      );
+      return;
+    }
+
+    content.status =
+      "published";
+
+    content.statusLabel =
+      "Terbit";
+
+    content.updatedAt =
+      "10 Sep 2026, sekarang";
+
+    const row =
+      rows.find(
+        (candidate) =>
+          candidate.getAttribute(
+            "data-id",
+          ) === content.id,
+      );
+
+    if (
+      row instanceof HTMLElement
+    ) {
+      row.setAttribute(
+        "data-status",
+        content.status,
+      );
+
+      const statusBadge =
+        row.querySelector(
+          ".status-badge",
+        );
+
+      setStatusBadge(
+        statusBadge,
+        content,
+      );
+    }
+
+    populateDrawer(
+      content,
+    );
+
+    window.dispatchEvent(
+      new CustomEvent(
+        "binsight:admin-content-publish",
+        {
+          detail: {
+            ...content,
+          },
+        },
+      ),
+    );
+
+    showToast(
+      `"${content.title}" ditandai sebagai terbit.`,
+    );
+
+    updateFilters();
+  }
+
+  function archiveContent(
+    id,
+  ) {
+    const content =
+      getContent(id);
+
+    if (!content) {
+      return;
+    }
+
+    if (
+      content.status ===
+      "archived"
+    ) {
+      showToast(
+        "Konten ini sudah diarsipkan.",
+      );
+      return;
+    }
+
+    content.status =
+      "archived";
+
+    content.statusLabel =
+      "Arsip";
+
+    content.visibility =
+      "private";
+
+    content.updatedAt =
+      "10 Sep 2026, sekarang";
+
+    const row =
+      rows.find(
+        (candidate) =>
+          candidate.getAttribute(
+            "data-id",
+          ) === content.id,
+      );
+
+    if (
+      row instanceof HTMLElement
+    ) {
+      row.setAttribute(
+        "data-status",
+        content.status,
+      );
+
+      row.setAttribute(
+        "data-visibility",
+        content.visibility,
+      );
+
+      const statusBadge =
+        row.querySelector(
+          ".status-badge",
+        );
+
+      const visibilityBadge =
+        row.querySelector(
+          ".visibility-badge",
+        );
+
+      setStatusBadge(
+        statusBadge,
+        content,
+      );
+
+      setVisibilityBadge(
+        visibilityBadge,
+        content,
+      );
+    }
+
+    window.dispatchEvent(
+      new CustomEvent(
+        "binsight:admin-content-archive",
+        {
+          detail: {
+            ...content,
+          },
+        },
+      ),
+    );
+
+    if (
+      selectedContentId ===
+      content.id
+    ) {
+      populateDrawer(
+        content,
+      );
+    }
+
+    showToast(
+      `"${content.title}" diarsipkan.`,
+    );
+
+    updateFilters();
+  }
+
+  function openCreateModal() {
+    if (
+      !(createModal instanceof HTMLElement)
+    ) {
+      return;
+    }
+
+    createModal.hidden =
+      false;
+
+    createModal.setAttribute(
+      "aria-hidden",
+      "false",
+    );
+
+    document.documentElement.style.overflow =
+      "hidden";
+
+    const firstInput =
+      createModal.querySelector(
+        'input[name="title"]',
+      );
+
+    if (
+      firstInput instanceof HTMLInputElement
+    ) {
+      window.setTimeout(
+        () =>
+          firstInput.focus(),
+        0,
+      );
+    }
+  }
+
+  function closeCreateModal() {
+    if (
+      !(createModal instanceof HTMLElement)
+    ) {
+      return;
+    }
+
+    createModal.hidden =
+      true;
+
+    createModal.setAttribute(
+      "aria-hidden",
+      "true",
+    );
+
+    document.documentElement.style.overflow =
+      "";
+  }
+
+  createContentButton?.addEventListener(
+    "click",
+    openCreateModal,
+  );
+
+  createCloseButtons.forEach(
+    (button) => {
+      button.addEventListener(
+        "click",
+        closeCreateModal,
+      );
+    },
+  );
+
+  createForm?.addEventListener(
+    "submit",
+    (event) => {
+      event.preventDefault();
+
+      if (
+        !(createForm instanceof HTMLFormElement)
+      ) {
+        return;
+      }
+
+      const formData =
+        new FormData(
+          createForm,
+        );
+
+      const title =
+        String(
+          formData.get(
+            "title",
+          ) ?? "",
+        ).trim();
+
+      const description =
+        String(
+          formData.get(
+            "description",
+          ) ?? "",
+        ).trim();
+
+      const type =
+        String(
+          formData.get(
+            "type",
+          ) ?? "page",
+        );
+
+      const visibility =
+        String(
+          formData.get(
+            "visibility",
+          ) ?? "public",
+        );
+
+      if (
+        !title ||
+        !description
+      ) {
+        showToast(
+          "Judul dan deskripsi wajib diisi.",
+        );
+
+        return;
+      }
+
+      const typeMap = {
+        page: "Halaman",
+        article: "Artikel",
+        guide: "Panduan",
+        media: "Media",
+      };
+
+      window.dispatchEvent(
+        new CustomEvent(
+          "binsight:admin-content-create",
+          {
+            detail: {
+              title,
+              description,
+              type,
+              typeLabel:
+                typeMap[
+                  type
+                ] ?? "Halaman",
+              visibility,
+              status:
+                "draft",
+              statusLabel:
+                "Draft",
+            },
+          },
+        ),
+      );
+
+      closeCreateModal();
+
+      createForm.reset();
+
+      showToast(
+        `"${title}" disiapkan sebagai draft.`,
+      );
+    },
+  );
+
+  searchInput?.addEventListener(
+    "input",
+    updateFilters,
+  );
+
+  statusFilter?.addEventListener(
+    "change",
+    updateFilters,
+  );
+
+  typeFilter?.addEventListener(
+    "change",
+    updateFilters,
+  );
+
+  visibilityFilter?.addEventListener(
+    "change",
+    updateFilters,
+  );
+
+  clearSearch?.addEventListener(
+    "click",
+    () => {
+      if (
+        searchInput instanceof HTMLInputElement
+      ) {
+        searchInput.value =
+          "";
+
+        searchInput.focus();
+      }
+
+      updateFilters();
+    },
+  );
+
+  emptyReset?.addEventListener(
+    "click",
+    resetFilters,
+  );
+
+  page
+    .querySelectorAll(
+      "[data-view]",
+    )
+    .forEach(
+      (button) => {
+        button.addEventListener(
+          "click",
+          () => {
+            const id =
+              button.getAttribute(
+                "data-record",
+              );
+
+            if (id) {
+              openDrawer(id);
+            }
+          },
+        );
+      },
+    );
+
+  page
+    .querySelectorAll(
+      "[data-edit]",
+    )
+    .forEach(
+      (button) => {
+        button.addEventListener(
+          "click",
+          () => {
+            const id =
+              button.getAttribute(
+                "data-record",
+              );
+
+            if (id) {
+              editContent(id);
+            }
+          },
+        );
+      },
+    );
+
+  page
+    .querySelectorAll(
+      "[data-archive]",
+    )
+    .forEach(
+      (button) => {
+        button.addEventListener(
+          "click",
+          () => {
+            const id =
+              button.getAttribute(
+                "data-record",
+              );
+
+            if (id) {
+              archiveContent(id);
+            }
+          },
+        );
+      },
+    );
+
+  drawerClose?.addEventListener(
+    "click",
+    closeDrawer,
+  );
+
+  drawerBackdrop?.addEventListener(
+    "click",
+    closeDrawer,
+  );
+
+  drawerEdit?.addEventListener(
+    "click",
+    () => {
+      if (
+        selectedContentId
+      ) {
+        editContent(
+          selectedContentId,
+        );
+      }
+    },
+  );
+
+  drawerPublish?.addEventListener(
+    "click",
+    publishContent,
+  );
+
+  page
+    .querySelector(
+      "[data-refresh]",
+    )
+    ?.addEventListener(
+      "click",
+      () => {
+        updateFilters();
+
+        showToast(
+          "Daftar konten diperbarui.",
+        );
+      },
+    );
+
+  document.addEventListener(
+    "keydown",
+    (event) => {
+      if (
+        event.key !== "Escape"
+      ) {
+        return;
+      }
+
+      if (
+        drawer instanceof HTMLElement &&
+        drawer.getAttribute(
+          "data-open",
+        ) === "true"
+      ) {
+        closeDrawer();
+        return;
+      }
+
+      if (
+        createModal instanceof HTMLElement &&
+        !createModal.hidden
+      ) {
+        closeCreateModal();
+      }
+    },
+  );
+
+  updateFilters();
+</script>

@@ -1,0 +1,3500 @@
+---
+import {
+  Ban,
+  CircleCheck,
+  Clock3,
+  Eye,
+  KeyRound,
+  Mail,
+  Pencil,
+  Plus,
+  RefreshCw,
+  Search,
+  ShieldCheck,
+  Trash2,
+  UserRound,
+  Users,
+  X,
+} from "@lucide/astro";
+
+import AdminLayout from "../../layouts/AdminLayout.astro";
+
+type UserStatus =
+  | "active"
+  | "pending"
+  | "suspended";
+
+type UserRole =
+  | "super-admin"
+  | "admin"
+  | "editor"
+  | "viewer"
+  | "organization";
+
+interface UserRecord {
+  id: string;
+  name: string;
+  email: string;
+  role: UserRole;
+  roleLabel: string;
+  status: UserStatus;
+  statusLabel: string;
+  organization: string;
+  lastActive: string;
+  createdAt: string;
+}
+
+const users: UserRecord[] = [
+  {
+    id: "user-demo-001",
+    name: "Admin BINSIGHT",
+    email: "admin@binsight.id",
+    role: "super-admin",
+    roleLabel: "Super Admin",
+    status: "active",
+    statusLabel: "Aktif",
+    organization: "BINSIGHT",
+    lastActive: "Hari ini, 10:42",
+    createdAt: "1 Sep 2026",
+  },
+  {
+    id: "user-demo-002",
+    name: "Pengelola Data",
+    email: "data@binsight.id",
+    role: "admin",
+    roleLabel: "Admin",
+    status: "active",
+    statusLabel: "Aktif",
+    organization: "BINSIGHT",
+    lastActive: "Hari ini, 09:51",
+    createdAt: "2 Sep 2026",
+  },
+  {
+    id: "user-demo-003",
+    name: "Editor Konten",
+    email: "editor@binsight.id",
+    role: "editor",
+    roleLabel: "Editor",
+    status: "active",
+    statusLabel: "Aktif",
+    organization: "BINSIGHT",
+    lastActive: "9 Sep 2026, 16:18",
+    createdAt: "3 Sep 2026",
+  },
+  {
+    id: "user-demo-004",
+    name: "Operator Organisasi",
+    email: "operator@contoh.id",
+    role: "organization",
+    roleLabel: "Organisasi",
+    status: "pending",
+    statusLabel: "Menunggu",
+    organization: "Organisasi Pengelola Sampah",
+    lastActive: "Belum aktif",
+    createdAt: "9 Sep 2026",
+  },
+  {
+    id: "user-demo-005",
+    name: "Pengguna Publik",
+    email: "viewer@contoh.id",
+    role: "viewer",
+    roleLabel: "Viewer",
+    status: "suspended",
+    statusLabel: "Ditangguhkan",
+    organization: "—",
+    lastActive: "6 Sep 2026, 11:24",
+    createdAt: "4 Sep 2026",
+  },
+];
+
+const roleLabels: Record<UserRole, string> = {
+  "super-admin": "Super Admin",
+  admin: "Admin",
+  editor: "Editor",
+  viewer: "Viewer",
+  organization: "Organisasi",
+};
+
+const statusLabels: Record<UserStatus, string> = {
+  active: "Aktif",
+  pending: "Menunggu",
+  suspended: "Ditangguhkan",
+};
+
+const totalUsers = users.length;
+const activeUsers = users.filter(
+  (user) => user.status === "active",
+).length;
+const pendingUsers = users.filter(
+  (user) => user.status === "pending",
+).length;
+const suspendedUsers = users.filter(
+  (user) => user.status === "suspended",
+).length;
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "CollectionPage",
+  name: "Pengguna — Admin BINSIGHT",
+  description:
+    "Administrasi pengguna BINSIGHT untuk pengelolaan peran, status akun, dan akses platform.",
+  url: "https://binsight.id/admin/users",
+  isPartOf: {
+    "@type": "WebSite",
+    name: "BINSIGHT — Badung Waste Intelligence",
+    url: "https://binsight.id",
+  },
+};
+---
+
+<AdminLayout
+  title="Pengguna"
+  description="Kelola akun, peran, dan status akses pengguna BINSIGHT."
+>
+  <script
+    type="application/ld+json"
+    is:inline
+    set:html={JSON.stringify(jsonLd)}
+  />
+
+  <main
+    class="users-page"
+    data-users-page
+  >
+    <header class="page-top">
+      <div class="page-top__main">
+        <div class="page-top__eyebrow">
+          <span class="page-top__eyebrow-icon">
+            <Users
+              size={15}
+              stroke-width={2}
+              aria-hidden="true"
+            />
+          </span>
+
+          <span>USER MANAGEMENT</span>
+        </div>
+
+        <h1>Pengguna</h1>
+
+        <p>
+          Kelola akun internal dan pengguna organisasi dengan kontrol
+          peran yang jelas sehingga akses data BINSIGHT tetap terjaga.
+        </p>
+      </div>
+
+      <div class="page-top__actions">
+        <button
+          type="button"
+          class="button button--secondary"
+          data-refresh
+        >
+          <RefreshCw
+            size={16}
+            stroke-width={2}
+            aria-hidden="true"
+          />
+
+          <span>Refresh</span>
+        </button>
+
+        <button
+          type="button"
+          class="button button--primary"
+          data-create-user
+        >
+          <Plus
+            size={17}
+            stroke-width={2}
+            aria-hidden="true"
+          />
+
+          <span>Tambah pengguna</span>
+        </button>
+      </div>
+    </header>
+
+    <section
+      class="summary-grid"
+      aria-label="Ringkasan pengguna"
+    >
+      <article class="summary-card">
+        <div class="summary-card__top">
+          <span class="summary-card__label">
+            Total pengguna
+          </span>
+
+          <span class="summary-card__icon summary-card__icon--green">
+            <Users
+              size={18}
+              stroke-width={1.9}
+              aria-hidden="true"
+            />
+          </span>
+        </div>
+
+        <strong class="summary-card__value">
+          {totalUsers}
+        </strong>
+
+        <span class="summary-card__meta">
+          Akun dalam workspace
+        </span>
+      </article>
+
+      <article class="summary-card">
+        <div class="summary-card__top">
+          <span class="summary-card__label">
+            Aktif
+          </span>
+
+          <span class="summary-card__icon summary-card__icon--active">
+            <CircleCheck
+              size={18}
+              stroke-width={1.9}
+              aria-hidden="true"
+            />
+          </span>
+        </div>
+
+        <strong class="summary-card__value">
+          {activeUsers}
+        </strong>
+
+        <span class="summary-card__meta">
+          Dapat mengakses workspace
+        </span>
+      </article>
+
+      <article class="summary-card">
+        <div class="summary-card__top">
+          <span class="summary-card__label">
+            Menunggu
+          </span>
+
+          <span class="summary-card__icon summary-card__icon--pending">
+            <Clock3
+              size={18}
+              stroke-width={1.9}
+              aria-hidden="true"
+            />
+          </span>
+        </div>
+
+        <strong class="summary-card__value">
+          {pendingUsers}
+        </strong>
+
+        <span class="summary-card__meta">
+          Membutuhkan pemeriksaan akses
+        </span>
+      </article>
+
+      <article class="summary-card">
+        <div class="summary-card__top">
+          <span class="summary-card__label">
+            Ditangguhkan
+          </span>
+
+          <span class="summary-card__icon summary-card__icon--suspended">
+            <Ban
+              size={18}
+              stroke-width={1.9}
+              aria-hidden="true"
+            />
+          </span>
+        </div>
+
+        <strong class="summary-card__value">
+          {suspendedUsers}
+        </strong>
+
+        <span class="summary-card__meta">
+          Akses sementara dinonaktifkan
+        </span>
+      </article>
+    </section>
+
+    <section class="security-strip">
+      <div class="security-strip__icon">
+        <ShieldCheck
+          size={21}
+          stroke-width={1.9}
+          aria-hidden="true"
+        />
+      </div>
+
+      <div class="security-strip__content">
+        <span class="security-strip__eyebrow">
+          ACCESS CONTROL
+        </span>
+
+        <strong>
+          Terapkan akses berdasarkan kebutuhan
+        </strong>
+
+        <p>
+          Berikan peran minimum yang diperlukan. Akses administrasi
+          tidak perlu diberikan kepada seluruh pengguna.
+        </p>
+      </div>
+
+      <span class="security-strip__status">
+        <CircleCheck
+          size={14}
+          stroke-width={2}
+          aria-hidden="true"
+        />
+        Access policy
+      </span>
+    </section>
+
+    <section class="workspace-card">
+      <div class="toolbar">
+        <div class="toolbar__search">
+          <Search
+            size={17}
+            stroke-width={1.9}
+            aria-hidden="true"
+          />
+
+          <label
+            class="sr-only"
+            for="user-search"
+          >
+            Cari pengguna
+          </label>
+
+          <input
+            id="user-search"
+            type="search"
+            placeholder="Cari nama, email, organisasi, atau peran..."
+            autocomplete="off"
+            data-search
+          />
+
+          <button
+            type="button"
+            class="toolbar__clear"
+            aria-label="Hapus pencarian"
+            data-clear-search
+            hidden
+          >
+            <X
+              size={15}
+              stroke-width={2}
+              aria-hidden="true"
+            />
+          </button>
+        </div>
+
+        <div class="toolbar__filters">
+          <label class="filter-control">
+            <span class="sr-only">
+              Filter status
+            </span>
+
+            <select
+              aria-label="Filter status pengguna"
+              data-status-filter
+            >
+              <option value="all">
+                Semua status
+              </option>
+
+              {
+                Object.entries(statusLabels).map(
+                  ([value, label]) => (
+                    <option value={value}>
+                      {label}
+                    </option>
+                  ),
+                )
+              }
+            </select>
+          </label>
+
+          <label class="filter-control">
+            <span class="sr-only">
+              Filter peran
+            </span>
+
+            <select
+              aria-label="Filter peran pengguna"
+              data-role-filter
+            >
+              <option value="all">
+                Semua peran
+              </option>
+
+              {
+                Object.entries(roleLabels).map(
+                  ([value, label]) => (
+                    <option value={value}>
+                      {label}
+                    </option>
+                  ),
+                )
+              }
+            </select>
+          </label>
+        </div>
+      </div>
+
+      <div class="table-head">
+        <div>
+          <span class="table-head__eyebrow">
+            USER DIRECTORY
+          </span>
+
+          <h2>
+            Daftar pengguna
+          </h2>
+        </div>
+
+        <span
+          class="result-count"
+          data-result-count
+        >
+          {totalUsers} pengguna
+        </span>
+      </div>
+
+      <div class="table-wrap">
+        <table class="users-table">
+          <caption class="sr-only">
+            Daftar pengguna BINSIGHT
+          </caption>
+
+          <thead>
+            <tr>
+              <th scope="col">
+                Pengguna
+              </th>
+
+              <th scope="col">
+                Peran
+              </th>
+
+              <th scope="col">
+                Organisasi
+              </th>
+
+              <th scope="col">
+                Status
+              </th>
+
+              <th scope="col">
+                Aktivitas terakhir
+              </th>
+
+              <th scope="col">
+                Dibuat
+              </th>
+
+              <th scope="col">
+                <span class="sr-only">
+                  Aksi
+                </span>
+              </th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {
+              users.map((user) => (
+                <tr
+                  data-user-row
+                  data-id={user.id}
+                  data-name={user.name.toLowerCase()}
+                  data-email={user.email.toLowerCase()}
+                  data-role={user.role}
+                  data-role-label={user.roleLabel.toLowerCase()}
+                  data-status={user.status}
+                  data-organization={user.organization.toLowerCase()}
+                >
+                  <td>
+                    <div class="user-cell">
+                      <span class="user-avatar">
+                        {user.name
+                          .split(" ")
+                          .map((part) => part[0] ?? "")
+                          .join("")
+                          .slice(0, 2)
+                          .toUpperCase()}
+                      </span>
+
+                      <div class="user-cell__copy">
+                        <strong>
+                          {user.name}
+                        </strong>
+
+                        <span>
+                          {user.email}
+                        </span>
+                      </div>
+                    </div>
+                  </td>
+
+                  <td>
+                    <span
+                      class:list={[
+                        "role-badge",
+                        `role-badge--${user.role}`,
+                      ]}
+                    >
+                      {user.role === "super-admin" ? (
+                        <ShieldCheck
+                          size={13}
+                          stroke-width={2}
+                          aria-hidden="true"
+                        />
+                      ) : user.role === "admin" ? (
+                        <KeyRound
+                          size={13}
+                          stroke-width={2}
+                          aria-hidden="true"
+                        />
+                      ) : user.role === "organization" ? (
+                        <Users
+                          size={13}
+                          stroke-width={2}
+                          aria-hidden="true"
+                        />
+                      ) : (
+                        <UserRound
+                          size={13}
+                          stroke-width={2}
+                          aria-hidden="true"
+                        />
+                      )}
+
+                      <span>
+                        {user.roleLabel}
+                      </span>
+                    </span>
+                  </td>
+
+                  <td>
+                    <span class="organization-label">
+                      {user.organization}
+                    </span>
+                  </td>
+
+                  <td>
+                    <span
+                      class:list={[
+                        "status-badge",
+                        `status-badge--${user.status}`,
+                      ]}
+                    >
+                      {user.status === "active" ? (
+                        <CircleCheck
+                          size={13}
+                          stroke-width={2}
+                          aria-hidden="true"
+                        />
+                      ) : user.status === "pending" ? (
+                        <Clock3
+                          size={13}
+                          stroke-width={2}
+                          aria-hidden="true"
+                        />
+                      ) : (
+                        <Ban
+                          size={13}
+                          stroke-width={2}
+                          aria-hidden="true"
+                        />
+                      )}
+
+                      <span>
+                        {user.statusLabel}
+                      </span>
+                    </span>
+                  </td>
+
+                  <td>
+                    <span class="activity-label">
+                      {user.lastActive}
+                    </span>
+                  </td>
+
+                  <td>
+                    <span class="created-label">
+                      {user.createdAt}
+                    </span>
+                  </td>
+
+                  <td>
+                    <div class="row-actions">
+                      <button
+                        type="button"
+                        class="row-action"
+                        aria-label={`Lihat ${user.name}`}
+                        data-view
+                        data-record={user.id}
+                      >
+                        <Eye
+                          size={15}
+                          stroke-width={1.9}
+                          aria-hidden="true"
+                        />
+                      </button>
+
+                      <button
+                        type="button"
+                        class="row-action"
+                        aria-label={`Edit ${user.name}`}
+                        data-edit
+                        data-record={user.id}
+                      >
+                        <Pencil
+                          size={15}
+                          stroke-width={1.9}
+                          aria-hidden="true"
+                        />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            }
+          </tbody>
+        </table>
+
+        <div
+          class="empty-state"
+          data-empty-state
+          hidden
+        >
+          <span class="empty-state__icon">
+            <Search
+              size={23}
+              stroke-width={1.8}
+              aria-hidden="true"
+            />
+          </span>
+
+          <h3>
+            Pengguna tidak ditemukan
+          </h3>
+
+          <p>
+            Tidak ada pengguna yang cocok dengan pencarian atau filter
+            yang digunakan.
+          </p>
+
+          <button
+            type="button"
+            class="button button--secondary"
+            data-empty-reset
+          >
+            Reset filter
+          </button>
+        </div>
+      </div>
+
+      <footer class="table-footer">
+        <span>
+          <strong data-footer-count>
+            {totalUsers}
+          </strong>
+          pengguna ditampilkan
+        </span>
+
+        <span>
+          User directory
+        </span>
+      </footer>
+    </section>
+
+    <section class="role-grid">
+      <article class="role-card">
+        <div class="role-card__icon role-card__icon--danger">
+          <ShieldCheck
+            size={19}
+            stroke-width={1.9}
+            aria-hidden="true"
+          />
+        </div>
+
+        <div>
+          <span class="role-card__eyebrow">
+            SUPER ADMIN
+          </span>
+
+          <h2>
+            Akses tertinggi
+          </h2>
+
+          <p>
+            Untuk pengelolaan sistem, pengguna, konfigurasi, dan
+            kebijakan administrasi yang bersifat kritis.
+          </p>
+        </div>
+      </article>
+
+      <article class="role-card">
+        <div class="role-card__icon role-card__icon--green">
+          <KeyRound
+            size={19}
+            stroke-width={1.9}
+            aria-hidden="true"
+          />
+        </div>
+
+        <div>
+          <span class="role-card__eyebrow">
+            ADMIN / EDITOR
+          </span>
+
+          <h2>
+            Kelola data dan konten
+          </h2>
+
+          <p>
+            Dipakai untuk pekerjaan operasional seperti verifikasi,
+            pengelolaan data, dan pemeliharaan konten sesuai kewenangan.
+          </p>
+        </div>
+      </article>
+
+      <article class="role-card">
+        <div class="role-card__icon role-card__icon--blue">
+          <Users
+            size={19}
+            stroke-width={1.9}
+            aria-hidden="true"
+          />
+        </div>
+
+        <div>
+          <span class="role-card__eyebrow">
+            ORGANISASI
+          </span>
+
+          <h2>
+            Ruang kerja organisasi
+          </h2>
+
+          <p>
+            Membatasi akses pada informasi dan pengelolaan profil
+            organisasi yang bersangkutan.
+          </p>
+        </div>
+      </article>
+    </section>
+
+    <aside
+      class="user-drawer"
+      data-drawer
+      aria-hidden="true"
+      hidden
+      aria-labelledby="drawer-title"
+    >
+      <div class="drawer__header">
+        <div>
+          <span class="drawer__eyebrow">
+            USER DETAIL
+          </span>
+
+          <h2 id="drawer-title">
+            Detail pengguna
+          </h2>
+        </div>
+
+        <button
+          type="button"
+          class="drawer__close"
+          aria-label="Tutup detail pengguna"
+          data-drawer-close
+        >
+          <X
+            size={18}
+            stroke-width={2}
+            aria-hidden="true"
+          />
+        </button>
+      </div>
+
+      <div class="drawer__body">
+        <div class="drawer-identity">
+          <span
+            class="drawer-avatar"
+            data-drawer-avatar
+          >
+            US
+          </span>
+
+          <div>
+            <h3 data-drawer-name>
+              -
+            </h3>
+
+            <span data-drawer-email>
+              -
+            </span>
+          </div>
+        </div>
+
+        <div class="drawer-badges">
+          <span
+            class="role-badge"
+            data-drawer-role
+          >
+            -
+          </span>
+
+          <span
+            class="status-badge"
+            data-drawer-status
+          >
+            -
+          </span>
+        </div>
+
+        <div class="drawer-section">
+          <span class="drawer-section__label">
+            AKUN
+          </span>
+
+          <dl class="detail-list">
+            <div>
+              <dt>
+                Organisasi
+              </dt>
+
+              <dd data-drawer-organization>
+                -
+              </dd>
+            </div>
+
+            <div>
+              <dt>
+                Dibuat
+              </dt>
+
+              <dd data-drawer-created>
+                -
+              </dd>
+            </div>
+
+            <div>
+              <dt>
+                Aktivitas
+              </dt>
+
+              <dd data-drawer-last-active>
+                -
+              </dd>
+            </div>
+          </dl>
+        </div>
+
+        <div class="drawer-section">
+          <span class="drawer-section__label">
+            AKSES
+          </span>
+
+          <div class="access-box">
+            <div class="access-box__icon">
+              <ShieldCheck
+                size={18}
+                stroke-width={1.9}
+                aria-hidden="true"
+              />
+            </div>
+
+            <div>
+              <strong data-drawer-access-title>
+                Akses pengguna
+              </strong>
+
+              <p data-drawer-access-copy>
+                Hak akses mengikuti peran akun.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="drawer__footer">
+        <button
+          type="button"
+          class="button button--secondary"
+          data-drawer-edit
+        >
+          <Pencil
+            size={16}
+            stroke-width={1.9}
+            aria-hidden="true"
+          />
+
+          <span>
+            Edit
+          </span>
+        </button>
+
+        <button
+          type="button"
+          class="button button--danger"
+          data-drawer-toggle-status
+        >
+          <Ban
+            size={16}
+            stroke-width={1.9}
+            aria-hidden="true"
+          />
+
+          <span>
+            Tangguhkan
+          </span>
+        </button>
+      </div>
+    </aside>
+
+    <div
+      class="drawer-backdrop"
+      data-drawer-backdrop
+      hidden
+    ></div>
+
+    <div
+      class="modal"
+      data-create-modal
+      hidden
+      aria-hidden="true"
+    >
+      <div
+        class="modal__backdrop"
+        data-create-close
+      ></div>
+
+      <div
+        class="modal__panel"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="create-user-title"
+      >
+        <div class="modal__header">
+          <div>
+            <span class="modal__eyebrow">
+              USER MANAGEMENT
+            </span>
+
+            <h2 id="create-user-title">
+              Tambah pengguna
+            </h2>
+
+            <p>
+              Form ini menyiapkan data pengguna untuk proses administrasi.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            class="modal__close"
+            aria-label="Tutup form"
+            data-create-close
+          >
+            <X
+              size={18}
+              stroke-width={2}
+              aria-hidden="true"
+            />
+          </button>
+        </div>
+
+        <form
+          class="user-form"
+          data-create-form
+        >
+          <div class="form-grid">
+            <label class="form-field">
+              <span>
+                Nama
+              </span>
+
+              <input
+                type="text"
+                name="name"
+                placeholder="Nama pengguna"
+                autocomplete="name"
+                required
+              />
+            </label>
+
+            <label class="form-field">
+              <span>
+                Email
+              </span>
+
+              <input
+                type="email"
+                name="email"
+                placeholder="nama@domain.id"
+                autocomplete="email"
+                required
+              />
+            </label>
+
+            <label class="form-field">
+              <span>
+                Peran
+              </span>
+
+              <select
+                name="role"
+                required
+              >
+                <option value="viewer">
+                  Viewer
+                </option>
+
+                <option value="editor">
+                  Editor
+                </option>
+
+                <option value="organization">
+                  Organisasi
+                </option>
+
+                <option value="admin">
+                  Admin
+                </option>
+              </select>
+            </label>
+
+            <label class="form-field">
+              <span>
+                Organisasi
+              </span>
+
+              <input
+                type="text"
+                name="organization"
+                placeholder="Nama organisasi atau —"
+                autocomplete="organization"
+              />
+            </label>
+          </div>
+
+          <div class="form-note">
+            <Mail
+              size={16}
+              stroke-width={1.9}
+              aria-hidden="true"
+            />
+
+            <span>
+              Pembuatan akun di halaman ini hanya menyiapkan workflow
+              admin. Integrasi autentikasi dapat dihubungkan pada layer
+              Firebase Auth secara terpisah.
+            </span>
+          </div>
+
+          <div class="modal__footer">
+            <button
+              type="button"
+              class="button button--secondary"
+              data-create-close
+            >
+              Batal
+            </button>
+
+            <button
+              type="submit"
+              class="button button--primary"
+            >
+              <Plus
+                size={16}
+                stroke-width={2}
+                aria-hidden="true"
+              />
+
+              <span>
+                Simpan
+              </span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div
+      class="toast"
+      data-toast
+      hidden
+      role="status"
+      aria-live="polite"
+    >
+      <CircleCheck
+        size={17}
+        stroke-width={2}
+        aria-hidden="true"
+      />
+
+      <span data-toast-message>
+        Berhasil
+      </span>
+    </div>
+  </main>
+</AdminLayout>
+
+<style>
+  .users-page {
+    position: relative;
+    min-height: 100%;
+    padding: 30px 30px 50px;
+    background:
+      radial-gradient(
+        circle at 95% 0%,
+        rgba(132, 204, 22, 0.065),
+        transparent 31rem
+      ),
+      var(--color-background);
+  }
+
+  .page-top {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 28px;
+  }
+
+  .page-top__eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--color-primary);
+    font-size: 0.62rem;
+    font-weight: 900;
+    letter-spacing: 0.12em;
+  }
+
+  .page-top__eyebrow-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 27px;
+    height: 27px;
+    border-radius: 8px;
+    background: var(--color-primary-soft);
+  }
+
+  .page-top h1 {
+    margin: 12px 0 0;
+    color: var(--color-text-strong);
+    font-size: clamp(1.7rem, 3vw, 2.4rem);
+    font-weight: 900;
+    letter-spacing: -0.03em;
+    line-height: 1.08;
+  }
+
+  .page-top__main > p {
+    max-width: 760px;
+    margin: 9px 0 0;
+    color: var(--color-text-muted);
+    font-size: 0.77rem;
+    line-height: 1.7;
+  }
+
+  .page-top__actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    min-height: 41px;
+    padding: 0 13px;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    font: inherit;
+    font-size: 0.68rem;
+    font-weight: 800;
+    text-decoration: none;
+    cursor: pointer;
+    white-space: nowrap;
+    transition:
+      transform 150ms ease,
+      background 150ms ease,
+      border-color 150ms ease,
+      box-shadow 150ms ease;
+  }
+
+  .button:hover {
+    transform: translateY(-1px);
+  }
+
+  .button:focus-visible,
+  .row-action:focus-visible,
+  .drawer__close:focus-visible,
+  .modal__close:focus-visible,
+  .toolbar__clear:focus-visible,
+  .modal__panel button:focus-visible {
+    outline: 3px solid var(--color-primary-ring);
+    outline-offset: 2px;
+  }
+
+  .button--primary {
+    border-color: var(--color-primary);
+    background: var(--color-primary);
+    color: #ffffff;
+    box-shadow: var(--shadow-xs);
+  }
+
+  .button--primary:hover {
+    border-color: var(--color-primary-dark);
+    background: var(--color-primary-dark);
+  }
+
+  .button--secondary {
+    border-color: var(--color-border);
+    background: var(--color-surface);
+    color: var(--color-text-strong);
+  }
+
+  .button--secondary:hover {
+    border-color: var(--color-border-strong);
+    background: var(--color-surface-soft);
+  }
+
+  .button--danger {
+    border-color: rgba(220, 38, 38, 0.14);
+    background: rgba(220, 38, 38, 0.08);
+    color: #b91c1c;
+  }
+
+  .button--danger:hover {
+    border-color: rgba(220, 38, 38, 0.2);
+    background: rgba(220, 38, 38, 0.13);
+  }
+
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+    margin-top: 28px;
+  }
+
+  .summary-card {
+    padding: 17px;
+    border: 1px solid var(--color-border);
+    border-radius: 16px;
+    background: var(--color-surface);
+    box-shadow: var(--shadow-xs);
+  }
+
+  .summary-card__top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .summary-card__label {
+    color: var(--color-text-muted);
+    font-size: 0.67rem;
+    font-weight: 750;
+  }
+
+  .summary-card__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 37px;
+    height: 37px;
+    border-radius: 10px;
+  }
+
+  .summary-card__icon--green,
+  .summary-card__icon--active {
+    background: var(--color-primary-soft);
+    color: var(--color-primary);
+  }
+
+  .summary-card__icon--pending {
+    background: rgba(245, 158, 11, 0.1);
+    color: #d97706;
+  }
+
+  .summary-card__icon--suspended {
+    background: rgba(220, 38, 38, 0.08);
+    color: #b91c1c;
+  }
+
+  .summary-card__value {
+    display: block;
+    margin-top: 15px;
+    color: var(--color-text-strong);
+    font-size: 1.55rem;
+    font-weight: 900;
+    line-height: 1;
+  }
+
+  .summary-card__meta {
+    display: block;
+    margin-top: 6px;
+    color: var(--color-text-faint);
+    font-size: 0.61rem;
+    line-height: 1.5;
+  }
+
+  .security-strip {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    margin-top: 18px;
+    padding: 14px 16px;
+    border: 1px solid rgba(22, 101, 52, 0.13);
+    border-radius: 15px;
+    background:
+      linear-gradient(
+        135deg,
+        var(--color-primary-soft),
+        var(--color-surface)
+      );
+  }
+
+  .security-strip__icon {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    width: 43px;
+    height: 43px;
+    border-radius: 12px;
+    background: var(--color-surface);
+    color: var(--color-primary);
+  }
+
+  .security-strip__content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .security-strip__eyebrow {
+    display: block;
+    color: var(--color-primary);
+    font-size: 0.59rem;
+    font-weight: 900;
+    letter-spacing: 0.1em;
+  }
+
+  .security-strip__content strong {
+    display: block;
+    margin-top: 3px;
+    color: var(--color-text-strong);
+    font-size: 0.78rem;
+    font-weight: 850;
+  }
+
+  .security-strip__content p {
+    margin: 2px 0 0;
+    color: var(--color-text-muted);
+    font-size: 0.62rem;
+    line-height: 1.5;
+  }
+
+  .security-strip__status {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 5px;
+    min-height: 28px;
+    padding: 0 9px;
+    border-radius: 999px;
+    background: rgba(22, 101, 52, 0.08);
+    color: var(--color-primary-dark);
+    font-size: 0.59rem;
+    font-weight: 800;
+  }
+
+  .workspace-card {
+    margin-top: 18px;
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+    border-radius: 18px;
+    background: var(--color-surface);
+    box-shadow: var(--shadow-xs);
+  }
+
+  .toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 15px;
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-surface-soft);
+  }
+
+  .toolbar__search {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    flex: 1;
+    min-width: 0;
+    max-width: 500px;
+    min-height: 40px;
+    padding: 0 12px;
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    background: var(--color-surface);
+    color: var(--color-text-faint);
+  }
+
+  .toolbar__search:focus-within {
+    border-color: var(--color-primary);
+    box-shadow:
+      0 0 0 3px var(--color-primary-ring);
+  }
+
+  .toolbar__search input {
+    width: 100%;
+    min-width: 0;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: var(--color-text-strong);
+    font: inherit;
+    font-size: 0.69rem;
+  }
+
+  .toolbar__search input::placeholder {
+    color: var(--color-text-faint);
+  }
+
+  .toolbar__clear {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 25px;
+    height: 25px;
+    padding: 0;
+    border: 0;
+    border-radius: 7px;
+    background: transparent;
+    color: var(--color-text-muted);
+    cursor: pointer;
+  }
+
+  .toolbar__clear:hover {
+    background: var(--color-surface-soft);
+    color: var(--color-text-strong);
+  }
+
+  .toolbar__filters {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .filter-control select {
+    min-height: 40px;
+    min-width: 145px;
+    padding: 0 28px 0 11px;
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    background: var(--color-surface);
+    color: var(--color-text-strong);
+    font: inherit;
+    font-size: 0.65rem;
+    cursor: pointer;
+  }
+
+  .filter-control select:focus {
+    border-color: var(--color-primary);
+    outline: none;
+    box-shadow:
+      0 0 0 3px var(--color-primary-ring);
+  }
+
+  .table-head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 18px;
+    padding: 18px 18px 15px;
+  }
+
+  .table-head__eyebrow {
+    display: block;
+    color: var(--color-primary);
+    font-size: 0.59rem;
+    font-weight: 900;
+    letter-spacing: 0.1em;
+  }
+
+  .table-head h2 {
+    margin: 4px 0 0;
+    color: var(--color-text-strong);
+    font-size: 0.98rem;
+    font-weight: 850;
+  }
+
+  .result-count {
+    color: var(--color-text-faint);
+    font-size: 0.64rem;
+    font-weight: 700;
+  }
+
+  .table-wrap {
+    overflow-x: auto;
+    border-top: 1px solid var(--color-border);
+  }
+
+  .users-table {
+    width: 100%;
+    min-width: 1070px;
+    border-collapse: collapse;
+    text-align: left;
+  }
+
+  .users-table th {
+    padding: 11px 18px;
+    background: var(--color-surface-soft);
+    color: var(--color-text-faint);
+    font-size: 0.59rem;
+    font-weight: 850;
+    letter-spacing: 0.055em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .users-table td {
+    padding: 13px 18px;
+    border-top: 1px solid var(--color-border);
+    vertical-align: middle;
+  }
+
+  .users-table tbody tr {
+    transition: background 120ms ease;
+  }
+
+  .users-table tbody tr:hover {
+    background: rgba(248, 250, 252, 0.9);
+  }
+
+  .users-table tbody tr[data-hidden="true"] {
+    display: none;
+  }
+
+  .user-cell {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 270px;
+  }
+
+  .user-avatar,
+  .drawer-avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    border-radius: 12px;
+    background:
+      linear-gradient(
+        135deg,
+        var(--color-primary-soft),
+        #f0fdf4
+      );
+    color: var(--color-primary-dark);
+    font-weight: 900;
+    letter-spacing: 0.02em;
+  }
+
+  .user-avatar {
+    width: 39px;
+    height: 39px;
+    font-size: 0.63rem;
+  }
+
+  .user-cell__copy {
+    min-width: 0;
+  }
+
+  .user-cell__copy strong,
+  .user-cell__copy span {
+    display: block;
+  }
+
+  .user-cell__copy strong {
+    max-width: 290px;
+    overflow: hidden;
+    color: var(--color-text-strong);
+    font-size: 0.7rem;
+    font-weight: 800;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .user-cell__copy span {
+    max-width: 290px;
+    margin-top: 3px;
+    overflow: hidden;
+    color: var(--color-text-faint);
+    font-size: 0.6rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .organization-label,
+  .activity-label,
+  .created-label {
+    color: var(--color-text-muted);
+    font-size: 0.62rem;
+    white-space: nowrap;
+  }
+
+  .organization-label {
+    display: block;
+    max-width: 230px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .role-badge,
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    min-height: 25px;
+    padding: 0 8px;
+    border-radius: 999px;
+    font-size: 0.58rem;
+    font-weight: 800;
+    white-space: nowrap;
+  }
+
+  .role-badge--super-admin {
+    background: rgba(124, 58, 237, 0.09);
+    color: #6d28d9;
+  }
+
+  .role-badge--admin {
+    background: rgba(37, 99, 235, 0.08);
+    color: #1d4ed8;
+  }
+
+  .role-badge--editor {
+    background: var(--color-primary-soft);
+    color: var(--color-primary-dark);
+  }
+
+  .role-badge--viewer {
+    background: var(--color-surface-soft);
+    color: var(--color-text-muted);
+    border: 1px solid var(--color-border);
+  }
+
+  .role-badge--organization {
+    background: rgba(14, 116, 144, 0.08);
+    color: #0e7490;
+  }
+
+  .status-badge--active {
+    background: var(--color-primary-soft);
+    color: var(--color-primary-dark);
+  }
+
+  .status-badge--pending {
+    background: rgba(245, 158, 11, 0.1);
+    color: #b45309;
+  }
+
+  .status-badge--suspended {
+    background: rgba(220, 38, 38, 0.08);
+    color: #b91c1c;
+  }
+
+  .row-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 4px;
+  }
+
+  .row-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--color-text-muted);
+    cursor: pointer;
+  }
+
+  .row-action:hover {
+    border-color: var(--color-border);
+    background: var(--color-surface-soft);
+    color: var(--color-primary);
+  }
+
+  .empty-state {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    min-height: 280px;
+    padding: 30px;
+    text-align: center;
+  }
+
+  .empty-state__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 54px;
+    height: 54px;
+    border-radius: 15px;
+    background: var(--color-surface-soft);
+    color: var(--color-text-faint);
+  }
+
+  .empty-state h3 {
+    margin: 13px 0 0;
+    color: var(--color-text-strong);
+    font-size: 0.9rem;
+    font-weight: 820;
+  }
+
+  .empty-state p {
+    max-width: 390px;
+    margin: 5px 0 16px;
+    color: var(--color-text-muted);
+    font-size: 0.67rem;
+    line-height: 1.6;
+  }
+
+  .table-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 18px;
+    border-top: 1px solid var(--color-border);
+    color: var(--color-text-faint);
+    font-size: 0.61rem;
+  }
+
+  .table-footer strong {
+    color: var(--color-text-strong);
+    font-weight: 850;
+  }
+
+  .role-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+    margin-top: 18px;
+  }
+
+  .role-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 17px;
+    border: 1px solid var(--color-border);
+    border-radius: 16px;
+    background: var(--color-surface);
+    box-shadow: var(--shadow-xs);
+  }
+
+  .role-card__icon {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+  }
+
+  .role-card__icon--danger {
+    background: rgba(124, 58, 237, 0.09);
+    color: #6d28d9;
+  }
+
+  .role-card__icon--green {
+    background: var(--color-primary-soft);
+    color: var(--color-primary);
+  }
+
+  .role-card__icon--blue {
+    background: rgba(14, 116, 144, 0.08);
+    color: #0e7490;
+  }
+
+  .role-card__eyebrow {
+    display: block;
+    color: var(--color-primary);
+    font-size: 0.56rem;
+    font-weight: 900;
+    letter-spacing: 0.1em;
+  }
+
+  .role-card h2 {
+    margin: 4px 0 0;
+    color: var(--color-text-strong);
+    font-size: 0.8rem;
+    font-weight: 820;
+  }
+
+  .role-card p {
+    margin: 5px 0 0;
+    color: var(--color-text-muted);
+    font-size: 0.63rem;
+    line-height: 1.6;
+  }
+
+  .user-drawer {
+    position: fixed;
+    top: 0;
+    right: 0;
+    z-index: 81;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    width: min(460px, 100%);
+    height: 100dvh;
+    border-left: 1px solid var(--color-border);
+    background: var(--color-surface);
+    box-shadow:
+      -18px 0 48px rgba(15, 23, 42, 0.13);
+    transform: translateX(100%);
+    transition: transform 180ms ease;
+  }
+
+  .user-drawer[hidden] {
+    display: grid;
+  }
+
+  .user-drawer[data-open="true"] {
+    transform: translateX(0);
+  }
+
+  .drawer-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 80;
+    background: rgba(15, 23, 42, 0.28);
+    backdrop-filter: blur(2px);
+  }
+
+  .drawer-backdrop[hidden] {
+    display: none;
+  }
+
+  .drawer__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 20px;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .drawer__eyebrow,
+  .drawer-section__label {
+    display: block;
+    color: var(--color-primary);
+    font-size: 0.59rem;
+    font-weight: 900;
+    letter-spacing: 0.1em;
+  }
+
+  .drawer__header h2 {
+    margin: 5px 0 0;
+    color: var(--color-text-strong);
+    font-size: 1.05rem;
+    font-weight: 850;
+  }
+
+  .drawer__close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 35px;
+    height: 35px;
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    background: var(--color-surface);
+    color: var(--color-text-muted);
+    cursor: pointer;
+  }
+
+  .drawer__close:hover {
+    background: var(--color-surface-soft);
+    color: var(--color-text-strong);
+  }
+
+  .drawer__body {
+    overflow-y: auto;
+    padding: 20px;
+  }
+
+  .drawer-identity {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .drawer-avatar {
+    width: 52px;
+    height: 52px;
+    font-size: 0.7rem;
+  }
+
+  .drawer-identity h3 {
+    margin: 0;
+    color: var(--color-text-strong);
+    font-size: 0.95rem;
+    font-weight: 850;
+  }
+
+  .drawer-identity div > span {
+    display: block;
+    margin-top: 4px;
+    color: var(--color-text-muted);
+    font-size: 0.63rem;
+  }
+
+  .drawer-badges {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin-top: 15px;
+  }
+
+  .drawer-section {
+    margin-top: 25px;
+    padding-top: 19px;
+    border-top: 1px solid var(--color-border);
+  }
+
+  .detail-list {
+    display: grid;
+    gap: 0;
+    margin: 10px 0 0;
+  }
+
+  .detail-list > div {
+    display: grid;
+    grid-template-columns: 90px minmax(0, 1fr);
+    gap: 12px;
+    padding: 9px 0;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .detail-list > div:last-child {
+    border-bottom: 0;
+  }
+
+  .detail-list dt {
+    color: var(--color-text-faint);
+    font-size: 0.62rem;
+  }
+
+  .detail-list dd {
+    margin: 0;
+    color: var(--color-text-strong);
+    font-size: 0.65rem;
+    font-weight: 700;
+    line-height: 1.5;
+    word-break: break-word;
+  }
+
+  .access-box {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-top: 10px;
+    padding: 13px;
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    background: var(--color-surface-soft);
+  }
+
+  .access-box__icon {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: var(--color-primary-soft);
+    color: var(--color-primary);
+  }
+
+  .access-box strong {
+    display: block;
+    color: var(--color-text-strong);
+    font-size: 0.68rem;
+    font-weight: 800;
+  }
+
+  .access-box p {
+    margin: 3px 0 0;
+    color: var(--color-text-muted);
+    font-size: 0.61rem;
+    line-height: 1.55;
+  }
+
+  .drawer__footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    padding: 14px 20px;
+    border-top: 1px solid var(--color-border);
+    background: var(--color-surface);
+  }
+
+  .modal {
+    position: fixed;
+    inset: 0;
+    z-index: 90;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .modal[hidden] {
+    display: none;
+  }
+
+  .modal__backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.38);
+    backdrop-filter: blur(3px);
+  }
+
+  .modal__panel {
+    position: relative;
+    width: min(600px, 100%);
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+    border-radius: 18px;
+    background: var(--color-surface);
+    box-shadow:
+      0 30px 80px rgba(15, 23, 42, 0.2);
+  }
+
+  .modal__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 20px;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .modal__eyebrow {
+    display: block;
+    color: var(--color-primary);
+    font-size: 0.58rem;
+    font-weight: 900;
+    letter-spacing: 0.1em;
+  }
+
+  .modal__header h2 {
+    margin: 5px 0 0;
+    color: var(--color-text-strong);
+    font-size: 1rem;
+    font-weight: 850;
+  }
+
+  .modal__header p {
+    max-width: 450px;
+    margin: 5px 0 0;
+    color: var(--color-text-muted);
+    font-size: 0.64rem;
+    line-height: 1.55;
+  }
+
+  .modal__close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 35px;
+    height: 35px;
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    background: var(--color-surface);
+    color: var(--color-text-muted);
+    cursor: pointer;
+  }
+
+  .user-form {
+    padding: 20px;
+  }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 13px;
+  }
+
+  .form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .form-field > span {
+    color: var(--color-text-strong);
+    font-size: 0.63rem;
+    font-weight: 780;
+  }
+
+  .form-field input,
+  .form-field select {
+    width: 100%;
+    min-height: 42px;
+    padding: 0 11px;
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    background: var(--color-surface);
+    color: var(--color-text-strong);
+    font: inherit;
+    font-size: 0.66rem;
+    outline: none;
+  }
+
+  .form-field input:focus,
+  .form-field select:focus {
+    border-color: var(--color-primary);
+    box-shadow:
+      0 0 0 3px var(--color-primary-ring);
+  }
+
+  .form-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin-top: 15px;
+    padding: 12px;
+    border-radius: 11px;
+    background: var(--color-surface-soft);
+    color: var(--color-text-muted);
+  }
+
+  .form-note svg {
+    flex: 0 0 auto;
+    margin-top: 1px;
+    color: var(--color-primary);
+  }
+
+  .form-note span {
+    font-size: 0.61rem;
+    line-height: 1.6;
+  }
+
+  .modal__footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 18px;
+  }
+
+  .toast {
+    position: fixed;
+    right: 24px;
+    bottom: 24px;
+    z-index: 100;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    max-width: min(390px, calc(100vw - 30px));
+    padding: 11px 14px;
+    border: 1px solid var(--color-primary-soft);
+    border-radius: 11px;
+    background: var(--color-surface);
+    color: var(--color-text-strong);
+    box-shadow:
+      0 15px 35px rgba(15, 23, 42, 0.14);
+    font-size: 0.66rem;
+    font-weight: 750;
+  }
+
+  .toast[hidden] {
+    display: none;
+  }
+
+  .toast svg {
+    color: var(--color-primary);
+  }
+
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  @media (max-width: 1200px) {
+    .page-top {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+
+    .page-top__actions {
+      justify-content: flex-start;
+    }
+
+    .summary-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .toolbar {
+      align-items: stretch;
+      flex-direction: column;
+    }
+
+    .toolbar__search {
+      max-width: none;
+    }
+
+    .toolbar__filters {
+      justify-content: flex-start;
+    }
+
+    .role-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 820px) {
+    .users-page {
+      padding: 20px 16px 36px;
+    }
+
+    .security-strip {
+      align-items: flex-start;
+      flex-wrap: wrap;
+    }
+
+    .security-strip__status {
+      margin-left: 56px;
+    }
+
+    .form-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 600px) {
+    .summary-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .page-top__actions {
+      width: 100%;
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .page-top__actions .button {
+      width: 100%;
+    }
+
+    .toolbar__filters {
+      display: grid;
+      grid-template-columns: 1fr;
+    }
+
+    .filter-control select {
+      width: 100%;
+      min-width: 0;
+    }
+
+    .table-head {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+
+    .drawer__footer {
+      align-items: stretch;
+    }
+
+    .drawer__footer .button {
+      flex: 1;
+    }
+
+    .modal {
+      padding: 12px;
+    }
+
+    .modal__panel {
+      max-height: calc(100dvh - 24px);
+      overflow-y: auto;
+    }
+
+    .modal__footer {
+      flex-direction: column-reverse;
+    }
+
+    .modal__footer .button {
+      width: 100%;
+    }
+
+    .toast {
+      right: 15px;
+      bottom: 15px;
+    }
+  }
+</style>
+
+<script>
+// @ts-nocheck
+
+  const users = [
+    {
+      id: "user-demo-001",
+      name: "Admin BINSIGHT",
+      email: "admin@binsight.id",
+      role: "super-admin",
+      roleLabel: "Super Admin",
+      status: "active",
+      statusLabel: "Aktif",
+      organization: "BINSIGHT",
+      lastActive: "Hari ini, 10:42",
+      createdAt: "1 Sep 2026",
+    },
+    {
+      id: "user-demo-002",
+      name: "Pengelola Data",
+      email: "data@binsight.id",
+      role: "admin",
+      roleLabel: "Admin",
+      status: "active",
+      statusLabel: "Aktif",
+      organization: "BINSIGHT",
+      lastActive: "Hari ini, 09:51",
+      createdAt: "2 Sep 2026",
+    },
+    {
+      id: "user-demo-003",
+      name: "Editor Konten",
+      email: "editor@binsight.id",
+      role: "editor",
+      roleLabel: "Editor",
+      status: "active",
+      statusLabel: "Aktif",
+      organization: "BINSIGHT",
+      lastActive: "9 Sep 2026, 16:18",
+      createdAt: "3 Sep 2026",
+    },
+    {
+      id: "user-demo-004",
+      name: "Operator Organisasi",
+      email: "operator@contoh.id",
+      role: "organization",
+      roleLabel: "Organisasi",
+      status: "pending",
+      statusLabel: "Menunggu",
+      organization: "Organisasi Pengelola Sampah",
+      lastActive: "Belum aktif",
+      createdAt: "9 Sep 2026",
+    },
+    {
+      id: "user-demo-005",
+      name: "Pengguna Publik",
+      email: "viewer@contoh.id",
+      role: "viewer",
+      roleLabel: "Viewer",
+      status: "suspended",
+      statusLabel: "Ditangguhkan",
+      organization: "—",
+      lastActive: "6 Sep 2026, 11:24",
+      createdAt: "4 Sep 2026",
+    },
+  ];
+
+  const page =
+    document.querySelector(
+      "[data-users-page]",
+    );
+
+  if (!(page instanceof HTMLElement)) {
+    throw new Error(
+      "BINSIGHT users admin page root not found.",
+    );
+  }
+
+  const searchInput =
+    page.querySelector(
+      "[data-search]",
+    );
+
+  const clearSearch =
+    page.querySelector(
+      "[data-clear-search]",
+    );
+
+  const statusFilter =
+    page.querySelector(
+      "[data-status-filter]",
+    );
+
+  const roleFilter =
+    page.querySelector(
+      "[data-role-filter]",
+    );
+
+  const resultCount =
+    page.querySelector(
+      "[data-result-count]",
+    );
+
+  const footerCount =
+    page.querySelector(
+      "[data-footer-count]",
+    );
+
+  const emptyState =
+    page.querySelector(
+      "[data-empty-state]",
+    );
+
+  const emptyReset =
+    page.querySelector(
+      "[data-empty-reset]",
+    );
+
+  const rows =
+    Array.from(
+      page.querySelectorAll(
+        "[data-user-row]",
+      ),
+    );
+
+  const drawer =
+    page.querySelector(
+      "[data-drawer]",
+    );
+
+  const drawerBackdrop =
+    page.querySelector(
+      "[data-drawer-backdrop]",
+    );
+
+  const drawerClose =
+    page.querySelector(
+      "[data-drawer-close]",
+    );
+
+  const drawerAvatar =
+    page.querySelector(
+      "[data-drawer-avatar]",
+    );
+
+  const drawerName =
+    page.querySelector(
+      "[data-drawer-name]",
+    );
+
+  const drawerEmail =
+    page.querySelector(
+      "[data-drawer-email]",
+    );
+
+  const drawerRole =
+    page.querySelector(
+      "[data-drawer-role]",
+    );
+
+  const drawerStatus =
+    page.querySelector(
+      "[data-drawer-status]",
+    );
+
+  const drawerOrganization =
+    page.querySelector(
+      "[data-drawer-organization]",
+    );
+
+  const drawerCreated =
+    page.querySelector(
+      "[data-drawer-created]",
+    );
+
+  const drawerLastActive =
+    page.querySelector(
+      "[data-drawer-last-active]",
+    );
+
+  const drawerAccessTitle =
+    page.querySelector(
+      "[data-drawer-access-title]",
+    );
+
+  const drawerAccessCopy =
+    page.querySelector(
+      "[data-drawer-access-copy]",
+    );
+
+  const drawerEdit =
+    page.querySelector(
+      "[data-drawer-edit]",
+    );
+
+  const drawerToggleStatus =
+    page.querySelector(
+      "[data-drawer-toggle-status]",
+    );
+
+  const createModal =
+    page.querySelector(
+      "[data-create-modal]",
+    );
+
+  const createForm =
+    page.querySelector(
+      "[data-create-form]",
+    );
+
+  const createUserButton =
+    page.querySelector(
+      "[data-create-user]",
+    );
+
+  const createCloseButtons =
+    Array.from(
+      page.querySelectorAll(
+        "[data-create-close]",
+      ),
+    );
+
+  const toast =
+    page.querySelector(
+      "[data-toast]",
+    );
+
+  const toastMessage =
+    page.querySelector(
+      "[data-toast-message]",
+    );
+
+  let selectedUserId = null;
+  let toastTimer = null;
+
+  function getUser(id) {
+    return users.find(
+      (user) =>
+        user.id === id,
+    );
+  }
+
+  function initials(name) {
+    return name
+      .split(" ")
+      .map(
+        (part) =>
+          part[0] ?? "",
+      )
+      .join("")
+      .slice(0, 2)
+      .toUpperCase();
+  }
+
+  function updateFilters() {
+    const query =
+      searchInput instanceof
+      HTMLInputElement
+        ? searchInput.value
+            .trim()
+            .toLowerCase()
+        : "";
+
+    const status =
+      statusFilter instanceof
+      HTMLSelectElement
+        ? statusFilter.value
+        : "all";
+
+    const role =
+      roleFilter instanceof
+      HTMLSelectElement
+        ? roleFilter.value
+        : "all";
+
+    const visibleRows =
+      rows.filter(
+        (row) => {
+          const name =
+            row.getAttribute(
+              "data-name",
+            ) ?? "";
+
+          const email =
+            row.getAttribute(
+              "data-email",
+            ) ?? "";
+
+          const roleValue =
+            row.getAttribute(
+              "data-role",
+            ) ?? "";
+
+          const roleLabel =
+            row.getAttribute(
+              "data-role-label",
+            ) ?? "";
+
+          const organization =
+            row.getAttribute(
+              "data-organization",
+            ) ?? "";
+
+          const rowStatus =
+            row.getAttribute(
+              "data-status",
+            ) ?? "";
+
+          const matchesSearch =
+            query === "" ||
+            name.includes(query) ||
+            email.includes(query) ||
+            roleLabel.includes(query) ||
+            organization.includes(query);
+
+          const matchesStatus =
+            status === "all" ||
+            rowStatus === status;
+
+          const matchesRole =
+            role === "all" ||
+            roleValue === role;
+
+          return (
+            matchesSearch &&
+            matchesStatus &&
+            matchesRole
+          );
+        },
+      );
+
+    rows.forEach(
+      (row) => {
+        row.setAttribute(
+          "data-hidden",
+          visibleRows.includes(
+            row,
+          )
+            ? "false"
+            : "true",
+        );
+      },
+    );
+
+    if (
+      resultCount instanceof HTMLElement
+    ) {
+      resultCount.textContent =
+        `${visibleRows.length} pengguna`;
+    }
+
+    if (
+      footerCount instanceof HTMLElement
+    ) {
+      footerCount.textContent =
+        String(
+          visibleRows.length,
+        );
+    }
+
+    if (
+      emptyState instanceof HTMLElement
+    ) {
+      emptyState.hidden =
+        visibleRows.length !== 0;
+    }
+
+    if (
+      clearSearch instanceof HTMLButtonElement
+    ) {
+      clearSearch.hidden =
+        !(
+          searchInput instanceof HTMLInputElement &&
+          searchInput.value.length > 0
+        );
+    }
+  }
+
+  function resetFilters() {
+    if (
+      searchInput instanceof HTMLInputElement
+    ) {
+      searchInput.value = "";
+    }
+
+    if (
+      statusFilter instanceof HTMLSelectElement
+    ) {
+      statusFilter.value = "all";
+    }
+
+    if (
+      roleFilter instanceof HTMLSelectElement
+    ) {
+      roleFilter.value = "all";
+    }
+
+    updateFilters();
+  }
+
+  function showToast(message) {
+    if (
+      !(toast instanceof HTMLElement) ||
+      !(toastMessage instanceof HTMLElement)
+    ) {
+      return;
+    }
+
+    toastMessage.textContent =
+      message;
+
+    toast.hidden = false;
+
+    if (
+      toastTimer !== null
+    ) {
+      window.clearTimeout(
+        toastTimer,
+      );
+    }
+
+    toastTimer =
+      window.setTimeout(
+        () => {
+          toast.hidden = true;
+          toastTimer = null;
+        },
+        2800,
+      );
+  }
+
+  function setRoleBadge(
+    element,
+    user,
+  ) {
+    if (
+      !(element instanceof HTMLElement)
+    ) {
+      return;
+    }
+
+    element.className =
+      `role-badge role-badge--${user.role}`;
+
+    element.textContent =
+      user.roleLabel;
+  }
+
+  function setStatusBadge(
+    element,
+    user,
+  ) {
+    if (
+      !(element instanceof HTMLElement)
+    ) {
+      return;
+    }
+
+    element.className =
+      `status-badge status-badge--${user.status}`;
+
+    element.textContent =
+      user.statusLabel;
+  }
+
+  function updateDrawerAction(
+    user,
+  ) {
+    if (
+      !(drawerToggleStatus instanceof HTMLButtonElement)
+    ) {
+      return;
+    }
+
+    if (
+      user.status === "suspended"
+    ) {
+      drawerToggleStatus.className =
+        "button button--secondary";
+
+      drawerToggleStatus.innerHTML = `
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="9"/>
+          <path d="m8 12 2.5 2.5L16 9"/>
+        </svg>
+        <span>Aktifkan</span>
+      `;
+
+      drawerToggleStatus.disabled =
+        user.role === "super-admin";
+
+      return;
+    }
+
+    if (
+      user.role === "super-admin"
+    ) {
+      drawerToggleStatus.className =
+        "button button--secondary";
+
+      drawerToggleStatus.innerHTML = `
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20Z"/>
+          <path d="M12 8v4l3 2"/>
+        </svg>
+        <span>Dilindungi</span>
+      `;
+
+      drawerToggleStatus.disabled =
+        true;
+
+      return;
+    }
+
+    drawerToggleStatus.disabled =
+      false;
+
+    drawerToggleStatus.className =
+      "button button--danger";
+
+    drawerToggleStatus.innerHTML = `
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="12" cy="12" r="9"/>
+        <path d="M8 12h8"/>
+      </svg>
+      <span>Tangguhkan</span>
+    `;
+  }
+
+  function populateDrawer(
+    user,
+  ) {
+    if (!user) {
+      return;
+    }
+
+    if (
+      drawerAvatar instanceof HTMLElement
+    ) {
+      drawerAvatar.textContent =
+        initials(user.name);
+    }
+
+    if (
+      drawerName instanceof HTMLElement
+    ) {
+      drawerName.textContent =
+        user.name;
+    }
+
+    if (
+      drawerEmail instanceof HTMLElement
+    ) {
+      drawerEmail.textContent =
+        user.email;
+    }
+
+    setRoleBadge(
+      drawerRole,
+      user,
+    );
+
+    setStatusBadge(
+      drawerStatus,
+      user,
+    );
+
+    if (
+      drawerOrganization instanceof HTMLElement
+    ) {
+      drawerOrganization.textContent =
+        user.organization;
+    }
+
+    if (
+      drawerCreated instanceof HTMLElement
+    ) {
+      drawerCreated.textContent =
+        user.createdAt;
+    }
+
+    if (
+      drawerLastActive instanceof HTMLElement
+    ) {
+      drawerLastActive.textContent =
+        user.lastActive;
+    }
+
+    if (
+      drawerAccessTitle instanceof HTMLElement
+    ) {
+      drawerAccessTitle.textContent =
+        `${user.roleLabel} access`;
+    }
+
+    if (
+      drawerAccessCopy instanceof HTMLElement
+    ) {
+      if (
+        user.role ===
+        "super-admin"
+      ) {
+        drawerAccessCopy.textContent =
+          "Akses administratif tertinggi. Perubahan sensitif membutuhkan kehati-hatian.";
+      } else if (
+        user.role === "admin"
+      ) {
+        drawerAccessCopy.textContent =
+          "Dapat menangani operasi admin sesuai kewenangan yang diberikan.";
+      } else if (
+        user.role === "editor"
+      ) {
+        drawerAccessCopy.textContent =
+          "Fokus pada pemeliharaan dan pengelolaan konten.";
+      } else if (
+        user.role === "organization"
+      ) {
+        drawerAccessCopy.textContent =
+          "Akses diarahkan pada ruang kerja dan data organisasi terkait.";
+      } else {
+        drawerAccessCopy.textContent =
+          "Akses baca sesuai bagian publik atau data yang diizinkan.";
+      }
+    }
+
+    updateDrawerAction(
+      user,
+    );
+  }
+
+  function openDrawer(id) {
+    const user =
+      getUser(id);
+
+    if (
+      !user ||
+      !(drawer instanceof HTMLElement) ||
+      !(drawerBackdrop instanceof HTMLElement)
+    ) {
+      return;
+    }
+
+    selectedUserId =
+      id;
+
+    populateDrawer(
+      user,
+    );
+
+    drawer.hidden = false;
+    drawerBackdrop.hidden =
+      false;
+
+    window.requestAnimationFrame(
+      () => {
+        drawer.setAttribute(
+          "data-open",
+          "true",
+        );
+
+        drawer.setAttribute(
+          "aria-hidden",
+          "false",
+        );
+      },
+    );
+
+    document.documentElement.style.overflow =
+      "hidden";
+  }
+
+  function closeDrawer() {
+    if (
+      !(drawer instanceof HTMLElement) ||
+      !(drawerBackdrop instanceof HTMLElement)
+    ) {
+      return;
+    }
+
+    drawer.setAttribute(
+      "data-open",
+      "false",
+    );
+
+    drawer.setAttribute(
+      "aria-hidden",
+      "true",
+    );
+
+    window.setTimeout(
+      () => {
+        drawer.hidden = true;
+        drawerBackdrop.hidden =
+          true;
+      },
+      190,
+    );
+
+    document.documentElement.style.overflow =
+      "";
+
+    selectedUserId =
+      null;
+  }
+
+  function editUser(id) {
+    const user =
+      getUser(id);
+
+    if (!user) {
+      return;
+    }
+
+    window.dispatchEvent(
+      new CustomEvent(
+        "binsight:admin-user-edit",
+        {
+          detail: {
+            ...user,
+          },
+        },
+      ),
+    );
+
+    showToast(
+      `Mode edit untuk "${user.name}" dipersiapkan.`,
+    );
+  }
+
+  function toggleUserStatus() {
+    if (!selectedUserId) {
+      return;
+    }
+
+    const user =
+      getUser(
+        selectedUserId,
+      );
+
+    if (!user) {
+      return;
+    }
+
+    if (
+      user.role ===
+      "super-admin"
+    ) {
+      showToast(
+        "Akun Super Admin dilindungi dari perubahan status.",
+      );
+      return;
+    }
+
+    if (
+      user.status ===
+      "suspended"
+    ) {
+      user.status =
+        "active";
+
+      user.statusLabel =
+        "Aktif";
+
+      user.lastActive =
+        "Aktif kembali sekarang";
+
+      showToast(
+        `Akun ${user.name} diaktifkan kembali.`,
+      );
+    } else {
+      user.status =
+        "suspended";
+
+      user.statusLabel =
+        "Ditangguhkan";
+
+      showToast(
+        `Akun ${user.name} ditangguhkan.`,
+      );
+    }
+
+    const row =
+      rows.find(
+        (candidate) =>
+          candidate.getAttribute(
+            "data-id",
+          ) === user.id,
+      );
+
+    if (
+      row instanceof HTMLElement
+    ) {
+      row.setAttribute(
+        "data-status",
+        user.status,
+      );
+
+      const statusBadge =
+        row.querySelector(
+          ".status-badge",
+        );
+
+      setStatusBadge(
+        statusBadge,
+        user,
+      );
+    }
+
+    populateDrawer(
+      user,
+    );
+
+    window.dispatchEvent(
+      new CustomEvent(
+        "binsight:admin-user-status-change",
+        {
+          detail: {
+            ...user,
+          },
+        },
+      ),
+    );
+
+    updateFilters();
+  }
+
+  function openCreateModal() {
+    if (
+      !(createModal instanceof HTMLElement)
+    ) {
+      return;
+    }
+
+    createModal.hidden =
+      false;
+
+    createModal.setAttribute(
+      "aria-hidden",
+      "false",
+    );
+
+    document.documentElement.style.overflow =
+      "hidden";
+
+    const firstInput =
+      createModal.querySelector(
+        'input[name="name"]',
+      );
+
+    if (
+      firstInput instanceof HTMLInputElement
+    ) {
+      window.setTimeout(
+        () => firstInput.focus(),
+        0,
+      );
+    }
+  }
+
+  function closeCreateModal() {
+    if (
+      !(createModal instanceof HTMLElement)
+    ) {
+      return;
+    }
+
+    createModal.hidden =
+      true;
+
+    createModal.setAttribute(
+      "aria-hidden",
+      "true",
+    );
+
+    document.documentElement.style.overflow =
+      "";
+  }
+
+  createUserButton?.addEventListener(
+    "click",
+    openCreateModal,
+  );
+
+  createCloseButtons.forEach(
+    (button) => {
+      button.addEventListener(
+        "click",
+        closeCreateModal,
+      );
+    },
+  );
+
+  createForm?.addEventListener(
+    "submit",
+    (event) => {
+      event.preventDefault();
+
+      if (
+        !(createForm instanceof HTMLFormElement)
+      ) {
+        return;
+      }
+
+      const formData =
+        new FormData(
+          createForm,
+        );
+
+      const name =
+        String(
+          formData.get("name") ?? "",
+        ).trim();
+
+      const email =
+        String(
+          formData.get("email") ?? "",
+        ).trim();
+
+      const role =
+        String(
+          formData.get("role") ??
+            "viewer",
+        );
+
+      const organization =
+        String(
+          formData.get(
+            "organization",
+          ) ?? "—",
+        ).trim() || "—";
+
+      if (
+        !name ||
+        !email
+      ) {
+        showToast(
+          "Nama dan email wajib diisi.",
+        );
+        return;
+      }
+
+      const roleLabelMap = {
+        "super-admin": "Super Admin",
+        admin: "Admin",
+        editor: "Editor",
+        viewer: "Viewer",
+        organization: "Organisasi",
+      };
+
+      window.dispatchEvent(
+        new CustomEvent(
+          "binsight:admin-user-create",
+          {
+            detail: {
+              name,
+              email,
+              role,
+              roleLabel:
+                roleLabelMap[
+                  role
+                ] ?? "Viewer",
+              status: "pending",
+              statusLabel:
+                "Menunggu",
+              organization,
+            },
+          },
+        ),
+      );
+
+      closeCreateModal();
+
+      createForm.reset();
+
+      showToast(
+        "Data pengguna disiapkan untuk proses pembuatan akun.",
+      );
+    },
+  );
+
+  searchInput?.addEventListener(
+    "input",
+    updateFilters,
+  );
+
+  statusFilter?.addEventListener(
+    "change",
+    updateFilters,
+  );
+
+  roleFilter?.addEventListener(
+    "change",
+    updateFilters,
+  );
+
+  clearSearch?.addEventListener(
+    "click",
+    () => {
+      if (
+        searchInput instanceof HTMLInputElement
+      ) {
+        searchInput.value = "";
+        searchInput.focus();
+      }
+
+      updateFilters();
+    },
+  );
+
+  emptyReset?.addEventListener(
+    "click",
+    resetFilters,
+  );
+
+  page
+    .querySelectorAll(
+      "[data-view]",
+    )
+    .forEach(
+      (button) => {
+        button.addEventListener(
+          "click",
+          () => {
+            const id =
+              button.getAttribute(
+                "data-record",
+              );
+
+            if (id) {
+              openDrawer(id);
+            }
+          },
+        );
+      },
+    );
+
+  page
+    .querySelectorAll(
+      "[data-edit]",
+    )
+    .forEach(
+      (button) => {
+        button.addEventListener(
+          "click",
+          () => {
+            const id =
+              button.getAttribute(
+                "data-record",
+              );
+
+            if (id) {
+              editUser(id);
+            }
+          },
+        );
+      },
+    );
+
+  drawerClose?.addEventListener(
+    "click",
+    closeDrawer,
+  );
+
+  drawerBackdrop?.addEventListener(
+    "click",
+    closeDrawer,
+  );
+
+  drawerEdit?.addEventListener(
+    "click",
+    () => {
+      if (selectedUserId) {
+        editUser(
+          selectedUserId,
+        );
+      }
+    },
+  );
+
+  drawerToggleStatus?.addEventListener(
+    "click",
+    toggleUserStatus,
+  );
+
+  page
+    .querySelector(
+      "[data-refresh]",
+    )
+    ?.addEventListener(
+      "click",
+      () => {
+        updateFilters();
+
+        showToast(
+          "Data pengguna diperbarui.",
+        );
+      },
+    );
+
+  document.addEventListener(
+    "keydown",
+    (event) => {
+      if (
+        event.key !== "Escape"
+      ) {
+        return;
+      }
+
+      if (
+        drawer instanceof HTMLElement &&
+        drawer.getAttribute(
+          "data-open",
+        ) === "true"
+      ) {
+        closeDrawer();
+        return;
+      }
+
+      if (
+        createModal instanceof HTMLElement &&
+        !createModal.hidden
+      ) {
+        closeCreateModal();
+      }
+    },
+  );
+
+  updateFilters();
+</script>
