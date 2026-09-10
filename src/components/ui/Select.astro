@@ -21,56 +21,6 @@
  *
  * Component system:
  * src/styles/components.css
- *
- * ============================================================================
- * Basic usage
- * ============================================================================
- *
- * <Select
- *   name="waste-type"
- *   label="Jenis Sampah"
- * >
- *   <option value="">Semua jenis sampah</option>
- *   <option value="organic">Organik</option>
- *   <option value="plastic">Plastik</option>
- * </Select>
- *
- * ============================================================================
- * With options array
- * ============================================================================
- *
- * <Select
- *   name="area"
- *   label="Wilayah"
- *   options={[
- *     { value: "kuta", label: "Kuta" },
- *     { value: "mengwi", label: "Mengwi" },
- *     { value: "petang", label: "Petang" }
- *   ]}
- * />
- *
- * ============================================================================
- * Error state
- * ============================================================================
- *
- * <Select
- *   name="status"
- *   label="Status"
- *   error="Silakan pilih status."
- * />
- *
- * ============================================================================
- * Required
- * ============================================================================
- *
- * <Select
- *   name="category"
- *   label="Kategori"
- *   required
- * >
- *   ...
- * </Select>
- *
  * ============================================================================
  */
 
@@ -143,13 +93,6 @@ interface Props {
 
   dataCategory?: string;
 
-  /**
-   * Allows a parent component to identify the semantic purpose
-   * without changing the component's visual API.
-   *
-   * Example:
-   * data-context="dashboard-filter"
-   */
   dataContext?: string;
 }
 
@@ -215,9 +158,14 @@ const {
 
 const generatedId =
   id ??
-  (name
-    ? `select-${name.replace(/[^a-zA-Z0-9_-]/g, "-")}`
-    : undefined);
+  (
+    name
+      ? `select-${name.replace(
+          /[^a-zA-Z0-9_-]/g,
+          "-"
+        )}`
+      : undefined
+  );
 
 const hintId =
   generatedId && (description || hint)
@@ -229,33 +177,72 @@ const errorId =
     ? `${generatedId}-error`
     : undefined;
 
-const describedBy =
-  ariaDescribedBy ??
+const generatedDescribedBy = (
   [
     hintId,
     errorId,
   ]
-    .filter(Boolean)
-    .join(" ") ||
-  undefined;
+    .filter(
+      (item): item is string =>
+        Boolean(item)
+    )
+    .join(" ")
+    .trim()
+);
+
+const describedBy =
+  ariaDescribedBy ??
+  (generatedDescribedBy || undefined);
 
 const labelId =
   ariaLabelledBy ??
-  (label && generatedId
-    ? `${generatedId}-label`
-    : undefined);
+  (
+    label && generatedId
+      ? `${generatedId}-label`
+      : undefined
+  );
+
+const ariaInvalid:
+  | "true"
+  | "false"
+  | undefined =
+  error ? "true" : undefined;
+
+const ariaReadonly:
+  | "true"
+  | "false"
+  | undefined =
+  readonly ? "true" : undefined;
 
 const classes = [
   "select-field",
   `select-field--${selectSize}`,
-  error ? "select-field--error" : "",
-  disabled ? "select-field--disabled" : "",
-  readonly ? "select-field--readonly" : "",
-  multiple ? "select-field--multiple" : "",
+
+  error
+    ? "select-field--error"
+    : "",
+
+  disabled
+    ? "select-field--disabled"
+    : "",
+
+  readonly
+    ? "select-field--readonly"
+    : "",
+
+  multiple
+    ? "select-field--multiple"
+    : "",
+
   className,
 ]
   .filter(Boolean)
   .join(" ");
+
+const selectedValue =
+  value !== ""
+    ? value
+    : undefined;
 ---
 
 <div
@@ -311,14 +298,10 @@ const classes = [
         "select-field__select",
         selectClass,
       ]}
-      value={value || undefined}
+      value={selectedValue}
       required={required}
       disabled={disabled}
-      aria-readonly={
-        readonly
-          ? "true"
-          : undefined
-      }
+      aria-readonly={ariaReadonly}
       multiple={multiple}
       size={size}
       autocomplete={autocomplete}
@@ -336,11 +319,7 @@ const classes = [
           : undefined
       }
       aria-describedby={describedBy}
-      aria-invalid={
-        error
-          ? "true"
-          : undefined
-      }
+      aria-invalid={ariaInvalid}
       data-testid={dataTestid}
       data-value={dataValue}
       data-category={dataCategory}
@@ -352,7 +331,7 @@ const classes = [
           <option
             value=""
             disabled={required}
-            selected={!value}
+            selected={value === ""}
           >
             {placeholder}
           </option>
@@ -361,18 +340,22 @@ const classes = [
 
       {
         options.length > 0
-          ? options.map((option) => (
-              <option
-                value={option.value}
-                disabled={option.disabled}
-                selected={
-                  option.selected ??
-                  option.value === value
-                }
-              >
-                {option.label}
-              </option>
-            ))
+          ? options.map(
+              (option) => (
+                <option
+                  value={option.value}
+                  disabled={
+                    option.disabled
+                  }
+                  selected={
+                    option.selected ??
+                    option.value === value
+                  }
+                >
+                  {option.label}
+                </option>
+              )
+            )
           : <slot />
       }
     </select>
@@ -411,7 +394,6 @@ const classes = [
   }
 </div>
 
-
 <style>
   /* ==========================================================================
      01. WRAPPER
@@ -423,10 +405,8 @@ const classes = [
     gap: var(--space-2);
 
     min-width: 0;
-
     width: 100%;
   }
-
 
   /* ==========================================================================
      02. LABEL
@@ -453,7 +433,6 @@ const classes = [
     font-weight: var(--font-weight-bold);
   }
 
-
   /* ==========================================================================
      03. HINT
      ========================================================================== */
@@ -467,7 +446,6 @@ const classes = [
     line-height: var(--line-height-relaxed);
   }
 
-
   /* ==========================================================================
      04. CONTROL
      ========================================================================== */
@@ -478,7 +456,6 @@ const classes = [
     width: 100%;
     min-width: 0;
   }
-
 
   /* ==========================================================================
      05. SELECT
@@ -493,8 +470,8 @@ const classes = [
     padding:
       0
       calc(
-        var(--space-10)
-        + var(--space-1)
+        var(--space-10) +
+        var(--space-1)
       )
       0
       var(--space-4);
@@ -567,7 +544,6 @@ const classes = [
       0.8;
   }
 
-
   /* ==========================================================================
      06. ARROW
      ========================================================================== */
@@ -598,7 +574,6 @@ const classes = [
     height: 100%;
   }
 
-
   /* ==========================================================================
      07. MULTIPLE
      ========================================================================== */
@@ -617,7 +592,6 @@ const classes = [
     cursor: pointer;
   }
 
-
   /* ==========================================================================
      08. OPTION
      ========================================================================== */
@@ -634,7 +608,6 @@ const classes = [
     color:
       var(--color-text-subtle);
   }
-
 
   /* ==========================================================================
      09. ERROR
@@ -667,7 +640,6 @@ const classes = [
       var(--line-height-normal);
   }
 
-
   /* ==========================================================================
      10. DISABLED
      ========================================================================== */
@@ -681,7 +653,6 @@ const classes = [
       not-allowed;
   }
 
-
   /* ==========================================================================
      11. READONLY
      ========================================================================== */
@@ -694,7 +665,6 @@ const classes = [
     cursor:
       default;
   }
-
 
   /* ==========================================================================
      12. SIZE — SMALL
@@ -710,8 +680,8 @@ const classes = [
 
     padding-right:
       calc(
-        var(--space-8)
-        + var(--space-2)
+        var(--space-8) +
+        var(--space-2)
       );
 
     border-radius:
@@ -720,7 +690,6 @@ const classes = [
     font-size:
       var(--font-size-xs);
   }
-
 
   /* ==========================================================================
      13. SIZE — MEDIUM
@@ -731,7 +700,6 @@ const classes = [
     min-height:
       var(--control-height-md);
   }
-
 
   /* ==========================================================================
      14. SIZE — LARGE
@@ -747,14 +715,13 @@ const classes = [
 
     padding-right:
       calc(
-        var(--space-10)
-        + var(--space-2)
+        var(--space-10) +
+        var(--space-2)
       );
 
     font-size:
       var(--font-size-md);
   }
-
 
   /* ==========================================================================
      15. DARK THEME
@@ -777,7 +744,6 @@ const classes = [
     background:
       var(--color-surface);
   }
-
 
   /* ==========================================================================
      16. REDUCED MOTION

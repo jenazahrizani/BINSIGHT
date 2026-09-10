@@ -62,6 +62,13 @@ type Size =
   | "md"
   | "lg";
 
+type AriaInvalid =
+  | "true"
+  | "false"
+  | "grammar"
+  | "spelling"
+  | undefined;
+
 interface Props {
   name?: string;
   id?: string;
@@ -218,7 +225,8 @@ const generatedId =
   );
 
 const hintId =
-  generatedId && (description || hint)
+  generatedId &&
+  (description || hint)
     ? `${generatedId}-hint`
     : undefined;
 
@@ -227,16 +235,19 @@ const errorId =
     ? `${generatedId}-error`
     : undefined;
 
+const generatedDescribedBy = [
+  hintId,
+  errorId,
+]
+  .filter(
+    (item): item is string =>
+      Boolean(item)
+  )
+  .join(" ");
+
 const describedBy =
   ariaDescribedBy ??
-  (
-    [
-      hintId,
-      errorId,
-    ]
-      .filter(Boolean)
-      .join(" ") || undefined
-  );
+  (generatedDescribedBy || undefined);
 
 const labelId =
   ariaLabelledBy ??
@@ -245,6 +256,11 @@ const labelId =
       ? `${generatedId}-label`
       : undefined
   );
+
+const ariaInvalid: AriaInvalid =
+  error
+    ? "true"
+    : undefined;
 
 const classes = [
   "input-field",
@@ -329,9 +345,7 @@ const commonProps = {
     describedBy,
 
   "aria-invalid":
-    error
-      ? "true"
-      : undefined,
+    ariaInvalid,
 
   "data-testid":
     dataTestid,
@@ -379,7 +393,8 @@ const commonProps = {
   }
 
   {
-    (description || hint) && !isCheckbox && (
+    (description || hint) &&
+    !isCheckbox && (
       <p
         id={hintId}
         class="input-field__hint"
@@ -502,7 +517,10 @@ const commonProps = {
                   cy="11"
                   r="7"
                 />
-                <path d="m20 20-4-4" />
+
+                <path
+                  d="m20 20-4-4"
+                />
               </svg>
             </span>
           )
@@ -560,7 +578,10 @@ const commonProps = {
                   cy="12"
                   r="9"
                 />
-                <path d="m8 12 2.5 2.5L16 9" />
+
+                <path
+                  d="m8 12 2.5 2.5L16 9"
+                />
               </svg>
             </span>
           )
@@ -582,7 +603,6 @@ const commonProps = {
   }
 </div>
 
-
 <style>
   /* ==========================================================================
      01. FIELD WRAPPER
@@ -596,7 +616,6 @@ const commonProps = {
     width: 100%;
     min-width: 0;
   }
-
 
   /* ==========================================================================
      02. LABEL
@@ -623,7 +642,6 @@ const commonProps = {
     font-weight: var(--font-weight-bold);
   }
 
-
   /* ==========================================================================
      03. HINT
      ========================================================================== */
@@ -636,7 +654,6 @@ const commonProps = {
     font-size: var(--font-size-xs);
     line-height: var(--line-height-relaxed);
   }
-
 
   /* ==========================================================================
      04. CONTROL WRAPPER
@@ -651,7 +668,6 @@ const commonProps = {
     display: flex;
     align-items: center;
   }
-
 
   /* ==========================================================================
      05. INPUT / TEXTAREA
@@ -695,14 +711,10 @@ const commonProps = {
     line-height:
       var(--line-height-normal);
 
-    outline:
-      none;
+    outline: none;
 
-    appearance:
-      none;
-
-    -webkit-appearance:
-      none;
+    appearance: none;
+    -webkit-appearance: none;
 
     transition:
       border-color var(--transition-fast),
@@ -712,11 +724,8 @@ const commonProps = {
   }
 
   .input-field__control::placeholder {
-    color:
-      var(--color-text-subtle);
-
-    opacity:
-      1;
+    color: var(--color-text-subtle);
+    opacity: 1;
   }
 
   .input-field__control:hover:not(:disabled) {
@@ -755,15 +764,13 @@ const commonProps = {
       default;
   }
 
-
   /* ==========================================================================
      06. TEXTAREA
      ========================================================================== */
 
   .input-field--multiline
     .input-field__wrapper {
-    align-items:
-      stretch;
+    align-items: stretch;
   }
 
   .input-field--multiline
@@ -777,13 +784,11 @@ const commonProps = {
       var(--space-3)
       var(--space-4);
 
-    resize:
-      vertical;
+    resize: vertical;
 
     line-height:
       var(--line-height-relaxed);
   }
-
 
   /* ==========================================================================
      07. PREFIX / SUFFIX
@@ -791,20 +796,14 @@ const commonProps = {
 
   .input-field__prefix,
   .input-field__suffix {
-    position:
-      absolute;
+    position: absolute;
 
-    z-index:
-      2;
+    z-index: 2;
 
-    display:
-      inline-flex;
+    display: inline-flex;
+    align-items: center;
 
-    align-items:
-      center;
-
-    height:
-      100%;
+    height: 100%;
 
     color:
       var(--color-text-muted);
@@ -812,11 +811,9 @@ const commonProps = {
     font-size:
       var(--font-size-sm);
 
-    white-space:
-      nowrap;
+    white-space: nowrap;
 
-    pointer-events:
-      none;
+    pointer-events: none;
   }
 
   .input-field__prefix {
@@ -847,26 +844,18 @@ const commonProps = {
       );
   }
 
-
   /* ==========================================================================
      08. ICON
      ========================================================================== */
 
   .input-field__icon {
-    position:
-      absolute;
+    position: absolute;
 
-    z-index:
-      2;
+    z-index: 2;
 
-    display:
-      inline-flex;
-
-    align-items:
-      center;
-
-    justify-content:
-      center;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 
     width:
       var(--icon-size-md);
@@ -877,8 +866,7 @@ const commonProps = {
     color:
       var(--color-text-subtle);
 
-    pointer-events:
-      none;
+    pointer-events: none;
   }
 
   .input-field__icon--prefix {
@@ -892,13 +880,9 @@ const commonProps = {
   }
 
   .input-field__icon svg {
-    width:
-      100%;
-
-    height:
-      100%;
+    width: 100%;
+    height: 100%;
   }
-
 
   /* ==========================================================================
      09. LOADING
@@ -906,28 +890,19 @@ const commonProps = {
 
   .input-field--loading
     .input-field__control {
-    color:
-      transparent;
+    color: transparent;
   }
 
   .input-field__spinner {
-    position:
-      absolute;
+    position: absolute;
 
-    z-index:
-      3;
+    z-index: 3;
 
-    top:
-      50%;
+    top: 50%;
+    right: var(--space-4);
 
-    right:
-      var(--space-4);
-
-    width:
-      1rem;
-
-    height:
-      1rem;
+    width: 1rem;
+    height: 1rem;
 
     transform:
       translateY(-50%);
@@ -960,50 +935,35 @@ const commonProps = {
     }
   }
 
-
   /* ==========================================================================
      10. CHECKBOX
      ========================================================================== */
 
   .input-field__checkbox {
-    position:
-      relative;
+    position: relative;
 
-    display:
-      inline-flex;
-
-    align-items:
-      flex-start;
+    display: inline-flex;
+    align-items: flex-start;
 
     gap:
       var(--space-3);
 
-    width:
-      fit-content;
+    width: fit-content;
 
-    cursor:
-      pointer;
+    cursor: pointer;
   }
 
   .input-field__checkbox
     .input-field__control {
-    position:
-      absolute;
+    position: absolute;
 
-    width:
-      1px;
+    width: 1px;
+    height: 1px;
 
-    height:
-      1px;
+    padding: 0;
+    margin: -1px;
 
-    padding:
-      0;
-
-    margin:
-      -1px;
-
-    overflow:
-      hidden;
+    overflow: hidden;
 
     clip:
       rect(0, 0, 0, 0);
@@ -1011,28 +971,21 @@ const commonProps = {
     clip-path:
       inset(50%);
 
-    white-space:
-      nowrap;
+    white-space: nowrap;
 
-    border:
-      0;
+    border: 0;
   }
 
   .input-field__checkbox-box {
-    position:
-      relative;
+    position: relative;
 
-    display:
-      inline-flex;
+    display: inline-flex;
 
     flex:
       0 0 auto;
 
-    align-items:
-      center;
-
-    justify-content:
-      center;
+    align-items: center;
+    justify-content: center;
 
     width:
       1.25rem;
@@ -1067,8 +1020,7 @@ const commonProps = {
     height:
       0.7rem;
 
-    content:
-      "";
+    content: "";
 
     transform:
       rotate(45deg)
@@ -1116,11 +1068,9 @@ const commonProps = {
   }
 
   .input-field__checkbox-content {
-    display:
-      inline-flex;
+    display: inline-flex;
 
-    align-items:
-      center;
+    align-items: center;
 
     gap:
       var(--space-1);
@@ -1135,14 +1085,12 @@ const commonProps = {
       var(--line-height-relaxed);
   }
 
-
   /* ==========================================================================
      11. FILE INPUT
      ========================================================================== */
 
   .input-field__control[type="file"] {
-    height:
-      auto;
+    height: auto;
 
     min-height:
       var(--input-height);
@@ -1151,8 +1099,7 @@ const commonProps = {
       var(--space-2)
       var(--space-3);
 
-    cursor:
-      pointer;
+    cursor: pointer;
   }
 
   .input-field__control[type="file"]::file-selector-button {
@@ -1202,7 +1149,6 @@ const commonProps = {
       var(--color-slate-200);
   }
 
-
   /* ==========================================================================
      12. SEARCH
      ========================================================================== */
@@ -1211,10 +1157,8 @@ const commonProps = {
   .input-field__control[type="search"]::-webkit-search-decoration,
   .input-field__control[type="search"]::-webkit-search-results-button,
   .input-field__control[type="search"]::-webkit-search-results-decoration {
-    display:
-      none;
+    display: none;
   }
-
 
   /* ==========================================================================
      13. NUMBER
@@ -1222,14 +1166,10 @@ const commonProps = {
 
   .input-field__control[type="number"]::-webkit-inner-spin-button,
   .input-field__control[type="number"]::-webkit-outer-spin-button {
-    margin:
-      0;
+    margin: 0;
 
-    appearance:
-      none;
-
-    -webkit-appearance:
-      none;
+    appearance: none;
+    -webkit-appearance: none;
   }
 
   .input-field__control[type="number"] {
@@ -1239,7 +1179,6 @@ const commonProps = {
     -moz-appearance:
       textfield;
   }
-
 
   /* ==========================================================================
      14. COLOR
@@ -1255,7 +1194,6 @@ const commonProps = {
     cursor:
       pointer;
   }
-
 
   /* ==========================================================================
      15. ERROR
@@ -1288,7 +1226,6 @@ const commonProps = {
       var(--line-height-normal);
   }
 
-
   /* ==========================================================================
      16. DISABLED
      ========================================================================== */
@@ -1307,7 +1244,6 @@ const commonProps = {
     cursor:
       not-allowed;
   }
-
 
   /* ==========================================================================
      17. SIZE — SMALL
@@ -1331,7 +1267,6 @@ const commonProps = {
       var(--font-size-xs);
   }
 
-
   /* ==========================================================================
      18. SIZE — MEDIUM
      ========================================================================== */
@@ -1353,7 +1288,6 @@ const commonProps = {
     font-size:
       var(--font-size-sm);
   }
-
 
   /* ==========================================================================
      19. SIZE — LARGE
@@ -1377,7 +1311,6 @@ const commonProps = {
       var(--font-size-md);
   }
 
-
   /* ==========================================================================
      20. DARK THEME
      ========================================================================== */
@@ -1399,7 +1332,6 @@ const commonProps = {
     color:
       var(--color-text);
   }
-
 
   /* ==========================================================================
      21. REDUCED MOTION

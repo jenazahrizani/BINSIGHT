@@ -27,13 +27,13 @@
 
 import {
   Activity,
-  BarChart3,
+  ChartColumn,
   ChevronRight,
   LayoutDashboard,
   Map,
   Recycle,
   Building2,
-  FileWarning,
+  TriangleAlert,
   Menu,
   X,
 } from "@lucide/astro";
@@ -56,7 +56,8 @@ interface Props {
 
 const {
   title = "Dashboard Data",
-  description = "Gambaran data dan insight ekosistem persampahan Kabupaten Badung.",
+  description =
+    "Gambaran data dan insight ekosistem persampahan Kabupaten Badung.",
   breadcrumbs = [
     {
       label: "Beranda",
@@ -90,7 +91,9 @@ const absoluteUrl = (
   }
 
   return new URL(
-    value.startsWith("/") ? value : `/${value}`,
+    value.startsWith("/")
+      ? value
+      : `/${value}`,
     siteUrl
   ).toString();
 };
@@ -228,6 +231,7 @@ const robotsContent = noindex
     />
 
     <script
+      is:inline
       type="application/ld+json"
       set:html={JSON.stringify({
         "@context": "https://schema.org",
@@ -276,7 +280,7 @@ const robotsContent = noindex
                 <span class="dashboard-layout__sidebar-title-icon">
                   <LayoutDashboard
                     size={17}
-                    strokeWidth={2}
+                    stroke-width={2}
                     aria-hidden="true"
                   />
                 </span>
@@ -299,9 +303,9 @@ const robotsContent = noindex
                 aria-current="page"
               >
                 <span class="dashboard-layout__nav-icon">
-                  <BarChart3
+                  <ChartColumn
                     size={17}
-                    strokeWidth={1.9}
+                    stroke-width={1.9}
                     aria-hidden="true"
                   />
                 </span>
@@ -319,7 +323,7 @@ const robotsContent = noindex
                 <span class="dashboard-layout__nav-icon">
                   <Map
                     size={17}
-                    strokeWidth={1.9}
+                    stroke-width={1.9}
                     aria-hidden="true"
                   />
                 </span>
@@ -337,7 +341,7 @@ const robotsContent = noindex
                 <span class="dashboard-layout__nav-icon">
                   <Building2
                     size={17}
-                    strokeWidth={1.9}
+                    stroke-width={1.9}
                     aria-hidden="true"
                   />
                 </span>
@@ -355,7 +359,7 @@ const robotsContent = noindex
                 <span class="dashboard-layout__nav-icon">
                   <Recycle
                     size={17}
-                    strokeWidth={1.9}
+                    stroke-width={1.9}
                     aria-hidden="true"
                   />
                 </span>
@@ -371,9 +375,9 @@ const robotsContent = noindex
                 class="dashboard-layout__nav-item"
               >
                 <span class="dashboard-layout__nav-icon">
-                  <FileWarning
+                  <TriangleAlert
                     size={17}
-                    strokeWidth={1.9}
+                    stroke-width={1.9}
                     aria-hidden="true"
                   />
                 </span>
@@ -391,7 +395,7 @@ const robotsContent = noindex
               <span class="dashboard-layout__sidebar-note-icon">
                 <Activity
                   size={15}
-                  strokeWidth={2}
+                  stroke-width={2}
                   aria-hidden="true"
                 />
               </span>
@@ -421,14 +425,14 @@ const robotsContent = noindex
                 <Menu
                   class="dashboard-layout__mobile-menu-icon"
                   size={20}
-                  strokeWidth={2}
+                  stroke-width={2}
                   aria-hidden="true"
                 />
 
                 <X
                   class="dashboard-layout__mobile-close-icon"
                   size={20}
-                  strokeWidth={2}
+                  stroke-width={2}
                   aria-hidden="true"
                 />
               </button>
@@ -481,7 +485,7 @@ const robotsContent = noindex
                                 !isLast && (
                                   <ChevronRight
                                     size={13}
-                                    strokeWidth={1.8}
+                                    stroke-width={1.8}
                                     aria-hidden="true"
                                   />
                                 )
@@ -546,33 +550,74 @@ const robotsContent = noindex
 
     <script>
       const dashboardRoot =
-        document.querySelector<HTMLElement>(
+        document.querySelector(
           ".dashboard-layout"
         );
 
-      if (dashboardRoot) {
+      if (
+        dashboardRoot instanceof HTMLElement
+      ) {
         const sidebar =
-          dashboardRoot.querySelector<HTMLElement>(
+          dashboardRoot.querySelector(
             "[data-dashboard-sidebar]"
           );
 
         const sidebarToggle =
-          dashboardRoot.querySelector<HTMLButtonElement>(
+          dashboardRoot.querySelector(
             "[data-dashboard-sidebar-toggle]"
           );
 
         const backdrop =
-          dashboardRoot.querySelector<HTMLElement>(
+          dashboardRoot.querySelector(
             "[data-dashboard-backdrop]"
           );
 
         const progress =
-          dashboardRoot.querySelector<HTMLElement>(
+          dashboardRoot.querySelector(
             "[data-dashboard-progress]"
           );
 
+        const updateProgress = () => {
+          if (
+            !(progress instanceof HTMLElement)
+          ) {
+            return;
+          }
+
+          const documentHeight =
+            document.documentElement.scrollHeight -
+            window.innerHeight;
+
+          if (documentHeight <= 0) {
+            progress.style.transform =
+              "scaleX(0)";
+
+            return;
+          }
+
+          const scrollRatio = Math.min(
+            Math.max(
+              window.scrollY /
+                documentHeight,
+              0
+            ),
+            1
+          );
+
+          progress.style.transform =
+            `scaleX(${scrollRatio})`;
+        };
+
         const openSidebar = () => {
-          if (!sidebar || !sidebarToggle) return;
+          if (
+            !(sidebar instanceof HTMLElement) ||
+            !(
+              sidebarToggle instanceof
+              HTMLButtonElement
+            )
+          ) {
+            return;
+          }
 
           sidebar.classList.add(
             "dashboard-layout__sidebar--open"
@@ -602,7 +647,15 @@ const robotsContent = noindex
         };
 
         const closeSidebar = () => {
-          if (!sidebar || !sidebarToggle) return;
+          if (
+            !(sidebar instanceof HTMLElement) ||
+            !(
+              sidebarToggle instanceof
+              HTMLButtonElement
+            )
+          ) {
+            return;
+          }
 
           sidebar.classList.remove(
             "dashboard-layout__sidebar--open"
@@ -631,37 +684,49 @@ const robotsContent = noindex
           );
         };
 
-        sidebarToggle?.addEventListener(
-          "click",
-          () => {
-            const isOpen =
-              sidebar?.classList.contains(
-                "dashboard-layout__sidebar--open"
-              ) ?? false;
+        if (
+          sidebarToggle instanceof
+          HTMLButtonElement
+        ) {
+          sidebarToggle.addEventListener(
+            "click",
+            () => {
+              const isOpen =
+                sidebar instanceof HTMLElement &&
+                sidebar.classList.contains(
+                  "dashboard-layout__sidebar--open"
+                );
 
-            if (isOpen) {
-              closeSidebar();
-            } else {
-              openSidebar();
-            }
-          }
-        );
-
-        backdrop?.addEventListener(
-          "click",
-          closeSidebar
-        );
-
-        sidebar
-          ?.querySelectorAll("a")
-          .forEach((link) => {
-            link.addEventListener(
-              "click",
-              () => {
+              if (isOpen) {
                 closeSidebar();
+              } else {
+                openSidebar();
               }
-            );
-          });
+            }
+          );
+        }
+
+        if (
+          backdrop instanceof HTMLElement
+        ) {
+          backdrop.addEventListener(
+            "click",
+            closeSidebar
+          );
+        }
+
+        if (
+          sidebar instanceof HTMLElement
+        ) {
+          sidebar
+            .querySelectorAll("a")
+            .forEach((link) => {
+              link.addEventListener(
+                "click",
+                closeSidebar
+              );
+            });
+        }
 
         document.addEventListener(
           "keydown",
@@ -678,38 +743,11 @@ const robotsContent = noindex
             if (window.innerWidth > 1000) {
               closeSidebar();
             }
-          }
+
+            updateProgress();
+          },
+          { passive: true }
         );
-
-        const updateProgress = () => {
-          if (!progress) return;
-
-          const documentHeight =
-            document.documentElement.scrollHeight -
-            window.innerHeight;
-
-          if (documentHeight <= 0) {
-            progress.style.transform =
-              "scaleX(0)";
-
-            return;
-          }
-
-          const scrollRatio =
-            Math.min(
-              Math.max(
-                window.scrollY /
-                  documentHeight,
-                0
-              ),
-              1
-            );
-
-          progress.style.transform =
-            `scaleX(${scrollRatio})`;
-        };
-
-        updateProgress();
 
         window.addEventListener(
           "scroll",
@@ -717,11 +755,7 @@ const robotsContent = noindex
           { passive: true }
         );
 
-        window.addEventListener(
-          "resize",
-          updateProgress,
-          { passive: true }
-        );
+        updateProgress();
       }
     </script>
   </body>
@@ -856,6 +890,7 @@ const robotsContent = noindex
   .dashboard-layout__nav-item--active {
     color: var(--color-primary-dark);
     background: var(--color-primary-light);
+
     border-color: rgba(
       22,
       101,
@@ -885,27 +920,31 @@ const robotsContent = noindex
 
     display: grid;
     place-items: center;
+
     flex-shrink: 0;
 
     border-radius: 9px;
 
     color: currentColor;
-    background: rgba(
-      226,
-      232,
-      240,
-      0.55
-    );
+
+    background:
+      rgba(
+        226,
+        232,
+        240,
+        0.55
+      );
   }
 
   .dashboard-layout__nav-item--active
     .dashboard-layout__nav-icon {
-    background: rgba(
-      255,
-      255,
-      255,
-      0.78
-    );
+    background:
+      rgba(
+        255,
+        255,
+        255,
+        0.78
+      );
   }
 
   .dashboard-layout__nav-copy {
@@ -913,6 +952,7 @@ const robotsContent = noindex
 
     display: flex;
     flex-direction: column;
+
     gap: 3px;
   }
 
@@ -921,6 +961,7 @@ const robotsContent = noindex
 
     font-size: 0.77rem;
     font-weight: 800;
+
     line-height: 1.2;
   }
 
@@ -929,6 +970,7 @@ const robotsContent = noindex
 
     font-size: 0.64rem;
     font-weight: 500;
+
     line-height: 1.3;
   }
 
@@ -943,25 +985,31 @@ const robotsContent = noindex
   .dashboard-layout__sidebar-note {
     display: flex;
     align-items: flex-start;
+
     gap: 9px;
 
     margin: 0 5px;
+
     padding: 11px;
 
-    border: 1px solid rgba(
-      22,
-      101,
-      52,
-      0.08
-    );
+    border:
+      1px solid
+      rgba(
+        22,
+        101,
+        52,
+        0.08
+      );
+
     border-radius: 11px;
 
-    background: rgba(
-      220,
-      252,
-      231,
-      0.38
-    );
+    background:
+      rgba(
+        220,
+        252,
+        231,
+        0.38
+      );
   }
 
   .dashboard-layout__sidebar-note-icon {
@@ -970,17 +1018,20 @@ const robotsContent = noindex
 
     display: grid;
     place-items: center;
+
     flex-shrink: 0;
 
     border-radius: 8px;
 
     color: var(--color-primary-dark);
-    background: rgba(
-      255,
-      255,
-      255,
-      0.85
-    );
+
+    background:
+      rgba(
+        255,
+        255,
+        255,
+        0.85
+      );
   }
 
   .dashboard-layout__sidebar-note strong {
@@ -990,6 +1041,7 @@ const robotsContent = noindex
 
     font-size: 0.66rem;
     font-weight: 850;
+
     line-height: 1.3;
   }
 
@@ -999,11 +1051,13 @@ const robotsContent = noindex
     color: var(--color-secondary);
 
     font-size: 0.61rem;
+
     line-height: 1.55;
   }
 
   .dashboard-layout__content {
     min-width: 0;
+
     flex: 1 1 auto;
 
     display: flex;
@@ -1046,7 +1100,9 @@ const robotsContent = noindex
   .dashboard-layout__breadcrumb-list {
     display: flex;
     align-items: center;
+
     flex-wrap: wrap;
+
     gap: 3px;
 
     margin: 0;
@@ -1057,7 +1113,9 @@ const robotsContent = noindex
 
   .dashboard-layout__breadcrumb-item {
     display: inline-flex;
+
     align-items: center;
+
     gap: 3px;
 
     min-width: 0;
@@ -1074,30 +1132,40 @@ const robotsContent = noindex
     color: inherit;
 
     font-size: 0.67rem;
+
     font-weight: 650;
+
     line-height: 1.35;
 
     text-decoration: none;
+
     text-overflow: ellipsis;
+
     white-space: nowrap;
   }
 
   .dashboard-layout__breadcrumb-link {
-    transition: color 160ms ease;
+    transition:
+      color 160ms ease;
   }
 
   .dashboard-layout__breadcrumb-link:hover {
-    color: var(--color-primary-dark);
+    color:
+      var(--color-primary-dark);
   }
 
   .dashboard-layout__breadcrumb-current {
-    color: var(--color-text);
+    color:
+      var(--color-text);
+
     font-weight: 750;
   }
 
   .dashboard-layout__title-row {
     display: flex;
+
     align-items: flex-end;
+
     justify-content: space-between;
 
     gap: 28px;
@@ -1109,7 +1177,9 @@ const robotsContent = noindex
     color: var(--color-primary);
 
     font-size: 0.62rem;
+
     font-weight: 900;
+
     line-height: 1;
 
     letter-spacing: 0.11em;
@@ -1127,6 +1197,7 @@ const robotsContent = noindex
     );
 
     font-weight: 900;
+
     line-height: 1.08;
 
     letter-spacing: -0.03em;
@@ -1140,13 +1211,17 @@ const robotsContent = noindex
     color: var(--color-secondary);
 
     font-size: 0.83rem;
+
     font-weight: 500;
+
     line-height: 1.65;
   }
 
   .dashboard-layout__header-actions {
     display: flex;
+
     align-items: center;
+
     justify-content: flex-end;
 
     flex-shrink: 0;
@@ -1156,6 +1231,7 @@ const robotsContent = noindex
 
   .dashboard-layout__main {
     min-width: 0;
+
     flex: 1 1 auto;
 
     outline: none;
@@ -1182,34 +1258,48 @@ const robotsContent = noindex
 
   .dashboard-layout__skip-link {
     position: fixed;
+
     top: 12px;
     left: 12px;
+
     z-index: 2200;
 
     display: inline-flex;
+
     align-items: center;
+
     justify-content: center;
 
     min-height: 42px;
+
     padding: 0 15px;
 
-    border: 1px solid var(--color-primary);
+    border:
+      1px solid
+      var(--color-primary);
+
     border-radius: 9px;
 
     color: #ffffff;
-    background: var(--color-primary);
 
-    box-shadow: var(--shadow-lg);
+    background:
+      var(--color-primary);
+
+    box-shadow:
+      var(--shadow-lg);
 
     font-size: 0.8rem;
+
     font-weight: 800;
 
     text-decoration: none;
 
     opacity: 0;
+
     pointer-events: none;
 
-    transform: translateY(-12px);
+    transform:
+      translateY(-12px);
 
     transition:
       opacity 140ms ease,
@@ -1218,23 +1308,32 @@ const robotsContent = noindex
 
   .dashboard-layout__skip-link:focus {
     opacity: 1;
+
     pointer-events: auto;
-    transform: translateY(0);
+
+    transform:
+      translateY(0);
   }
 
   .dashboard-layout__scroll-progress {
     position: fixed;
+
     top: 0;
     left: 0;
+
     z-index: 2300;
 
     width: 100%;
     height: 2px;
 
-    background: var(--color-accent);
+    background:
+      var(--color-accent);
 
-    transform: scaleX(0);
-    transform-origin: left center;
+    transform:
+      scaleX(0);
+
+    transform-origin:
+      left center;
 
     pointer-events: none;
   }
@@ -1242,57 +1341,74 @@ const robotsContent = noindex
   @media (max-width: 1000px) {
     .dashboard-layout__sidebar {
       position: fixed;
+
       top: 76px;
       left: 0;
+
       z-index: 1000;
 
       width: min(
         300px,
         calc(100vw - 50px)
       );
+
       min-width: 0;
-      height: calc(100vh - 76px);
 
-      box-shadow: var(--shadow-xl);
+      height:
+        calc(100vh - 76px);
 
-      transform: translateX(-102%);
+      box-shadow:
+        var(--shadow-xl);
 
-      transition: transform 220ms ease;
+      transform:
+        translateX(-102%);
+
+      transition:
+        transform 220ms ease;
     }
 
     .dashboard-layout__sidebar--open {
-      transform: translateX(0);
+      transform:
+        translateX(0);
     }
 
     .dashboard-layout__sidebar::after {
       content: "";
 
       position: absolute;
+
       top: 0;
       right: 0;
       bottom: 0;
 
       width: 1px;
 
-      background: var(--color-border);
+      background:
+        var(--color-border);
     }
 
     .dashboard-layout__backdrop {
       position: fixed;
-      inset: 76px 0 0;
+
+      inset:
+        76px 0 0;
+
       z-index: 950;
 
       display: block;
 
-      background: rgba(
-        15,
-        23,
-        42,
-        0.34
-      );
+      background:
+        rgba(
+          15,
+          23,
+          42,
+          0.34
+        );
 
       opacity: 0;
+
       visibility: hidden;
+
       pointer-events: none;
 
       transition:
@@ -1303,7 +1419,9 @@ const robotsContent = noindex
     .dashboard-layout--sidebar-open
       .dashboard-layout__backdrop {
       opacity: 1;
+
       visibility: visible;
+
       pointer-events: auto;
     }
 
@@ -1312,19 +1430,27 @@ const robotsContent = noindex
       height: 40px;
 
       display: grid;
+
       place-items: center;
 
       margin-bottom: 15px;
 
-      border: 1px solid var(--color-border);
+      border:
+        1px solid
+        var(--color-border);
+
       border-radius: 9px;
 
-      color: var(--color-text);
-      background: var(--color-surface);
+      color:
+        var(--color-text);
+
+      background:
+        var(--color-surface);
 
       cursor: pointer;
 
-      box-shadow: var(--shadow-xs);
+      box-shadow:
+        var(--shadow-xs);
 
       transition:
         color 160ms ease,
@@ -1333,9 +1459,14 @@ const robotsContent = noindex
     }
 
     .dashboard-layout__mobile-toggle:hover {
-      color: var(--color-primary-dark);
-      border-color: var(--color-primary);
-      background: var(--color-primary-light);
+      color:
+        var(--color-primary-dark);
+
+      border-color:
+        var(--color-primary);
+
+      background:
+        var(--color-primary-light);
     }
 
     .dashboard-layout__mobile-toggle:focus-visible {
@@ -1345,6 +1476,7 @@ const robotsContent = noindex
           var(--color-primary) 25%,
           transparent
         );
+
       outline-offset: 2px;
     }
 
@@ -1359,21 +1491,27 @@ const robotsContent = noindex
 
     .dashboard-layout__mobile-close-icon {
       opacity: 0;
-      transform: scale(0.75)
+
+      transform:
+        scale(0.75)
         rotate(-30deg);
     }
 
     .dashboard-layout--sidebar-open
       .dashboard-layout__mobile-menu-icon {
       opacity: 0;
-      transform: scale(0.75)
+
+      transform:
+        scale(0.75)
         rotate(30deg);
     }
 
     .dashboard-layout--sidebar-open
       .dashboard-layout__mobile-close-icon {
       opacity: 1;
-      transform: scale(1)
+
+      transform:
+        scale(1)
         rotate(0);
     }
 
@@ -1394,22 +1532,27 @@ const robotsContent = noindex
 
   @media (max-width: 720px) {
     .dashboard-layout__header-container {
-      padding-block: 19px 22px;
+      padding-block:
+        19px 22px;
     }
 
     .dashboard-layout__title-row {
       align-items: flex-start;
+
       flex-direction: column;
+
       gap: 18px;
     }
 
     .dashboard-layout__header-actions {
       justify-content: flex-start;
+
       width: 100%;
     }
 
     .dashboard-layout__main-container {
       padding-top: 24px;
+
       padding-bottom: 40px;
     }
   }
@@ -1425,11 +1568,14 @@ const robotsContent = noindex
 
     .dashboard-layout__sidebar {
       top: 70px;
-      height: calc(100vh - 70px);
+
+      height:
+        calc(100vh - 70px);
     }
 
     .dashboard-layout__backdrop {
-      inset: 70px 0 0;
+      inset:
+        70px 0 0;
     }
 
     .dashboard-layout__mobile-toggle {
@@ -1460,9 +1606,15 @@ const robotsContent = noindex
     .dashboard-layout::before,
     .dashboard-layout::after {
       scroll-behavior: auto !important;
-      transition-duration: 0.01ms !important;
-      animation-duration: 0.01ms !important;
-      animation-iteration-count: 1 !important;
+
+      transition-duration:
+        0.01ms !important;
+
+      animation-duration:
+        0.01ms !important;
+
+      animation-iteration-count:
+        1 !important;
     }
   }
 </style>

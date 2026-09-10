@@ -26,22 +26,19 @@
  *
  * Security note:
  * - This layout is UI infrastructure only.
- * - It does NOT replace server-side authentication / authorization.
+ * - It does NOT replace authentication / authorization.
  * - Access control belongs to src/lib/auth/*
- * - Firebase security rules remain authoritative.
+ * - Firebase Security Rules remain authoritative.
  * --------------------------------------------------------------------------
  */
 
 import {
   Activity,
-  BarChart3,
   BellRing,
   Building2,
-  CheckCircle2,
+  ChartColumn,
   ChevronRight,
-  Database,
-  FileText,
-  FileWarning,
+  CircleCheck,
   LayoutDashboard,
   LockKeyhole,
   MapPin,
@@ -49,6 +46,7 @@ import {
   Newspaper,
   Recycle,
   ShieldCheck,
+  TriangleAlert,
   Users,
   X,
 } from "@lucide/astro";
@@ -109,7 +107,9 @@ const appName =
   import.meta.env.PUBLIC_APP_NAME ||
   "BINSIGHT";
 
-const absoluteUrl = (value: string): string => {
+const absoluteUrl = (
+  value: string
+): string => {
   if (
     value.startsWith("http://") ||
     value.startsWith("https://")
@@ -118,7 +118,9 @@ const absoluteUrl = (value: string): string => {
   }
 
   return new URL(
-    value.startsWith("/") ? value : `/${value}`,
+    value.startsWith("/")
+      ? value
+      : `/${value}`,
     siteUrl
   ).toString();
 };
@@ -176,7 +178,7 @@ const navItems: Array<{
     label: "Laporan",
     description: "Tinjau & tindak lanjut",
     href: "/admin/reports",
-    icon: FileWarning,
+    icon: TriangleAlert,
   },
   {
     id: "users",
@@ -198,7 +200,7 @@ const managementLinks = [
   {
     label: "Dashboard Publik",
     href: "/dashboard",
-    icon: BarChart3,
+    icon: ChartColumn,
   },
   {
     label: "Lihat Peta",
@@ -207,8 +209,11 @@ const managementLinks = [
   },
 ];
 
-const isActive = (section: AdminSection) =>
-  activeSection === section;
+const isActive = (
+  section: AdminSection
+): boolean => {
+  return activeSection === section;
+};
 ---
 
 <!doctype html>
@@ -330,6 +335,7 @@ const isActive = (section: AdminSection) =>
     />
 
     <script
+      is:inline
       type="application/ld+json"
       set:html={JSON.stringify({
         "@context": "https://schema.org",
@@ -378,7 +384,7 @@ const isActive = (section: AdminSection) =>
                 <span class="admin-layout__system-icon">
                   <ShieldCheck
                     size={17}
-                    strokeWidth={2}
+                    stroke-width={2}
                     aria-hidden="true"
                   />
                 </span>
@@ -405,7 +411,7 @@ const isActive = (section: AdminSection) =>
                 <span>
                   <LockKeyhole
                     size={12}
-                    strokeWidth={2}
+                    stroke-width={2}
                     aria-hidden="true"
                   />
 
@@ -424,7 +430,8 @@ const isActive = (section: AdminSection) =>
 
               {
                 navItems.map((item) => {
-                  const active = isActive(item.id);
+                  const active =
+                    isActive(item.id);
 
                   return (
                     <a
@@ -437,20 +444,27 @@ const isActive = (section: AdminSection) =>
                         },
                       ]}
                       aria-current={
-                        active ? "page" : undefined
+                        active
+                          ? "page"
+                          : undefined
                       }
                     >
                       <span class="admin-layout__nav-icon">
                         <item.icon
                           size={17}
-                          strokeWidth={1.9}
+                          stroke-width={1.9}
                           aria-hidden="true"
                         />
                       </span>
 
                       <span class="admin-layout__nav-copy">
-                        <strong>{item.label}</strong>
-                        <small>{item.description}</small>
+                        <strong>
+                          {item.label}
+                        </strong>
+
+                        <small>
+                          {item.description}
+                        </small>
                       </span>
                     </a>
                   );
@@ -465,7 +479,7 @@ const isActive = (section: AdminSection) =>
                 <span class="admin-layout__system-status-icon">
                   <Activity
                     size={14}
-                    strokeWidth={2}
+                    stroke-width={2}
                     aria-hidden="true"
                   />
                 </span>
@@ -497,22 +511,24 @@ const isActive = (section: AdminSection) =>
               </p>
 
               {
-                managementLinks.map((item) => (
-                  <a
-                    href={item.href}
-                    class="admin-layout__secondary-link"
-                  >
-                    <span>
-                      <item.icon
-                        size={15}
-                        strokeWidth={1.9}
-                        aria-hidden="true"
-                      />
-                    </span>
+                managementLinks.map(
+                  (item) => (
+                    <a
+                      href={item.href}
+                      class="admin-layout__secondary-link"
+                    >
+                      <span>
+                        <item.icon
+                          size={15}
+                          stroke-width={1.9}
+                          aria-hidden="true"
+                        />
+                      </span>
 
-                    {item.label}
-                  </a>
-                ))
+                      {item.label}
+                    </a>
+                  )
+                )
               }
             </nav>
 
@@ -520,7 +536,7 @@ const isActive = (section: AdminSection) =>
               <span class="admin-layout__security-icon">
                 <LockKeyhole
                   size={14}
-                  strokeWidth={2}
+                  stroke-width={2}
                   aria-hidden="true"
                 />
               </span>
@@ -552,14 +568,14 @@ const isActive = (section: AdminSection) =>
                   <Menu
                     class="admin-layout__mobile-menu-icon"
                     size={20}
-                    strokeWidth={2}
+                    stroke-width={2}
                     aria-hidden="true"
                   />
 
                   <X
                     class="admin-layout__mobile-close-icon"
                     size={20}
-                    strokeWidth={2}
+                    stroke-width={2}
                     aria-hidden="true"
                   />
                 </button>
@@ -571,9 +587,9 @@ const isActive = (section: AdminSection) =>
                 </div>
 
                 <div class="admin-layout__mobile-status">
-                  <CheckCircle2
+                  <CircleCheck
                     size={17}
-                    strokeWidth={2}
+                    stroke-width={2}
                     aria-hidden="true"
                   />
                 </div>
@@ -587,10 +603,14 @@ const isActive = (section: AdminSection) =>
                   <ol class="admin-layout__breadcrumb-list">
                     {
                       breadcrumbs.map(
-                        (breadcrumb, index) => {
+                        (
+                          breadcrumb,
+                          index
+                        ) => {
                           const isLast =
                             index ===
-                            breadcrumbs.length - 1;
+                            breadcrumbs.length -
+                              1;
 
                           return (
                             <li class="admin-layout__breadcrumb-item">
@@ -627,7 +647,7 @@ const isActive = (section: AdminSection) =>
                                 !isLast && (
                                   <ChevronRight
                                     size={13}
-                                    strokeWidth={1.8}
+                                    stroke-width={1.8}
                                     aria-hidden="true"
                                   />
                                 )
@@ -643,11 +663,13 @@ const isActive = (section: AdminSection) =>
                 <div class="admin-layout__header-system">
                   <span class="admin-layout__header-system-dot"></span>
 
-                  <span>System operational</span>
+                  <span>
+                    System operational
+                  </span>
 
                   <BellRing
                     size={16}
-                    strokeWidth={1.8}
+                    stroke-width={1.8}
                     aria-hidden="true"
                   />
                 </div>
@@ -704,33 +726,36 @@ const isActive = (section: AdminSection) =>
 
     <script>
       const adminRoot =
-        document.querySelector<HTMLElement>(
+        document.querySelector(
           ".admin-layout"
         );
 
       if (adminRoot) {
         const sidebar =
-          adminRoot.querySelector<HTMLElement>(
+          adminRoot.querySelector(
             "[data-admin-sidebar]"
           );
 
         const toggle =
-          adminRoot.querySelector<HTMLButtonElement>(
+          adminRoot.querySelector(
             "[data-admin-sidebar-toggle]"
           );
 
         const backdrop =
-          adminRoot.querySelector<HTMLElement>(
+          adminRoot.querySelector(
             "[data-admin-backdrop]"
           );
 
         const progress =
-          adminRoot.querySelector<HTMLElement>(
+          adminRoot.querySelector(
             "[data-admin-progress]"
           );
 
         const openSidebar = () => {
-          if (!sidebar || !toggle) {
+          if (
+            !(sidebar instanceof HTMLElement) ||
+            !(toggle instanceof HTMLButtonElement)
+          ) {
             return;
           }
 
@@ -762,7 +787,10 @@ const isActive = (section: AdminSection) =>
         };
 
         const closeSidebar = () => {
-          if (!sidebar || !toggle) {
+          if (
+            !(sidebar instanceof HTMLElement) ||
+            !(toggle instanceof HTMLButtonElement)
+          ) {
             return;
           }
 
@@ -793,35 +821,48 @@ const isActive = (section: AdminSection) =>
           );
         };
 
-        toggle?.addEventListener(
-          "click",
-          () => {
-            const isOpen =
-              sidebar?.classList.contains(
-                "admin-layout__sidebar--open"
-              ) ?? false;
+        if (
+          toggle instanceof HTMLButtonElement
+        ) {
+          toggle.addEventListener(
+            "click",
+            () => {
+              const isOpen =
+                sidebar instanceof HTMLElement &&
+                sidebar.classList.contains(
+                  "admin-layout__sidebar--open"
+                );
 
-            if (isOpen) {
-              closeSidebar();
-            } else {
-              openSidebar();
+              if (isOpen) {
+                closeSidebar();
+              } else {
+                openSidebar();
+              }
             }
-          }
-        );
+          );
+        }
 
-        backdrop?.addEventListener(
-          "click",
-          closeSidebar
-        );
+        if (
+          backdrop instanceof HTMLElement
+        ) {
+          backdrop.addEventListener(
+            "click",
+            closeSidebar
+          );
+        }
 
-        sidebar
-          ?.querySelectorAll("a")
-          .forEach((link) => {
-            link.addEventListener(
-              "click",
-              closeSidebar
-            );
-          });
+        if (
+          sidebar instanceof HTMLElement
+        ) {
+          sidebar
+            .querySelectorAll("a")
+            .forEach((link) => {
+              link.addEventListener(
+                "click",
+                closeSidebar
+              );
+            });
+        }
 
         document.addEventListener(
           "keydown",
@@ -842,12 +883,15 @@ const isActive = (section: AdminSection) =>
         );
 
         const updateProgress = () => {
-          if (!progress) {
+          if (
+            !(progress instanceof HTMLElement)
+          ) {
             return;
           }
 
           const height =
-            document.documentElement.scrollHeight -
+            document.documentElement
+              .scrollHeight -
             window.innerHeight;
 
           if (height <= 0) {
@@ -875,13 +919,17 @@ const isActive = (section: AdminSection) =>
         window.addEventListener(
           "scroll",
           updateProgress,
-          { passive: true }
+          {
+            passive: true,
+          }
         );
 
         window.addEventListener(
           "resize",
           updateProgress,
-          { passive: true }
+          {
+            passive: true,
+          }
         );
       }
     </script>
@@ -948,6 +996,7 @@ const isActive = (section: AdminSection) =>
     display: flex;
     align-items: center;
     justify-content: space-between;
+
     gap: 10px;
 
     padding: 2px 8px 14px;
@@ -956,6 +1005,7 @@ const isActive = (section: AdminSection) =>
   .admin-layout__system-title {
     display: flex;
     align-items: center;
+
     gap: 8px;
 
     min-width: 0;
@@ -972,11 +1022,13 @@ const isActive = (section: AdminSection) =>
 
     display: grid;
     place-items: center;
+
     flex-shrink: 0;
 
     border-radius: 8px;
 
     color: #ffffff;
+
     background:
       linear-gradient(
         145deg,
@@ -990,6 +1042,7 @@ const isActive = (section: AdminSection) =>
     align-items: center;
 
     min-height: 21px;
+
     padding: 0 7px;
 
     border: 1px solid #cbd5e1;
@@ -1008,6 +1061,7 @@ const isActive = (section: AdminSection) =>
   .admin-layout__admin-card {
     display: flex;
     align-items: center;
+
     gap: 11px;
 
     margin: 0 2px 19px;
@@ -1030,6 +1084,7 @@ const isActive = (section: AdminSection) =>
 
     display: grid;
     place-items: center;
+
     flex-shrink: 0;
 
     border-radius: 11px;
@@ -1054,6 +1109,7 @@ const isActive = (section: AdminSection) =>
 
     display: flex;
     flex-direction: column;
+
     gap: 5px;
   }
 
@@ -1073,6 +1129,7 @@ const isActive = (section: AdminSection) =>
   .admin-layout__admin-copy span {
     display: inline-flex;
     align-items: center;
+
     gap: 4px;
 
     color: #64748b;
@@ -1105,9 +1162,11 @@ const isActive = (section: AdminSection) =>
 
     display: flex;
     align-items: center;
+
     gap: 10px;
 
     min-height: 53px;
+
     padding: 7px 9px;
 
     border: 1px solid transparent;
@@ -1149,6 +1208,7 @@ const isActive = (section: AdminSection) =>
     content: "";
 
     position: absolute;
+
     top: 9px;
     bottom: 9px;
     left: -14px;
@@ -1166,6 +1226,7 @@ const isActive = (section: AdminSection) =>
 
     display: grid;
     place-items: center;
+
     flex-shrink: 0;
 
     border-radius: 9px;
@@ -1189,6 +1250,7 @@ const isActive = (section: AdminSection) =>
 
     display: flex;
     flex-direction: column;
+
     gap: 3px;
   }
 
@@ -1218,6 +1280,7 @@ const isActive = (section: AdminSection) =>
 
   .admin-layout__system-status {
     margin: 0 5px;
+
     padding: 12px;
 
     border: 1px solid #e2e8f0;
@@ -1229,6 +1292,7 @@ const isActive = (section: AdminSection) =>
   .admin-layout__system-status-header {
     display: flex;
     align-items: center;
+
     gap: 8px;
 
     color: #334155;
@@ -1253,6 +1317,7 @@ const isActive = (section: AdminSection) =>
   .admin-layout__status-row {
     display: flex;
     align-items: center;
+
     gap: 7px;
 
     margin-top: 10px;
@@ -1295,9 +1360,11 @@ const isActive = (section: AdminSection) =>
   .admin-layout__secondary-link {
     display: flex;
     align-items: center;
+
     gap: 8px;
 
     min-height: 36px;
+
     padding: 0 7px;
 
     border-radius: 8px;
@@ -1334,9 +1401,11 @@ const isActive = (section: AdminSection) =>
   .admin-layout__security-note {
     display: flex;
     align-items: flex-start;
+
     gap: 9px;
 
     margin: 18px 5px 0;
+
     padding: 11px;
 
     border: 1px solid #e2e8f0;
@@ -1351,6 +1420,7 @@ const isActive = (section: AdminSection) =>
 
     display: grid;
     place-items: center;
+
     flex-shrink: 0;
 
     border-radius: 7px;
@@ -1428,6 +1498,7 @@ const isActive = (section: AdminSection) =>
     display: flex;
     align-items: center;
     justify-content: space-between;
+
     gap: 20px;
 
     margin-bottom: 15px;
@@ -1440,7 +1511,9 @@ const isActive = (section: AdminSection) =>
   .admin-layout__breadcrumb-list {
     display: flex;
     align-items: center;
+
     flex-wrap: wrap;
+
     gap: 3px;
 
     margin: 0;
@@ -1452,6 +1525,7 @@ const isActive = (section: AdminSection) =>
   .admin-layout__breadcrumb-item {
     display: inline-flex;
     align-items: center;
+
     gap: 3px;
 
     min-width: 0;
@@ -1461,6 +1535,7 @@ const isActive = (section: AdminSection) =>
 
   .admin-layout__breadcrumb-item svg {
     flex-shrink: 0;
+
     color: #94a3b8;
   }
 
@@ -1497,6 +1572,7 @@ const isActive = (section: AdminSection) =>
   .admin-layout__header-system {
     display: flex;
     align-items: center;
+
     gap: 8px;
 
     color: #64748b;
@@ -1520,6 +1596,7 @@ const isActive = (section: AdminSection) =>
 
   .admin-layout__header-system svg {
     margin-left: 3px;
+
     color: #94a3b8;
   }
 
@@ -1647,6 +1724,7 @@ const isActive = (section: AdminSection) =>
     justify-content: center;
 
     min-height: 42px;
+
     padding: 0 15px;
 
     border: 1px solid #0f172a;
@@ -1675,14 +1753,17 @@ const isActive = (section: AdminSection) =>
   .admin-layout__skip-link:focus {
     opacity: 1;
     pointer-events: auto;
+
     transform: translateY(0);
   }
 
   @media (max-width: 1000px) {
     .admin-layout__sidebar {
       position: fixed;
+
       top: 76px;
       left: 0;
+
       z-index: 1100;
 
       width: min(
@@ -1698,7 +1779,8 @@ const isActive = (section: AdminSection) =>
 
       transform: translateX(-102%);
 
-      transition: transform 220ms ease;
+      transition:
+        transform 220ms ease;
     }
 
     .admin-layout__sidebar--open {
@@ -1707,17 +1789,20 @@ const isActive = (section: AdminSection) =>
 
     .admin-layout__backdrop {
       position: fixed;
+
       inset: 76px 0 0;
+
       z-index: 1050;
 
       display: block;
 
-      background: rgba(
-        15,
-        23,
-        42,
-        0.38
-      );
+      background:
+        rgba(
+          15,
+          23,
+          42,
+          0.38
+        );
 
       opacity: 0;
       visibility: hidden;
@@ -1738,6 +1823,7 @@ const isActive = (section: AdminSection) =>
     .admin-layout__mobile-topbar {
       display: flex;
       align-items: center;
+
       gap: 10px;
 
       margin-bottom: 13px;
@@ -1749,6 +1835,7 @@ const isActive = (section: AdminSection) =>
 
       display: grid;
       place-items: center;
+
       flex-shrink: 0;
 
       border: 1px solid var(--color-border);
@@ -1819,6 +1906,7 @@ const isActive = (section: AdminSection) =>
 
       display: flex;
       flex-direction: column;
+
       gap: 3px;
     }
 
@@ -1849,6 +1937,7 @@ const isActive = (section: AdminSection) =>
 
       display: grid;
       place-items: center;
+
       flex-shrink: 0;
 
       border: 1px solid #dcfce7;
@@ -1874,12 +1963,15 @@ const isActive = (section: AdminSection) =>
 
     .admin-layout__header-bar {
       align-items: flex-start;
+
       flex-direction: column;
+
       gap: 8px;
     }
 
     .admin-layout__title-row {
       align-items: flex-start;
+
       flex-direction: column;
 
       gap: 18px;
@@ -1900,6 +1992,7 @@ const isActive = (section: AdminSection) =>
   @media (max-width: 560px) {
     .admin-layout__sidebar {
       top: 70px;
+
       height: calc(100vh - 70px);
     }
 
@@ -1952,8 +2045,12 @@ const isActive = (section: AdminSection) =>
    * SCROLL LOCK
    * --------------------------------------------------------------------- */
 
-  :global(html.admin-scroll-locked),
-  :global(body.admin-scroll-locked) {
+  :global(
+    html.admin-scroll-locked
+  ),
+  :global(
+    body.admin-scroll-locked
+  ) {
     overflow: hidden;
   }
 

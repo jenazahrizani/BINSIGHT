@@ -32,11 +32,9 @@
  */
 
 import {
-  Activity,
   ArrowLeft,
-  BarChart3,
   Building2,
-  CheckCircle2,
+  CircleCheck,
   ChevronRight,
   ExternalLink,
   FileText,
@@ -46,7 +44,6 @@ import {
   Recycle,
   Settings2,
   ShieldCheck,
-  UserRound,
   X,
 } from "@lucide/astro";
 
@@ -59,6 +56,13 @@ type OrganizationSection =
   | "waste"
   | "process"
   | "products";
+
+type OrganizationNavIcon =
+  | "dashboard"
+  | "building"
+  | "recycle"
+  | "settings"
+  | "package";
 
 interface Breadcrumb {
   label: string;
@@ -79,7 +83,8 @@ interface Props {
 
 const {
   title = "Workspace Organisasi",
-  description = "Kelola informasi organisasi dan tampilkan aktivitas pengelolaan sampah di BINSIGHT.",
+  description =
+    "Kelola informasi organisasi dan tampilkan aktivitas pengelolaan sampah di BINSIGHT.",
   breadcrumbs = [
     {
       label: "Organisasi",
@@ -106,7 +111,9 @@ const appName =
   import.meta.env.PUBLIC_APP_NAME ||
   "BINSIGHT";
 
-const absoluteUrl = (value: string): string => {
+const absoluteUrl = (
+  value: string
+): string => {
   if (
     value.startsWith("http://") ||
     value.startsWith("https://")
@@ -115,7 +122,9 @@ const absoluteUrl = (value: string): string => {
   }
 
   return new URL(
-    value.startsWith("/") ? value : `/${value}`,
+    value.startsWith("/")
+      ? value
+      : `/${value}`,
     siteUrl
   ).toString();
 };
@@ -152,48 +161,49 @@ const navItems: Array<{
   label: string;
   description: string;
   href: string;
-  icon: typeof LayoutDashboard;
+  icon: OrganizationNavIcon;
 }> = [
   {
     id: "overview",
     label: "Ringkasan",
     description: "Gambaran workspace",
     href: "/organization",
-    icon: LayoutDashboard,
+    icon: "dashboard",
   },
   {
     id: "profile",
     label: "Profil Organisasi",
     description: "Identitas & informasi",
     href: "/organization/profile",
-    icon: Building2,
+    icon: "building",
   },
   {
     id: "waste",
     label: "Sampah Dikelola",
     description: "Kategori & material",
     href: "/organization/waste",
-    icon: Recycle,
+    icon: "recycle",
   },
   {
     id: "process",
     label: "Proses Pengelolaan",
     description: "Alur & metode",
     href: "/organization/process",
-    icon: Settings2,
+    icon: "settings",
   },
   {
     id: "products",
     label: "Produk / Hasil",
     description: "Hasil pengelolaan",
     href: "/organization/products",
-    icon: PackageCheck,
+    icon: "package",
   },
 ];
 
 const isActive = (
   section: OrganizationSection
-) => activeSection === section;
+): boolean =>
+  activeSection === section;
 ---
 
 <!doctype html>
@@ -315,6 +325,7 @@ const isActive = (
     />
 
     <script
+      is:inline
       type="application/ld+json"
       set:html={JSON.stringify({
         "@context": "https://schema.org",
@@ -362,12 +373,14 @@ const isActive = (
               <span class="organization-layout__workspace-label-icon">
                 <Building2
                   size={16}
-                  strokeWidth={2}
+                  stroke-width={2}
                   aria-hidden="true"
                 />
               </span>
 
-              <span>Workspace Organisasi</span>
+              <span>
+                Workspace Organisasi
+              </span>
             </div>
 
             <div class="organization-layout__organization-card">
@@ -391,7 +404,7 @@ const isActive = (
                 >
                   <ShieldCheck
                     size={13}
-                    strokeWidth={2}
+                    stroke-width={2}
                     aria-hidden="true"
                   />
 
@@ -410,7 +423,9 @@ const isActive = (
 
               {
                 navItems.map((item) => {
-                  const active = isActive(item.id);
+                  const active = isActive(
+                    item.id
+                  );
 
                   return (
                     <a
@@ -423,20 +438,76 @@ const isActive = (
                         },
                       ]}
                       aria-current={
-                        active ? "page" : undefined
+                        active
+                          ? "page"
+                          : undefined
                       }
                     >
                       <span class="organization-layout__nav-icon">
-                        <item.icon
-                          size={17}
-                          strokeWidth={1.9}
-                          aria-hidden="true"
-                        />
+                        {
+                          item.icon ===
+                            "dashboard" && (
+                            <LayoutDashboard
+                              size={17}
+                              stroke-width={1.9}
+                              aria-hidden="true"
+                            />
+                          )
+                        }
+
+                        {
+                          item.icon ===
+                            "building" && (
+                            <Building2
+                              size={17}
+                              stroke-width={1.9}
+                              aria-hidden="true"
+                            />
+                          )
+                        }
+
+                        {
+                          item.icon ===
+                            "recycle" && (
+                            <Recycle
+                              size={17}
+                              stroke-width={1.9}
+                              aria-hidden="true"
+                            />
+                          )
+                        }
+
+                        {
+                          item.icon ===
+                            "settings" && (
+                            <Settings2
+                              size={17}
+                              stroke-width={1.9}
+                              aria-hidden="true"
+                            />
+                          )
+                        }
+
+                        {
+                          item.icon ===
+                            "package" && (
+                            <PackageCheck
+                              size={17}
+                              stroke-width={1.9}
+                              aria-hidden="true"
+                            />
+                          )
+                        }
                       </span>
 
                       <span class="organization-layout__nav-copy">
-                        <strong>{item.label}</strong>
-                        <small>{item.description}</small>
+                        <strong>
+                          {item.label}
+                        </strong>
+
+                        <small>
+                          {item.description}
+                        </small>
                       </span>
                     </a>
                   );
@@ -449,14 +520,16 @@ const isActive = (
             <div class="organization-layout__visibility">
               <div class="organization-layout__visibility-header">
                 <span class="organization-layout__visibility-icon">
-                  <CheckCircle2
+                  <CircleCheck
                     size={15}
-                    strokeWidth={2}
+                    stroke-width={2}
                     aria-hidden="true"
                   />
                 </span>
 
-                <span>Visibilitas publik</span>
+                <span>
+                  Visibilitas publik
+                </span>
               </div>
 
               <p>
@@ -471,7 +544,7 @@ const isActive = (
                 <span>
                   <ArrowLeft
                     size={15}
-                    strokeWidth={1.9}
+                    stroke-width={1.9}
                     aria-hidden="true"
                   />
                 </span>
@@ -483,7 +556,7 @@ const isActive = (
                 <span>
                   <FileText
                     size={15}
-                    strokeWidth={1.9}
+                    stroke-width={1.9}
                     aria-hidden="true"
                   />
                 </span>
@@ -509,14 +582,14 @@ const isActive = (
                   <Menu
                     class="organization-layout__mobile-menu-icon"
                     size={20}
-                    strokeWidth={2}
+                    stroke-width={2}
                     aria-hidden="true"
                   />
 
                   <X
                     class="organization-layout__mobile-close-icon"
                     size={20}
-                    strokeWidth={2}
+                    stroke-width={2}
                     aria-hidden="true"
                   />
                 </button>
@@ -539,7 +612,7 @@ const isActive = (
                 >
                   <ExternalLink
                     size={18}
-                    strokeWidth={1.9}
+                    stroke-width={1.9}
                     aria-hidden="true"
                   />
                 </a>
@@ -592,7 +665,7 @@ const isActive = (
                               !isLast && (
                                 <ChevronRight
                                   size={13}
-                                  strokeWidth={1.8}
+                                  stroke-width={1.8}
                                   aria-hidden="true"
                                 />
                               )
@@ -627,11 +700,13 @@ const isActive = (
                   >
                     <ExternalLink
                       size={16}
-                      strokeWidth={1.9}
+                      stroke-width={1.9}
                       aria-hidden="true"
                     />
 
-                    <span>Lihat halaman publik</span>
+                    <span>
+                      Lihat halaman publik
+                    </span>
                   </a>
 
                   <slot name="actions" />
@@ -669,33 +744,73 @@ const isActive = (
 
     <script>
       const organizationRoot =
-        document.querySelector<HTMLElement>(
+        document.querySelector(
           ".organization-layout"
         );
 
-      if (organizationRoot) {
+      if (
+        organizationRoot instanceof HTMLElement
+      ) {
         const sidebar =
-          organizationRoot.querySelector<HTMLElement>(
+          organizationRoot.querySelector(
             "[data-organization-sidebar]"
           );
 
         const sidebarToggle =
-          organizationRoot.querySelector<HTMLButtonElement>(
+          organizationRoot.querySelector(
             "[data-organization-sidebar-toggle]"
           );
 
         const backdrop =
-          organizationRoot.querySelector<HTMLElement>(
+          organizationRoot.querySelector(
             "[data-organization-backdrop]"
           );
 
         const progress =
-          organizationRoot.querySelector<HTMLElement>(
+          organizationRoot.querySelector(
             "[data-organization-progress]"
           );
 
+        const updateProgress = () => {
+          if (
+            !(progress instanceof HTMLElement)
+          ) {
+            return;
+          }
+
+          const scrollableHeight =
+            document.documentElement
+              .scrollHeight -
+            window.innerHeight;
+
+          if (scrollableHeight <= 0) {
+            progress.style.transform =
+              "scaleX(0)";
+
+            return;
+          }
+
+          const ratio = Math.min(
+            Math.max(
+              window.scrollY /
+                scrollableHeight,
+              0
+            ),
+            1
+          );
+
+          progress.style.transform =
+            `scaleX(${ratio})`;
+        };
+
         const openSidebar = () => {
-          if (!sidebar || !sidebarToggle) {
+          if (
+            !(sidebar instanceof HTMLElement) ||
+            !(
+              sidebarToggle instanceof
+              HTMLButtonElement
+            )
+          ) {
             return;
           }
 
@@ -727,7 +842,13 @@ const isActive = (
         };
 
         const closeSidebar = () => {
-          if (!sidebar || !sidebarToggle) {
+          if (
+            !(sidebar instanceof HTMLElement) ||
+            !(
+              sidebarToggle instanceof
+              HTMLButtonElement
+            )
+          ) {
             return;
           }
 
@@ -758,35 +879,49 @@ const isActive = (
           );
         };
 
-        sidebarToggle?.addEventListener(
-          "click",
-          () => {
-            const open =
-              sidebar?.classList.contains(
-                "organization-layout__sidebar--open"
-              ) ?? false;
+        if (
+          sidebarToggle instanceof
+          HTMLButtonElement
+        ) {
+          sidebarToggle.addEventListener(
+            "click",
+            () => {
+              const isOpen =
+                sidebar instanceof HTMLElement &&
+                sidebar.classList.contains(
+                  "organization-layout__sidebar--open"
+                );
 
-            if (open) {
-              closeSidebar();
-            } else {
-              openSidebar();
+              if (isOpen) {
+                closeSidebar();
+              } else {
+                openSidebar();
+              }
             }
-          }
-        );
+          );
+        }
 
-        backdrop?.addEventListener(
-          "click",
-          closeSidebar
-        );
+        if (
+          backdrop instanceof HTMLElement
+        ) {
+          backdrop.addEventListener(
+            "click",
+            closeSidebar
+          );
+        }
 
-        sidebar
-          ?.querySelectorAll("a")
-          .forEach((link) => {
-            link.addEventListener(
-              "click",
-              closeSidebar
-            );
-          });
+        if (
+          sidebar instanceof HTMLElement
+        ) {
+          sidebar
+            .querySelectorAll("a")
+            .forEach((link) => {
+              link.addEventListener(
+                "click",
+                closeSidebar
+              );
+            });
+        }
 
         document.addEventListener(
           "keydown",
@@ -803,40 +938,11 @@ const isActive = (
             if (window.innerWidth > 1000) {
               closeSidebar();
             }
-          }
+
+            updateProgress();
+          },
+          { passive: true }
         );
-
-        const updateProgress = () => {
-          if (!progress) {
-            return;
-          }
-
-          const scrollableHeight =
-            document.documentElement.scrollHeight -
-            window.innerHeight;
-
-          if (scrollableHeight <= 0) {
-            progress.style.transform =
-              "scaleX(0)";
-
-            return;
-          }
-
-          const ratio =
-            Math.min(
-              Math.max(
-                window.scrollY /
-                  scrollableHeight,
-                0
-              ),
-              1
-            );
-
-          progress.style.transform =
-            `scaleX(${ratio})`;
-        };
-
-        updateProgress();
 
         window.addEventListener(
           "scroll",
@@ -844,11 +950,7 @@ const isActive = (
           { passive: true }
         );
 
-        window.addEventListener(
-          "resize",
-          updateProgress,
-          { passive: true }
-        );
+        updateProgress();
       }
     </script>
   </body>
@@ -857,16 +959,13 @@ const isActive = (
 <style>
   .organization-layout {
     min-height: 100vh;
-
     margin: 0;
-
     color: var(--color-text);
     background: var(--color-background);
   }
 
   .organization-layout__shell {
     min-height: 100vh;
-
     display: flex;
     flex-direction: column;
   }
@@ -874,7 +973,6 @@ const isActive = (
   .organization-layout__workspace {
     min-height: 0;
     flex: 1 1 auto;
-
     display: flex;
     align-items: stretch;
   }
@@ -976,6 +1074,7 @@ const isActive = (
     border-radius: 11px;
 
     color: #ffffff;
+
     background:
       linear-gradient(
         145deg,
@@ -1124,30 +1223,33 @@ const isActive = (
 
     display: grid;
     place-items: center;
-
     flex-shrink: 0;
 
     border-radius: 9px;
 
     color: currentColor;
-    background: rgba(
-      226,
-      232,
-      240,
-      0.62
-    );
 
-    transition: background-color 160ms ease;
+    background:
+      rgba(
+        226,
+        232,
+        240,
+        0.62
+      );
+
+    transition:
+      background-color 160ms ease;
   }
 
   .organization-layout__nav-item--active
     .organization-layout__nav-icon {
-    background: rgba(
-      255,
-      255,
-      255,
-      0.85
-    );
+    background:
+      rgba(
+        255,
+        255,
+        255,
+        0.85
+      );
   }
 
   .organization-layout__nav-copy {
@@ -1225,12 +1327,13 @@ const isActive = (
 
     border-radius: 7px;
 
-    background: rgba(
-      255,
-      255,
-      255,
-      0.86
-    );
+    background:
+      rgba(
+        255,
+        255,
+        255,
+        0.86
+      );
   }
 
   .organization-layout__visibility p {
@@ -1286,12 +1389,14 @@ const isActive = (
     border-radius: 7px;
 
     color: currentColor;
-    background: rgba(
-      226,
-      232,
-      240,
-      0.55
-    );
+
+    background:
+      rgba(
+        226,
+        232,
+        240,
+        0.55
+      );
   }
 
   /* -----------------------------------------------------------------------
@@ -1300,6 +1405,7 @@ const isActive = (
 
   .organization-layout__content {
     min-width: 0;
+
     flex: 1 1 auto;
 
     display: flex;
@@ -1315,7 +1421,12 @@ const isActive = (
     background:
       radial-gradient(
         circle at 84% 20%,
-        rgba(132, 204, 22, 0.075),
+        rgba(
+          132,
+          204,
+          22,
+          0.075
+        ),
         transparent 27%
       ),
       linear-gradient(
@@ -1368,7 +1479,6 @@ const isActive = (
 
   .organization-layout__breadcrumb-item svg {
     flex-shrink: 0;
-
     color: #94a3b8;
   }
 
@@ -1390,7 +1500,8 @@ const isActive = (
   .organization-layout__breadcrumb-link {
     color: var(--color-secondary);
 
-    transition: color 160ms ease;
+    transition:
+      color 160ms ease;
   }
 
   .organization-layout__breadcrumb-link:hover {
@@ -1498,12 +1609,13 @@ const isActive = (
   .organization-layout__public-button:hover {
     color: var(--color-primary-dark);
 
-    border-color: rgba(
-      22,
-      101,
-      52,
-      0.25
-    );
+    border-color:
+      rgba(
+        22,
+        101,
+        52,
+        0.25
+      );
 
     background: var(--color-primary-light);
 
@@ -1512,6 +1624,7 @@ const isActive = (
 
   .organization-layout__main {
     min-width: 0;
+
     flex: 1 1 auto;
 
     outline: none;
@@ -1619,7 +1732,8 @@ const isActive = (
 
       transform: translateX(-102%);
 
-      transition: transform 220ms ease;
+      transition:
+        transform 220ms ease;
     }
 
     .organization-layout__sidebar--open {
@@ -1633,12 +1747,13 @@ const isActive = (
 
       display: block;
 
-      background: rgba(
-        15,
-        23,
-        42,
-        0.35
-      );
+      background:
+        rgba(
+          15,
+          23,
+          42,
+          0.35
+        );
 
       opacity: 0;
       visibility: hidden;
@@ -1688,8 +1803,12 @@ const isActive = (
 
     .organization-layout__mobile-toggle:hover {
       color: var(--color-primary-dark);
-      border-color: var(--color-primary);
-      background: var(--color-primary-light);
+
+      border-color:
+        var(--color-primary);
+
+      background:
+        var(--color-primary-light);
     }
 
     .organization-layout__mobile-toggle:focus-visible {
@@ -1699,6 +1818,7 @@ const isActive = (
           var(--color-primary) 25%,
           transparent
         );
+
       outline-offset: 2px;
     }
 
@@ -1793,9 +1913,11 @@ const isActive = (
     .organization-layout__mobile-public-link:hover {
       color: var(--color-primary-dark);
 
-      border-color: var(--color-primary);
+      border-color:
+        var(--color-primary);
 
-      background: var(--color-primary-light);
+      background:
+        var(--color-primary-light);
     }
 
     .organization-layout__header-container,
@@ -1881,7 +2003,8 @@ const isActive = (
   .organization-layout__nav-item:focus-visible,
   .organization-layout__sidebar-links a:focus-visible,
   .organization-layout__public-button:focus-visible,
-  .organization-layout__mobile-public-link:focus-visible {
+  .organization-layout__mobile-public-link:focus-visible,
+  .organization-layout__mobile-toggle:focus-visible {
     outline: 3px solid
       color-mix(
         in srgb,
@@ -1916,11 +2039,14 @@ const isActive = (
     .organization-layout::after {
       scroll-behavior: auto !important;
 
-      transition-duration: 0.01ms !important;
+      transition-duration:
+        0.01ms !important;
 
-      animation-duration: 0.01ms !important;
+      animation-duration:
+        0.01ms !important;
 
-      animation-iteration-count: 1 !important;
+      animation-iteration-count:
+        1 !important;
     }
   }
 </style>

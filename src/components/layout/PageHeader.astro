@@ -26,15 +26,14 @@
  */
 
 import {
+  ChartColumn,
   ChevronRight,
+  Info,
+  Layers,
   Map,
-  BarChart3,
   Building2,
   Recycle,
-  FileWarning,
-  Info,
-  Layers3,
-  type Icon,
+  TriangleAlert,
 } from "@lucide/astro";
 
 type HeaderIcon =
@@ -74,26 +73,11 @@ const {
   compact = false,
 } = Astro.props;
 
-const iconMap: Record<
-  Exclude<HeaderIcon, "none">,
-  typeof Icon
-> = {
-  map: Map,
-  data: BarChart3,
-  organization: Building2,
-  waste: Recycle,
-  report: FileWarning,
-  company: Info,
-  layers: Layers3,
-};
+const hasBreadcrumbs =
+  breadcrumbs.length > 0;
 
-const HeaderIconComponent =
-  icon !== "none"
-    ? iconMap[icon as Exclude<HeaderIcon, "none">]
-    : null;
-
-const hasBreadcrumbs = breadcrumbs.length > 0;
-const hasMeta = Boolean(eyebrow || HeaderIconComponent);
+const hasMeta =
+  Boolean(eyebrow || icon !== "none");
 ---
 
 <section
@@ -107,8 +91,15 @@ const hasMeta = Boolean(eyebrow || HeaderIconComponent);
   ]}
   aria-labelledby="page-header-title"
 >
-  <div class="page-header__glow page-header__glow--one" aria-hidden="true"></div>
-  <div class="page-header__glow page-header__glow--two" aria-hidden="true"></div>
+  <div
+    class="page-header__glow page-header__glow--one"
+    aria-hidden="true"
+  ></div>
+
+  <div
+    class="page-header__glow page-header__glow--two"
+    aria-hidden="true"
+  ></div>
 
   <div class="page-header__container">
     {
@@ -118,50 +109,57 @@ const hasMeta = Boolean(eyebrow || HeaderIconComponent);
           aria-label="Breadcrumb"
         >
           <ol class="page-header__breadcrumb-list">
-            {breadcrumbs.map((item, index) => {
-              const isLast = index === breadcrumbs.length - 1;
+            {breadcrumbs.map(
+              (item, index) => {
+                const isLast =
+                  index ===
+                  breadcrumbs.length - 1;
 
-              return (
-                <li class="page-header__breadcrumb-item">
-                  {
-                    item.href && !isLast ? (
-                      <a
-                        href={item.href}
-                        class="page-header__breadcrumb-link"
-                      >
-                        {item.label}
-                      </a>
-                    ) : (
-                      <span
-                        class:list={[
-                          "page-header__breadcrumb-current",
-                          {
-                            "page-header__breadcrumb-current--last":
-                              isLast,
-                          },
-                        ]}
-                        aria-current={
-                          isLast ? "page" : undefined
-                        }
-                      >
-                        {item.label}
-                      </span>
-                    )
-                  }
+                return (
+                  <li class="page-header__breadcrumb-item">
+                    {
+                      item.href &&
+                      !isLast ? (
+                        <a
+                          href={item.href}
+                          class="page-header__breadcrumb-link"
+                        >
+                          {item.label}
+                        </a>
+                      ) : (
+                        <span
+                          class:list={[
+                            "page-header__breadcrumb-current",
+                            {
+                              "page-header__breadcrumb-current--last":
+                                isLast,
+                            },
+                          ]}
+                          aria-current={
+                            isLast
+                              ? "page"
+                              : undefined
+                          }
+                        >
+                          {item.label}
+                        </span>
+                      )
+                    }
 
-                  {
-                    !isLast && (
-                      <ChevronRight
-                        class="page-header__breadcrumb-separator"
-                        size={14}
-                        strokeWidth={1.8}
-                        aria-hidden="true"
-                      />
-                    )
-                  }
-                </li>
-              );
-            })}
+                    {
+                      !isLast && (
+                        <ChevronRight
+                          class="page-header__breadcrumb-separator"
+                          size={14}
+                          stroke-width={1.8}
+                          aria-hidden="true"
+                        />
+                      )
+                    }
+                  </li>
+                );
+              }
+            )}
           </ol>
         </nav>
       )
@@ -173,14 +171,99 @@ const hasMeta = Boolean(eyebrow || HeaderIconComponent);
           hasMeta && (
             <div class="page-header__meta">
               {
-                HeaderIconComponent && (
+                icon === "map" && (
                   <span
                     class="page-header__icon"
                     aria-hidden="true"
                   >
-                    <HeaderIconComponent
+                    <Map
                       size={22}
-                      strokeWidth={1.9}
+                      stroke-width={1.9}
+                    />
+                  </span>
+                )
+              }
+
+              {
+                icon === "data" && (
+                  <span
+                    class="page-header__icon"
+                    aria-hidden="true"
+                  >
+                    <ChartColumn
+                      size={22}
+                      stroke-width={1.9}
+                    />
+                  </span>
+                )
+              }
+
+              {
+                icon ===
+                  "organization" && (
+                  <span
+                    class="page-header__icon"
+                    aria-hidden="true"
+                  >
+                    <Building2
+                      size={22}
+                      stroke-width={1.9}
+                    />
+                  </span>
+                )
+              }
+
+              {
+                icon === "waste" && (
+                  <span
+                    class="page-header__icon"
+                    aria-hidden="true"
+                  >
+                    <Recycle
+                      size={22}
+                      stroke-width={1.9}
+                    />
+                  </span>
+                )
+              }
+
+              {
+                icon === "report" && (
+                  <span
+                    class="page-header__icon"
+                    aria-hidden="true"
+                  >
+                    <TriangleAlert
+                      size={22}
+                      stroke-width={1.9}
+                    />
+                  </span>
+                )
+              }
+
+              {
+                icon === "company" && (
+                  <span
+                    class="page-header__icon"
+                    aria-hidden="true"
+                  >
+                    <Info
+                      size={22}
+                      stroke-width={1.9}
+                    />
+                  </span>
+                )
+              }
+
+              {
+                icon === "layers" && (
+                  <span
+                    class="page-header__icon"
+                    aria-hidden="true"
+                  >
+                    <Layers
+                      size={22}
+                      stroke-width={1.9}
                     />
                   </span>
                 )
@@ -228,7 +311,9 @@ const hasMeta = Boolean(eyebrow || HeaderIconComponent);
 
     width: 100%;
 
-    border-bottom: 1px solid var(--color-border);
+    border-bottom:
+      1px solid
+      var(--color-border);
 
     background:
       linear-gradient(
@@ -254,7 +339,8 @@ const hasMeta = Boolean(eyebrow || HeaderIconComponent);
 
   .page-header--compact
     .page-header__container {
-    padding-block: 22px 25px;
+    padding-block:
+      22px 25px;
   }
 
   .page-header__glow {
@@ -280,8 +366,18 @@ const hasMeta = Boolean(eyebrow || HeaderIconComponent);
     background:
       radial-gradient(
         circle,
-        rgba(132, 204, 22, 0.13) 0%,
-        rgba(132, 204, 22, 0.04) 48%,
+        rgba(
+          132,
+          204,
+          22,
+          0.13
+        ) 0%,
+        rgba(
+          132,
+          204,
+          22,
+          0.04
+        ) 48%,
         transparent 72%
       );
   }
@@ -296,8 +392,18 @@ const hasMeta = Boolean(eyebrow || HeaderIconComponent);
     background:
       radial-gradient(
         circle,
-        rgba(22, 101, 52, 0.08) 0%,
-        rgba(22, 101, 52, 0.025) 48%,
+        rgba(
+          22,
+          101,
+          52,
+          0.08
+        ) 0%,
+        rgba(
+          22,
+          101,
+          52,
+          0.025
+        ) 48%,
         transparent 73%
       );
   }
@@ -332,7 +438,8 @@ const hasMeta = Boolean(eyebrow || HeaderIconComponent);
 
     overflow: hidden;
 
-    color: var(--color-secondary);
+    color:
+      var(--color-secondary);
 
     font-size: 0.7rem;
     font-weight: 650;
@@ -342,19 +449,24 @@ const hasMeta = Boolean(eyebrow || HeaderIconComponent);
     text-overflow: ellipsis;
     white-space: nowrap;
 
-    transition: color 160ms ease;
+    transition:
+      color 160ms ease;
   }
 
   .page-header__breadcrumb-link:hover {
-    color: var(--color-primary-dark);
+    color:
+      var(--color-primary-dark);
   }
 
   .page-header__breadcrumb-current {
-    color: var(--color-secondary);
+    color:
+      var(--color-secondary);
   }
 
   .page-header__breadcrumb-current--last {
-    color: var(--color-text);
+    color:
+      var(--color-text);
+
     font-weight: 750;
   }
 
@@ -391,9 +503,11 @@ const hasMeta = Boolean(eyebrow || HeaderIconComponent);
 
     display: grid;
     place-items: center;
+
     flex-shrink: 0;
 
-    border: 1px solid
+    border:
+      1px solid
       color-mix(
         in srgb,
         var(--color-primary) 12%,
@@ -402,13 +516,24 @@ const hasMeta = Boolean(eyebrow || HeaderIconComponent);
 
     border-radius: 10px;
 
-    color: var(--color-primary-dark);
+    color:
+      var(--color-primary-dark);
 
     background:
       linear-gradient(
         145deg,
-        rgba(220, 252, 231, 0.92),
-        rgba(240, 253, 244, 0.9)
+        rgba(
+          220,
+          252,
+          231,
+          0.92
+        ),
+        rgba(
+          240,
+          253,
+          244,
+          0.9
+        )
       );
   }
 
@@ -421,8 +546,11 @@ const hasMeta = Boolean(eyebrow || HeaderIconComponent);
 
     border-radius: 999px;
 
-    color: var(--color-primary-dark);
-    background: var(--color-primary-light);
+    color:
+      var(--color-primary-dark);
+
+    background:
+      var(--color-primary-light);
 
     font-size: 0.66rem;
     font-weight: 850;
@@ -435,7 +563,8 @@ const hasMeta = Boolean(eyebrow || HeaderIconComponent);
   .page-header__title {
     margin: 0;
 
-    color: var(--color-text);
+    color:
+      var(--color-text);
 
     font-size: clamp(
       1.7rem,
@@ -454,7 +583,8 @@ const hasMeta = Boolean(eyebrow || HeaderIconComponent);
 
     margin: 13px 0 0;
 
-    color: var(--color-secondary);
+    color:
+      var(--color-secondary);
 
     font-size: 0.92rem;
     font-weight: 500;
@@ -499,12 +629,13 @@ const hasMeta = Boolean(eyebrow || HeaderIconComponent);
   }
 
   .page-header--green {
-    border-bottom-color: rgba(
-      22,
-      101,
-      52,
-      0.12
-    );
+    border-bottom-color:
+      rgba(
+        22,
+        101,
+        52,
+        0.12
+      );
 
     background:
       linear-gradient(
@@ -520,8 +651,18 @@ const hasMeta = Boolean(eyebrow || HeaderIconComponent);
     background:
       radial-gradient(
         circle,
-        rgba(132, 204, 22, 0.17) 0%,
-        rgba(132, 204, 22, 0.05) 45%,
+        rgba(
+          132,
+          204,
+          22,
+          0.17
+        ) 0%,
+        rgba(
+          132,
+          204,
+          22,
+          0.05
+        ) 45%,
         transparent 73%
       );
   }
@@ -531,26 +672,42 @@ const hasMeta = Boolean(eyebrow || HeaderIconComponent);
     background:
       radial-gradient(
         circle,
-        rgba(22, 101, 52, 0.11) 0%,
-        rgba(22, 101, 52, 0.03) 46%,
+        rgba(
+          22,
+          101,
+          52,
+          0.11
+        ) 0%,
+        rgba(
+          22,
+          101,
+          52,
+          0.03
+        ) 46%,
         transparent 73%
       );
   }
 
   .page-header--dark {
-    border-bottom-color: rgba(
-      255,
-      255,
-      255,
-      0.08
-    );
+    border-bottom-color:
+      rgba(
+        255,
+        255,
+        255,
+        0.08
+      );
 
     color: #ffffff;
 
     background:
       radial-gradient(
         circle at 80% 20%,
-        rgba(132, 204, 22, 0.11),
+        rgba(
+          132,
+          204,
+          22,
+          0.11
+        ),
         transparent 30%
       ),
       linear-gradient(
@@ -560,7 +717,8 @@ const hasMeta = Boolean(eyebrow || HeaderIconComponent);
       );
   }
 
-  .page-header--dark .page-header__title {
+  .page-header--dark
+    .page-header__title {
     color: #ffffff;
   }
 
@@ -593,41 +751,46 @@ const hasMeta = Boolean(eyebrow || HeaderIconComponent);
 
   .page-header--dark
     .page-header__icon {
-    border-color: rgba(
-      132,
-      204,
-      22,
-      0.18
-    );
+    border-color:
+      rgba(
+        132,
+        204,
+        22,
+        0.18
+      );
 
     color: #bce98a;
 
-    background: rgba(
-      132,
-      204,
-      22,
-      0.08
-    );
+    background:
+      rgba(
+        132,
+        204,
+        22,
+        0.08
+      );
   }
 
   .page-header--dark
     .page-header__eyebrow {
     color: #d7efb9;
-    background: rgba(
-      132,
-      204,
-      22,
-      0.11
-    );
+
+    background:
+      rgba(
+        132,
+        204,
+        22,
+        0.11
+      );
   }
 
   .page-header--blue {
-    border-bottom-color: rgba(
-      37,
-      99,
-      235,
-      0.12
-    );
+    border-bottom-color:
+      rgba(
+        37,
+        99,
+        235,
+        0.12
+      );
 
     background:
       linear-gradient(
@@ -640,26 +803,30 @@ const hasMeta = Boolean(eyebrow || HeaderIconComponent);
 
   .page-header--blue
     .page-header__icon {
-    color: var(--color-info);
+    color:
+      var(--color-info);
 
-    border-color: rgba(
-      37,
-      99,
-      235,
-      0.13
-    );
+    border-color:
+      rgba(
+        37,
+        99,
+        235,
+        0.13
+      );
 
-    background: rgba(
-      219,
-      234,
-      254,
-      0.7
-    );
+    background:
+      rgba(
+        219,
+        234,
+        254,
+        0.7
+      );
   }
 
   .page-header--blue
     .page-header__eyebrow {
     color: #1d4ed8;
+
     background: #dbeafe;
   }
 
@@ -676,6 +843,7 @@ const hasMeta = Boolean(eyebrow || HeaderIconComponent);
     .page-header__content {
       align-items: flex-start;
       flex-direction: column;
+
       gap: 22px;
     }
 
@@ -711,6 +879,7 @@ const hasMeta = Boolean(eyebrow || HeaderIconComponent);
     .page-header__breadcrumb-link,
     .page-header__breadcrumb-current {
       max-width: 180px;
+
       font-size: 0.66rem;
     }
 
@@ -726,6 +895,7 @@ const hasMeta = Boolean(eyebrow || HeaderIconComponent);
 
     .page-header__description {
       margin-top: 10px;
+
       font-size: 0.83rem;
       line-height: 1.65;
     }
@@ -741,7 +911,9 @@ const hasMeta = Boolean(eyebrow || HeaderIconComponent);
 
     .page-header__eyebrow {
       min-height: 22px;
+
       padding-inline: 8px;
+
       font-size: 0.6rem;
     }
 
@@ -762,9 +934,15 @@ const hasMeta = Boolean(eyebrow || HeaderIconComponent);
     .page-header,
     .page-header * {
       scroll-behavior: auto !important;
-      transition-duration: 0.01ms !important;
-      animation-duration: 0.01ms !important;
-      animation-iteration-count: 1 !important;
+
+      transition-duration:
+        0.01ms !important;
+
+      animation-duration:
+        0.01ms !important;
+
+      animation-iteration-count:
+        1 !important;
     }
   }
 </style>
