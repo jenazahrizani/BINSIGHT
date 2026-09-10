@@ -1,0 +1,763 @@
+---
+/**
+ * ============================================================================
+ * BINSIGHT — BUTTON
+ * ============================================================================
+ * Badung Waste Intelligence
+ *
+ * Reusable button component for:
+ * - Public interface
+ * - Dashboard
+ * - Organization portal
+ * - Admin portal
+ * - Forms
+ * - Navigation actions
+ * - Map controls
+ * - Report actions
+ *
+ * Design system:
+ * src/styles/variables.css
+ *
+ * Component system:
+ * src/styles/components.css
+ *
+ * ============================================================================
+ * Usage
+ * ============================================================================
+ *
+ * <Button>Primary Action</Button>
+ *
+ * <Button variant="secondary">Secondary</Button>
+ *
+ * <Button variant="outline">Outline</Button>
+ *
+ * <Button variant="ghost">Ghost</Button>
+ *
+ * <Button variant="danger">Delete</Button>
+ *
+ * <Button size="sm">Small</Button>
+ *
+ * <Button size="lg" fullWidth>
+ *   Submit Report
+ * </Button>
+ *
+ * <Button href="/reports/create">
+ *   Laporkan Sampah
+ * </Button>
+ *
+ * <Button type="submit">
+ *   Simpan
+ * </Button>
+ *
+ * <Button loading>
+ *   Menyimpan...
+ * </Button>
+ *
+ * <Button disabled>
+ *   Tidak tersedia
+ * </Button>
+ * ============================================================================
+ */
+
+type Variant =
+  | "primary"
+  | "secondary"
+  | "outline"
+  | "ghost"
+  | "danger"
+  | "success"
+  | "warning"
+  | "link"
+  | "icon";
+
+type Size =
+  | "sm"
+  | "md"
+  | "lg"
+  | "xl";
+
+interface Props {
+  variant?: Variant;
+  size?: Size;
+
+  type?: "button" | "submit" | "reset";
+
+  href?: string;
+
+  target?: "_self" | "_blank" | "_parent" | "_top";
+
+  rel?: string;
+
+  disabled?: boolean;
+  loading?: boolean;
+
+  fullWidth?: boolean;
+
+  iconOnly?: boolean;
+
+  ariaLabel?: string;
+  ariaDescribedBy?: string;
+  ariaControls?: string;
+  ariaExpanded?: boolean;
+
+  title?: string;
+
+  download?: string | boolean;
+
+  class?: string;
+
+  id?: string;
+
+  name?: string;
+  value?: string;
+
+  form?: string;
+
+  tabindex?: number;
+
+  dataTestid?: string;
+
+  /**
+   * Visual emphasis for navigation / CTA.
+   * Kept separate from "variant" so consumer components
+   * can add semantics without creating new variants.
+   */
+  dataVariant?: string;
+}
+
+const {
+  variant = "primary",
+  size = "md",
+
+  type = "button",
+  href,
+
+  target = "_self",
+  rel,
+
+  disabled = false,
+  loading = false,
+
+  fullWidth = false,
+  iconOnly = false,
+
+  ariaLabel,
+  ariaDescribedBy,
+  ariaControls,
+  ariaExpanded,
+
+  title,
+
+  download,
+
+  class: className = "",
+
+  id,
+  name,
+  value,
+  form,
+  tabindex,
+
+  dataTestid,
+
+  dataVariant,
+} = Astro.props;
+
+const isDisabled = disabled || loading;
+const isLink = Boolean(href);
+
+const classes = [
+  "btn",
+  `btn--${variant}`,
+  `btn--${size}`,
+  fullWidth ? "btn--full" : "",
+  iconOnly ? "btn--icon-only" : "",
+  loading ? "btn--loading" : "",
+  isDisabled ? "btn--disabled" : "",
+  className,
+]
+  .filter(Boolean)
+  .join(" ");
+
+const resolvedRel =
+  target === "_blank"
+    ? rel ?? "noopener noreferrer"
+    : rel;
+
+const ariaDisabled = isLink && isDisabled ? "true" : undefined;
+const resolvedTabIndex =
+  isLink && isDisabled ? -1 : tabindex;
+
+const safeAriaLabel =
+  ariaLabel ??
+  (iconOnly ? title : undefined);
+---
+
+{
+  isLink ? (
+    <a
+      id={id}
+      class={classes}
+      href={isDisabled ? undefined : href}
+      target={target}
+      rel={resolvedRel}
+      title={title}
+      download={download}
+      aria-label={safeAriaLabel}
+      aria-describedby={ariaDescribedBy}
+      aria-controls={ariaControls}
+      aria-expanded={ariaExpanded}
+      aria-disabled={ariaDisabled}
+      tabindex={resolvedTabIndex}
+      data-testid={dataTestid}
+      data-variant={dataVariant}
+    >
+      {loading && (
+        <span
+          class="btn__spinner"
+          aria-hidden="true"
+        ></span>
+      )}
+
+      <span
+        class:list={[
+          "btn__content",
+          loading && "btn__content--loading",
+        ]}
+      >
+        <slot />
+      </span>
+    </a>
+  ) : (
+    <button
+      id={id}
+      class={classes}
+      type={type}
+      disabled={isDisabled}
+      name={name}
+      value={value}
+      form={form}
+      title={title}
+      aria-label={safeAriaLabel}
+      aria-describedby={ariaDescribedBy}
+      aria-controls={ariaControls}
+      aria-expanded={ariaExpanded}
+      aria-busy={loading ? "true" : undefined}
+      tabindex={resolvedTabIndex}
+      data-testid={dataTestid}
+      data-variant={dataVariant}
+    >
+      {loading && (
+        <span
+          class="btn__spinner"
+          aria-hidden="true"
+        ></span>
+      )}
+
+      <span
+        class:list={[
+          "btn__content",
+          loading && "btn__content--loading",
+        ]}
+      >
+        <slot />
+      </span>
+    </button>
+  )
+}
+
+
+<style>
+  /* ==========================================================================
+     BASE
+     ========================================================================== */
+
+  .btn {
+    --btn-background: var(--color-primary);
+    --btn-background-hover: var(--color-primary-hover);
+    --btn-background-active: var(--color-primary-active);
+
+    --btn-color: var(--color-white);
+
+    --btn-border: transparent;
+    --btn-border-hover: transparent;
+
+    --btn-shadow: none;
+    --btn-shadow-hover: var(--shadow-sm);
+
+    position: relative;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    min-width: 0;
+    min-height: var(--control-height-md);
+
+    padding-inline: var(--space-4);
+
+    overflow: hidden;
+
+    border:
+      var(--border-width-1)
+      var(--border-style)
+      var(--btn-border);
+
+    border-radius: var(--button-radius);
+
+    background: var(--btn-background);
+    color: var(--btn-color);
+
+    font-family: var(--font-sans);
+    font-size: var(--font-size-sm);
+    font-weight: var(--button-font-weight);
+    line-height: 1;
+    letter-spacing: normal;
+    text-align: center;
+    text-decoration: none;
+    white-space: nowrap;
+
+    box-shadow: var(--btn-shadow);
+
+    vertical-align: middle;
+
+    cursor: pointer;
+    user-select: none;
+
+    transition:
+      background-color var(--transition-fast),
+      border-color var(--transition-fast),
+      color var(--transition-fast),
+      box-shadow var(--transition-fast),
+      transform var(--transition-fast),
+      opacity var(--transition-fast);
+  }
+
+  .btn::after {
+    position: absolute;
+    inset: 0;
+
+    content: "";
+
+    background: transparent;
+
+    pointer-events: none;
+
+    transition:
+      background-color var(--transition-fast);
+  }
+
+  .btn:hover:not(:disabled) {
+    background: var(--btn-background-hover);
+    border-color: var(--btn-border-hover);
+    box-shadow: var(--btn-shadow-hover);
+    text-decoration: none;
+  }
+
+  .btn:active:not(:disabled) {
+    background: var(--btn-background-active);
+    transform: translateY(1px);
+  }
+
+  .btn:focus-visible {
+    outline:
+      var(--focus-ring-width)
+      solid
+      var(--color-focus-ring);
+
+    outline-offset: var(--focus-ring-offset);
+  }
+
+  .btn:disabled,
+  .btn--disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+
+  .btn--disabled:hover {
+    transform: none;
+  }
+
+
+  /* ==========================================================================
+     CONTENT
+     ========================================================================== */
+
+  .btn__content {
+    position: relative;
+    z-index: 1;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    min-width: 0;
+
+    gap: var(--space-2);
+
+    transition:
+      opacity var(--transition-fast);
+  }
+
+  .btn__content--loading {
+    opacity: 0;
+  }
+
+
+  /* ==========================================================================
+     LOADING
+     ========================================================================== */
+
+  .btn--loading {
+    cursor: wait;
+  }
+
+  .btn__spinner {
+    position: absolute;
+    z-index: 2;
+
+    width: 1rem;
+    height: 1rem;
+
+    border:
+      2px
+      solid
+      currentColor;
+
+    border-right-color: transparent;
+
+    border-radius: var(--radius-full);
+
+    animation:
+      binsight-button-spin
+      650ms
+      linear
+      infinite;
+  }
+
+  @keyframes binsight-button-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+
+  /* ==========================================================================
+     SIZE — SMALL
+     ========================================================================== */
+
+  .btn--sm {
+    min-height: var(--control-height-sm);
+
+    padding-inline: var(--space-3);
+
+    border-radius: var(--radius-sm);
+
+    font-size: var(--font-size-xs);
+  }
+
+
+  /* ==========================================================================
+     SIZE — MEDIUM
+     ========================================================================== */
+
+  .btn--md {
+    min-height: var(--control-height-md);
+
+    padding-inline: var(--space-4);
+
+    border-radius: var(--radius-md);
+
+    font-size: var(--font-size-sm);
+  }
+
+
+  /* ==========================================================================
+     SIZE — LARGE
+     ========================================================================== */
+
+  .btn--lg {
+    min-height: var(--control-height-lg);
+
+    padding-inline: var(--space-5);
+
+    border-radius: var(--radius-md);
+
+    font-size: var(--font-size-sm);
+  }
+
+
+  /* ==========================================================================
+     SIZE — XL
+     ========================================================================== */
+
+  .btn--xl {
+    min-height: var(--control-height-xl);
+
+    padding-inline: var(--space-6);
+
+    border-radius: var(--radius-lg);
+
+    font-size: var(--font-size-md);
+  }
+
+
+  /* ==========================================================================
+     PRIMARY
+     ========================================================================== */
+
+  .btn--primary {
+    --btn-background: var(--color-primary);
+    --btn-background-hover: var(--color-primary-hover);
+    --btn-background-active: var(--color-primary-active);
+
+    --btn-color: var(--color-white);
+
+    --btn-border: var(--color-primary);
+    --btn-border-hover: var(--color-primary-hover);
+
+    --btn-shadow: 0 1px 2px rgb(20 83 45 / 0.12);
+    --btn-shadow-hover: var(--shadow-sm);
+  }
+
+
+  /* ==========================================================================
+     SECONDARY
+     ========================================================================== */
+
+  .btn--secondary {
+    --btn-background: var(--color-slate-100);
+    --btn-background-hover: var(--color-slate-200);
+    --btn-background-active: var(--color-slate-300);
+
+    --btn-color: var(--color-text-strong);
+
+    --btn-border: var(--color-slate-200);
+    --btn-border-hover: var(--color-slate-300);
+
+    --btn-shadow: none;
+    --btn-shadow-hover: var(--shadow-xs);
+  }
+
+
+  /* ==========================================================================
+     OUTLINE
+     ========================================================================== */
+
+  .btn--outline {
+    --btn-background: transparent;
+    --btn-background-hover: var(--color-primary-light);
+    --btn-background-active: var(--color-brand-200);
+
+    --btn-color: var(--color-primary);
+
+    --btn-border: var(--color-primary);
+    --btn-border-hover: var(--color-primary);
+
+    --btn-shadow: none;
+    --btn-shadow-hover: none;
+  }
+
+
+  /* ==========================================================================
+     GHOST
+     ========================================================================== */
+
+  .btn--ghost {
+    --btn-background: transparent;
+    --btn-background-hover: var(--color-surface-soft);
+    --btn-background-active: var(--color-slate-200);
+
+    --btn-color: var(--color-text-secondary);
+
+    --btn-border: transparent;
+    --btn-border-hover: transparent;
+
+    --btn-shadow: none;
+    --btn-shadow-hover: none;
+  }
+
+  .btn--ghost:hover:not(:disabled) {
+    color: var(--color-text-strong);
+  }
+
+
+  /* ==========================================================================
+     DANGER
+     ========================================================================== */
+
+  .btn--danger {
+    --btn-background: var(--color-danger);
+    --btn-background-hover: var(--color-danger-700);
+    --btn-background-active: var(--color-danger-700);
+
+    --btn-color: var(--color-white);
+
+    --btn-border: var(--color-danger);
+    --btn-border-hover: var(--color-danger-700);
+
+    --btn-shadow: 0 1px 2px rgb(185 28 28 / 0.12);
+    --btn-shadow-hover: var(--shadow-sm);
+  }
+
+
+  /* ==========================================================================
+     SUCCESS
+     ========================================================================== */
+
+  .btn--success {
+    --btn-background: var(--color-success);
+    --btn-background-hover: var(--color-success-700);
+    --btn-background-active: var(--color-success-700);
+
+    --btn-color: var(--color-white);
+
+    --btn-border: var(--color-success);
+    --btn-border-hover: var(--color-success-700);
+
+    --btn-shadow: 0 1px 2px rgb(21 128 61 / 0.12);
+    --btn-shadow-hover: var(--shadow-sm);
+  }
+
+
+  /* ==========================================================================
+     WARNING
+     ========================================================================== */
+
+  .btn--warning {
+    --btn-background: var(--color-warning);
+    --btn-background-hover: var(--color-warning-700);
+    --btn-background-active: var(--color-warning-700);
+
+    --btn-color: var(--color-white);
+
+    --btn-border: var(--color-warning);
+    --btn-border-hover: var(--color-warning-700);
+
+    --btn-shadow: 0 1px 2px rgb(180 83 9 / 0.12);
+    --btn-shadow-hover: var(--shadow-sm);
+  }
+
+
+  /* ==========================================================================
+     LINK
+     ========================================================================== */
+
+  .btn--link {
+    --btn-background: transparent;
+    --btn-background-hover: transparent;
+    --btn-background-active: transparent;
+
+    --btn-color: var(--color-primary);
+
+    --btn-border: transparent;
+    --btn-border-hover: transparent;
+
+    --btn-shadow: none;
+    --btn-shadow-hover: none;
+
+    min-height: auto;
+    padding: 0;
+
+    border-radius: var(--radius-xs);
+  }
+
+  .btn--link:hover:not(:disabled) {
+    color: var(--color-primary-hover);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.18em;
+  }
+
+  .btn--link:active:not(:disabled) {
+    transform: none;
+  }
+
+
+  /* ==========================================================================
+     ICON
+     ========================================================================== */
+
+  .btn--icon {
+    --btn-background: var(--color-surface);
+    --btn-background-hover: var(--color-surface-soft);
+    --btn-background-active: var(--color-slate-200);
+
+    --btn-color: var(--color-text-secondary);
+
+    --btn-border: var(--color-border);
+    --btn-border-hover: var(--color-border-strong);
+
+    --btn-shadow: none;
+    --btn-shadow-hover: var(--shadow-xs);
+
+    width: var(--control-height-md);
+    padding: 0;
+  }
+
+
+  /* ==========================================================================
+     ICON ONLY
+     ========================================================================== */
+
+  .btn--icon-only {
+    aspect-ratio: 1;
+    padding-inline: 0;
+  }
+
+  .btn--icon-only .btn__content {
+    width: 100%;
+  }
+
+
+  /* ==========================================================================
+     FULL WIDTH
+     ========================================================================== */
+
+  .btn--full {
+    display: flex;
+    width: 100%;
+  }
+
+
+  /* ==========================================================================
+     LINK ACCESSIBILITY
+     ========================================================================== */
+
+  a.btn {
+    color: var(--btn-color);
+  }
+
+  a.btn:hover:not(.btn--disabled) {
+    color: var(--btn-color);
+  }
+
+
+  /* ==========================================================================
+     REDUCED MOTION
+     ========================================================================== */
+
+  @media (prefers-reduced-motion: reduce) {
+    .btn,
+    .btn::after,
+    .btn__content {
+      transition: none;
+    }
+
+    .btn__spinner {
+      animation-duration: 1.2s;
+    }
+  }
+
+
+  /* ==========================================================================
+     MOBILE
+     ========================================================================== */
+
+  @media (max-width: 479px) {
+    .btn--xl {
+      width: 100%;
+    }
+  }
+</style>

@@ -1,0 +1,618 @@
+---
+/**
+ * ============================================================================
+ * BINSIGHT — BADGE
+ * ============================================================================
+ * Badung Waste Intelligence
+ *
+ * Reusable badge component for:
+ * - Organization verification
+ * - Organization status
+ * - Report status
+ * - Waste categories
+ * - Admin status
+ * - Data labels
+ * - Filters / tags
+ * - Small semantic indicators
+ *
+ * Design system:
+ * src/styles/variables.css
+ *
+ * Component system:
+ * src/styles/components.css
+ *
+ * ============================================================================
+ * Usage
+ * ============================================================================
+ *
+ * <Badge>Active</Badge>
+ *
+ * <Badge variant="success">Verified</Badge>
+ *
+ * <Badge variant="warning">Pending</Badge>
+ *
+ * <Badge variant="danger">Rejected</Badge>
+ *
+ * <Badge variant="info">Processing</Badge>
+ *
+ * <Badge variant="neutral">Draft</Badge>
+ *
+ * <Badge variant="brand">BINSIGHT</Badge>
+ *
+ * <Badge variant="organic">Organik</Badge>
+ *
+ * <Badge variant="plastic">Plastik</Badge>
+ *
+ * <Badge variant="paper">Kertas</Badge>
+ *
+ * <Badge dot variant="success">Active</Badge>
+ *
+ * <Badge size="lg">Important</Badge>
+ *
+ * <Badge pill={false}>Label</Badge>
+ *
+ * ============================================================================
+ */
+
+type Variant =
+  | "neutral"
+  | "brand"
+  | "success"
+  | "warning"
+  | "danger"
+  | "info"
+  | "organic"
+  | "plastic"
+  | "paper"
+  | "glass"
+  | "metal"
+  | "textile"
+  | "electronic"
+  | "hazardous"
+  | "other";
+
+type Size =
+  | "sm"
+  | "md"
+  | "lg";
+
+type DotColor =
+  | "default"
+  | "brand"
+  | "success"
+  | "warning"
+  | "danger"
+  | "info"
+  | "organic"
+  | "plastic"
+  | "paper"
+  | "glass"
+  | "metal"
+  | "textile"
+  | "electronic"
+  | "hazardous"
+  | "other";
+
+interface Props {
+  variant?: Variant;
+
+  size?: Size;
+
+  dot?: boolean;
+
+  dotColor?: DotColor;
+
+  pill?: boolean;
+
+  bordered?: boolean;
+
+  uppercase?: boolean;
+
+  title?: string;
+
+  ariaLabel?: string;
+
+  class?: string;
+
+  id?: string;
+
+  dataTestid?: string;
+
+  dataValue?: string;
+}
+
+const {
+  variant = "neutral",
+  size = "md",
+  dot = false,
+  dotColor,
+  pill = true,
+  bordered = false,
+  uppercase = false,
+  title,
+  ariaLabel,
+  class: className = "",
+  id,
+  dataTestid,
+  dataValue,
+} = Astro.props;
+
+const resolvedDotColor = dotColor ?? variant;
+
+const classes = [
+  "badge",
+  `badge--${variant}`,
+  `badge--${size}`,
+  pill ? "badge--pill" : "",
+  bordered ? "badge--bordered" : "",
+  uppercase ? "badge--uppercase" : "",
+  className,
+]
+  .filter(Boolean)
+  .join(" ");
+
+const dotClasses = [
+  "badge__dot",
+  `badge__dot--${resolvedDotColor}`,
+]
+  .filter(Boolean)
+  .join(" ");
+---
+
+<span
+  id={id}
+  class={classes}
+  title={title}
+  aria-label={ariaLabel}
+  data-testid={dataTestid}
+  data-value={dataValue}
+>
+  {dot && (
+    <span
+      class={dotClasses}
+      aria-hidden="true"
+    ></span>
+  )}
+
+  <span class="badge__content">
+    <slot />
+  </span>
+</span>
+
+
+<style>
+  /* ==========================================================================
+     BASE
+     ========================================================================== */
+
+  .badge {
+    --badge-background: var(--color-slate-100);
+    --badge-border: transparent;
+    --badge-color: var(--color-text-secondary);
+    --badge-dot: var(--color-text-subtle);
+
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+
+    min-width: 0;
+
+    min-height: 1.75rem;
+    padding-inline: var(--space-3);
+
+    border:
+      var(--border-width-1)
+      var(--border-style)
+      var(--badge-border);
+
+    border-radius: var(--radius-md);
+
+    background: var(--badge-background);
+    color: var(--badge-color);
+
+    font-family: var(--font-sans);
+    font-size: var(--font-size-xs);
+    font-weight: var(--badge-font-weight);
+    line-height: 1;
+    letter-spacing: normal;
+    white-space: nowrap;
+
+    vertical-align: middle;
+  }
+
+
+  /* ==========================================================================
+     CONTENT
+     ========================================================================== */
+
+  .badge__content {
+    display: inline-flex;
+    align-items: center;
+
+    min-width: 0;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+
+  /* ==========================================================================
+     PILL
+     ========================================================================== */
+
+  .badge--pill {
+    border-radius: var(--badge-radius);
+  }
+
+
+  /* ==========================================================================
+     SIZES
+     ========================================================================== */
+
+  .badge--sm {
+    min-height: 1.5rem;
+    padding-inline: var(--space-2);
+
+    font-size: 0.6875rem;
+  }
+
+  .badge--md {
+    min-height: 1.75rem;
+    padding-inline: var(--space-3);
+
+    font-size: var(--font-size-xs);
+  }
+
+  .badge--lg {
+    min-height: 2rem;
+    padding-inline: var(--space-3-5);
+
+    font-size: var(--font-size-sm);
+  }
+
+
+  /* ==========================================================================
+     NEUTRAL
+     ========================================================================== */
+
+  .badge--neutral {
+    --badge-background: var(--color-slate-100);
+    --badge-border: var(--color-slate-200);
+    --badge-color: var(--color-slate-700);
+    --badge-dot: var(--color-slate-500);
+  }
+
+
+  /* ==========================================================================
+     BRAND
+     ========================================================================== */
+
+  .badge--brand {
+    --badge-background: var(--color-primary-light);
+    --badge-border: var(--color-brand-200);
+    --badge-color: var(--color-primary);
+    --badge-dot: var(--color-primary);
+  }
+
+
+  /* ==========================================================================
+     SUCCESS
+     ========================================================================== */
+
+  .badge--success {
+    --badge-background: var(--color-success-bg);
+    --badge-border: var(--color-success-border);
+    --badge-color: var(--color-success-text);
+    --badge-dot: var(--color-success);
+  }
+
+
+  /* ==========================================================================
+     WARNING
+     ========================================================================== */
+
+  .badge--warning {
+    --badge-background: var(--color-warning-bg);
+    --badge-border: var(--color-warning-border);
+    --badge-color: var(--color-warning-text);
+    --badge-dot: var(--color-warning);
+  }
+
+
+  /* ==========================================================================
+     DANGER
+     ========================================================================== */
+
+  .badge--danger {
+    --badge-background: var(--color-danger-bg);
+    --badge-border: var(--color-danger-border);
+    --badge-color: var(--color-danger-text);
+    --badge-dot: var(--color-danger);
+  }
+
+
+  /* ==========================================================================
+     INFO
+     ========================================================================== */
+
+  .badge--info {
+    --badge-background: var(--color-info-bg);
+    --badge-border: var(--color-info-border);
+    --badge-color: var(--color-info-text);
+    --badge-dot: var(--color-info);
+  }
+
+
+  /* ==========================================================================
+     WASTE — ORGANIC
+     ========================================================================== */
+
+  .badge--organic {
+    --badge-background: var(--waste-organic-soft);
+    --badge-border: var(--waste-organic-soft);
+    --badge-color: #166534;
+    --badge-dot: var(--waste-organic);
+  }
+
+
+  /* ==========================================================================
+     WASTE — PLASTIC
+     ========================================================================== */
+
+  .badge--plastic {
+    --badge-background: var(--waste-plastic-soft);
+    --badge-border: var(--waste-plastic-soft);
+    --badge-color: #1d4ed8;
+    --badge-dot: var(--waste-plastic);
+  }
+
+
+  /* ==========================================================================
+     WASTE — PAPER
+     ========================================================================== */
+
+  .badge--paper {
+    --badge-background: var(--waste-paper-soft);
+    --badge-border: var(--waste-paper-soft);
+    --badge-color: #a16207;
+    --badge-dot: var(--waste-paper);
+  }
+
+
+  /* ==========================================================================
+     WASTE — GLASS
+     ========================================================================== */
+
+  .badge--glass {
+    --badge-background: var(--waste-glass-soft);
+    --badge-border: var(--waste-glass-soft);
+    --badge-color: #0e7490;
+    --badge-dot: var(--waste-glass);
+  }
+
+
+  /* ==========================================================================
+     WASTE — METAL
+     ========================================================================== */
+
+  .badge--metal {
+    --badge-background: var(--waste-metal-soft);
+    --badge-border: var(--waste-metal-soft);
+    --badge-color: var(--color-slate-700);
+    --badge-dot: var(--waste-metal);
+  }
+
+
+  /* ==========================================================================
+     WASTE — TEXTILE
+     ========================================================================== */
+
+  .badge--textile {
+    --badge-background: var(--waste-textile-soft);
+    --badge-border: var(--waste-textile-soft);
+    --badge-color: #7e22ce;
+    --badge-dot: var(--waste-textile);
+  }
+
+
+  /* ==========================================================================
+     WASTE — ELECTRONIC
+     ========================================================================== */
+
+  .badge--electronic {
+    --badge-background: var(--waste-electronic-soft);
+    --badge-border: var(--waste-electronic-soft);
+    --badge-color: #6d28d9;
+    --badge-dot: var(--waste-electronic);
+  }
+
+
+  /* ==========================================================================
+     WASTE — HAZARDOUS
+     ========================================================================== */
+
+  .badge--hazardous {
+    --badge-background: var(--waste-hazardous-soft);
+    --badge-border: var(--waste-hazardous-soft);
+    --badge-color: #b91c1c;
+    --badge-dot: var(--waste-hazardous);
+  }
+
+
+  /* ==========================================================================
+     WASTE — OTHER
+     ========================================================================== */
+
+  .badge--other {
+    --badge-background: var(--waste-other-soft);
+    --badge-border: var(--waste-other-soft);
+    --badge-color: var(--color-slate-700);
+    --badge-dot: var(--waste-other);
+  }
+
+
+  /* ==========================================================================
+     DOT
+     ========================================================================== */
+
+  .badge__dot {
+    display: inline-block;
+    flex: 0 0 auto;
+
+    width: 0.4375rem;
+    height: 0.4375rem;
+    margin-right: var(--space-2);
+
+    border-radius: var(--radius-full);
+
+    background: var(--badge-dot);
+  }
+
+
+  /* ==========================================================================
+     DOT COLORS
+     ========================================================================== */
+
+  .badge__dot--default {
+    background: var(--color-text-subtle);
+  }
+
+  .badge__dot--brand {
+    background: var(--color-primary);
+  }
+
+  .badge__dot--success {
+    background: var(--color-success);
+  }
+
+  .badge__dot--warning {
+    background: var(--color-warning);
+  }
+
+  .badge__dot--danger {
+    background: var(--color-danger);
+  }
+
+  .badge__dot--info {
+    background: var(--color-info);
+  }
+
+  .badge__dot--organic {
+    background: var(--waste-organic);
+  }
+
+  .badge__dot--plastic {
+    background: var(--waste-plastic);
+  }
+
+  .badge__dot--paper {
+    background: var(--waste-paper);
+  }
+
+  .badge__dot--glass {
+    background: var(--waste-glass);
+  }
+
+  .badge__dot--metal {
+    background: var(--waste-metal);
+  }
+
+  .badge__dot--textile {
+    background: var(--waste-textile);
+  }
+
+  .badge__dot--electronic {
+    background: var(--waste-electronic);
+  }
+
+  .badge__dot--hazardous {
+    background: var(--waste-hazardous);
+  }
+
+  .badge__dot--other {
+    background: var(--waste-other);
+  }
+
+
+  /* ==========================================================================
+     BORDERED
+     ========================================================================== */
+
+  .badge--bordered {
+    border-color: var(--badge-color);
+    background: transparent;
+  }
+
+
+  /* ==========================================================================
+     UPPERCASE
+     ========================================================================== */
+
+  .badge--uppercase {
+    letter-spacing: var(--letter-spacing-wide);
+    text-transform: uppercase;
+  }
+
+
+  /* ==========================================================================
+     ACCESSIBILITY
+     ========================================================================== */
+
+  .badge:focus-visible {
+    outline:
+      var(--focus-ring-width)
+      solid
+      var(--color-focus-ring);
+
+    outline-offset: var(--focus-ring-offset);
+  }
+
+
+  /* ==========================================================================
+     DARK THEME
+     ========================================================================== */
+
+  [data-theme="dark"] .badge--neutral {
+    --badge-background: var(--color-slate-800);
+    --badge-border: var(--color-slate-700);
+    --badge-color: var(--color-slate-200);
+  }
+
+  [data-theme="dark"] .badge--brand {
+    --badge-background: rgb(22 101 52 / 0.24);
+    --badge-border: rgb(74 222 128 / 0.28);
+    --badge-color: var(--color-brand-300);
+  }
+
+  [data-theme="dark"] .badge--organic {
+    --badge-background: rgb(22 163 74 / 0.16);
+    --badge-border: rgb(34 197 94 / 0.24);
+    --badge-color: var(--color-brand-300);
+  }
+
+  [data-theme="dark"] .badge--plastic {
+    --badge-background: rgb(37 99 235 / 0.16);
+    --badge-border: rgb(59 130 246 / 0.24);
+    --badge-color: #93c5fd;
+  }
+
+  [data-theme="dark"] .badge--paper {
+    --badge-background: rgb(202 138 4 / 0.16);
+    --badge-border: rgb(234 179 8 / 0.24);
+    --badge-color: #fde68a;
+  }
+
+
+  /* ==========================================================================
+     REDUCED MOTION
+     ========================================================================== */
+
+  @media (prefers-reduced-motion: reduce) {
+    .badge {
+      transition: none;
+    }
+  }
+</style>

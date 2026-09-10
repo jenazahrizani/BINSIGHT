@@ -1,0 +1,791 @@
+---
+/**
+ * ============================================================================
+ * BINSIGHT — SELECT
+ * ============================================================================
+ * Badung Waste Intelligence
+ *
+ * Reusable select component for:
+ * - Dashboard filters
+ * - Waste categories
+ * - Area / Kecamatan selection
+ * - Organization type
+ * - Report categories
+ * - Report status
+ * - Organization forms
+ * - Admin forms
+ * - Search/filter interfaces
+ *
+ * Design system:
+ * src/styles/variables.css
+ *
+ * Component system:
+ * src/styles/components.css
+ *
+ * ============================================================================
+ * Basic usage
+ * ============================================================================
+ *
+ * <Select
+ *   name="waste-type"
+ *   label="Jenis Sampah"
+ * >
+ *   <option value="">Semua jenis sampah</option>
+ *   <option value="organic">Organik</option>
+ *   <option value="plastic">Plastik</option>
+ * </Select>
+ *
+ * ============================================================================
+ * With options array
+ * ============================================================================
+ *
+ * <Select
+ *   name="area"
+ *   label="Wilayah"
+ *   options={[
+ *     { value: "kuta", label: "Kuta" },
+ *     { value: "mengwi", label: "Mengwi" },
+ *     { value: "petang", label: "Petang" }
+ *   ]}
+ * />
+ *
+ * ============================================================================
+ * Error state
+ * ============================================================================
+ *
+ * <Select
+ *   name="status"
+ *   label="Status"
+ *   error="Silakan pilih status."
+ * />
+ *
+ * ============================================================================
+ * Required
+ * ============================================================================
+ *
+ * <Select
+ *   name="category"
+ *   label="Kategori"
+ *   required
+ * >
+ *   ...
+ * </Select>
+ *
+ * ============================================================================
+ */
+
+interface SelectOption {
+  value: string;
+  label: string;
+  disabled?: boolean;
+  selected?: boolean;
+}
+
+type Size =
+  | "sm"
+  | "md"
+  | "lg";
+
+interface Props {
+  name?: string;
+
+  id?: string;
+
+  label?: string;
+
+  description?: string;
+
+  hint?: string;
+
+  error?: string;
+
+  options?: SelectOption[];
+
+  value?: string;
+
+  placeholder?: string;
+
+  required?: boolean;
+
+  disabled?: boolean;
+
+  readonly?: boolean;
+
+  multiple?: boolean;
+
+  size?: number;
+
+  selectSize?: Size;
+
+  autocomplete?: string;
+
+  form?: string;
+
+  ariaLabel?: string;
+
+  ariaDescribedBy?: string;
+
+  ariaLabelledBy?: string;
+
+  title?: string;
+
+  class?: string;
+
+  selectClass?: string;
+
+  labelClass?: string;
+
+  wrapperClass?: string;
+
+  dataTestid?: string;
+
+  dataValue?: string;
+
+  dataCategory?: string;
+
+  /**
+   * Allows a parent component to identify the semantic purpose
+   * without changing the component's visual API.
+   *
+   * Example:
+   * data-context="dashboard-filter"
+   */
+  dataContext?: string;
+}
+
+const {
+  name,
+
+  id,
+
+  label,
+
+  description,
+
+  hint,
+
+  error,
+
+  options = [],
+
+  value = "",
+
+  placeholder = "",
+
+  required = false,
+
+  disabled = false,
+
+  readonly = false,
+
+  multiple = false,
+
+  size,
+
+  selectSize = "md",
+
+  autocomplete,
+
+  form,
+
+  ariaLabel,
+
+  ariaDescribedBy,
+
+  ariaLabelledBy,
+
+  title,
+
+  class: className = "",
+
+  selectClass = "",
+
+  labelClass = "",
+
+  wrapperClass = "",
+
+  dataTestid,
+
+  dataValue,
+
+  dataCategory,
+
+  dataContext,
+} = Astro.props;
+
+const generatedId =
+  id ??
+  (name
+    ? `select-${name.replace(/[^a-zA-Z0-9_-]/g, "-")}`
+    : undefined);
+
+const hintId =
+  generatedId && (description || hint)
+    ? `${generatedId}-hint`
+    : undefined;
+
+const errorId =
+  generatedId && error
+    ? `${generatedId}-error`
+    : undefined;
+
+const describedBy =
+  ariaDescribedBy ??
+  [
+    hintId,
+    errorId,
+  ]
+    .filter(Boolean)
+    .join(" ") ||
+  undefined;
+
+const labelId =
+  ariaLabelledBy ??
+  (label && generatedId
+    ? `${generatedId}-label`
+    : undefined);
+
+const classes = [
+  "select-field",
+  `select-field--${selectSize}`,
+  error ? "select-field--error" : "",
+  disabled ? "select-field--disabled" : "",
+  readonly ? "select-field--readonly" : "",
+  multiple ? "select-field--multiple" : "",
+  className,
+]
+  .filter(Boolean)
+  .join(" ");
+---
+
+<div
+  class:list={[
+    classes,
+    wrapperClass,
+  ]}
+>
+  {
+    label && (
+      <label
+        id={labelId}
+        class:list={[
+          "select-field__label",
+          labelClass,
+        ]}
+        for={generatedId}
+      >
+        <span>
+          {label}
+        </span>
+
+        {
+          required && (
+            <span
+              class="select-field__required"
+              aria-hidden="true"
+            >
+              *
+            </span>
+          )
+        }
+      </label>
+    )
+  }
+
+  {
+    (description || hint) && (
+      <p
+        id={hintId}
+        class="select-field__hint"
+      >
+        {description ?? hint}
+      </p>
+    )
+  }
+
+  <div class="select-field__control">
+    <select
+      id={generatedId}
+      name={name}
+      class:list={[
+        "select-field__select",
+        selectClass,
+      ]}
+      value={value || undefined}
+      required={required}
+      disabled={disabled}
+      aria-readonly={
+        readonly
+          ? "true"
+          : undefined
+      }
+      multiple={multiple}
+      size={size}
+      autocomplete={autocomplete}
+      form={form}
+      title={title}
+      aria-label={
+        ariaLabel ??
+        (!label
+          ? title
+          : undefined)
+      }
+      aria-labelledby={
+        label
+          ? labelId
+          : undefined
+      }
+      aria-describedby={describedBy}
+      aria-invalid={
+        error
+          ? "true"
+          : undefined
+      }
+      data-testid={dataTestid}
+      data-value={dataValue}
+      data-category={dataCategory}
+      data-context={dataContext}
+    >
+      {
+        placeholder &&
+        !multiple && (
+          <option
+            value=""
+            disabled={required}
+            selected={!value}
+          >
+            {placeholder}
+          </option>
+        )
+      }
+
+      {
+        options.length > 0
+          ? options.map((option) => (
+              <option
+                value={option.value}
+                disabled={option.disabled}
+                selected={
+                  option.selected ??
+                  option.value === value
+                }
+              >
+                {option.label}
+              </option>
+            ))
+          : <slot />
+      }
+    </select>
+
+    {
+      !multiple && (
+        <span
+          class="select-field__icon"
+          aria-hidden="true"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="m6 9 6 6 6-6" />
+          </svg>
+        </span>
+      )
+    }
+  </div>
+
+  {
+    error && (
+      <p
+        id={errorId}
+        class="select-field__error"
+        role="alert"
+      >
+        {error}
+      </p>
+    )
+  }
+</div>
+
+
+<style>
+  /* ==========================================================================
+     01. WRAPPER
+     ========================================================================== */
+
+  .select-field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+
+    min-width: 0;
+
+    width: 100%;
+  }
+
+
+  /* ==========================================================================
+     02. LABEL
+     ========================================================================== */
+
+  .select-field__label {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+
+    width: fit-content;
+
+    color: var(--color-text-strong);
+
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--line-height-normal);
+
+    cursor: pointer;
+  }
+
+  .select-field__required {
+    color: var(--color-danger);
+    font-weight: var(--font-weight-bold);
+  }
+
+
+  /* ==========================================================================
+     03. HINT
+     ========================================================================== */
+
+  .select-field__hint {
+    margin-top: -0.125rem;
+
+    color: var(--color-text-muted);
+
+    font-size: var(--font-size-xs);
+    line-height: var(--line-height-relaxed);
+  }
+
+
+  /* ==========================================================================
+     04. CONTROL
+     ========================================================================== */
+
+  .select-field__control {
+    position: relative;
+
+    width: 100%;
+    min-width: 0;
+  }
+
+
+  /* ==========================================================================
+     05. SELECT
+     ========================================================================== */
+
+  .select-field__select {
+    display: block;
+
+    width: 100%;
+    min-width: 0;
+
+    padding:
+      0
+      calc(
+        var(--space-10)
+        + var(--space-1)
+      )
+      0
+      var(--space-4);
+
+    border:
+      var(--border-width-1)
+      var(--border-style)
+      var(--input-border);
+
+    border-radius:
+      var(--input-radius);
+
+    background:
+      var(--input-background);
+
+    color:
+      var(--color-text);
+
+    font-family:
+      var(--font-sans);
+
+    font-size:
+      var(--font-size-sm);
+
+    font-weight:
+      var(--font-weight-regular);
+
+    line-height:
+      var(--line-height-normal);
+
+    cursor: pointer;
+
+    appearance: none;
+    -webkit-appearance: none;
+
+    outline: none;
+
+    transition:
+      border-color var(--transition-fast),
+      box-shadow var(--transition-fast),
+      background-color var(--transition-fast),
+      color var(--transition-fast);
+  }
+
+  .select-field__select:hover:not(:disabled) {
+    border-color:
+      var(--color-border-strong);
+  }
+
+  .select-field__select:focus {
+    border-color:
+      var(--color-focus-ring);
+
+    box-shadow:
+      0 0 0 var(--focus-ring-width)
+      rgb(34 197 94 / 0.16);
+  }
+
+  .select-field__select:disabled {
+    background:
+      var(--color-surface-soft);
+
+    color:
+      var(--color-text-subtle);
+
+    cursor:
+      not-allowed;
+
+    opacity:
+      0.8;
+  }
+
+
+  /* ==========================================================================
+     06. ARROW
+     ========================================================================== */
+
+  .select-field__icon {
+    position: absolute;
+
+    top: 50%;
+    right: var(--space-3);
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    width: var(--icon-size-md);
+    height: var(--icon-size-md);
+
+    transform: translateY(-50%);
+
+    color:
+      var(--color-text-muted);
+
+    pointer-events: none;
+  }
+
+  .select-field__icon svg {
+    width: 100%;
+    height: 100%;
+  }
+
+
+  /* ==========================================================================
+     07. MULTIPLE
+     ========================================================================== */
+
+  .select-field--multiple
+    .select-field__select {
+    height: auto;
+    min-height: 10rem;
+
+    padding:
+      var(--space-2)
+      var(--space-3);
+
+    background-image: none;
+
+    cursor: pointer;
+  }
+
+
+  /* ==========================================================================
+     08. OPTION
+     ========================================================================== */
+
+  .select-field__select option {
+    color:
+      var(--color-text);
+
+    background:
+      var(--color-surface);
+  }
+
+  .select-field__select option:disabled {
+    color:
+      var(--color-text-subtle);
+  }
+
+
+  /* ==========================================================================
+     09. ERROR
+     ========================================================================== */
+
+  .select-field--error
+    .select-field__select {
+    border-color:
+      var(--color-danger);
+  }
+
+  .select-field--error
+    .select-field__select:focus {
+    border-color:
+      var(--color-danger);
+
+    box-shadow:
+      0 0 0 var(--focus-ring-width)
+      rgb(239 68 68 / 0.14);
+  }
+
+  .select-field__error {
+    color:
+      var(--color-danger-text);
+
+    font-size:
+      var(--font-size-xs);
+
+    line-height:
+      var(--line-height-normal);
+  }
+
+
+  /* ==========================================================================
+     10. DISABLED
+     ========================================================================== */
+
+  .select-field--disabled
+    .select-field__label {
+    color:
+      var(--color-text-subtle);
+
+    cursor:
+      not-allowed;
+  }
+
+
+  /* ==========================================================================
+     11. READONLY
+     ========================================================================== */
+
+  .select-field--readonly
+    .select-field__select {
+    background:
+      var(--color-surface-soft);
+
+    cursor:
+      default;
+  }
+
+
+  /* ==========================================================================
+     12. SIZE — SMALL
+     ========================================================================== */
+
+  .select-field--sm
+    .select-field__select {
+    min-height:
+      var(--control-height-sm);
+
+    padding-left:
+      var(--space-3);
+
+    padding-right:
+      calc(
+        var(--space-8)
+        + var(--space-2)
+      );
+
+    border-radius:
+      var(--radius-sm);
+
+    font-size:
+      var(--font-size-xs);
+  }
+
+
+  /* ==========================================================================
+     13. SIZE — MEDIUM
+     ========================================================================== */
+
+  .select-field--md
+    .select-field__select {
+    min-height:
+      var(--control-height-md);
+  }
+
+
+  /* ==========================================================================
+     14. SIZE — LARGE
+     ========================================================================== */
+
+  .select-field--lg
+    .select-field__select {
+    min-height:
+      var(--control-height-lg);
+
+    padding-left:
+      var(--space-5);
+
+    padding-right:
+      calc(
+        var(--space-10)
+        + var(--space-2)
+      );
+
+    font-size:
+      var(--font-size-md);
+  }
+
+
+  /* ==========================================================================
+     15. DARK THEME
+     ========================================================================== */
+
+  [data-theme="dark"]
+    .select-field__select {
+    color:
+      var(--color-text);
+
+    background:
+      var(--color-surface);
+  }
+
+  [data-theme="dark"]
+    .select-field__select option {
+    color:
+      var(--color-text);
+
+    background:
+      var(--color-surface);
+  }
+
+
+  /* ==========================================================================
+     16. REDUCED MOTION
+     ========================================================================== */
+
+  @media (prefers-reduced-motion: reduce) {
+    .select-field__select {
+      transition: none;
+    }
+  }
+</style>

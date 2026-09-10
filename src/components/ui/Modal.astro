@@ -1,0 +1,1353 @@
+---
+/**
+ * ============================================================================
+ * BINSIGHT — MODAL
+ * ============================================================================
+ * Badung Waste Intelligence
+ *
+ * Reusable modal/dialog component for:
+ * - Confirmation dialogs
+ * - Organization actions
+ * - Report details
+ * - Admin forms
+ * - Filters
+ * - Map details
+ * - Image / information previews
+ *
+ * Design system:
+ * src/styles/variables.css
+ *
+ * Component system:
+ * src/styles/components.css
+ *
+ * ============================================================================
+ * Usage
+ * ============================================================================
+ *
+ * <Modal
+ *   id="report-modal"
+ *   title="Detail Laporan"
+ *   description="Informasi laporan masyarakat."
+ * >
+ *   Content
+ * </Modal>
+ *
+ * <Modal
+ *   id="delete-modal"
+ *   title="Hapus organisasi?"
+ *   size="sm"
+ *   variant="danger"
+ * >
+ *   Content
+ * </Modal>
+ *
+ * <Modal
+ *   id="form-modal"
+ *   title="Tambah Organisasi"
+ *   size="lg"
+ * >
+ *   Form
+ *
+ *   <Fragment slot="footer">
+ *     <Button variant="ghost">Batal</Button>
+ *     <Button>Simpan</Button>
+ *   </Fragment>
+ * </Modal>
+ *
+ * ============================================================================
+ * Open / Close
+ * ============================================================================
+ *
+ * Any element can open the modal with:
+ *
+ * data-modal-open="report-modal"
+ *
+ * Any element can close the modal with:
+ *
+ * data-modal-close="report-modal"
+ *
+ * Or inside the modal:
+ *
+ * data-modal-close
+ *
+ * ============================================================================
+ */
+
+type Size =
+  | "sm"
+  | "md"
+  | "lg"
+  | "xl"
+  | "full";
+
+type Variant =
+  | "default"
+  | "danger"
+  | "warning"
+  | "success"
+  | "info";
+
+interface Props {
+  id: string;
+
+  title?: string;
+
+  description?: string;
+
+  size?: Size;
+
+  variant?: Variant;
+
+  open?: boolean;
+
+  dismissible?: boolean;
+
+  closeOnBackdrop?: boolean;
+
+  closeOnEscape?: boolean;
+
+  showClose?: boolean;
+
+  showHeader?: boolean;
+
+  showFooter?: boolean;
+
+  centered?: boolean;
+
+  lockScroll?: boolean;
+
+  ariaLabel?: string;
+
+  ariaLabelledBy?: string;
+
+  ariaDescribedBy?: string;
+
+  class?: string;
+
+  panelClass?: string;
+
+  backdropClass?: string;
+
+  titleClass?: string;
+
+  descriptionClass?: string;
+
+  footerClass?: string;
+
+  dataTestid?: string;
+}
+
+const {
+  id,
+
+  title,
+  description,
+
+  size = "md",
+  variant = "default",
+
+  open = false,
+
+  dismissible = true,
+
+  closeOnBackdrop = true,
+  closeOnEscape = true,
+
+  showClose = true,
+  showHeader = true,
+  showFooter = false,
+
+  centered = true,
+
+  lockScroll = true,
+
+  ariaLabel,
+  ariaLabelledBy,
+  ariaDescribedBy,
+
+  class: className = "",
+  panelClass = "",
+  backdropClass = "",
+  titleClass = "",
+  descriptionClass = "",
+  footerClass = "",
+
+  dataTestid,
+} = Astro.props;
+
+const titleId = title
+  ? `${id}-title`
+  : undefined;
+
+const descriptionId = description
+  ? `${id}-description`
+  : undefined;
+
+const resolvedLabelledBy =
+  ariaLabelledBy ?? titleId;
+
+const resolvedDescribedBy =
+  ariaDescribedBy ?? descriptionId;
+
+const classes = [
+  "modal",
+  `modal--${size}`,
+  `modal--${variant}`,
+  centered ? "modal--centered" : "",
+  open ? "modal--open" : "",
+  className,
+]
+  .filter(Boolean)
+  .join(" ");
+
+const resolvedAriaLabel =
+  ariaLabel ??
+  (!resolvedLabelledBy
+    ? "Dialog"
+    : undefined);
+---
+
+<div
+  id={id}
+  class={classes}
+  data-modal
+  data-modal-state={open ? "open" : "closed"}
+  data-modal-size={size}
+  data-modal-variant={variant}
+  data-modal-dismissible={dismissible ? "true" : "false"}
+  data-modal-close-on-backdrop={closeOnBackdrop ? "true" : "false"}
+  data-modal-close-on-escape={closeOnEscape ? "true" : "false"}
+  data-modal-lock-scroll={lockScroll ? "true" : "false"}
+  data-testid={dataTestid}
+>
+  <button
+    class:list={[
+      "modal__backdrop",
+      backdropClass,
+    ]}
+    type="button"
+    aria-label="Tutup dialog"
+    data-modal-close
+    tabindex="-1"
+  ></button>
+
+  <section
+    class:list={[
+      "modal__dialog",
+      panelClass,
+    ]}
+    role="dialog"
+    aria-modal="true"
+    aria-label={resolvedAriaLabel}
+    aria-labelledby={resolvedLabelledBy}
+    aria-describedby={resolvedDescribedBy}
+    tabindex="-1"
+  >
+    {
+      showHeader && (
+        <header class="modal__header">
+          <div class="modal__heading">
+            {
+              title && (
+                <h2
+                  id={titleId}
+                  class:list={[
+                    "modal__title",
+                    titleClass,
+                  ]}
+                >
+                  {title}
+                </h2>
+              )
+            }
+
+            {
+              description && (
+                <p
+                  id={descriptionId}
+                  class:list={[
+                    "modal__description",
+                    descriptionClass,
+                  ]}
+                >
+                  {description}
+                </p>
+              )
+            }
+          </div>
+
+          {
+            showClose && dismissible && (
+              <button
+                class="modal__close"
+                type="button"
+                aria-label="Tutup dialog"
+                title="Tutup"
+                data-modal-close
+              >
+                <span
+                  class="modal__close-icon"
+                  aria-hidden="true"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="M6 6l12 12" />
+                    <path d="M18 6L6 18" />
+                  </svg>
+                </span>
+              </button>
+            )
+          }
+        </header>
+      )
+    }
+
+    <div class="modal__body">
+      <slot />
+    </div>
+
+    {
+      showFooter && (
+        <footer
+          class:list={[
+            "modal__footer",
+            footerClass,
+          ]}
+        >
+          <slot name="footer" />
+        </footer>
+      )
+    }
+  </section>
+</div>
+
+
+<script define:vars={{
+  modalId: id,
+  initialOpen: open,
+  closeOnBackdrop,
+  closeOnEscape,
+  dismissible,
+  lockScroll,
+}}>
+  /**
+   * ==========================================================================
+   * BINSIGHT MODAL ENGINE
+   * ==========================================================================
+   *
+   * The script is intentionally scoped to one modal instance.
+   */
+
+  const modal = document.getElementById(modalId);
+
+  if (!modal) {
+    console.warn(
+      `[BINSIGHT Modal] Modal "${modalId}" tidak ditemukan.`
+    );
+  } else {
+    const dialog = modal.querySelector(
+      '[role="dialog"]'
+    );
+
+    const backdrop = modal.querySelector(
+      '.modal__backdrop'
+    );
+
+    const closeButtons =
+      modal.querySelectorAll(
+        '[data-modal-close]'
+      );
+
+    let previousFocusedElement = null;
+
+    const focusableSelector = [
+      'a[href]',
+      'button:not([disabled])',
+      'input:not([disabled])',
+      'textarea:not([disabled])',
+      'select:not([disabled])',
+      'details > summary',
+      '[contenteditable="true"]',
+      '[tabindex]:not([tabindex="-1"])',
+    ].join(',');
+
+    const isOpen = () =>
+      modal.dataset.modalState === 'open';
+
+    const getFocusableElements = () =>
+      Array.from(
+        modal.querySelectorAll(focusableSelector)
+      ).filter(
+        (element) =>
+          !element.hasAttribute('hidden') &&
+          element.getAttribute('aria-hidden') !== 'true'
+      );
+
+    const setBodyLock = (locked) => {
+      if (!lockScroll) {
+        return;
+      }
+
+      document.body.classList.toggle(
+        'binsight-modal-open',
+        locked
+      );
+    };
+
+    const openModal = () => {
+      if (isOpen()) {
+        return;
+      }
+
+      previousFocusedElement =
+        document.activeElement;
+
+      modal.classList.add('modal--open');
+      modal.dataset.modalState = 'open';
+      modal.setAttribute('aria-hidden', 'false');
+
+      setBodyLock(true);
+
+      requestAnimationFrame(() => {
+        const focusable =
+          getFocusableElements();
+
+        const firstFocusable =
+          focusable.find(
+            (element) =>
+              !element.matches(
+                '[data-modal-close]'
+              )
+          ) ?? dialog;
+
+        firstFocusable?.focus();
+      });
+
+      modal.dispatchEvent(
+        new CustomEvent(
+          'binsight:modal-open',
+          {
+            bubbles: true,
+            detail: {
+              id: modalId,
+            },
+          }
+        )
+      );
+    };
+
+    const closeModal = () => {
+      if (!isOpen()) {
+        return;
+      }
+
+      if (!dismissible) {
+        return;
+      }
+
+      modal.classList.remove('modal--open');
+      modal.dataset.modalState = 'closed';
+      modal.setAttribute('aria-hidden', 'true');
+
+      setBodyLock(false);
+
+      if (
+        previousFocusedElement instanceof HTMLElement
+      ) {
+        previousFocusedElement.focus();
+      }
+
+      modal.dispatchEvent(
+        new CustomEvent(
+          'binsight:modal-close',
+          {
+            bubbles: true,
+            detail: {
+              id: modalId,
+            },
+          }
+        )
+      );
+    };
+
+    const handleBackdropClick = (event) => {
+      if (!closeOnBackdrop) {
+        return;
+      }
+
+      if (
+        event.target === backdrop
+      ) {
+        closeModal();
+      }
+    };
+
+    const handleKeydown = (event) => {
+      if (!isOpen()) {
+        return;
+      }
+
+      if (
+        event.key === 'Escape' &&
+        closeOnEscape &&
+        dismissible
+      ) {
+        event.preventDefault();
+        closeModal();
+        return;
+      }
+
+      if (event.key !== 'Tab') {
+        return;
+      }
+
+      const focusable =
+        getFocusableElements();
+
+      if (!focusable.length) {
+        event.preventDefault();
+        dialog?.focus();
+        return;
+      }
+
+      const first =
+        focusable[0];
+
+      const last =
+        focusable[focusable.length - 1];
+
+      if (
+        event.shiftKey &&
+        document.activeElement === first
+      ) {
+        event.preventDefault();
+        last.focus();
+      } else if (
+        !event.shiftKey &&
+        document.activeElement === last
+      ) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+
+    closeButtons.forEach((button) => {
+      button.addEventListener(
+        'click',
+        closeModal
+      );
+    });
+
+    backdrop?.addEventListener(
+      'click',
+      handleBackdropClick
+    );
+
+    document.addEventListener(
+      'keydown',
+      handleKeydown
+    );
+
+    /*
+     * Global open triggers:
+     *
+     * <button data-modal-open="example">
+     *   Open
+     * </button>
+     */
+    const handleGlobalClick = (event) => {
+      const target =
+        event.target instanceof Element
+          ? event.target.closest(
+              '[data-modal-open]'
+            )
+          : null;
+
+      if (!target) {
+        return;
+      }
+
+      const targetId =
+        target.getAttribute(
+          'data-modal-open'
+        );
+
+      if (
+        targetId !== modalId
+      ) {
+        return;
+      }
+
+      event.preventDefault();
+      openModal();
+    };
+
+    document.addEventListener(
+      'click',
+      handleGlobalClick
+    );
+
+    /*
+     * Public API through CustomEvent.
+     *
+     * document.dispatchEvent(
+     *   new CustomEvent('binsight:modal-open', {
+     *     detail: { id: 'example' }
+     *   })
+     * )
+     *
+     * This listener ignores its own event if another instance
+     * dispatches it, keeping multiple modals independent.
+     */
+    const handleExternalOpen = (event) => {
+      if (
+        !(event instanceof CustomEvent)
+      ) {
+        return;
+      }
+
+      const eventId =
+        event.detail?.id;
+
+      if (
+        eventId !== modalId
+      ) {
+        return;
+      }
+
+      if (
+        event.type ===
+        'binsight:modal-open'
+      ) {
+        openModal();
+      }
+
+      if (
+        event.type ===
+        'binsight:modal-close'
+      ) {
+        closeModal();
+      }
+    };
+
+    document.addEventListener(
+      'binsight:modal-open',
+      handleExternalOpen
+    );
+
+    document.addEventListener(
+      'binsight:modal-close',
+      handleExternalOpen
+    );
+
+    /*
+     * Close triggers anywhere in the document:
+     *
+     * <button data-modal-close="example">
+     *   Close
+     * </button>
+     *
+     * Without a value:
+     *
+     * <button data-modal-close>
+     *   Close
+     * </button>
+     *
+     * The latter is scoped to this modal.
+     */
+    const handleGlobalClose = (event) => {
+      const target =
+        event.target instanceof Element
+          ? event.target.closest(
+              '[data-modal-close]'
+            )
+          : null;
+
+      if (!target) {
+        return;
+      }
+
+      const targetId =
+        target.getAttribute(
+          'data-modal-close'
+        );
+
+      if (
+        targetId &&
+        targetId !== modalId
+      ) {
+        return;
+      }
+
+      if (!targetId && !modal.contains(target)) {
+        return;
+      }
+
+      closeModal();
+    };
+
+    document.addEventListener(
+      'click',
+      handleGlobalClose
+    );
+
+    /*
+     * Initial state.
+     */
+    if (initialOpen) {
+      modal.classList.add('modal--open');
+      modal.dataset.modalState = 'open';
+      modal.setAttribute('aria-hidden', 'false');
+      setBodyLock(true);
+    } else {
+      modal.setAttribute('aria-hidden', 'true');
+    }
+
+    /*
+     * Reusable element API:
+     *
+     * modal.open()
+     * modal.close()
+     * modal.toggle()
+     */
+    modal.open = openModal;
+    modal.close = closeModal;
+    modal.toggle = () => {
+      if (isOpen()) {
+        closeModal();
+      } else {
+        openModal();
+      }
+    };
+  }
+</script>
+
+
+<style>
+  /* ==========================================================================
+     01. HOST
+     ========================================================================== */
+
+  .modal {
+    position: fixed;
+    z-index: var(--z-modal);
+
+    inset: 0;
+
+    display: none;
+
+    width: 100%;
+    height: 100%;
+
+    opacity: 0;
+    visibility: hidden;
+
+    pointer-events: none;
+
+    transition:
+      opacity var(--duration-normal) var(--ease-standard),
+      visibility var(--duration-normal) var(--ease-standard);
+  }
+
+  .modal--open {
+    display: block;
+
+    opacity: 1;
+    visibility: visible;
+
+    pointer-events: auto;
+  }
+
+
+  /* ==========================================================================
+     02. BACKDROP
+     ========================================================================== */
+
+  .modal__backdrop {
+    position: absolute;
+
+    inset: 0;
+
+    width: 100%;
+    height: 100%;
+
+    margin: 0;
+    padding: 0;
+
+    border: 0;
+
+    background:
+      var(--color-overlay);
+
+    backdrop-filter: blur(3px);
+
+    cursor: default;
+
+    opacity: 0;
+
+    transition:
+      opacity var(--duration-normal) var(--ease-standard);
+  }
+
+  .modal--open .modal__backdrop {
+    opacity: 1;
+  }
+
+
+  /* ==========================================================================
+     03. DIALOG WRAPPER
+     ========================================================================== */
+
+  .modal__dialog {
+    position: absolute;
+    z-index: var(--z-raised);
+
+    top: 50%;
+    left: 50%;
+
+    width: calc(
+      100% - (var(--space-6) * 2)
+    );
+
+    max-height: calc(
+      100dvh - (var(--space-8) * 2)
+    );
+
+    overflow: hidden;
+
+    transform:
+      translate(-50%, -48%)
+      scale(0.985);
+
+    border:
+      var(--border-width-1)
+      var(--border-style)
+      var(--color-border);
+
+    border-radius: var(--modal-radius);
+
+    background:
+      var(--color-surface);
+
+    color:
+      var(--color-text);
+
+    box-shadow:
+      var(--modal-shadow);
+
+    outline: none;
+
+    opacity: 0;
+
+    transition:
+      transform var(--duration-normal) var(--ease-emphasized),
+      opacity var(--duration-normal) var(--ease-standard);
+  }
+
+  .modal--open .modal__dialog {
+    transform:
+      translate(-50%, -50%)
+      scale(1);
+
+    opacity: 1;
+  }
+
+
+  /* ==========================================================================
+     04. SIZES
+     ========================================================================== */
+
+  .modal--sm .modal__dialog {
+    max-width: 28rem;
+  }
+
+  .modal--md .modal__dialog {
+    max-width: 36rem;
+  }
+
+  .modal--lg .modal__dialog {
+    max-width: 48rem;
+  }
+
+  .modal--xl .modal__dialog {
+    max-width: 64rem;
+  }
+
+  .modal--full .modal__dialog {
+    width: calc(
+      100% - (var(--space-4) * 2)
+    );
+
+    height: calc(
+      100dvh - (var(--space-4) * 2)
+    );
+
+    max-width: none;
+    max-height: none;
+  }
+
+
+  /* ==========================================================================
+     05. HEADER
+     ========================================================================== */
+
+  .modal__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+
+    gap: var(--space-5);
+
+    padding:
+      var(--space-6)
+      var(--space-6)
+      var(--space-4);
+
+    border-bottom:
+      var(--border-width-1)
+      var(--border-style)
+      var(--color-border);
+  }
+
+  .modal__heading {
+    min-width: 0;
+    flex: 1;
+  }
+
+  .modal__title {
+    color: var(--color-text-strong);
+
+    font-family: var(--font-display);
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-bold);
+    line-height: var(--line-height-snug);
+    letter-spacing: var(--letter-spacing-tight);
+  }
+
+  .modal__description {
+    max-width: 42rem;
+
+    margin-top: var(--space-2);
+
+    color: var(--color-text-muted);
+
+    font-size: var(--font-size-sm);
+    line-height: var(--line-height-relaxed);
+  }
+
+
+  /* ==========================================================================
+     06. CLOSE
+     ========================================================================== */
+
+  .modal__close {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+
+    width: 2.5rem;
+    height: 2.5rem;
+
+    margin: -0.375rem -0.375rem 0 0;
+    padding: 0;
+
+    border:
+      var(--border-width-1)
+      var(--border-style)
+      transparent;
+
+    border-radius: var(--radius-md);
+
+    background: transparent;
+    color: var(--color-text-muted);
+
+    cursor: pointer;
+
+    transition:
+      background-color var(--transition-fast),
+      border-color var(--transition-fast),
+      color var(--transition-fast),
+      transform var(--transition-fast);
+  }
+
+  .modal__close:hover {
+    border-color: var(--color-border);
+    background: var(--color-surface-soft);
+    color: var(--color-text-strong);
+  }
+
+  .modal__close:active {
+    transform: scale(0.96);
+  }
+
+  .modal__close:focus-visible {
+    outline:
+      var(--focus-ring-width)
+      solid
+      var(--color-focus-ring);
+
+    outline-offset: var(--focus-ring-offset);
+  }
+
+  .modal__close-icon {
+    display: inline-flex;
+
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+
+  .modal__close-icon svg {
+    width: 100%;
+    height: 100%;
+  }
+
+
+  /* ==========================================================================
+     07. BODY
+     ========================================================================== */
+
+  .modal__body {
+    min-width: 0;
+
+    max-height:
+      calc(
+        100dvh -
+        12rem
+      );
+
+    padding: var(--space-6);
+
+    overflow-y: auto;
+
+    overscroll-behavior: contain;
+  }
+
+  .modal--full .modal__body {
+    max-height: none;
+    height: calc(
+      100% - 9rem
+    );
+  }
+
+
+  /* ==========================================================================
+     08. FOOTER
+     ========================================================================== */
+
+  .modal__footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+
+    gap: var(--space-2);
+
+    padding:
+      var(--space-4)
+      var(--space-6)
+      var(--space-6);
+
+    border-top:
+      var(--border-width-1)
+      var(--border-style)
+      var(--color-border);
+
+    background:
+      var(--color-surface);
+  }
+
+
+  /* ==========================================================================
+     09. VARIANT — DEFAULT
+     ========================================================================== */
+
+  .modal--default .modal__title {
+    color: var(--color-text-strong);
+  }
+
+
+  /* ==========================================================================
+     10. VARIANT — DANGER
+     ========================================================================== */
+
+  .modal--danger {
+    --modal-accent:
+      var(--color-danger);
+  }
+
+  .modal--danger .modal__title {
+    color: var(--color-danger-text);
+  }
+
+  .modal--danger .modal__header {
+    border-top:
+      3px
+      solid
+      var(--color-danger);
+  }
+
+
+  /* ==========================================================================
+     11. VARIANT — WARNING
+     ========================================================================== */
+
+  .modal--warning {
+    --modal-accent:
+      var(--color-warning);
+  }
+
+  .modal--warning .modal__title {
+    color: var(--color-warning-text);
+  }
+
+  .modal--warning .modal__header {
+    border-top:
+      3px
+      solid
+      var(--color-warning);
+  }
+
+
+  /* ==========================================================================
+     12. VARIANT — SUCCESS
+     ========================================================================== */
+
+  .modal--success {
+    --modal-accent:
+      var(--color-success);
+  }
+
+  .modal--success .modal__title {
+    color: var(--color-success-text);
+  }
+
+  .modal--success .modal__header {
+    border-top:
+      3px
+      solid
+      var(--color-success);
+  }
+
+
+  /* ==========================================================================
+     13. VARIANT — INFO
+     ========================================================================== */
+
+  .modal--info {
+    --modal-accent:
+      var(--color-info);
+  }
+
+  .modal--info .modal__title {
+    color: var(--color-info-text);
+  }
+
+  .modal--info .modal__header {
+    border-top:
+      3px
+      solid
+      var(--color-info);
+  }
+
+
+  /* ==========================================================================
+     14. SCROLLBAR
+     ========================================================================== */
+
+  .modal__body {
+    scrollbar-width: thin;
+
+    scrollbar-color:
+      var(--color-slate-300)
+      transparent;
+  }
+
+  .modal__body::-webkit-scrollbar {
+    width: 9px;
+  }
+
+  .modal__body::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .modal__body::-webkit-scrollbar-thumb {
+    border: 2px solid transparent;
+    border-radius: var(--radius-full);
+
+    background-clip: padding-box;
+    background-color: var(--color-slate-300);
+  }
+
+
+  /* ==========================================================================
+     15. BODY LOCK
+     ========================================================================== */
+
+  :global(body.binsight-modal-open) {
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+
+
+  /* ==========================================================================
+     16. MOBILE
+     ========================================================================== */
+
+  @media (max-width: 767px) {
+    .modal__dialog {
+      top: auto;
+      bottom: var(--space-3);
+      left: var(--space-3);
+
+      width: calc(
+        100% - (var(--space-3) * 2)
+      );
+
+      max-height:
+        calc(
+          100dvh - var(--space-6)
+        );
+
+      transform:
+        translateY(1.5rem)
+        scale(0.985);
+
+      border-radius: var(--radius-xl);
+    }
+
+    .modal--open .modal__dialog {
+      transform:
+        translateY(0)
+        scale(1);
+    }
+
+    .modal--sm .modal__dialog,
+    .modal--md .modal__dialog,
+    .modal--lg .modal__dialog,
+    .modal--xl .modal__dialog {
+      max-width: none;
+    }
+
+    .modal--full .modal__dialog {
+      top: var(--space-3);
+      bottom: var(--space-3);
+      left: var(--space-3);
+
+      width: calc(
+        100% - (var(--space-3) * 2)
+      );
+
+      height: auto;
+      max-height: none;
+    }
+
+    .modal__header {
+      padding:
+        var(--space-5)
+        var(--space-5)
+        var(--space-4);
+    }
+
+    .modal__body {
+      max-height:
+        calc(
+          100dvh - 12rem
+        );
+
+      padding: var(--space-5);
+    }
+
+    .modal__footer {
+      padding:
+        var(--space-4)
+        var(--space-5)
+        var(--space-5);
+    }
+  }
+
+
+  /* ==========================================================================
+     17. SMALL MOBILE
+     ========================================================================== */
+
+  @media (max-width: 479px) {
+    .modal__dialog {
+      bottom: 0;
+      left: 0;
+
+      width: 100%;
+
+      max-height: 100dvh;
+
+      border-radius:
+        var(--radius-xl)
+        var(--radius-xl)
+        0
+        0;
+    }
+
+    .modal--full .modal__dialog {
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+
+      width: 100%;
+      height: 100%;
+
+      border-radius: 0;
+    }
+
+    .modal__footer {
+      flex-direction: column-reverse;
+      align-items: stretch;
+    }
+  }
+
+
+  /* ==========================================================================
+     18. REDUCED MOTION
+     ========================================================================== */
+
+  @media (prefers-reduced-motion: reduce) {
+    .modal,
+    .modal__backdrop,
+    .modal__dialog,
+    .modal__close {
+      transition: none;
+    }
+  }
+
+
+  /* ==========================================================================
+     19. DARK THEME
+     ========================================================================== */
+
+  [data-theme="dark"] .modal__backdrop {
+    background:
+      rgb(2 6 23 / 0.72);
+  }
+
+  [data-theme="dark"] .modal__dialog {
+    box-shadow:
+      0 24px 60px rgb(0 0 0 / 0.4);
+  }
+
+
+  /* ==========================================================================
+     20. PRINT
+     ========================================================================== */
+
+  @media print {
+    .modal {
+      display: none !important;
+    }
+  }
+</style>

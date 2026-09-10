@@ -1,0 +1,1239 @@
+---
+/**
+ * ============================================================================
+ * BINSIGHT — EMPTY STATE
+ * ============================================================================
+ * Badung Waste Intelligence
+ *
+ * Reusable empty-state component for:
+ * - Empty dashboard sections
+ * - Empty organization lists
+ * - Empty waste data
+ * - Empty report history
+ * - Empty search results
+ * - No map results
+ * - No products
+ * - No management process
+ * - First-time onboarding
+ * - Recoverable error states
+ *
+ * Design system:
+ * src/styles/variables.css
+ *
+ * Component system:
+ * src/styles/components.css
+ *
+ * ============================================================================
+ * Basic usage
+ * ============================================================================
+ *
+ * <EmptyState
+ *   title="Belum ada organisasi"
+ *   description="Belum ada organisasi yang terdaftar pada area ini."
+ * />
+ *
+ * ============================================================================
+ * With action
+ * ============================================================================
+ *
+ * <EmptyState
+ *   title="Belum ada laporan"
+ *   description="Belum ada laporan sampah yang masuk."
+ *   actionLabel="Buat Laporan"
+ *   actionHref="/reports/create"
+ * />
+ *
+ * ============================================================================
+ * Search result
+ * ============================================================================
+ *
+ * <EmptyState
+ *   variant="search"
+ *   title="Tidak ada hasil"
+ *   description="Coba kata kunci lain."
+ *   actionLabel="Reset Pencarian"
+ * />
+ *
+ * ============================================================================
+ * Custom icon / content
+ * ============================================================================
+ *
+ * <EmptyState
+ *   title="Belum ada data"
+ * >
+ *   <div slot="icon">
+ *     ...
+ *   </div>
+ *
+ *   <div slot="actions">
+ *     ...
+ *   </div>
+ * </EmptyState>
+ *
+ * ============================================================================
+ */
+
+type Variant =
+  | "default"
+  | "search"
+  | "data"
+  | "location"
+  | "report"
+  | "organization"
+  | "waste"
+  | "process"
+  | "product"
+  | "error"
+  | "success";
+
+type Size =
+  | "sm"
+  | "md"
+  | "lg";
+
+interface Props {
+  title?: string;
+
+  description?: string;
+
+  variant?: Variant;
+
+  size?: Size;
+
+  actionLabel?: string;
+
+  actionHref?: string;
+
+  actionVariant?:
+    | "primary"
+    | "secondary"
+    | "outline"
+    | "ghost"
+    | "danger"
+    | "success"
+    | "warning"
+    | "link";
+
+  actionTarget?:
+    | "_self"
+    | "_blank"
+    | "_parent"
+    | "_top";
+
+  actionRel?: string;
+
+  actionDisabled?: boolean;
+
+  secondaryActionLabel?: string;
+
+  secondaryActionHref?: string;
+
+  secondaryActionTarget?:
+    | "_self"
+    | "_blank"
+    | "_parent"
+    | "_top";
+
+  showIcon?: boolean;
+
+  bordered?: boolean;
+
+  compact?: boolean;
+
+  center?: boolean;
+
+  class?: string;
+
+  contentClass?: string;
+
+  titleClass?: string;
+
+  descriptionClass?: string;
+
+  actionsClass?: string;
+
+  ariaLabel?: string;
+
+  role?: "status" | "region";
+
+  dataTestid?: string;
+
+  dataContext?: string;
+}
+
+const {
+  title = "Belum ada data",
+  description,
+
+  variant = "default",
+
+  size = "md",
+
+  actionLabel,
+  actionHref,
+
+  actionVariant = "primary",
+
+  actionTarget = "_self",
+  actionRel,
+
+  actionDisabled = false,
+
+  secondaryActionLabel,
+  secondaryActionHref,
+  secondaryActionTarget = "_self",
+
+  showIcon = true,
+
+  bordered = true,
+
+  compact = false,
+
+  center = true,
+
+  class: className = "",
+
+  contentClass = "",
+  titleClass = "",
+  descriptionClass = "",
+  actionsClass = "",
+
+  ariaLabel,
+
+  role = "status",
+
+  dataTestid,
+
+  dataContext,
+} = Astro.props;
+
+const classes = [
+  "empty-state-component",
+  `empty-state-component--${variant}`,
+  `empty-state-component--${size}`,
+  bordered
+    ? "empty-state-component--bordered"
+    : "",
+  compact
+    ? "empty-state-component--compact"
+    : "",
+  center
+    ? "empty-state-component--center"
+    : "",
+  className,
+]
+  .filter(Boolean)
+  .join(" ");
+
+const resolvedSecondaryRel =
+  secondaryActionTarget === "_blank"
+    ? "noopener noreferrer"
+    : undefined;
+
+const resolvedActionRel =
+  actionTarget === "_blank"
+    ? actionRel ?? "noopener noreferrer"
+    : actionRel;
+---
+
+<section
+  class={classes}
+  role={role}
+  aria-label={ariaLabel}
+  data-empty-state
+  data-empty-state-variant={variant}
+  data-context={dataContext}
+  data-testid={dataTestid}
+>
+  <div
+    class:list={[
+      "empty-state-component__content",
+      contentClass,
+    ]}
+  >
+    {
+      showIcon && (
+        <div
+          class="empty-state-component__icon"
+          aria-hidden="true"
+        >
+          <slot name="icon">
+            {
+              variant === "search" ? (
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <circle
+                    cx="11"
+                    cy="11"
+                    r="7"
+                  />
+                  <path d="m20 20-4-4" />
+                </svg>
+              ) : variant === "location" ? (
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z" />
+                  <circle
+                    cx="12"
+                    cy="10"
+                    r="2.5"
+                  />
+                </svg>
+              ) : variant === "report" ? (
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M12 3 2.8 19h18.4L12 3Z" />
+                  <path d="M12 9v4" />
+                  <path d="M12 16h.01" />
+                </svg>
+              ) : variant === "organization" ? (
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M3 21h18" />
+                  <path d="M5 21V6l7-3 7 3v15" />
+                  <path d="M9 9h2" />
+                  <path d="M13 9h2" />
+                  <path d="M9 13h2" />
+                  <path d="M13 13h2" />
+                  <path d="M10 21v-4h4v4" />
+                </svg>
+              ) : variant === "waste" ? (
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M6 7h12" />
+                  <path d="M9 7V4h6v3" />
+                  <path d="m8 7 1 13h6l1-13" />
+                  <path d="M10 11v5" />
+                  <path d="M14 11v5" />
+                  <path d="M4 7h16" />
+                </svg>
+              ) : variant === "process" ? (
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <circle
+                    cx="6"
+                    cy="6"
+                    r="2.5"
+                  />
+                  <circle
+                    cx="18"
+                    cy="6"
+                    r="2.5"
+                  />
+                  <circle
+                    cx="12"
+                    cy="18"
+                    r="2.5"
+                  />
+                  <path d="M8.5 6h7" />
+                  <path d="m16.3 8-3 7.5" />
+                  <path d="m7.7 8 3 7.5" />
+                </svg>
+              ) : variant === "product" ? (
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="m4 7 8-4 8 4v10l-8 4-8-4V7Z" />
+                  <path d="m4 7 8 4 8-4" />
+                  <path d="M12 21V11" />
+                </svg>
+              ) : variant === "error" ? (
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="9"
+                  />
+                  <path d="M12 8v5" />
+                  <path d="M12 16h.01" />
+                </svg>
+              ) : variant === "success" ? (
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="9"
+                  />
+                  <path d="m8 12 2.5 2.5L16 9" />
+                </svg>
+              ) : (
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M12 3v18" />
+                  <path d="M3 12h18" />
+                </svg>
+              )
+            }
+          </slot>
+        </div>
+      )
+    }
+
+    <h2
+      class:list={[
+        "empty-state-component__title",
+        titleClass,
+      ]}
+    >
+      {title}
+    </h2>
+
+    {
+      description && (
+        <p
+          class:list={[
+            "empty-state-component__description",
+            descriptionClass,
+          ]}
+        >
+          {description}
+        </p>
+      )
+    }
+
+    {
+      (actionLabel ||
+        secondaryActionLabel ||
+        Astro.slots.has("actions")) && (
+        <div
+          class:list={[
+            "empty-state-component__actions",
+            actionsClass,
+          ]}
+        >
+          {
+            Astro.slots.has("actions") ? (
+              <slot name="actions" />
+            ) : (
+              <>
+                {
+                  actionLabel && actionHref ? (
+                    <a
+                      class:list={[
+                        "empty-state-component__action",
+                        `empty-state-component__action--${actionVariant}`,
+                        actionDisabled
+                          ? "empty-state-component__action--disabled"
+                          : "",
+                      ]}
+                      href={
+                        actionDisabled
+                          ? undefined
+                          : actionHref
+                      }
+                      target={
+                        actionTarget
+                      }
+                      rel={
+                        resolvedActionRel
+                      }
+                      aria-disabled={
+                        actionDisabled
+                          ? "true"
+                          : undefined
+                      }
+                    >
+                      {actionLabel}
+                    </a>
+                  ) : (
+                    actionLabel && (
+                      <button
+                        class:list={[
+                          "empty-state-component__action",
+                          `empty-state-component__action--${actionVariant}`,
+                          actionDisabled
+                            ? "empty-state-component__action--disabled"
+                            : "",
+                        ]}
+                        type="button"
+                        disabled={
+                          actionDisabled
+                        }
+                      >
+                        {actionLabel}
+                      </button>
+                    )
+                  )
+                }
+
+                {
+                  secondaryActionLabel &&
+                  secondaryActionHref && (
+                    <a
+                      class="empty-state-component__secondary-action"
+                      href={secondaryActionHref}
+                      target={
+                        secondaryActionTarget
+                      }
+                      rel={
+                        resolvedSecondaryRel
+                      }
+                    >
+                      {
+                        secondaryActionLabel
+                      }
+                    </a>
+                  )
+                }
+              </>
+            )
+          }
+        </div>
+      )
+    }
+
+    {
+      Astro.slots.has("footer") && (
+        <div class="empty-state-component__footer">
+          <slot name="footer" />
+        </div>
+      )
+    }
+  </div>
+</section>
+
+
+<style>
+  /* ==========================================================================
+     01. BASE
+     ========================================================================== */
+
+  .empty-state-component {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 100%;
+    min-width: 0;
+
+    padding:
+      var(--space-12)
+      var(--space-6);
+
+    color: var(--color-text);
+
+    text-align: center;
+  }
+
+  .empty-state-component--bordered {
+    min-height: 16rem;
+
+    border:
+      var(--border-width-1)
+      dashed
+      var(--color-border-strong);
+
+    border-radius: var(--radius-xl);
+
+    background: var(--color-surface-muted);
+  }
+
+  .empty-state-component--center {
+    margin-inline: auto;
+  }
+
+
+  /* ==========================================================================
+     02. CONTENT
+     ========================================================================== */
+
+  .empty-state-component__content {
+    width: min(100%, 30rem);
+    margin-inline: auto;
+  }
+
+
+  /* ==========================================================================
+     03. ICON
+     ========================================================================== */
+
+  .empty-state-component__icon {
+    display: inline-flex;
+
+    align-items: center;
+    justify-content: center;
+
+    width: 4rem;
+    height: 4rem;
+
+    margin-inline: auto;
+
+    border:
+      var(--border-width-1)
+      var(--border-style)
+      var(--color-border);
+
+    border-radius: var(--radius-full);
+
+    background: var(--color-surface);
+    color: var(--color-text-muted);
+
+    box-shadow: var(--shadow-xs);
+  }
+
+  .empty-state-component__icon svg {
+    width: 1.75rem;
+    height: 1.75rem;
+  }
+
+
+  /* ==========================================================================
+     04. TITLE
+     ========================================================================== */
+
+  .empty-state-component__title {
+    margin-top: var(--space-5);
+
+    color: var(--color-text-strong);
+
+    font-family: var(--font-display);
+
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--line-height-snug);
+    letter-spacing: var(--letter-spacing-tight);
+  }
+
+
+  /* ==========================================================================
+     05. DESCRIPTION
+     ========================================================================== */
+
+  .empty-state-component__description {
+    max-width: 28rem;
+
+    margin-top: var(--space-2);
+    margin-inline: auto;
+
+    color: var(--color-text-muted);
+
+    font-size: var(--font-size-sm);
+    line-height: var(--line-height-relaxed);
+  }
+
+
+  /* ==========================================================================
+     06. ACTIONS
+     ========================================================================== */
+
+  .empty-state-component__actions {
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    flex-wrap: wrap;
+
+    gap: var(--space-2);
+
+    margin-top: var(--space-5);
+  }
+
+  .empty-state-component__action,
+  .empty-state-component__secondary-action {
+    display: inline-flex;
+
+    align-items: center;
+    justify-content: center;
+
+    min-height: var(--control-height-md);
+
+    padding-inline: var(--space-4);
+
+    border:
+      var(--border-width-1)
+      var(--border-style)
+      transparent;
+
+    border-radius: var(--button-radius);
+
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    line-height: 1;
+
+    text-decoration: none;
+    white-space: nowrap;
+
+    cursor: pointer;
+
+    transition:
+      background-color var(--transition-fast),
+      border-color var(--transition-fast),
+      color var(--transition-fast),
+      box-shadow var(--transition-fast),
+      transform var(--transition-fast);
+  }
+
+  .empty-state-component__action:hover,
+  .empty-state-component__secondary-action:hover {
+    text-decoration: none;
+  }
+
+  .empty-state-component__action:active,
+  .empty-state-component__secondary-action:active {
+    transform: translateY(1px);
+  }
+
+  .empty-state-component__action:focus-visible,
+  .empty-state-component__secondary-action:focus-visible {
+    outline:
+      var(--focus-ring-width)
+      solid
+      var(--color-focus-ring);
+
+    outline-offset: var(--focus-ring-offset);
+  }
+
+
+  /* ==========================================================================
+     07. ACTION VARIANTS
+     ========================================================================== */
+
+  .empty-state-component__action--primary {
+    border-color: var(--color-primary);
+
+    background: var(--color-primary);
+    color: var(--color-white);
+  }
+
+  .empty-state-component__action--primary:hover {
+    border-color: var(--color-primary-hover);
+    background: var(--color-primary-hover);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .empty-state-component__action--secondary {
+    border-color: var(--color-slate-200);
+
+    background: var(--color-slate-100);
+    color: var(--color-text-strong);
+  }
+
+  .empty-state-component__action--secondary:hover {
+    border-color: var(--color-slate-300);
+    background: var(--color-slate-200);
+  }
+
+  .empty-state-component__action--outline {
+    border-color: var(--color-primary);
+
+    background: transparent;
+    color: var(--color-primary);
+  }
+
+  .empty-state-component__action--outline:hover {
+    background: var(--color-primary-light);
+  }
+
+  .empty-state-component__action--ghost {
+    border-color: transparent;
+
+    background: transparent;
+    color: var(--color-text-secondary);
+  }
+
+  .empty-state-component__action--ghost:hover {
+    background: var(--color-surface-soft);
+    color: var(--color-text-strong);
+  }
+
+  .empty-state-component__action--danger {
+    border-color: var(--color-danger);
+
+    background: var(--color-danger);
+    color: var(--color-white);
+  }
+
+  .empty-state-component__action--danger:hover {
+    border-color: var(--color-danger-700);
+    background: var(--color-danger-700);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .empty-state-component__action--success {
+    border-color: var(--color-success);
+
+    background: var(--color-success);
+    color: var(--color-white);
+  }
+
+  .empty-state-component__action--success:hover {
+    border-color: var(--color-success-700);
+    background: var(--color-success-700);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .empty-state-component__action--warning {
+    border-color: var(--color-warning);
+
+    background: var(--color-warning);
+    color: var(--color-white);
+  }
+
+  .empty-state-component__action--warning:hover {
+    border-color: var(--color-warning-700);
+    background: var(--color-warning-700);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .empty-state-component__action--link {
+    min-height: auto;
+
+    padding-inline: 0;
+
+    border-color: transparent;
+
+    background: transparent;
+    color: var(--color-primary);
+  }
+
+  .empty-state-component__action--link:hover {
+    color: var(--color-primary-hover);
+
+    text-decoration:
+      underline;
+
+    text-decoration-thickness:
+      1px;
+
+    text-underline-offset:
+      0.18em;
+  }
+
+  .empty-state-component__action--disabled {
+    opacity: 0.55;
+    pointer-events: none;
+    cursor: not-allowed;
+  }
+
+
+  /* ==========================================================================
+     08. SECONDARY ACTION
+     ========================================================================== */
+
+  .empty-state-component__secondary-action {
+    min-height: auto;
+    padding-inline: var(--space-2);
+
+    border-color: transparent;
+
+    background: transparent;
+    color: var(--color-text-muted);
+  }
+
+  .empty-state-component__secondary-action:hover {
+    color: var(--color-text-strong);
+  }
+
+
+  /* ==========================================================================
+     09. FOOTER
+     ========================================================================== */
+
+  .empty-state-component__footer {
+    margin-top: var(--space-5);
+
+    color: var(--color-text-muted);
+
+    font-size: var(--font-size-xs);
+    line-height: var(--line-height-relaxed);
+  }
+
+
+  /* ==========================================================================
+     10. SIZE — SMALL
+     ========================================================================== */
+
+  .empty-state-component--sm {
+    padding:
+      var(--space-8)
+      var(--space-4);
+  }
+
+  .empty-state-component--sm.empty-state-component--bordered {
+    min-height: 12rem;
+    border-radius: var(--radius-lg);
+  }
+
+  .empty-state-component--sm
+    .empty-state-component__icon {
+    width: 3rem;
+    height: 3rem;
+  }
+
+  .empty-state-component--sm
+    .empty-state-component__icon svg {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+
+  .empty-state-component--sm
+    .empty-state-component__title {
+    margin-top: var(--space-4);
+
+    font-size: var(--font-size-lg);
+  }
+
+
+  /* ==========================================================================
+     11. SIZE — MEDIUM
+     ========================================================================== */
+
+  .empty-state-component--md {
+    padding:
+      var(--space-12)
+      var(--space-6);
+  }
+
+
+  /* ==========================================================================
+     12. SIZE — LARGE
+     ========================================================================== */
+
+  .empty-state-component--lg {
+    padding:
+      var(--space-16)
+      var(--space-8);
+  }
+
+  .empty-state-component--lg.empty-state-component--bordered {
+    min-height: 22rem;
+  }
+
+  .empty-state-component--lg
+    .empty-state-component__icon {
+    width: 5rem;
+    height: 5rem;
+  }
+
+  .empty-state-component--lg
+    .empty-state-component__icon svg {
+    width: 2.25rem;
+    height: 2.25rem;
+  }
+
+  .empty-state-component--lg
+    .empty-state-component__title {
+    margin-top: var(--space-6);
+
+    font-size: var(--font-size-2xl);
+  }
+
+
+  /* ==========================================================================
+     13. COMPACT
+     ========================================================================== */
+
+  .empty-state-component--compact {
+    padding-block: var(--space-6);
+  }
+
+  .empty-state-component--compact
+    .empty-state-component__icon {
+    width: 3rem;
+    height: 3rem;
+  }
+
+  .empty-state-component--compact
+    .empty-state-component__icon svg {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+
+  .empty-state-component--compact
+    .empty-state-component__title {
+    margin-top: var(--space-3);
+
+    font-size: var(--font-size-md);
+  }
+
+  .empty-state-component--compact
+    .empty-state-component__description {
+    margin-top: var(--space-1);
+
+    font-size: var(--font-size-xs);
+  }
+
+  .empty-state-component--compact
+    .empty-state-component__actions {
+    margin-top: var(--space-3);
+  }
+
+
+  /* ==========================================================================
+     14. VARIANT — SEARCH
+     ========================================================================== */
+
+  .empty-state-component--search
+    .empty-state-component__icon {
+    border-color: var(--color-info-border);
+
+    background: var(--color-info-bg);
+    color: var(--color-info);
+  }
+
+
+  /* ==========================================================================
+     15. VARIANT — DATA
+     ========================================================================== */
+
+  .empty-state-component--data
+    .empty-state-component__icon {
+    border-color: var(--color-border-brand);
+
+    background: var(--color-primary-light);
+    color: var(--color-primary);
+  }
+
+
+  /* ==========================================================================
+     16. VARIANT — LOCATION
+     ========================================================================== */
+
+  .empty-state-component--location
+    .empty-state-component__icon {
+    border-color: var(--color-success-border);
+
+    background: var(--color-success-bg);
+    color: var(--color-success);
+  }
+
+
+  /* ==========================================================================
+     17. VARIANT — REPORT
+     ========================================================================== */
+
+  .empty-state-component--report
+    .empty-state-component__icon {
+    border-color: var(--color-warning-border);
+
+    background: var(--color-warning-bg);
+    color: var(--color-warning);
+  }
+
+
+  /* ==========================================================================
+     18. VARIANT — ORGANIZATION
+     ========================================================================== */
+
+  .empty-state-component--organization
+    .empty-state-component__icon {
+    border-color: var(--color-primary-light);
+
+    background: var(--color-primary-light);
+    color: var(--color-primary);
+  }
+
+
+  /* ==========================================================================
+     19. VARIANT — WASTE
+     ========================================================================== */
+
+  .empty-state-component--waste
+    .empty-state-component__icon {
+    border-color: var(--waste-organic-soft);
+
+    background: var(--waste-organic-soft);
+    color: var(--waste-organic);
+  }
+
+
+  /* ==========================================================================
+     20. VARIANT — PROCESS
+     ========================================================================== */
+
+  .empty-state-component--process
+    .empty-state-component__icon {
+    border-color: var(--color-info-border);
+
+    background: var(--color-info-bg);
+    color: var(--color-info);
+  }
+
+
+  /* ==========================================================================
+     21. VARIANT — PRODUCT
+     ========================================================================== */
+
+  .empty-state-component--product
+    .empty-state-component__icon {
+    border-color: var(--color-accent-200);
+
+    background: var(--color-accent-light);
+    color: var(--color-accent-700);
+  }
+
+
+  /* ==========================================================================
+     22. VARIANT — ERROR
+     ========================================================================== */
+
+  .empty-state-component--error
+    .empty-state-component__icon {
+    border-color: var(--color-danger-border);
+
+    background: var(--color-danger-bg);
+    color: var(--color-danger);
+  }
+
+  .empty-state-component--error
+    .empty-state-component__title {
+    color: var(--color-danger-text);
+  }
+
+
+  /* ==========================================================================
+     23. VARIANT — SUCCESS
+     ========================================================================== */
+
+  .empty-state-component--success
+    .empty-state-component__icon {
+    border-color: var(--color-success-border);
+
+    background: var(--color-success-bg);
+    color: var(--color-success);
+  }
+
+
+  /* ==========================================================================
+     24. DARK THEME
+     ========================================================================== */
+
+  [data-theme="dark"]
+    .empty-state-component--bordered {
+    background: var(--color-surface-muted);
+  }
+
+  [data-theme="dark"]
+    .empty-state-component__icon {
+    background: var(--color-surface-raised);
+  }
+
+  [data-theme="dark"]
+    .empty-state-component--search
+    .empty-state-component__icon {
+    background: rgb(37 99 235 / 0.12);
+  }
+
+  [data-theme="dark"]
+    .empty-state-component--report
+    .empty-state-component__icon {
+    background: rgb(245 158 11 / 0.12);
+  }
+
+  [data-theme="dark"]
+    .empty-state-component--error
+    .empty-state-component__icon {
+    background: rgb(220 38 38 / 0.12);
+  }
+
+
+  /* ==========================================================================
+     25. MOBILE
+     ========================================================================== */
+
+  @media (max-width: 639px) {
+    .empty-state-component {
+      padding-inline: var(--space-4);
+    }
+
+    .empty-state-component__actions {
+      width: 100%;
+      flex-direction: column;
+    }
+
+    .empty-state-component__action,
+    .empty-state-component__secondary-action {
+      width: 100%;
+    }
+
+    .empty-state-component__secondary-action {
+      min-height: var(--control-height-md);
+    }
+  }
+
+
+  /* ==========================================================================
+     26. REDUCED MOTION
+     ========================================================================== */
+
+  @media (prefers-reduced-motion: reduce) {
+    .empty-state-component__action,
+    .empty-state-component__secondary-action {
+      transition: none;
+    }
+  }
+
+
+  /* ==========================================================================
+     27. PRINT
+     ========================================================================== */
+
+  @media print {
+    .empty-state-component {
+      border-color: #cccccc;
+      background: var(--color-white);
+    }
+  }
+</style>

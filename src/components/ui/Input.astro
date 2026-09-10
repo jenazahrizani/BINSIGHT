@@ -1,0 +1,1393 @@
+---
+/**
+ * ============================================================================
+ * BINSIGHT — INPUT
+ * ============================================================================
+ * Badung Waste Intelligence
+ *
+ * Reusable form field for:
+ * - Public forms
+ * - Report submission
+ * - Organization profile
+ * - Admin CRUD
+ * - Search
+ * - Filters
+ * - Authentication
+ * - Contact information
+ * - Waste / organization data
+ *
+ * Supports:
+ * - input
+ * - textarea
+ *
+ * Design system:
+ * src/styles/variables.css
+ *
+ * Component system:
+ * src/styles/components.css
+ *
+ * ============================================================================
+ * Basic usage
+ * ============================================================================
+ *
+ * <Input
+ *   name="name"
+ *   label="Nama"
+ *   placeholder="Masukkan nama"
+ * />
+ *
+ * ============================================================================
+ * Required
+ * ============================================================================
+ *
+ * <Input
+ *   name="email"
+ *   type="email"
+ *   label="Email"
+ *   required
+ * />
+ *
+ * ============================================================================
+ * Error
+ * ============================================================================
+ *
+ * <Input
+ *   name="email"
+ *   type="email"
+ *   label="Email"
+ *   error="Format email tidak valid."
+ * />
+ *
+ * ============================================================================
+ * Textarea
+ * ============================================================================
+ *
+ * <Input
+ *   name="description"
+ *   label="Deskripsi"
+ *   multiline
+ *   rows={6}
+ * />
+ *
+ * ============================================================================
+ * Search
+ * ============================================================================
+ *
+ * <Input
+ *   name="search"
+ *   type="search"
+ *   placeholder="Cari organisasi..."
+ * />
+ *
+ * ============================================================================
+ * Prefix / suffix
+ * ============================================================================
+ *
+ * <Input
+ *   name="website"
+ *   label="Website"
+ *   prefix="https://"
+ * />
+ *
+ * <Input
+ *   name="capacity"
+ *   label="Kapasitas"
+ *   suffix="unit"
+ * />
+ *
+ * ============================================================================
+ */
+
+type InputType =
+  | "text"
+  | "email"
+  | "password"
+  | "search"
+  | "number"
+  | "tel"
+  | "url"
+  | "date"
+  | "datetime-local"
+  | "time"
+  | "month"
+  | "week"
+  | "color"
+  | "file"
+  | "hidden";
+
+type Size =
+  | "sm"
+  | "md"
+  | "lg";
+
+interface Props {
+  name?: string;
+
+  id?: string;
+
+  type?: InputType;
+
+  label?: string;
+
+  description?: string;
+
+  hint?: string;
+
+  error?: string;
+
+  placeholder?: string;
+
+  value?: string | number;
+
+  defaultValue?: string | number;
+
+  autocomplete?: string;
+
+  inputmode?: string;
+
+  pattern?: string;
+
+  minlength?: number;
+
+  maxlength?: number;
+
+  min?: string | number;
+
+  max?: string | number;
+
+  step?: string | number;
+
+  rows?: number;
+
+  cols?: number;
+
+  required?: boolean;
+
+  disabled?: boolean;
+
+  readonly?: boolean;
+
+  autofocus?: boolean;
+
+  multiple?: boolean;
+
+  checked?: boolean;
+
+  accept?: string;
+
+  size?: Size;
+
+  multiline?: boolean;
+
+  prefix?: string;
+
+  suffix?: string;
+
+  prefixIcon?: boolean;
+
+  suffixIcon?: boolean;
+
+  ariaLabel?: string;
+
+  ariaDescribedBy?: string;
+
+  ariaLabelledBy?: string;
+
+  title?: string;
+
+  form?: string;
+
+  class?: string;
+
+  inputClass?: string;
+
+  labelClass?: string;
+
+  wrapperClass?: string;
+
+  dataTestid?: string;
+
+  dataValue?: string;
+
+  dataContext?: string;
+
+  loading?: boolean;
+}
+
+const {
+  name,
+
+  id,
+
+  type = "text",
+
+  label,
+
+  description,
+
+  hint,
+
+  error,
+
+  placeholder,
+
+  value,
+
+  defaultValue,
+
+  autocomplete,
+
+  inputmode,
+
+  pattern,
+
+  minlength,
+
+  maxlength,
+
+  min,
+
+  max,
+
+  step,
+
+  rows = 4,
+
+  cols,
+
+  required = false,
+
+  disabled = false,
+
+  readonly = false,
+
+  autofocus = false,
+
+  multiple = false,
+
+  checked = false,
+
+  accept,
+
+  size = "md",
+
+  multiline = false,
+
+  prefix,
+
+  suffix,
+
+  prefixIcon = false,
+
+  suffixIcon = false,
+
+  ariaLabel,
+
+  ariaDescribedBy,
+
+  ariaLabelledBy,
+
+  title,
+
+  form,
+
+  class: className = "",
+
+  inputClass = "",
+
+  labelClass = "",
+
+  wrapperClass = "",
+
+  dataTestid,
+
+  dataValue,
+
+  dataContext,
+
+  loading = false,
+} = Astro.props;
+
+const isTextarea = multiline;
+
+const generatedId =
+  id ??
+  (
+    name
+      ? `input-${name.replace(
+          /[^a-zA-Z0-9_-]/g,
+          "-"
+        )}`
+      : undefined
+  );
+
+const hintId =
+  generatedId &&
+  (description || hint)
+    ? `${generatedId}-hint`
+    : undefined;
+
+const errorId =
+  generatedId && error
+    ? `${generatedId}-error`
+    : undefined;
+
+const describedBy =
+  ariaDescribedBy ??
+  [
+    hintId,
+    errorId,
+  ]
+    .filter(Boolean)
+    .join(" ") ||
+  undefined;
+
+const labelId =
+  ariaLabelledBy ??
+  (
+    label && generatedId
+      ? `${generatedId}-label`
+      : undefined
+  );
+
+const classes = [
+  "input-field",
+  `input-field--${size}`,
+  error
+    ? "input-field--error"
+    : "",
+  disabled
+    ? "input-field--disabled"
+    : "",
+  readonly
+    ? "input-field--readonly"
+    : "",
+  multiline
+    ? "input-field--multiline"
+    : "",
+  loading
+    ? "input-field--loading"
+    : "",
+  prefix
+    ? "input-field--has-prefix"
+    : "",
+  suffix
+    ? "input-field--has-suffix"
+    : "",
+  className,
+]
+  .filter(Boolean)
+  .join(" ");
+
+const inputClasses = [
+  "input-field__control",
+  inputClass,
+]
+  .filter(Boolean)
+  .join(" ");
+
+const resolvedValue =
+  value ?? defaultValue;
+
+const commonProps = {
+  id: generatedId,
+  name,
+  placeholder,
+  autocomplete,
+  inputmode,
+  pattern,
+  minlength,
+  maxlength,
+  required,
+  disabled,
+  readonly,
+  autofocus,
+  multiple,
+  title,
+  form,
+  "aria-label":
+    ariaLabel ??
+    (!label
+      ? title
+      : undefined),
+  "aria-labelledby":
+    label
+      ? labelId
+      : undefined,
+  "aria-describedby":
+    describedBy,
+  "aria-invalid":
+    error
+      ? "true"
+      : undefined,
+  "data-testid":
+    dataTestid,
+  "data-value":
+    dataValue,
+  "data-context":
+    dataContext,
+};
+---
+
+<div
+  class:list={[
+    classes,
+    wrapperClass,
+  ]}
+>
+  {
+    label && (
+      <label
+        id={labelId}
+        class:list={[
+          "input-field__label",
+          labelClass,
+        ]}
+        for={generatedId}
+      >
+        <span>
+          {label}
+        </span>
+
+        {
+          required && (
+            <span
+              class="input-field__required"
+              aria-hidden="true"
+            >
+              *
+            </span>
+          )
+        }
+      </label>
+    )
+  }
+
+  {
+    (description || hint) && (
+      <p
+        id={hintId}
+        class="input-field__hint"
+      >
+        {description ?? hint}
+      </p>
+    )
+  }
+
+  {
+    isTextarea ? (
+      <div class="input-field__wrapper">
+        {prefix && (
+          <span
+            class="input-field__prefix"
+            aria-hidden="true"
+          >
+            {prefix}
+          </span>
+        )}
+
+        <textarea
+          {...commonProps}
+          class={inputClasses}
+          rows={rows}
+          cols={cols}
+        >{resolvedValue ?? ""}</textarea>
+
+        {suffix && (
+          <span
+            class="input-field__suffix"
+            aria-hidden="true"
+          >
+            {suffix}
+          </span>
+        )}
+      </div>
+    ) : type === "hidden" ? (
+      <input
+        {...commonProps}
+        class={inputClasses}
+        type="hidden"
+        value={
+          resolvedValue !== undefined
+            ? String(resolvedValue)
+            : undefined
+        }
+      />
+    ) : type === "checkbox" ? (
+      <label class="input-field__checkbox">
+        <input
+          {...commonProps}
+          class={inputClasses}
+          type="checkbox"
+          checked={checked}
+          value={
+            resolvedValue !== undefined
+              ? String(resolvedValue)
+              : "on"
+          }
+        />
+
+        <span class="input-field__checkbox-box"></span>
+
+        <span class="input-field__checkbox-content">
+          <slot />
+        </span>
+      </label>
+    ) : (
+      <div class="input-field__wrapper">
+        {prefix && (
+          <span
+            class="input-field__prefix"
+            aria-hidden="true"
+          >
+            {prefix}
+          </span>
+        )}
+
+        {
+          prefixIcon && (
+            <span
+              class="input-field__icon input-field__icon--prefix"
+              aria-hidden="true"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <circle
+                  cx="11"
+                  cy="11"
+                  r="7"
+                />
+                <path d="m20 20-4-4" />
+              </svg>
+            </span>
+          )
+        }
+
+        {
+          loading && (
+            <span
+              class="input-field__spinner"
+              aria-hidden="true"
+            ></span>
+          )
+        }
+
+        <input
+          {...commonProps}
+          class={inputClasses}
+          type={type}
+          value={
+            resolvedValue !== undefined
+              ? String(resolvedValue)
+              : undefined
+          }
+          min={min}
+          max={max}
+          step={step}
+          accept={accept}
+        />
+
+        {suffix && (
+          <span
+            class="input-field__suffix"
+            aria-hidden="true"
+          >
+            {suffix}
+          </span>
+        )}
+
+        {
+          suffixIcon && (
+            <span
+              class="input-field__icon input-field__icon--suffix"
+              aria-hidden="true"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <circle
+                  cx="12"
+                  cy="12"
+                  r="9"
+                />
+                <path d="m8 12 2.5 2.5L16 9" />
+              </svg>
+            </span>
+          )
+        }
+      </div>
+    )
+  }
+
+  {
+    error && (
+      <p
+        id={errorId}
+        class="input-field__error"
+        role="alert"
+      >
+        {error}
+      </p>
+    )
+  }
+</div>
+
+
+<style>
+  /* ==========================================================================
+     01. FIELD WRAPPER
+     ========================================================================== */
+
+  .input-field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+
+    width: 100%;
+    min-width: 0;
+  }
+
+
+  /* ==========================================================================
+     02. LABEL
+     ========================================================================== */
+
+  .input-field__label {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+
+    width: fit-content;
+
+    color: var(--color-text-strong);
+
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--line-height-normal);
+
+    cursor: pointer;
+  }
+
+  .input-field__required {
+    color: var(--color-danger);
+    font-weight: var(--font-weight-bold);
+  }
+
+
+  /* ==========================================================================
+     03. HINT
+     ========================================================================== */
+
+  .input-field__hint {
+    margin-top: -0.125rem;
+
+    color: var(--color-text-muted);
+
+    font-size: var(--font-size-xs);
+    line-height: var(--line-height-relaxed);
+  }
+
+
+  /* ==========================================================================
+     04. CONTROL WRAPPER
+     ========================================================================== */
+
+  .input-field__wrapper {
+    position: relative;
+
+    width: 100%;
+    min-width: 0;
+
+    display: flex;
+    align-items: center;
+  }
+
+
+  /* ==========================================================================
+     05. INPUT / TEXTAREA
+     ========================================================================== */
+
+  .input-field__control {
+    display: block;
+
+    width: 100%;
+    min-width: 0;
+
+    min-height: var(--input-height);
+
+    padding:
+      0
+      var(--space-4);
+
+    border:
+      var(--border-width-1)
+      var(--border-style)
+      var(--input-border);
+
+    border-radius: var(--input-radius);
+
+    background: var(--input-background);
+    color: var(--color-text);
+
+    font-family: var(--font-sans);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-regular);
+    line-height: var(--line-height-normal);
+
+    outline: none;
+
+    appearance: none;
+    -webkit-appearance: none;
+
+    transition:
+      border-color var(--transition-fast),
+      box-shadow var(--transition-fast),
+      background-color var(--transition-fast),
+      color var(--transition-fast);
+  }
+
+  .input-field__control::placeholder {
+    color: var(--color-text-subtle);
+    opacity: 1;
+  }
+
+  .input-field__control:hover:not(:disabled) {
+    border-color:
+      var(--color-border-strong);
+  }
+
+  .input-field__control:focus {
+    border-color:
+      var(--color-focus-ring);
+
+    box-shadow:
+      0 0 0 var(--focus-ring-width)
+      rgb(34 197 94 / 0.16);
+  }
+
+  .input-field__control:disabled {
+    background:
+      var(--color-surface-soft);
+
+    color:
+      var(--color-text-subtle);
+
+    cursor:
+      not-allowed;
+
+    opacity:
+      0.8;
+  }
+
+  .input-field__control[readonly] {
+    background:
+      var(--color-surface-soft);
+
+    cursor:
+      default;
+  }
+
+
+  /* ==========================================================================
+     06. TEXTAREA
+     ========================================================================== */
+
+  .input-field--multiline
+    .input-field__wrapper {
+    align-items: stretch;
+  }
+
+  .input-field--multiline
+    .input-field__control {
+    min-height:
+      calc(
+        var(--input-height) * 2
+      );
+
+    padding:
+      var(--space-3)
+      var(--space-4);
+
+    resize:
+      vertical;
+
+    line-height:
+      var(--line-height-relaxed);
+  }
+
+
+  /* ==========================================================================
+     07. PREFIX / SUFFIX
+     ========================================================================== */
+
+  .input-field__prefix,
+  .input-field__suffix {
+    position: absolute;
+    z-index: 2;
+
+    display: inline-flex;
+    align-items: center;
+
+    height: 100%;
+
+    color:
+      var(--color-text-muted);
+
+    font-size:
+      var(--font-size-sm);
+
+    white-space:
+      nowrap;
+
+    pointer-events:
+      none;
+  }
+
+  .input-field__prefix {
+    left: var(--space-4);
+  }
+
+  .input-field__suffix {
+    right: var(--space-4);
+  }
+
+  .input-field--has-prefix
+    .input-field__control {
+    padding-left:
+      calc(
+        var(--space-4) +
+        3rem
+      );
+  }
+
+  .input-field--has-suffix
+    .input-field__control {
+    padding-right:
+      calc(
+        var(--space-4) +
+        3rem
+      );
+  }
+
+
+  /* ==========================================================================
+     08. ICON
+     ========================================================================== */
+
+  .input-field__icon {
+    position: absolute;
+    z-index: 2;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    width: var(--icon-size-md);
+    height: var(--icon-size-md);
+
+    color:
+      var(--color-text-subtle);
+
+    pointer-events: none;
+  }
+
+  .input-field__icon--prefix {
+    left: var(--space-3);
+  }
+
+  .input-field__icon--suffix {
+    right: var(--space-3);
+  }
+
+  .input-field__icon svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  .input-field--has-prefix
+    .input-field__control {
+    padding-left:
+      calc(
+        var(--space-3) +
+        var(--icon-size-md) +
+        var(--space-3)
+      );
+  }
+
+  .input-field--has-suffix
+    .input-field__control {
+    padding-right:
+      calc(
+        var(--space-3) +
+        var(--icon-size-md) +
+        var(--space-3)
+      );
+  }
+
+
+  /* ==========================================================================
+     09. LOADING
+     ========================================================================== */
+
+  .input-field--loading
+    .input-field__control {
+    color: transparent;
+  }
+
+  .input-field__spinner {
+    position: absolute;
+    z-index: 3;
+
+    top: 50%;
+    right: var(--space-4);
+
+    width: 1rem;
+    height: 1rem;
+
+    transform:
+      translateY(-50%);
+
+    border:
+      2px
+      solid
+      var(--color-border-strong);
+
+    border-right-color:
+      var(--color-primary);
+
+    border-radius:
+      var(--radius-full);
+
+    animation:
+      binsight-input-spin
+      650ms
+      linear
+      infinite;
+
+    pointer-events:
+      none;
+  }
+
+  @keyframes binsight-input-spin {
+    to {
+      transform:
+        translateY(-50%)
+        rotate(360deg);
+    }
+  }
+
+
+  /* ==========================================================================
+     10. CHECKBOX
+     ========================================================================== */
+
+  .input-field__checkbox {
+    position: relative;
+
+    display: inline-flex;
+    align-items: flex-start;
+
+    gap: var(--space-3);
+
+    width: fit-content;
+
+    cursor: pointer;
+  }
+
+  .input-field__checkbox
+    .input-field__control {
+    position: absolute;
+
+    width: 1px;
+    height: 1px;
+
+    padding: 0;
+    margin: -1px;
+
+    overflow: hidden;
+
+    clip: rect(0, 0, 0, 0);
+    clip-path: inset(50%);
+
+    white-space: nowrap;
+
+    border: 0;
+  }
+
+  .input-field__checkbox-box {
+    position: relative;
+
+    display: inline-flex;
+    flex: 0 0 auto;
+
+    align-items: center;
+    justify-content: center;
+
+    width: 1.25rem;
+    height: 1.25rem;
+
+    margin-top: 0.0625rem;
+
+    border:
+      var(--border-width-1)
+      var(--border-style)
+      var(--color-border-strong);
+
+    border-radius:
+      var(--radius-sm);
+
+    background:
+      var(--color-surface);
+
+    transition:
+      background-color var(--transition-fast),
+      border-color var(--transition-fast),
+      box-shadow var(--transition-fast);
+  }
+
+  .input-field__checkbox-box::after {
+    width: 0.45rem;
+    height: 0.7rem;
+
+    content: "";
+
+    transform:
+      rotate(45deg)
+      scale(0);
+
+    border:
+      solid
+      var(--color-white);
+
+    border-width:
+      0 2px 2px 0;
+
+    transition:
+      transform var(--transition-fast);
+  }
+
+  .input-field__checkbox
+    .input-field__control:checked
+    + .input-field__checkbox-box {
+    border-color:
+      var(--color-primary);
+
+    background:
+      var(--color-primary);
+  }
+
+  .input-field__checkbox
+    .input-field__control:checked
+    + .input-field__checkbox-box::after {
+    transform:
+      rotate(45deg)
+      scale(1);
+  }
+
+  .input-field__checkbox
+    .input-field__control:focus-visible
+    + .input-field__checkbox-box {
+    outline:
+      var(--focus-ring-width)
+      solid
+      var(--color-focus-ring);
+
+    outline-offset:
+      var(--focus-ring-offset);
+  }
+
+  .input-field__checkbox-content {
+    color:
+      var(--color-text-secondary);
+
+    font-size:
+      var(--font-size-sm);
+
+    line-height:
+      var(--line-height-relaxed);
+  }
+
+
+  /* ==========================================================================
+     11. FILE INPUT
+     ========================================================================== */
+
+  .input-field__control[type="file"] {
+    height: auto;
+    min-height: var(--input-height);
+
+    padding:
+      var(--space-2)
+      var(--space-3);
+
+    cursor: pointer;
+  }
+
+  .input-field__control[type="file"]::file-selector-button {
+    margin-right:
+      var(--space-3);
+
+    padding:
+      var(--space-2)
+      var(--space-3);
+
+    border:
+      var(--border-width-1)
+      var(--border-style)
+      var(--color-border);
+
+    border-radius:
+      var(--radius-sm);
+
+    background:
+      var(--color-surface-soft);
+
+    color:
+      var(--color-text-strong);
+
+    font-family:
+      var(--font-sans);
+
+    font-size:
+      var(--font-size-xs);
+
+    font-weight:
+      var(--font-weight-semibold);
+
+    cursor:
+      pointer;
+
+    transition:
+      background-color var(--transition-fast),
+      border-color var(--transition-fast);
+  }
+
+  .input-field__control[type="file"]::file-selector-button:hover {
+    border-color:
+      var(--color-border-strong);
+
+    background:
+      var(--color-slate-200);
+  }
+
+
+  /* ==========================================================================
+     12. SEARCH
+     ========================================================================== */
+
+  .input-field__control[type="search"]::-webkit-search-cancel-button,
+  .input-field__control[type="search"]::-webkit-search-decoration,
+  .input-field__control[type="search"]::-webkit-search-results-button,
+  .input-field__control[type="search"]::-webkit-search-results-decoration {
+    display: none;
+  }
+
+
+  /* ==========================================================================
+     13. NUMBER
+     ========================================================================== */
+
+  .input-field__control[type="number"]::-webkit-inner-spin-button,
+  .input-field__control[type="number"]::-webkit-outer-spin-button {
+    margin: 0;
+
+    appearance: none;
+    -webkit-appearance: none;
+  }
+
+  .input-field__control[type="number"] {
+    appearance:
+      textfield;
+
+    -moz-appearance:
+      textfield;
+  }
+
+
+  /* ==========================================================================
+     14. COLOR
+     ========================================================================== */
+
+  .input-field__control[type="color"] {
+    min-height:
+      var(--input-height);
+
+    padding:
+      var(--space-1);
+
+    cursor:
+      pointer;
+  }
+
+
+  /* ==========================================================================
+     15. ERROR
+     ========================================================================== */
+
+  .input-field--error
+    .input-field__control {
+    border-color:
+      var(--color-danger);
+  }
+
+  .input-field--error
+    .input-field__control:focus {
+    border-color:
+      var(--color-danger);
+
+    box-shadow:
+      0 0 0 var(--focus-ring-width)
+      rgb(239 68 68 / 0.14);
+  }
+
+  .input-field__error {
+    color:
+      var(--color-danger-text);
+
+    font-size:
+      var(--font-size-xs);
+
+    line-height:
+      var(--line-height-normal);
+  }
+
+
+  /* ==========================================================================
+     16. DISABLED
+     ========================================================================== */
+
+  .input-field--disabled
+    .input-field__label {
+    color:
+      var(--color-text-subtle);
+
+    cursor:
+      not-allowed;
+  }
+
+  .input-field--disabled
+    .input-field__checkbox {
+    cursor:
+      not-allowed;
+  }
+
+
+  /* ==========================================================================
+     17. SIZE — SMALL
+     ========================================================================== */
+
+  .input-field--sm
+    .input-field__control {
+    min-height:
+      var(--control-height-sm);
+
+    padding-left:
+      var(--space-3);
+
+    padding-right:
+      var(--space-3);
+
+    border-radius:
+      var(--radius-sm);
+
+    font-size:
+      var(--font-size-xs);
+  }
+
+
+  /* ==========================================================================
+     18. SIZE — MEDIUM
+     ========================================================================== */
+
+  .input-field--md
+    .input-field__control {
+    min-height:
+      var(--control-height-md);
+
+    padding-left:
+      var(--space-4);
+
+    padding-right:
+      var(--space-4);
+
+    border-radius:
+      var(--radius-md);
+
+    font-size:
+      var(--font-size-sm);
+  }
+
+
+  /* ==========================================================================
+     19. SIZE — LARGE
+     ========================================================================== */
+
+  .input-field--lg
+    .input-field__control {
+    min-height:
+      var(--control-height-lg);
+
+    padding-left:
+      var(--space-5);
+
+    padding-right:
+      var(--space-5);
+
+    border-radius:
+      var(--radius-md);
+
+    font-size:
+      var(--font-size-md);
+  }
+
+
+  /* ==========================================================================
+     20. DARK THEME
+     ========================================================================== */
+
+  [data-theme="dark"]
+    .input-field__control {
+    background:
+      var(--color-surface);
+
+    color:
+      var(--color-text);
+  }
+
+  [data-theme="dark"]
+    .input-field__control[type="file"]::file-selector-button {
+    background:
+      var(--color-surface-raised);
+
+    color:
+      var(--color-text);
+  }
+
+
+  /* ==========================================================================
+     21. REDUCED MOTION
+     ========================================================================== */
+
+  @media (prefers-reduced-motion: reduce) {
+    .input-field__control,
+    .input-field__checkbox-box,
+    .input-field__checkbox-box::after {
+      transition: none;
+    }
+
+    .input-field__spinner {
+      animation-duration: 1.2s;
+    }
+  }
+</style>
