@@ -1,0 +1,1780 @@
+---
+/**
+ * ============================================================================
+ * BINSIGHT — DASHBOARD PAGE
+ * ============================================================================
+ * Badung Waste Intelligence
+ *
+ * Dashboard publik:
+ * - Overview ekosistem
+ * - Organisasi terverifikasi
+ * - Distribusi kategori material
+ * - Distribusi wilayah
+ * - Akses cepat ke peta dan laporan
+ *
+ * Catatan:
+ * - Tidak menggunakan metrik tonase / kilogram.
+ * - Tidak membuat angka laporan tanpa sumber data.
+ * - Menggunakan data layer yang sudah tersedia.
+ * ============================================================================
+ */
+
+import {
+  ArrowRight,
+  Building2,
+  ChartColumn,
+  CircleAlert,
+  FileText,
+  Leaf,
+  Map,
+  MapPin,
+  Recycle,
+  ShieldCheck,
+} from "@lucide/astro";
+
+import DashboardLayout from "@layouts/DashboardLayout.astro";
+
+import {
+  getOrganizationCount,
+  getOrganizationCountByType,
+  getOrganizationsByArea,
+  getOrganizationsByWaste,
+  getOrganizationsGroupedByArea,
+  getPublicOrganizations,
+  getVerifiedOrganizationCount,
+} from "@lib/data/organizations";
+
+import {
+  WASTE_CATEGORY,
+} from "@lib/constants/waste";
+
+const publicOrganizations =
+  getPublicOrganizations();
+
+const totalOrganizations =
+  getOrganizationCount();
+
+const verifiedOrganizations =
+  getVerifiedOrganizationCount();
+
+const groupedOrganizations =
+  getOrganizationsGroupedByArea();
+
+const organizationTypeCounts =
+  getOrganizationCountByType();
+
+const areaEntries =
+  Object.entries(groupedOrganizations)
+    .sort(
+      (a, b) =>
+        b[1].length - a[1].length,
+    );
+
+const wasteCategories = [
+  {
+    key: WASTE_CATEGORY.ORGANIC,
+    label: "Organik",
+    description:
+      "Material organik yang tercatat dalam ekosistem BINSIGHT.",
+    icon: Leaf,
+  },
+  {
+    key: WASTE_CATEGORY.INORGANIC,
+    label: "Anorganik",
+    description:
+      "Material anorganik yang tercatat dan dapat ditelusuri.",
+    icon: Recycle,
+  },
+  {
+    key: WASTE_CATEGORY.HAZARDOUS,
+    label: "Bahan Berbahaya",
+    description:
+      "Material yang memerlukan perhatian dan penanganan khusus.",
+    icon: CircleAlert,
+  },
+  {
+    key: WASTE_CATEGORY.ELECTRONIC,
+    label: "Elektronik",
+    description:
+      "Material elektronik yang tercatat dalam data persampahan.",
+    icon: ChartColumn,
+  },
+  {
+    key: WASTE_CATEGORY.RESIDUAL,
+    label: "Residu",
+    description:
+      "Material sisa yang masuk kategori residu.",
+    icon: ShieldCheck,
+  },
+].map((category) => ({
+  ...category,
+  organizationCount:
+    getOrganizationsByWaste(category.key)
+      .length,
+}));
+
+const organizationTypeLabels: Record<
+  keyof typeof organizationTypeCounts,
+  string
+> = {
+  government: "Pemerintah",
+  community: "Komunitas",
+  private: "Swasta",
+  "social-enterprise": "Social Enterprise",
+  cooperative: "Koperasi",
+  educational: "Pendidikan",
+  nonprofit: "Nirlaba",
+  other: "Lainnya",
+};
+
+const typeEntries =
+  Object.entries(
+    organizationTypeCounts,
+  )
+    .map(([key, value]) => ({
+      key:
+        key as keyof typeof organizationTypeLabels,
+      label:
+        organizationTypeLabels[
+          key as keyof typeof organizationTypeLabels
+        ],
+      value,
+    }))
+    .filter(
+      (item) => item.value > 0,
+    )
+    .sort(
+      (a, b) =>
+        b.value - a.value,
+    );
+
+const topOrganizations =
+  publicOrganizations.slice(0, 4);
+
+const verifiedRate =
+  totalOrganizations > 0
+    ? Math.round(
+        (verifiedOrganizations /
+          publicOrganizations.length) *
+          100,
+      )
+    : 0;
+---
+
+<DashboardLayout
+  title="Dashboard BINSIGHT"
+  description="Ringkasan ekosistem informasi persampahan Kabupaten Badung."
+>
+  <main class="dashboard-page">
+    <!-- ================================================================== -->
+    <!-- HEADER                                                             -->
+    <!-- ================================================================== -->
+
+    <section class="dashboard-hero">
+      <div class="dashboard-container">
+        <div class="dashboard-hero__content">
+          <span class="dashboard-hero__eyebrow">
+            Badung Waste Intelligence
+          </span>
+
+          <h1>
+            Dashboard ekosistem
+            persampahan Badung
+          </h1>
+
+          <p>
+            Ringkasan informasi publik mengenai organisasi,
+            kategori material, dan wilayah yang telah tercatat
+            dalam BINSIGHT.
+          </p>
+
+          <div class="dashboard-hero__actions">
+            <a
+              href="/map"
+              class="dashboard-button dashboard-button--primary"
+            >
+              <Map
+                size={17}
+                stroke-width="1.9"
+                aria-hidden="true"
+              />
+              <span>Jelajahi peta</span>
+              <ArrowRight
+                size={16}
+                stroke-width="1.9"
+                aria-hidden="true"
+              />
+            </a>
+
+            <a
+              href="/organizations"
+              class="dashboard-button dashboard-button--secondary"
+            >
+              <Building2
+                size={17}
+                stroke-width="1.9"
+                aria-hidden="true"
+              />
+              <span>Lihat organisasi</span>
+            </a>
+          </div>
+        </div>
+
+        <div class="dashboard-hero__side">
+          <div class="dashboard-hero__side-icon">
+            <ChartColumn
+              size={24}
+              stroke-width="1.8"
+              aria-hidden="true"
+            />
+          </div>
+
+          <span>
+            Fokus data
+          </span>
+
+          <strong>
+            Entitas & keterhubungan
+          </strong>
+
+          <p>
+            BINSIGHT memprioritaskan informasi yang dapat
+            ditelusuri tanpa menambahkan klaim volume yang
+            belum tervalidasi.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================== -->
+    <!-- OVERVIEW STATS                                                     -->
+    <!-- ================================================================== -->
+
+    <section class="dashboard-section">
+      <div class="dashboard-container">
+        <div class="section-heading">
+          <span class="section-heading__eyebrow">
+            Overview
+          </span>
+
+          <h2>
+            Gambaran singkat ekosistem
+          </h2>
+
+          <p>
+            Metrik berikut menghitung entitas yang tersedia
+            pada data publik BINSIGHT.
+          </p>
+        </div>
+
+        <div class="stats-grid">
+          <article class="stat-card">
+            <div class="stat-card__icon">
+              <Building2
+                size={21}
+                stroke-width="1.8"
+                aria-hidden="true"
+              />
+            </div>
+
+            <span class="stat-card__label">
+              Organisasi publik
+            </span>
+
+            <strong class="stat-card__value">
+              {totalOrganizations}
+            </strong>
+
+            <span class="stat-card__detail">
+              Terdaftar dan tersedia untuk publik
+            </span>
+          </article>
+
+          <article class="stat-card">
+            <div class="stat-card__icon">
+              <ShieldCheck
+                size={21}
+                stroke-width="1.8"
+                aria-hidden="true"
+              />
+            </div>
+
+            <span class="stat-card__label">
+              Organisasi terverifikasi
+            </span>
+
+            <strong class="stat-card__value">
+              {verifiedOrganizations}
+            </strong>
+
+            <span class="stat-card__detail">
+              Status verifikasi aktif
+            </span>
+          </article>
+
+          <article class="stat-card">
+            <div class="stat-card__icon">
+              <MapPin
+                size={21}
+                stroke-width="1.8"
+                aria-hidden="true"
+              />
+            </div>
+
+            <span class="stat-card__label">
+              Area dengan organisasi
+            </span>
+
+            <strong class="stat-card__value">
+              {areaEntries.length}
+            </strong>
+
+            <span class="stat-card__detail">
+              Area yang memiliki entitas publik
+            </span>
+          </article>
+
+          <article class="stat-card">
+            <div class="stat-card__icon">
+              <Recycle
+                size={21}
+                stroke-width="1.8"
+                aria-hidden="true"
+              />
+            </div>
+
+            <span class="stat-card__label">
+              Kategori material
+            </span>
+
+            <strong class="stat-card__value">
+              {wasteCategories.length}
+            </strong>
+
+            <span class="stat-card__detail">
+              Kategori utama dalam BINSIGHT
+            </span>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================== -->
+    <!-- MAIN ANALYTICS                                                      -->
+    <!-- ================================================================== -->
+
+    <section class="dashboard-section dashboard-section--soft">
+      <div class="dashboard-container">
+        <div class="analytics-grid">
+          <!-- ORGANIZATIONS BY AREA -->
+          <section class="panel">
+            <header class="panel__header">
+              <div>
+                <span class="panel__eyebrow">
+                  Wilayah
+                </span>
+
+                <h2>
+                  Distribusi organisasi
+                </h2>
+
+                <p>
+                  Persebaran organisasi publik berdasarkan
+                  area yang tercatat.
+                </p>
+              </div>
+
+              <a
+                href="/organizations"
+                class="panel__link"
+              >
+                Semua
+                <ArrowRight
+                  size={15}
+                  stroke-width="1.8"
+                  aria-hidden="true"
+                />
+              </a>
+            </header>
+
+            {areaEntries.length > 0 ? (
+              <div class="area-list">
+                {areaEntries
+                  .slice(0, 6)
+                  .map(([area, organizations]) => {
+                    const percentage =
+                      totalOrganizations > 0
+                        ? Math.round(
+                            (organizations.length /
+                              totalOrganizations) *
+                              100,
+                          )
+                        : 0;
+
+                    return (
+                      <a
+                        href={`/organizations?area=${encodeURIComponent(area)}`}
+                        class="area-row"
+                      >
+                        <div class="area-row__top">
+                          <div>
+                            <strong>
+                              {area}
+                            </strong>
+
+                            <span>
+                              {organizations.length}
+                              {organizations.length === 1
+                                ? " organisasi"
+                                : " organisasi"}
+                            </span>
+                          </div>
+
+                          <b>
+                            {percentage}%
+                          </b>
+                        </div>
+
+                        <div class="area-row__bar">
+                          <span
+                            style={`width: ${percentage}%`}
+                          ></span>
+                        </div>
+                      </a>
+                    );
+                  })}
+              </div>
+            ) : (
+              <div class="panel__empty">
+                Belum ada distribusi area yang tersedia.
+              </div>
+            )}
+          </section>
+
+          <!-- ORGANIZATIONS BY TYPE -->
+          <section class="panel">
+            <header class="panel__header">
+              <div>
+                <span class="panel__eyebrow">
+                  Tipe organisasi
+                </span>
+
+                <h2>
+                  Komposisi pengelola
+                </h2>
+
+                <p>
+                  Kategori organisasi publik yang telah
+                  tercatat.
+                </p>
+              </div>
+            </header>
+
+            {typeEntries.length > 0 ? (
+              <div class="type-list">
+                {typeEntries.map(
+                  (item) => {
+                    const percentage =
+                      totalOrganizations > 0
+                        ? Math.round(
+                            (item.value /
+                              totalOrganizations) *
+                              100,
+                          )
+                        : 0;
+
+                    return (
+                      <div class="type-row">
+                        <div class="type-row__label">
+                          <span>
+                            {item.label}
+                          </span>
+
+                          <strong>
+                            {item.value}
+                          </strong>
+                        </div>
+
+                        <div class="type-row__track">
+                          <span
+                            style={`width: ${percentage}%`}
+                          ></span>
+                        </div>
+                      </div>
+                    );
+                  },
+                )}
+              </div>
+            ) : (
+              <div class="panel__empty">
+                Belum ada data tipe organisasi.
+              </div>
+            )}
+
+            <div class="panel__footnote">
+              <ShieldCheck
+                size={14}
+                stroke-width="1.8"
+                aria-hidden="true"
+              />
+
+              <span>
+                Hanya organisasi publik yang terverifikasi
+                yang dihitung pada tampilan ini.
+              </span>
+            </div>
+          </section>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================== -->
+    <!-- WASTE CATEGORIES                                                    -->
+    <!-- ================================================================== -->
+
+    <section class="dashboard-section">
+      <div class="dashboard-container">
+        <div class="section-heading-row">
+          <div class="section-heading">
+            <span class="section-heading__eyebrow">
+              Material
+            </span>
+
+            <h2>
+              Kategori persampahan
+            </h2>
+
+            <p>
+              Keterhubungan kategori material dengan organisasi
+              publik yang mencatatnya sebagai material yang dikelola.
+            </p>
+          </div>
+
+          <a
+            href="/waste"
+            class="section-link"
+          >
+            Jelajahi material
+            <ArrowRight
+              size={16}
+              stroke-width="1.8"
+              aria-hidden="true"
+            />
+          </a>
+        </div>
+
+        <div class="waste-grid">
+          {wasteCategories.map((category) => {
+            const Icon = category.icon;
+
+            return (
+              <a
+                href={`/waste?category=${encodeURIComponent(category.key)}`}
+                class="waste-item"
+              >
+                <div class="waste-item__icon">
+                  <Icon
+                    size={22}
+                    stroke-width="1.8"
+                    aria-hidden="true"
+                  />
+                </div>
+
+                <div class="waste-item__body">
+                  <div class="waste-item__heading">
+                    <h3>
+                      {category.label}
+                    </h3>
+
+                    <ArrowRight
+                      size={15}
+                      stroke-width="1.8"
+                      aria-hidden="true"
+                    />
+                  </div>
+
+                  <p>
+                    {category.description}
+                  </p>
+
+                  <span class="waste-item__count">
+                    <strong>
+                      {category.organizationCount}
+                    </strong>
+
+                    {category.organizationCount === 1
+                      ? " organisasi terkait"
+                      : " organisasi terkait"}
+                  </span>
+                </div>
+              </a>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================== -->
+    <!-- FEATURED ORGANIZATIONS                                              -->
+    <!-- ================================================================== -->
+
+    <section class="dashboard-section dashboard-section--soft">
+      <div class="dashboard-container">
+        <div class="section-heading-row">
+          <div class="section-heading">
+            <span class="section-heading__eyebrow">
+              Pengelola
+            </span>
+
+            <h2>
+              Organisasi dalam ekosistem
+            </h2>
+
+            <p>
+              Contoh organisasi publik yang dapat ditemukan
+              melalui BINSIGHT.
+            </p>
+          </div>
+
+          <a
+            href="/organizations"
+            class="section-link"
+          >
+            Lihat semua
+            <ArrowRight
+              size={16}
+              stroke-width="1.8"
+              aria-hidden="true"
+            />
+          </a>
+        </div>
+
+        {topOrganizations.length > 0 ? (
+          <div class="organization-list">
+            {topOrganizations.map(
+              (organization) => (
+                <a
+                  href={`/organizations/${organization.slug}`}
+                  class="organization-row"
+                >
+                  <div class="organization-row__logo">
+                    {organization.logo ? (
+                      <img
+                        src={organization.logo}
+                        alt=""
+                        loading="lazy"
+                      />
+                    ) : (
+                      <Building2
+                        size={22}
+                        stroke-width="1.8"
+                        aria-hidden="true"
+                      />
+                    )}
+                  </div>
+
+                  <div class="organization-row__body">
+                    <div class="organization-row__top">
+                      <h3>
+                        {organization.name}
+                      </h3>
+
+                      {organization.verified && (
+                        <span class="organization-row__verified">
+                          <ShieldCheck
+                            size={12}
+                            stroke-width="2"
+                            aria-hidden="true"
+                          />
+                          Terverifikasi
+                        </span>
+                      )}
+                    </div>
+
+                    <p>
+                      {organization.shortDescription ??
+                        organization.description}
+                    </p>
+
+                    <div class="organization-row__meta">
+                      <span>
+                        {organization.location.area}
+                      </span>
+
+                      <span>
+                        {organization.wasteManaged.length}
+                        kategori material
+                      </span>
+                    </div>
+                  </div>
+
+                  <ArrowRight
+                    class="organization-row__arrow"
+                    size={18}
+                    stroke-width="1.8"
+                    aria-hidden="true"
+                  />
+                </a>
+              ),
+            )}
+          </div>
+        ) : (
+          <div class="panel__empty panel__empty--large">
+            Belum ada organisasi publik yang tersedia.
+          </div>
+        )}
+      </div>
+    </section>
+
+    <!-- ================================================================== -->
+    <!-- DATA NOTE                                                           -->
+    <!-- ================================================================== -->
+
+    <section class="dashboard-section">
+      <div class="dashboard-container">
+        <div class="data-note">
+          <div class="data-note__icon">
+            <CircleAlert
+              size={21}
+              stroke-width="1.8"
+              aria-hidden="true"
+            />
+          </div>
+
+          <div class="data-note__content">
+            <span class="section-heading__eyebrow">
+              Catatan data
+            </span>
+
+            <h2>
+              Dashboard ini tidak menampilkan angka volume
+              yang belum tervalidasi
+            </h2>
+
+            <p>
+              BINSIGHT menggunakan metrik berbasis entitas dan
+              keterhubungan data. Informasi seperti tonase,
+              kilogram, kapasitas, atau volume hanya layak
+              ditampilkan ketika memiliki sumber data yang valid
+              dan dapat dipertanggungjawabkan.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================== -->
+    <!-- ACTIONS                                                             -->
+    <!-- ================================================================== -->
+
+    <section class="dashboard-section dashboard-section--actions">
+      <div class="dashboard-container">
+        <div class="action-grid">
+          <a
+            href="/map"
+            class="action-card action-card--primary"
+          >
+            <div class="action-card__icon">
+              <Map
+                size={24}
+                stroke-width="1.8"
+                aria-hidden="true"
+              />
+            </div>
+
+            <div>
+              <span class="action-card__eyebrow">
+                MAP
+              </span>
+
+              <h2>
+                Eksplorasi melalui peta
+              </h2>
+
+              <p>
+                Hubungkan wilayah, lokasi, dan organisasi
+                dalam konteks geografis Kabupaten Badung.
+              </p>
+            </div>
+
+            <ArrowRight
+              class="action-card__arrow"
+              size={19}
+              stroke-width="1.8"
+              aria-hidden="true"
+            />
+          </a>
+
+          <a
+            href="/reports/create"
+            class="action-card"
+          >
+            <div class="action-card__icon">
+              <FileText
+                size={24}
+                stroke-width="1.8"
+                aria-hidden="true"
+              />
+            </div>
+
+            <div>
+              <span class="action-card__eyebrow">
+                REPORT
+              </span>
+
+              <h2>
+                Sampaikan laporan
+              </h2>
+
+              <p>
+                Laporkan kondisi persampahan atau lingkungan
+                yang perlu diperhatikan.
+              </p>
+            </div>
+
+            <ArrowRight
+              class="action-card__arrow"
+              size={19}
+              stroke-width="1.8"
+              aria-hidden="true"
+            />
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+</DashboardLayout>
+
+<style>
+  .dashboard-page {
+    --dashboard-max-width: 1180px;
+    width: 100%;
+  }
+
+  .dashboard-container {
+    width: min(
+      var(--dashboard-max-width),
+      calc(100% - 2rem)
+    );
+    margin-inline: auto;
+  }
+
+  /* ========================================================================
+     HERO
+     ======================================================================== */
+
+  .dashboard-hero {
+    position: relative;
+    overflow: hidden;
+    padding: 4rem 0;
+    background:
+      radial-gradient(
+        circle at 85% 20%,
+        rgba(132, 204, 22, 0.12),
+        transparent 28%
+      ),
+      linear-gradient(
+        135deg,
+        #f8fafc,
+        #ffffff 58%,
+        #f0fdf4
+      );
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .dashboard-hero::after {
+    position: absolute;
+    top: -8rem;
+    right: 5%;
+    width: 20rem;
+    height: 20rem;
+    border: 1px solid rgba(22, 101, 52, 0.05);
+    border-radius: 50%;
+    content: "";
+    pointer-events: none;
+  }
+
+  .dashboard-hero__content {
+    position: relative;
+    z-index: 1;
+    max-width: 750px;
+  }
+
+  .dashboard-hero__eyebrow {
+    display: inline-flex;
+    align-items: center;
+    margin-bottom: 0.8rem;
+    padding: 0.35rem 0.6rem;
+    border: 1px solid var(--color-primary-light);
+    border-radius: 999px;
+    background: var(--color-primary-light);
+    color: var(--color-primary-dark);
+    font-size: 0.67rem;
+    font-weight: 800;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+  }
+
+  .dashboard-hero h1 {
+    margin: 0;
+    color: var(--color-text);
+    font-size: clamp(
+      2rem,
+      4vw,
+      3.35rem
+    );
+    font-weight: 850;
+    line-height: 1.05;
+    letter-spacing: -0.04em;
+  }
+
+  .dashboard-hero__content > p {
+    max-width: 720px;
+    margin: 1rem 0 0;
+    color: var(--color-text-secondary);
+    font-size: 0.95rem;
+    line-height: 1.7;
+  }
+
+  .dashboard-hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+    margin-top: 1.35rem;
+  }
+
+  .dashboard-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    min-height: 2.75rem;
+    padding: 0.68rem 0.9rem;
+    border-radius: 0.7rem;
+    font-size: 0.77rem;
+    font-weight: 750;
+    text-decoration: none;
+    transition:
+      transform 160ms ease,
+      box-shadow 160ms ease,
+      background 160ms ease,
+      border-color 160ms ease;
+  }
+
+  .dashboard-button:hover {
+    transform: translateY(-1px);
+  }
+
+  .dashboard-button--primary {
+    border: 1px solid var(--color-primary);
+    background: var(--color-primary);
+    color: #fff;
+  }
+
+  .dashboard-button--primary:hover {
+    border-color: var(--color-primary-dark);
+    background: var(--color-primary-dark);
+    box-shadow: var(--shadow-md);
+  }
+
+  .dashboard-button--secondary {
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    color: var(--color-text);
+  }
+
+  .dashboard-button--secondary:hover {
+    border-color: var(--color-primary-light);
+    background: var(--color-primary-light);
+    color: var(--color-primary-dark);
+  }
+
+  .dashboard-hero__side {
+    display: none;
+  }
+
+  /* ========================================================================
+     SECTIONS
+     ======================================================================== */
+
+  .dashboard-section {
+    padding: 4rem 0;
+  }
+
+  .dashboard-section--soft {
+    background: var(--color-background);
+    border-top: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .section-heading {
+    margin-bottom: 1.5rem;
+  }
+
+  .section-heading__eyebrow {
+    display: block;
+    margin-bottom: 0.3rem;
+    color: var(--color-primary);
+    font-size: 0.67rem;
+    font-weight: 850;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .section-heading h2 {
+    margin: 0;
+    color: var(--color-text);
+    font-size: clamp(
+      1.5rem,
+      3vw,
+      2.1rem
+    );
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: -0.025em;
+  }
+
+  .section-heading p {
+    max-width: 720px;
+    margin: 0.55rem 0 0;
+    color: var(--color-text-secondary);
+    font-size: 0.86rem;
+    line-height: 1.65;
+  }
+
+  .section-heading-row {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 2rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .section-heading-row .section-heading {
+    margin-bottom: 0;
+  }
+
+  .section-link,
+  .panel__link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    flex: 0 0 auto;
+    color: var(--color-primary);
+    font-size: 0.75rem;
+    font-weight: 750;
+    text-decoration: none;
+  }
+
+  .section-link:hover,
+  .panel__link:hover {
+    color: var(--color-primary-dark);
+  }
+
+  /* ========================================================================
+     STATS
+     ======================================================================== */
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns:
+      repeat(
+        4,
+        minmax(0, 1fr)
+      );
+    gap: 0.8rem;
+  }
+
+  .stat-card {
+    min-width: 0;
+    padding: 1.1rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    background: var(--color-surface);
+  }
+
+  .stat-card__icon {
+    display: grid;
+    width: 2.6rem;
+    height: 2.6rem;
+    place-items: center;
+    border-radius: 0.75rem;
+    background: var(--color-primary-light);
+    color: var(--color-primary-dark);
+  }
+
+  .stat-card__label {
+    display: block;
+    margin-top: 0.9rem;
+    color: var(--color-text-secondary);
+    font-size: 0.72rem;
+    font-weight: 650;
+  }
+
+  .stat-card__value {
+    display: block;
+    margin-top: 0.2rem;
+    color: var(--color-text);
+    font-size: 1.75rem;
+    font-weight: 850;
+    line-height: 1.1;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .stat-card__detail {
+    display: block;
+    margin-top: 0.35rem;
+    color: var(--color-text-secondary);
+    font-size: 0.67rem;
+    line-height: 1.45;
+  }
+
+  /* ========================================================================
+     ANALYTICS
+     ======================================================================== */
+
+  .analytics-grid {
+    display: grid;
+    grid-template-columns:
+      repeat(
+        2,
+        minmax(0, 1fr)
+      );
+    gap: 1rem;
+  }
+
+  .panel {
+    min-width: 0;
+    padding: 1.3rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    background: var(--color-surface);
+  }
+
+  .panel__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.2rem;
+  }
+
+  .panel__eyebrow {
+    display: block;
+    margin-bottom: 0.25rem;
+    color: var(--color-primary);
+    font-size: 0.65rem;
+    font-weight: 850;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+  }
+
+  .panel__header h2 {
+    margin: 0;
+    color: var(--color-text);
+    font-size: 1rem;
+    font-weight: 750;
+  }
+
+  .panel__header p {
+    max-width: 460px;
+    margin: 0.35rem 0 0;
+    color: var(--color-text-secondary);
+    font-size: 0.74rem;
+    line-height: 1.55;
+  }
+
+  .area-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+
+  .area-row {
+    display: block;
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .area-row__top {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .area-row__top strong {
+    display: block;
+    color: var(--color-text);
+    font-size: 0.78rem;
+    font-weight: 700;
+  }
+
+  .area-row__top span {
+    display: block;
+    margin-top: 0.1rem;
+    color: var(--color-text-secondary);
+    font-size: 0.65rem;
+  }
+
+  .area-row__top b {
+    color: var(--color-primary);
+    font-size: 0.7rem;
+    font-weight: 800;
+  }
+
+  .area-row__bar,
+  .type-row__track {
+    position: relative;
+    height: 0.4rem;
+    margin-top: 0.45rem;
+    overflow: hidden;
+    border-radius: 999px;
+    background: var(--color-background);
+  }
+
+  .area-row__bar span,
+  .type-row__track span {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: var(--color-primary);
+    transition: width 300ms ease;
+  }
+
+  .type-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+  }
+
+  .type-row__label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .type-row__label span {
+    color: var(--color-text-secondary);
+    font-size: 0.73rem;
+    font-weight: 650;
+  }
+
+  .type-row__label strong {
+    color: var(--color-text);
+    font-size: 0.73rem;
+    font-weight: 800;
+  }
+
+  .type-row__track span {
+    background: var(--color-accent);
+  }
+
+  .panel__footnote {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.4rem;
+    margin-top: 1.1rem;
+    padding-top: 0.9rem;
+    border-top: 1px solid var(--color-border);
+    color: var(--color-text-secondary);
+    font-size: 0.65rem;
+    line-height: 1.5;
+  }
+
+  .panel__footnote svg {
+    flex: 0 0 auto;
+    color: var(--color-primary);
+  }
+
+  .panel__empty {
+    padding: 1.25rem;
+    border: 1px dashed var(--color-border);
+    border-radius: var(--radius-lg);
+    background: var(--color-background);
+    color: var(--color-text-secondary);
+    font-size: 0.74rem;
+    text-align: center;
+  }
+
+  .panel__empty--large {
+    padding: 2rem;
+  }
+
+  /* ========================================================================
+     WASTE
+     ======================================================================== */
+
+  .waste-grid {
+    display: grid;
+    grid-template-columns:
+      repeat(
+        5,
+        minmax(0, 1fr)
+      );
+    gap: 0.75rem;
+  }
+
+  .waste-item {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    padding: 1rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    background: var(--color-surface);
+    color: inherit;
+    text-decoration: none;
+    transition:
+      border-color 160ms ease,
+      background 160ms ease,
+      box-shadow 160ms ease,
+      transform 160ms ease;
+  }
+
+  .waste-item:hover {
+    border-color: var(--color-primary-light);
+    background: var(--color-background);
+    box-shadow: var(--shadow-sm);
+    transform: translateY(-2px);
+  }
+
+  .waste-item__icon {
+    display: grid;
+    width: 2.65rem;
+    height: 2.65rem;
+    place-items: center;
+    border-radius: 0.75rem;
+    background: var(--color-primary-light);
+    color: var(--color-primary-dark);
+  }
+
+  .waste-item__body {
+    min-width: 0;
+    margin-top: 0.85rem;
+  }
+
+  .waste-item__heading {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
+  .waste-item__heading h3 {
+    margin: 0;
+    overflow-wrap: anywhere;
+    color: var(--color-text);
+    font-size: 0.83rem;
+    font-weight: 750;
+    line-height: 1.35;
+  }
+
+  .waste-item__heading svg {
+    flex: 0 0 auto;
+    color: var(--color-primary);
+  }
+
+  .waste-item p {
+    display: -webkit-box;
+    overflow: hidden;
+    margin: 0.45rem 0 0;
+    color: var(--color-text-secondary);
+    font-size: 0.68rem;
+    line-height: 1.5;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+  }
+
+  .waste-item__count {
+    display: block;
+    margin-top: 0.75rem;
+    color: var(--color-text-secondary);
+    font-size: 0.64rem;
+  }
+
+  .waste-item__count strong {
+    color: var(--color-text);
+    font-size: 0.78rem;
+    font-weight: 800;
+  }
+
+  /* ========================================================================
+     ORGANIZATION
+     ======================================================================== */
+
+  .organization-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+  }
+
+  .organization-row {
+    display: grid;
+    grid-template-columns:
+      3.4rem
+      minmax(0, 1fr)
+      2rem;
+    gap: 0.85rem;
+    align-items: center;
+    padding: 0.85rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    background: var(--color-surface);
+    color: inherit;
+    text-decoration: none;
+    transition:
+      border-color 160ms ease,
+      background 160ms ease,
+      box-shadow 160ms ease;
+  }
+
+  .organization-row:hover {
+    border-color: var(--color-primary-light);
+    background: var(--color-background);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .organization-row__logo {
+    display: grid;
+    width: 3.4rem;
+    height: 3.4rem;
+    place-items: center;
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+    border-radius: 0.8rem;
+    background: var(--color-background);
+    color: var(--color-primary);
+  }
+
+  .organization-row__logo img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    padding: 0.4rem;
+    object-fit: contain;
+  }
+
+  .organization-row__body {
+    min-width: 0;
+  }
+
+  .organization-row__top {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+  }
+
+  .organization-row__top h3 {
+    min-width: 0;
+    margin: 0;
+    overflow: hidden;
+    color: var(--color-text);
+    font-size: 0.86rem;
+    font-weight: 750;
+    line-height: 1.4;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .organization-row__verified {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    flex: 0 0 auto;
+    padding: 0.27rem 0.45rem;
+    border-radius: 999px;
+    background: var(--color-primary-light);
+    color: var(--color-primary-dark);
+    font-size: 0.59rem;
+    font-weight: 750;
+  }
+
+  .organization-row__body > p {
+    display: -webkit-box;
+    overflow: hidden;
+    margin: 0.3rem 0 0;
+    color: var(--color-text-secondary);
+    font-size: 0.7rem;
+    line-height: 1.5;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  .organization-row__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-top: 0.45rem;
+  }
+
+  .organization-row__meta span {
+    color: var(--color-text-secondary);
+    font-size: 0.62rem;
+  }
+
+  .organization-row__meta span + span {
+    position: relative;
+    padding-left: 0.6rem;
+  }
+
+  .organization-row__meta span + span::before {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 2px;
+    height: 2px;
+    border-radius: 50%;
+    background: var(--color-border);
+    content: "";
+    transform: translateY(-50%);
+  }
+
+  .organization-row__arrow {
+    color: var(--color-primary);
+  }
+
+  /* ========================================================================
+     DATA NOTE
+     ======================================================================== */
+
+  .data-note {
+    display: grid;
+    grid-template-columns: 3rem minmax(0, 1fr);
+    gap: 0.9rem;
+    padding: 1.3rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    background: var(--color-surface);
+  }
+
+  .data-note__icon {
+    display: grid;
+    width: 3rem;
+    height: 3rem;
+    place-items: center;
+    border-radius: 0.8rem;
+    background: var(--color-primary-light);
+    color: var(--color-primary-dark);
+  }
+
+  .data-note__content h2 {
+    margin: 0;
+    color: var(--color-text);
+    font-size: 1rem;
+    font-weight: 750;
+    line-height: 1.4;
+  }
+
+  .data-note__content p {
+    max-width: 820px;
+    margin: 0.4rem 0 0;
+    color: var(--color-text-secondary);
+    font-size: 0.76rem;
+    line-height: 1.65;
+  }
+
+  /* ========================================================================
+     ACTIONS
+     ======================================================================== */
+
+  .dashboard-section--actions {
+    padding-top: 0;
+    padding-bottom: 4.5rem;
+  }
+
+  .action-grid {
+    display: grid;
+    grid-template-columns:
+      repeat(
+        2,
+        minmax(0, 1fr)
+      );
+    gap: 0.8rem;
+  }
+
+  .action-card {
+    position: relative;
+    display: grid;
+    grid-template-columns: 3rem minmax(0, 1fr) 2rem;
+    gap: 0.85rem;
+    align-items: start;
+    padding: 1.2rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    background: var(--color-surface);
+    color: inherit;
+    text-decoration: none;
+    transition:
+      border-color 160ms ease,
+      box-shadow 160ms ease,
+      transform 160ms ease;
+  }
+
+  .action-card:hover {
+    border-color: var(--color-primary-light);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+  }
+
+  .action-card--primary {
+    border-color: var(--color-primary-light);
+    background: var(--color-primary-light);
+  }
+
+  .action-card__icon {
+    display: grid;
+    width: 3rem;
+    height: 3rem;
+    place-items: center;
+    border-radius: 0.8rem;
+    background: var(--color-background);
+    color: var(--color-primary-dark);
+  }
+
+  .action-card__eyebrow {
+    display: block;
+    margin-bottom: 0.2rem;
+    color: var(--color-primary);
+    font-size: 0.63rem;
+    font-weight: 850;
+    letter-spacing: 0.08em;
+  }
+
+  .action-card h2 {
+    margin: 0;
+    color: var(--color-text);
+    font-size: 0.98rem;
+    font-weight: 750;
+  }
+
+  .action-card p {
+    max-width: 620px;
+    margin: 0.35rem 0 0;
+    color: var(--color-text-secondary);
+    font-size: 0.72rem;
+    line-height: 1.55;
+  }
+
+  .action-card__arrow {
+    color: var(--color-primary);
+  }
+
+  /* ========================================================================
+     RESPONSIVE
+     ======================================================================== */
+
+  @media (max-width: 1050px) {
+    .stats-grid {
+      grid-template-columns:
+        repeat(
+          2,
+          minmax(0, 1fr)
+        );
+    }
+
+    .waste-grid {
+      grid-template-columns:
+        repeat(
+          3,
+          minmax(0, 1fr)
+        );
+    }
+  }
+
+  @media (max-width: 800px) {
+    .dashboard-section {
+      padding: 3.25rem 0;
+    }
+
+    .analytics-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .waste-grid {
+      grid-template-columns:
+        repeat(
+          2,
+          minmax(0, 1fr)
+        );
+    }
+
+    .action-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .dashboard-container {
+      width: min(
+        100% - 1.2rem,
+        var(--dashboard-max-width)
+      );
+    }
+
+    .dashboard-hero {
+      padding: 3rem 0;
+    }
+
+    .dashboard-hero__actions {
+      flex-direction: column;
+    }
+
+    .dashboard-button {
+      width: 100%;
+    }
+
+    .stats-grid,
+    .waste-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .section-heading-row {
+      align-items: flex-start;
+      flex-direction: column;
+      gap: 0.7rem;
+    }
+
+    .organization-row {
+      grid-template-columns:
+        3rem
+        minmax(0, 1fr)
+        1.6rem;
+    }
+
+    .organization-row__logo {
+      width: 3rem;
+      height: 3rem;
+    }
+
+    .organization-row__verified {
+      display: none;
+    }
+
+    .data-note {
+      grid-template-columns: 1fr;
+    }
+
+    .action-card {
+      grid-template-columns:
+        2.7rem
+        minmax(0, 1fr)
+        1.6rem;
+    }
+
+    .action-card__icon {
+      width: 2.7rem;
+      height: 2.7rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .dashboard-button,
+    .waste-item,
+    .organization-row,
+    .action-card {
+      transition: none;
+    }
+  }
+</style>
