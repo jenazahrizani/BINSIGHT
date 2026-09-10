@@ -1,0 +1,896 @@
+---
+import {
+  BarChart3,
+  Building2,
+  ChevronRight,
+  MapPin,
+  MapPinned,
+  Package,
+} from "@lucide/astro";
+
+import {
+  getPublicAreas,
+  getPublicLocations,
+  getLocationsByArea,
+  type Area,
+} from "@lib/data/locations";
+
+interface Props {
+  title?: string;
+  subtitle?: string;
+  areas?: Area[];
+  limit?: number;
+  showLocationCount?: boolean;
+  showPercentage?: boolean;
+  showDescription?: boolean;
+  hrefBase?: string;
+  emptyMessage?: string;
+}
+
+const {
+  title = "Distribusi Area",
+  subtitle = "Sebaran lokasi pengelolaan sampah berdasarkan area di Kabupaten Badung.",
+  areas,
+  limit,
+  showLocationCount = true,
+  showPercentage = true,
+  showDescription = true,
+  hrefBase = "/map",
+  emptyMessage = "Belum ada data area yang tersedia.",
+} = Astro.props;
+
+/* -------------------------------------------------------------------------- */
+/* Data                                                                       */
+/* -------------------------------------------------------------------------- */
+
+const sourceAreas =
+  areas ?? getPublicAreas();
+
+const visibleAreas =
+  typeof limit === "number"
+    ? sourceAreas.slice(
+        0,
+        Math.max(0, Math.trunc(limit)),
+      )
+    : sourceAreas;
+
+const publicLocations =
+  getPublicLocations();
+
+const areaRows = visibleAreas.map(
+  (area) => {
+    const locationCount =
+      getLocationsByArea(
+        area.id,
+      ).filter(
+        (location) =>
+          location.status ===
+          "active",
+      ).length;
+
+    return {
+      area,
+      locationCount,
+    };
+  },
+);
+
+const totalLocations =
+  areaRows.reduce(
+    (total, row) =>
+      total + row.locationCount,
+    0,
+  );
+
+const totalAreas =
+  areaRows.length;
+
+const maximumLocationCount =
+  areaRows.reduce(
+    (maximum, row) =>
+      Math.max(
+        maximum,
+        row.locationCount,
+      ),
+    0,
+  );
+
+function getAreaPercentage(
+  count: number,
+): number {
+  if (totalLocations <= 0) {
+    return 0;
+  }
+
+  return (
+    (count / totalLocations) *
+    100
+  );
+}
+
+function getBarWidth(
+  count: number,
+): number {
+  if (
+    maximumLocationCount <= 0
+  ) {
+    return 0;
+  }
+
+  return Math.max(
+    4,
+    (count /
+      maximumLocationCount) *
+      100,
+  );
+}
+
+function formatAreaCount(
+  count: number,
+): string {
+  return count.toLocaleString(
+    "id-ID",
+  );
+}
+---
+
+<section
+  class="area-distribution"
+  aria-labelledby="area-distribution-title"
+>
+  <header
+    class="area-distribution__header"
+  >
+    <div
+      class="area-distribution__heading"
+    >
+      <div
+        class="area-distribution__title-row"
+      >
+        <span
+          class="area-distribution__title-icon"
+          aria-hidden="true"
+        >
+          <MapPinned
+            size={18}
+            stroke-width={2}
+          />
+        </span>
+
+        <div>
+          <h2
+            id="area-distribution-title"
+            class="area-distribution__title"
+          >
+            {title}
+          </h2>
+
+          {
+            subtitle && (
+              <p class="area-distribution__subtitle">
+                {subtitle}
+              </p>
+            )
+          }
+        </div>
+      </div>
+    </div>
+
+    {
+      totalAreas > 0 && (
+        <span class="area-distribution__count">
+          {totalAreas} area
+        </span>
+      )
+    }
+  </header>
+
+  {
+    areaRows.length > 0 ? (
+      <>
+        <div
+          class="area-distribution__summary"
+          aria-label="Ringkasan distribusi area"
+        >
+          <div class="area-distribution__summary-item">
+            <span
+              class="area-distribution__summary-icon"
+              aria-hidden="true"
+            >
+              <MapPin
+                size={16}
+                stroke-width={1.9}
+              />
+            </span>
+
+            <span class="area-distribution__summary-copy">
+              <span class="area-distribution__summary-label">
+                Area aktif
+              </span>
+
+              <strong>
+                {totalAreas.toLocaleString(
+                  "id-ID",
+                )}
+              </strong>
+            </span>
+          </div>
+
+          <div class="area-distribution__summary-item">
+            <span
+              class="area-distribution__summary-icon"
+              aria-hidden="true"
+            >
+              <Package
+                size={16}
+                stroke-width={1.9}
+              />
+            </span>
+
+            <span class="area-distribution__summary-copy">
+              <span class="area-distribution__summary-label">
+                Lokasi terpetakan
+              </span>
+
+              <strong>
+                {publicLocations.length.toLocaleString(
+                  "id-ID",
+                )}
+              </strong>
+            </span>
+          </div>
+        </div>
+
+        <div
+          class="area-distribution__list"
+          role="list"
+          aria-label="Distribusi lokasi per area"
+        >
+          {
+            areaRows.map(
+              ({
+                area,
+                locationCount,
+              }) => {
+                const percentage =
+                  getAreaPercentage(
+                    locationCount,
+                  );
+
+                const barWidth =
+                  getBarWidth(
+                    locationCount,
+                  );
+
+                const areaHref =
+                  `${hrefBase}/${area.slug}`;
+
+                return (
+                  <article
+                    class="area-distribution__item"
+                    role="listitem"
+                  >
+                    <div class="area-distribution__item-main">
+                      <a
+                        class="area-distribution__area-link"
+                        href={areaHref}
+                        aria-label={`Lihat area ${area.name}`}
+                      >
+                        <span
+                          class="area-distribution__area-icon"
+                          aria-hidden="true"
+                        >
+                          <Building2
+                            size={18}
+                            stroke-width={1.9}
+                          />
+                        </span>
+
+                        <span class="area-distribution__area-copy">
+                          <span class="area-distribution__area-name">
+                            {area.name}
+                          </span>
+
+                          {
+                            showDescription &&
+                            area.description && (
+                              <span class="area-distribution__area-description">
+                                {area.description}
+                              </span>
+                            )
+                          }
+                        </span>
+                      </a>
+
+                      <div class="area-distribution__metrics">
+                        {
+                          showLocationCount && (
+                            <span class="area-distribution__location-count">
+                              <span class="area-distribution__metric-value">
+                                {formatAreaCount(
+                                  locationCount,
+                                )}
+                              </span>
+
+                              <span class="area-distribution__metric-label">
+                                lokasi
+                              </span>
+                            </span>
+                          )
+                        }
+
+                        {
+                          showPercentage && (
+                            <span class="area-distribution__percentage">
+                              {percentage.toLocaleString(
+                                "id-ID",
+                                {
+                                  maximumFractionDigits: 0,
+                                },
+                              )}
+                              %
+                            </span>
+                          )
+                        }
+
+                        <ChevronRight
+                          class="area-distribution__chevron"
+                          size={16}
+                          stroke-width={1.8}
+                          aria-hidden="true"
+                        />
+                      </div>
+                    </div>
+
+                    <div
+                      class="area-distribution__bar-track"
+                      role="progressbar"
+                      aria-label={`Proporsi lokasi pada area ${area.name}`}
+                      aria-valuemin="0"
+                      aria-valuemax="100"
+                      aria-valuenow={Math.round(
+                        percentage,
+                      )}
+                    >
+                      <span
+                        class="area-distribution__bar-fill"
+                        style={`width: ${barWidth}%;`}
+                      ></span>
+                    </div>
+                  </article>
+                );
+              },
+            )
+          }
+        </div>
+
+        <footer
+          class="area-distribution__footer"
+        >
+          <div class="area-distribution__footer-note">
+            <BarChart3
+              size={14}
+              stroke-width={1.8}
+              aria-hidden="true"
+            />
+
+            <span>
+              Distribusi dihitung dari jumlah
+              lokasi aktif yang tersedia pada
+              area yang ditampilkan.
+            </span>
+          </div>
+
+          <a
+            class="area-distribution__view-all"
+            href={hrefBase}
+          >
+            Lihat peta
+            <ChevronRight
+              size={15}
+              stroke-width={2}
+              aria-hidden="true"
+            />
+          </a>
+        </footer>
+      </>
+    ) : (
+      <div
+        class="area-distribution__empty"
+        role="status"
+      >
+        <span
+          class="area-distribution__empty-icon"
+          aria-hidden="true"
+        >
+          <MapPinned
+            size={22}
+            stroke-width={1.8}
+          />
+        </span>
+
+        <div>
+          <strong>
+            Belum ada data area
+          </strong>
+
+          <p>
+            {emptyMessage}
+          </p>
+        </div>
+      </div>
+    )
+  }
+</section>
+
+<style>
+  .area-distribution {
+    min-width: 0;
+    overflow: hidden;
+    border: 1px solid
+      var(--color-border, #e2e8f0);
+    border-radius: 1rem;
+    background: var(
+      --color-surface,
+      #ffffff
+    );
+    box-shadow:
+      0 1px 2px
+        rgb(15 23 42 / 0.03),
+      0 8px 24px
+        rgb(15 23 42 / 0.04);
+  }
+
+  .area-distribution__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1.25rem;
+    border-bottom: 1px solid
+      var(--color-border, #e2e8f0);
+  }
+
+  .area-distribution__title-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .area-distribution__title-icon {
+    width: 2.25rem;
+    height: 2.25rem;
+    flex: 0 0 2.25rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.7rem;
+    background: var(
+      --color-primary-light,
+      #dcfce7
+    );
+    color: var(
+      --color-primary,
+      #166534
+    );
+  }
+
+  .area-distribution__title {
+    margin: 0;
+    color: var(
+      --color-text,
+      #0f172a
+    );
+    font-size: 1rem;
+    font-weight: 750;
+    line-height: 1.35;
+    letter-spacing: -0.01em;
+  }
+
+  .area-distribution__subtitle {
+    max-width: 42rem;
+    margin: 0.25rem 0 0;
+    color: var(
+      --color-text-secondary,
+      #64748b
+    );
+    font-size: 0.8125rem;
+    line-height: 1.5;
+  }
+
+  .area-distribution__count {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    min-height: 1.75rem;
+    padding: 0.25rem
+      0.625rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 999px;
+    background: #f8fafc;
+    color: #64748b;
+    font-size: 0.6875rem;
+    font-weight: 700;
+  }
+
+  .area-distribution__summary {
+    display: grid;
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid
+      #f1f5f9;
+  }
+
+  .area-distribution__summary-item {
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+  }
+
+  .area-distribution__summary-icon {
+    width: 2rem;
+    height: 2rem;
+    flex: 0 0 2rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.6rem;
+    background: #f8fafc;
+    color: var(
+      --color-primary,
+      #166534
+    );
+    border: 1px solid #e2e8f0;
+  }
+
+  .area-distribution__summary-copy {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.075rem;
+  }
+
+  .area-distribution__summary-label {
+    color: #64748b;
+    font-size: 0.6875rem;
+    line-height: 1.3;
+  }
+
+  .area-distribution__summary-copy strong {
+    color: #0f172a;
+    font-size: 0.875rem;
+    font-weight: 750;
+    line-height: 1.2;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .area-distribution__list {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .area-distribution__item {
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid
+      #f1f5f9;
+  }
+
+  .area-distribution__item:last-child {
+    border-bottom: 0;
+  }
+
+  .area-distribution__item-main {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .area-distribution__area-link {
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .area-distribution__area-icon {
+    width: 2.25rem;
+    height: 2.25rem;
+    flex: 0 0 2.25rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.7rem;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    color: var(
+      --color-primary,
+      #166534
+    );
+    transition:
+      background-color 160ms ease,
+      border-color 160ms ease,
+      color 160ms ease;
+  }
+
+  .area-distribution__area-link:hover
+    .area-distribution__area-icon {
+    background: var(
+      --color-primary-light,
+      #dcfce7
+    );
+    border-color: #bbf7d0;
+    color: var(
+      --color-primary-dark,
+      #14532d
+    );
+  }
+
+  .area-distribution__area-link:focus-visible {
+    outline: 3px solid
+      rgb(37 99 235 / 0.18);
+    outline-offset: 3px;
+    border-radius: 0.5rem;
+  }
+
+  .area-distribution__area-copy {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+  }
+
+  .area-distribution__area-name {
+    overflow: hidden;
+    color: #0f172a;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    line-height: 1.35;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .area-distribution__area-description {
+    overflow: hidden;
+    max-width: 34rem;
+    color: #64748b;
+    font-size: 0.6875rem;
+    line-height: 1.4;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .area-distribution__metrics {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+  }
+
+  .area-distribution__location-count {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.25rem;
+  }
+
+  .area-distribution__metric-value {
+    color: #0f172a;
+    font-size: 0.8125rem;
+    font-weight: 750;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .area-distribution__metric-label {
+    color: #64748b;
+    font-size: 0.6875rem;
+  }
+
+  .area-distribution__percentage {
+    min-width: 2.75rem;
+    color: var(
+      --color-primary,
+      #166534
+    );
+    font-size: 0.75rem;
+    font-weight: 750;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .area-distribution__chevron {
+    color: #94a3b8;
+    transition:
+      transform 160ms ease,
+      color 160ms ease;
+  }
+
+  .area-distribution__area-link:hover
+    ~ .area-distribution__metrics
+    .area-distribution__chevron {
+    color: #166534;
+    transform: translateX(2px);
+  }
+
+  .area-distribution__bar-track {
+    width: 100%;
+    height: 0.35rem;
+    margin-top: 0.75rem;
+    overflow: hidden;
+    border-radius: 999px;
+    background: #f1f5f9;
+  }
+
+  .area-distribution__bar-fill {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background:
+      linear-gradient(
+        90deg,
+        var(
+          --color-primary,
+          #166534
+        ),
+        var(
+          --color-accent,
+          #84cc16
+        )
+      );
+    transition: width 350ms ease;
+  }
+
+  .area-distribution__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.875rem
+      1.25rem
+      1rem;
+    border-top: 1px solid
+      var(--color-border, #e2e8f0);
+  }
+
+  .area-distribution__footer-note {
+    min-width: 0;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.45rem;
+    color: #64748b;
+    font-size: 0.6875rem;
+    line-height: 1.45;
+  }
+
+  .area-distribution__footer-note
+    svg {
+    flex: 0 0 auto;
+    margin-top: 0.05rem;
+  }
+
+  .area-distribution__view-all {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.15rem;
+    color: var(
+      --color-primary,
+      #166534
+    );
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .area-distribution__view-all:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .area-distribution__view-all:focus-visible {
+    outline: 3px solid
+      rgb(37 99 235 / 0.18);
+    outline-offset: 3px;
+    border-radius: 0.25rem;
+  }
+
+  .area-distribution__empty {
+    min-height: 12rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    padding: 2rem 1.25rem;
+    color: #64748b;
+  }
+
+  .area-distribution__empty-icon {
+    width: 2.75rem;
+    height: 2.75rem;
+    flex: 0 0 2.75rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.75rem;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    color: #94a3b8;
+  }
+
+  .area-distribution__empty strong {
+    display: block;
+    color: #334155;
+    font-size: 0.8125rem;
+  }
+
+  .area-distribution__empty p {
+    margin: 0.2rem 0 0;
+    font-size: 0.75rem;
+    line-height: 1.5;
+  }
+
+  @media (max-width: 640px) {
+    .area-distribution__header {
+      padding: 1rem;
+    }
+
+    .area-distribution__summary {
+      padding-inline: 1rem;
+    }
+
+    .area-distribution__item {
+      padding: 0.875rem 1rem;
+    }
+
+    .area-distribution__item-main {
+      align-items: flex-start;
+    }
+
+    .area-distribution__area-description {
+      display: none;
+    }
+
+    .area-distribution__metric-label {
+      display: none;
+    }
+
+    .area-distribution__metrics {
+      gap: 0.35rem;
+    }
+
+    .area-distribution__footer {
+      padding-inline: 1rem;
+    }
+
+    .area-distribution__footer-note {
+      max-width: 68%;
+    }
+  }
+
+  @media (max-width: 420px) {
+    .area-distribution__summary {
+      grid-template-columns: 1fr;
+    }
+
+    .area-distribution__location-count {
+      display: none;
+    }
+
+    .area-distribution__percentage {
+      min-width: 2.25rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .area-distribution__area-icon,
+    .area-distribution__chevron,
+    .area-distribution__bar-fill {
+      transition: none;
+    }
+  }
+</style>

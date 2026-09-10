@@ -1,0 +1,585 @@
+---
+import {
+  ArrowDown,
+  ArrowUp,
+  BarChart,
+  Building2,
+  CheckCircle,
+  FileText,
+  Leaf,
+  MapPin,
+  Package,
+  Recycle,
+  TriangleAlert,
+  Users,
+} from "@lucide/astro";
+
+interface Props {
+  label: string;
+  value: string | number;
+  description?: string;
+  icon?:
+    | "chart"
+    | "building"
+    | "check"
+    | "file"
+    | "leaf"
+    | "location"
+    | "package"
+    | "recycle"
+    | "alert"
+    | "users";
+  trend?: number | null;
+  trendLabel?: string;
+  href?: string;
+  variant?:
+    | "default"
+    | "primary"
+    | "success"
+    | "warning"
+    | "danger"
+    | "info";
+  loading?: boolean;
+}
+
+const {
+  label,
+  value,
+  description,
+  icon = "chart",
+  trend = null,
+  trendLabel,
+  href,
+  variant = "default",
+  loading = false,
+} = Astro.props;
+
+const iconLabelMap: Record<
+  NonNullable<Props["icon"]>,
+  string
+> = {
+  chart: "Statistik",
+  building: "Organisasi",
+  check: "Terverifikasi",
+  file: "Laporan",
+  leaf: "Lingkungan",
+  location: "Lokasi",
+  package: "Data",
+  recycle: "Pengelolaan",
+  alert: "Perhatian",
+  users: "Pengguna",
+};
+
+const iconLabel =
+  iconLabelMap[icon];
+
+const hasTrend =
+  typeof trend === "number" &&
+  Number.isFinite(trend);
+
+const trendIsPositive =
+  hasTrend && trend > 0;
+
+const trendIsNegative =
+  hasTrend && trend < 0;
+
+const trendIsNeutral =
+  hasTrend && trend === 0;
+
+const formattedTrend =
+  hasTrend
+    ? `${Math.abs(trend ?? 0).toLocaleString(
+        "id-ID",
+      )}%`
+    : "";
+
+const trendText =
+  trendLabel ??
+  (trendIsPositive
+    ? "meningkat"
+    : trendIsNegative
+      ? "menurun"
+      : trendIsNeutral
+        ? "tetap"
+        : "");
+
+const tagName = href ? "a" : "div";
+
+const hrefAttributes = href
+  ? {
+      href,
+      "aria-label": `${label}: ${value}`,
+    }
+  : {};
+---
+
+<tagName
+  class:list={[
+    "stat-card",
+    `stat-card--${variant}`,
+    {
+      "stat-card--loading": loading,
+      "stat-card--interactive": Boolean(
+        href,
+      ),
+    },
+  ]}
+  {...hrefAttributes}
+>
+  <div class="stat-card__top">
+    <div
+      class="stat-card__icon"
+      aria-hidden="true"
+    >
+      {
+        icon === "chart" && (
+          <BarChart
+            size={20}
+            stroke-width={1.9}
+          />
+        )
+      }
+
+      {
+        icon === "building" && (
+          <Building2
+            size={20}
+            stroke-width={1.9}
+          />
+        )
+      }
+
+      {
+        icon === "check" && (
+          <CheckCircle
+            size={20}
+            stroke-width={1.9}
+          />
+        )
+      }
+
+      {
+        icon === "file" && (
+          <FileText
+            size={20}
+            stroke-width={1.9}
+          />
+        )
+      }
+
+      {
+        icon === "leaf" && (
+          <Leaf
+            size={20}
+            stroke-width={1.9}
+          />
+        )
+      }
+
+      {
+        icon === "location" && (
+          <MapPin
+            size={20}
+            stroke-width={1.9}
+          />
+        )
+      }
+
+      {
+        icon === "package" && (
+          <Package
+            size={20}
+            stroke-width={1.9}
+          />
+        )
+      }
+
+      {
+        icon === "recycle" && (
+          <Recycle
+            size={20}
+            stroke-width={1.9}
+          />
+        )
+      }
+
+      {
+        icon === "alert" && (
+          <TriangleAlert
+            size={20}
+            stroke-width={1.9}
+          />
+        )
+      }
+
+      {
+        icon === "users" && (
+          <Users
+            size={20}
+            stroke-width={1.9}
+          />
+        )
+      }
+    </div>
+
+    {
+      hasTrend && (
+        <span
+          class:list={[
+            "stat-card__trend",
+            {
+              "stat-card__trend--positive":
+                trendIsPositive,
+              "stat-card__trend--negative":
+                trendIsNegative,
+              "stat-card__trend--neutral":
+                trendIsNeutral,
+            },
+          ]}
+        >
+          {trendIsPositive && (
+            <ArrowUp
+              size={13}
+              stroke-width={2}
+              aria-hidden="true"
+            />
+          )}
+
+          {trendIsNegative && (
+            <ArrowDown
+              size={13}
+              stroke-width={2}
+              aria-hidden="true"
+            />
+          )}
+
+          {trendIsNeutral && (
+            <span
+              class="stat-card__trend-dot"
+              aria-hidden="true"
+            ></span>
+          )}
+
+          <span>
+            {formattedTrend}
+          </span>
+
+          {
+            trendText && (
+              <span class="stat-card__trend-label">
+                {trendText}
+              </span>
+            )
+          }
+        </span>
+      )
+    }
+  </div>
+
+  <div class="stat-card__content">
+    <span class="stat-card__label">
+      {label}
+    </span>
+
+    {
+      loading ? (
+        <span
+          class="stat-card__skeleton stat-card__skeleton--value"
+          aria-label="Memuat data"
+        ></span>
+      ) : (
+        <strong class="stat-card__value">
+          {value}
+        </strong>
+      )
+    }
+
+    {
+      description && !loading && (
+        <span class="stat-card__description">
+          {description}
+        </span>
+      )
+    }
+  </div>
+
+  {
+    href && (
+      <span
+        class="stat-card__sr-label"
+        aria-hidden="true"
+      >
+        Buka {iconLabel}
+      </span>
+    )
+  }
+</tagName>
+
+<style>
+  .stat-card {
+    position: relative;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1.125rem;
+    padding: 1.25rem;
+    border: 1px solid var(--color-border, #e2e8f0);
+    border-radius: 1rem;
+    background: var(--color-surface, #ffffff);
+    color: var(--color-text, #0f172a);
+    text-decoration: none;
+    box-shadow:
+      0 1px 2px rgb(15 23 42 / 0.03),
+      0 8px 24px rgb(15 23 42 / 0.04);
+    transition:
+      border-color 180ms ease,
+      box-shadow 180ms ease,
+      transform 180ms ease;
+  }
+
+  .stat-card--interactive {
+    cursor: pointer;
+  }
+
+  .stat-card--interactive:hover {
+    border-color: rgb(22 101 52 / 0.28);
+    box-shadow:
+      0 2px 4px rgb(15 23 42 / 0.04),
+      0 14px 32px rgb(15 23 42 / 0.08);
+    transform: translateY(-2px);
+  }
+
+  .stat-card--interactive:focus-visible {
+    outline: 3px solid
+      rgb(37 99 235 / 0.2);
+    outline-offset: 2px;
+    border-color: var(
+      --color-info,
+      #2563eb
+    );
+  }
+
+  .stat-card__top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .stat-card__icon {
+    width: 2.75rem;
+    height: 2.75rem;
+    flex: 0 0 2.75rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.8rem;
+    background: var(
+      --color-background-muted,
+      #f1f5f9
+    );
+    color: var(
+      --color-text-secondary,
+      #64748b
+    );
+  }
+
+  .stat-card--primary
+    .stat-card__icon {
+    background: var(
+      --color-primary-light,
+      #dcfce7
+    );
+    color: var(
+      --color-primary,
+      #166534
+    );
+  }
+
+  .stat-card--success
+    .stat-card__icon {
+    background: #ecfdf5;
+    color: #15803d;
+  }
+
+  .stat-card--warning
+    .stat-card__icon {
+    background: #fffbeb;
+    color: #b45309;
+  }
+
+  .stat-card--danger
+    .stat-card__icon {
+    background: #fef2f2;
+    color: #b91c1c;
+  }
+
+  .stat-card--info
+    .stat-card__icon {
+    background: #eff6ff;
+    color: #1d4ed8;
+  }
+
+  .stat-card__content {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.325rem;
+  }
+
+  .stat-card__label {
+    color: var(
+      --color-text-secondary,
+      #64748b
+    );
+    font-size: 0.8125rem;
+    font-weight: 600;
+    line-height: 1.4;
+    letter-spacing: 0.01em;
+  }
+
+  .stat-card__value {
+    color: var(
+      --color-text,
+      #0f172a
+    );
+    font-size: clamp(
+      1.65rem,
+      3vw,
+      2.15rem
+    );
+    font-weight: 750;
+    line-height: 1.05;
+    letter-spacing: -0.035em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .stat-card__description {
+    margin-top: 0.2rem;
+    color: var(
+      --color-text-secondary,
+      #64748b
+    );
+    font-size: 0.75rem;
+    line-height: 1.5;
+  }
+
+  .stat-card__trend {
+    min-height: 1.5rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.25rem;
+    flex-wrap: wrap;
+    color: #475569;
+    font-size: 0.75rem;
+    font-weight: 700;
+    line-height: 1.25;
+  }
+
+  .stat-card__trend--positive {
+    color: #15803d;
+  }
+
+  .stat-card__trend--negative {
+    color: #b91c1c;
+  }
+
+  .stat-card__trend--neutral {
+    color: #64748b;
+  }
+
+  .stat-card__trend-label {
+    margin-left: 0.05rem;
+    color: #64748b;
+    font-weight: 500;
+  }
+
+  .stat-card__trend-dot {
+    width: 0.35rem;
+    height: 0.35rem;
+    border-radius: 999px;
+    background: currentColor;
+  }
+
+  .stat-card__skeleton {
+    display: block;
+    border-radius: 0.45rem;
+    background:
+      linear-gradient(
+        90deg,
+        #f1f5f9 0%,
+        #e2e8f0 50%,
+        #f1f5f9 100%
+      );
+    background-size: 200% 100%;
+    animation: stat-card-shimmer
+      1.35s ease-in-out infinite;
+  }
+
+  .stat-card__skeleton--value {
+    width: min(75%, 8rem);
+    height: 2.25rem;
+  }
+
+  .stat-card__sr-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .stat-card--loading
+    .stat-card__label {
+    color: transparent;
+    width: 7rem;
+    height: 1rem;
+    border-radius: 0.35rem;
+    background: #f1f5f9;
+  }
+
+  @keyframes stat-card-shimmer {
+    0% {
+      background-position: 200% 0;
+    }
+
+    100% {
+      background-position: -200% 0;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .stat-card {
+      padding: 1rem;
+      gap: 1rem;
+      border-radius: 0.875rem;
+    }
+
+    .stat-card__icon {
+      width: 2.5rem;
+      height: 2.5rem;
+      flex-basis: 2.5rem;
+    }
+
+    .stat-card__value {
+      font-size: 1.65rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .stat-card,
+    .stat-card--interactive:hover {
+      transition: none;
+      transform: none;
+    }
+
+    .stat-card__skeleton {
+      animation: none;
+    }
+  }
+</style>

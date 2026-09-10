@@ -1,0 +1,805 @@
+---
+import {
+  ChartColumn,
+  Cpu,
+  Leaf,
+  Package,
+  Recycle,
+  Trash2,
+  TriangleAlert,
+} from "@lucide/astro";
+import {
+  WASTE_CATEGORY,
+  type WasteCategory,
+} from "@lib/constants/waste";
+import {
+  getPublicWaste,
+  type WasteItem,
+} from "@lib/data/waste";
+
+interface Props {
+  title?: string;
+  subtitle?: string;
+  items?: WasteItem[];
+  limit?: number;
+  showValues?: boolean;
+  showPercentage?: boolean;
+  showLegend?: boolean;
+  hrefBase?: string;
+  emptyMessage?: string;
+}
+
+const {
+  title = "Distribusi Jenis Sampah",
+  subtitle = "Komposisi kategori sampah dalam ekosistem BINSIGHT.",
+  items,
+  limit,
+  showValues = true,
+  showPercentage = true,
+  showLegend = true,
+  hrefBase = "/waste",
+  emptyMessage = "Belum ada data kategori sampah.",
+} = Astro.props;
+
+/* -------------------------------------------------------------------------- */
+/* Data                                                                       */
+/* -------------------------------------------------------------------------- */
+
+const wasteItems =
+  items ??
+  getPublicWaste();
+
+const visibleItems =
+  typeof limit === "number"
+    ? wasteItems.slice(
+        0,
+        Math.max(0, Math.trunc(limit)),
+      )
+    : wasteItems;
+
+const total =
+  visibleItems.length;
+
+const categoryMeta: Record<
+  WasteCategory,
+  {
+    label: string;
+    icon: "leaf" | "recycle" | "alert" | "cpu" | "trash";
+    description: string;
+  }
+> = {
+  [WASTE_CATEGORY.ORGANIC]: {
+    label: "Organik",
+    icon: "leaf",
+    description:
+      "Material yang berasal dari bahan hayati.",
+  },
+
+  [WASTE_CATEGORY.INORGANIC]: {
+    label: "Anorganik",
+    icon: "recycle",
+    description:
+      "Material non-organik yang dapat dipilah dan dimanfaatkan.",
+  },
+
+  [WASTE_CATEGORY.HAZARDOUS]: {
+    label: "B3",
+    icon: "alert",
+    description:
+      "Material yang memerlukan penanganan khusus.",
+  },
+
+  [WASTE_CATEGORY.ELECTRONIC]: {
+    label: "Elektronik",
+    icon: "cpu",
+    description:
+      "Perangkat listrik atau elektronik yang sudah tidak digunakan.",
+  },
+
+  [WASTE_CATEGORY.RESIDUAL]: {
+    label: "Residu",
+    icon: "trash",
+    description:
+      "Material yang tersisa setelah pemilahan.",
+  },
+};
+
+function getCategoryLabel(
+  category: WasteCategory,
+): string {
+  return (
+    categoryMeta[category]?.label ??
+    "Lainnya"
+  );
+}
+
+function getCategoryDescription(
+  category: WasteCategory,
+): string {
+  return (
+    categoryMeta[category]?.description ??
+    "Kategori sampah BINSIGHT."
+  );
+}
+
+function getCategoryIcon(
+  category: WasteCategory,
+) {
+  return categoryMeta[category]?.icon ??
+    "recycle";
+}
+
+const preparedItems = visibleItems.map(
+  (item) => ({
+    item,
+    label: getCategoryLabel(
+      item.category,
+    ),
+    description:
+      getCategoryDescription(
+        item.category,
+      ),
+    icon: getCategoryIcon(
+      item.category,
+    ),
+    percentage:
+      total > 0
+        ? (1 / total) * 100
+        : 0,
+  }),
+);
+
+const maximumPercentage =
+  preparedItems.reduce(
+    (maximum, current) =>
+      Math.max(
+        maximum,
+        current.percentage,
+      ),
+    0,
+  );
+---
+
+<section
+  class="waste-distribution"
+  aria-labelledby="waste-distribution-title"
+>
+  <div class="waste-distribution__header">
+    <div class="waste-distribution__heading">
+      <div
+        class="waste-distribution__title-row"
+      >
+        <span
+          class="waste-distribution__title-icon"
+          aria-hidden="true"
+        >
+          <ChartColumn
+            size={18}
+            stroke-width={2}
+          />
+        </span>
+
+        <div>
+          <h2
+            id="waste-distribution-title"
+            class="waste-distribution__title"
+          >
+            {title}
+          </h2>
+
+          {
+            subtitle && (
+              <p class="waste-distribution__subtitle">
+                {subtitle}
+              </p>
+            )
+          }
+        </div>
+      </div>
+    </div>
+
+    {
+      total > 0 && (
+        <span class="waste-distribution__count">
+          {total} kategori
+        </span>
+      )
+    }
+  </div>
+
+  {
+    preparedItems.length > 0 ? (
+      <>
+        <div
+          class="waste-distribution__body"
+          role="list"
+          aria-label="Distribusi kategori sampah"
+        >
+          {preparedItems.map(
+            ({
+              item,
+              label,
+              description,
+              icon,
+              percentage,
+            }) => {
+              const href =
+                `${hrefBase}/${item.slug}`;
+
+              const width =
+                maximumPercentage >
+                0
+                  ? Math.max(
+                      4,
+                      (percentage /
+                        maximumPercentage) *
+                        100,
+                    )
+                  : 0;
+
+              return (
+                <article
+                  class="waste-distribution__item"
+                  role="listitem"
+                >
+                  <div class="waste-distribution__item-main">
+                    <a
+                      class="waste-distribution__item-link"
+                      href={href}
+                      aria-label={`Lihat kategori ${label}`}
+                    >
+                      <span
+                        class="waste-distribution__icon"
+                        aria-hidden="true"
+                      >
+                        {
+                          icon ===
+                            "leaf" && (
+                            <Leaf
+                              size={18}
+                              stroke-width={1.9}
+                            />
+                          )
+                        }
+
+                        {
+                          icon ===
+                            "recycle" && (
+                            <Recycle
+                              size={18}
+                              stroke-width={1.9}
+                            />
+                          )
+                        }
+
+                        {
+                          icon ===
+                            "alert" && (
+                            <TriangleAlert
+                              size={18}
+                              stroke-width={1.9}
+                            />
+                          )
+                        }
+
+                        {
+                          icon ===
+                            "cpu" && (
+                            <Cpu
+                              size={18}
+                              stroke-width={1.9}
+                            />
+                          )
+                        }
+
+                        {
+                          icon ===
+                            "trash" && (
+                            <Trash2
+                              size={18}
+                              stroke-width={1.9}
+                            />
+                          )
+                        }
+                      </span>
+
+                      <span class="waste-distribution__item-copy">
+                        <span class="waste-distribution__item-label">
+                          {label}
+                        </span>
+
+                        <span class="waste-distribution__item-description">
+                          {description}
+                        </span>
+                      </span>
+                    </a>
+
+                    {
+                      showValues && (
+                        <div class="waste-distribution__item-value">
+                          <strong>
+                            {item.name}
+                          </strong>
+
+                          {
+                            showPercentage && (
+                              <span>
+                                {percentage.toLocaleString(
+                                  "id-ID",
+                                  {
+                                    maximumFractionDigits: 0,
+                                  },
+                                )}
+                                %
+                              </span>
+                            )
+                          }
+                        </div>
+                      )
+                    }
+                  </div>
+
+                  <div
+                    class="waste-distribution__bar-track"
+                    role="progressbar"
+                    aria-label={`Proporsi ${label}`}
+                    aria-valuemin="0"
+                    aria-valuemax="100"
+                    aria-valuenow={Math.round(
+                      percentage,
+                    )}
+                  >
+                    <span
+                      class="waste-distribution__bar-fill"
+                      style={`width: ${width}%;`}
+                    ></span>
+                  </div>
+                </article>
+              );
+            },
+          )}
+        </div>
+
+        {
+          showLegend && (
+            <div class="waste-distribution__footer">
+              <div class="waste-distribution__legend">
+                <span class="waste-distribution__legend-dot"></span>
+
+                <span>
+                  Persentase bersifat distribusi
+                  relatif berdasarkan jumlah
+                  kategori yang ditampilkan.
+                </span>
+              </div>
+
+              <a
+                class="waste-distribution__view-all"
+                href={hrefBase}
+              >
+                Lihat semua
+                <span aria-hidden="true">
+                  →
+                </span>
+              </a>
+            </div>
+          )
+        }
+      </>
+    ) : (
+      <div
+        class="waste-distribution__empty"
+        role="status"
+      >
+        <span
+          class="waste-distribution__empty-icon"
+          aria-hidden="true"
+        >
+          <Package
+            size={22}
+            stroke-width={1.8}
+          />
+        </span>
+
+        <div>
+          <strong>
+            Belum ada data
+          </strong>
+
+          <p>
+            {emptyMessage}
+          </p>
+        </div>
+      </div>
+    )
+  }
+</section>
+
+<style>
+  .waste-distribution {
+    min-width: 0;
+    overflow: hidden;
+    border: 1px solid
+      var(--color-border, #e2e8f0);
+    border-radius: 1rem;
+    background: var(
+      --color-surface,
+      #ffffff
+    );
+    box-shadow:
+      0 1px 2px
+        rgb(15 23 42 / 0.03),
+      0 8px 24px
+        rgb(15 23 42 / 0.04);
+  }
+
+  .waste-distribution__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1.25rem
+      1.25rem
+      1rem;
+    border-bottom: 1px solid
+      var(--color-border, #e2e8f0);
+  }
+
+  .waste-distribution__title-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .waste-distribution__title-icon {
+    width: 2.25rem;
+    height: 2.25rem;
+    flex: 0 0 2.25rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.7rem;
+    background: var(
+      --color-primary-light,
+      #dcfce7
+    );
+    color: var(
+      --color-primary,
+      #166534
+    );
+  }
+
+  .waste-distribution__title {
+    margin: 0;
+    color: var(
+      --color-text,
+      #0f172a
+    );
+    font-size: 1rem;
+    font-weight: 750;
+    line-height: 1.35;
+    letter-spacing: -0.01em;
+  }
+
+  .waste-distribution__subtitle {
+    max-width: 42rem;
+    margin: 0.25rem 0 0;
+    color: var(
+      --color-text-secondary,
+      #64748b
+    );
+    font-size: 0.8125rem;
+    line-height: 1.5;
+  }
+
+  .waste-distribution__count {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    min-height: 1.75rem;
+    padding: 0.25rem
+      0.625rem;
+    border-radius: 999px;
+    background: #f8fafc;
+    color: #64748b;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    border: 1px solid
+      #e2e8f0;
+  }
+
+  .waste-distribution__body {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .waste-distribution__item {
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid
+      #f1f5f9;
+  }
+
+  .waste-distribution__item:last-child {
+    border-bottom: 0;
+  }
+
+  .waste-distribution__item-main {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .waste-distribution__item-link {
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .waste-distribution__icon {
+    width: 2.25rem;
+    height: 2.25rem;
+    flex: 0 0 2.25rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.7rem;
+    background: #f8fafc;
+    color: var(
+      --color-primary,
+      #166534
+    );
+    border: 1px solid
+      #e2e8f0;
+    transition:
+      background-color 160ms ease,
+      color 160ms ease,
+      border-color 160ms ease;
+  }
+
+  .waste-distribution__item-link:hover
+    .waste-distribution__icon {
+    background: var(
+      --color-primary-light,
+      #dcfce7
+    );
+    border-color: #bbf7d0;
+    color: var(
+      --color-primary-dark,
+      #14532d
+    );
+  }
+
+  .waste-distribution__item-link:focus-visible {
+    outline: 3px solid
+      rgb(37 99 235 / 0.18);
+    outline-offset: 3px;
+    border-radius: 0.5rem;
+  }
+
+  .waste-distribution__item-copy {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+  }
+
+  .waste-distribution__item-label {
+    overflow: hidden;
+    color: #0f172a;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    line-height: 1.35;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .waste-distribution__item-description {
+    overflow: hidden;
+    max-width: 34rem;
+    color: #64748b;
+    font-size: 0.6875rem;
+    line-height: 1.4;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .waste-distribution__item-value {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.15rem;
+  }
+
+  .waste-distribution__item-value strong {
+    max-width: 13rem;
+    overflow: hidden;
+    color: #0f172a;
+    font-size: 0.6875rem;
+    font-weight: 650;
+    line-height: 1.3;
+    text-align: right;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .waste-distribution__item-value span {
+    color: var(
+      --color-primary,
+      #166534
+    );
+    font-size: 0.6875rem;
+    font-weight: 750;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .waste-distribution__bar-track {
+    width: 100%;
+    height: 0.35rem;
+    margin-top: 0.75rem;
+    overflow: hidden;
+    border-radius: 999px;
+    background: #f1f5f9;
+  }
+
+  .waste-distribution__bar-fill {
+    display: block;
+    height: 100%;
+    min-width: 0;
+    border-radius: inherit;
+    background:
+      linear-gradient(
+        90deg,
+        var(
+          --color-primary,
+          #166534
+        ),
+        var(
+          --color-accent,
+          #84cc16
+        )
+      );
+    transition:
+      width 350ms ease;
+  }
+
+  .waste-distribution__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.875rem
+      1.25rem
+      1rem;
+    border-top: 1px solid
+      var(--color-border, #e2e8f0);
+  }
+
+  .waste-distribution__legend {
+    min-width: 0;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    color: #64748b;
+    font-size: 0.6875rem;
+    line-height: 1.45;
+  }
+
+  .waste-distribution__legend-dot {
+    width: 0.45rem;
+    height: 0.45rem;
+    flex: 0 0 0.45rem;
+    margin-top: 0.3rem;
+    border-radius: 999px;
+    background: var(
+      --color-accent,
+      #84cc16
+    );
+  }
+
+  .waste-distribution__view-all {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(
+      --color-primary,
+      #166534
+    );
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .waste-distribution__view-all:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .waste-distribution__view-all:focus-visible {
+    outline: 3px solid
+      rgb(37 99 235 / 0.18);
+    outline-offset: 3px;
+    border-radius: 0.25rem;
+  }
+
+  .waste-distribution__empty {
+    min-height: 12rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    padding: 2rem 1.25rem;
+    color: #64748b;
+    text-align: left;
+  }
+
+  .waste-distribution__empty-icon {
+    width: 2.75rem;
+    height: 2.75rem;
+    flex: 0 0 2.75rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.75rem;
+    background: #f8fafc;
+    color: #94a3b8;
+    border: 1px solid
+      #e2e8f0;
+  }
+
+  .waste-distribution__empty strong {
+    display: block;
+    color: #334155;
+    font-size: 0.8125rem;
+  }
+
+  .waste-distribution__empty p {
+    margin: 0.2rem 0 0;
+    font-size: 0.75rem;
+    line-height: 1.5;
+  }
+
+  @media (max-width: 640px) {
+    .waste-distribution__header {
+      padding: 1rem;
+    }
+
+    .waste-distribution__item {
+      padding: 0.875rem 1rem;
+    }
+
+    .waste-distribution__item-main {
+      align-items: flex-start;
+    }
+
+    .waste-distribution__item-value strong {
+      max-width: 7rem;
+    }
+
+    .waste-distribution__item-description {
+      display: none;
+    }
+
+    .waste-distribution__footer {
+      padding-inline: 1rem;
+    }
+
+    .waste-distribution__legend {
+      max-width: 60%;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .waste-distribution__icon,
+    .waste-distribution__bar-fill {
+      transition: none;
+    }
+  }
+</style>
