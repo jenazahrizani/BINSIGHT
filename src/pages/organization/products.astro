@@ -1,0 +1,2237 @@
+---
+import {
+  ArrowLeft,
+  ArrowRight,
+  CircleCheck,
+  ExternalLink,
+  Image,
+  Leaf,
+  Package,
+  Plus,
+  Save,
+  ShieldCheck,
+  Trash2,
+  TriangleAlert,
+} from "@lucide/astro";
+
+import OrganizationLayout from "../../layouts/OrganizationLayout.astro";
+import PageHeader from "../../components/layout/PageHeader.astro";
+
+const productTypes = [
+  {
+    id: "recycled-material",
+    label: "Material hasil olahan",
+    description:
+      "Material yang dihasilkan setelah melalui proses pengolahan atau pemilahan.",
+  },
+  {
+    id: "reusable-product",
+    label: "Produk guna ulang",
+    description:
+      "Produk yang masih dapat digunakan kembali atau diperpanjang masa pakainya.",
+  },
+  {
+    id: "recovered-material",
+    label: "Material recovery",
+    description:
+      "Material atau nilai yang berhasil dipulihkan dari aliran sampah.",
+  },
+  {
+    id: "compost",
+    label: "Kompos",
+    description:
+      "Hasil pengolahan material organik melalui proses yang sesuai.",
+  },
+  {
+    id: "other",
+    label: "Hasil lainnya",
+    description:
+      "Output pengelolaan lain yang relevan dan benar-benar dihasilkan organisasi.",
+  },
+];
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  name: "Produk & Hasil — BINSIGHT",
+  description:
+    "Kelola informasi produk, output, dan hasil pengelolaan sampah organisasi melalui portal organisasi BINSIGHT.",
+  url: "https://binsight.id/organization/products",
+  isPartOf: {
+    "@type": "WebSite",
+    name: "BINSIGHT — Badung Waste Intelligence",
+    url: "https://binsight.id",
+  },
+};
+---
+
+<OrganizationLayout
+  title="Produk & Hasil"
+  description="Kelola informasi produk dan hasil pengelolaan sampah organisasi."
+>
+  <script
+    type="application/ld+json"
+    is:inline
+    set:html={JSON.stringify(jsonLd)}
+  />
+
+  <main class="organization-products-page">
+    <PageHeader
+      eyebrow="PORTAL ORGANISASI"
+      title="Produk & hasil"
+      description="Tampilkan output atau hasil nyata dari aktivitas pengelolaan organisasi agar masyarakat dapat memahami nilai yang dihasilkan dari material yang dikelola."
+      icon="organization"
+      tone="green"
+      breadcrumbs={[
+        {
+          label: "Beranda",
+          href: "/",
+        },
+        {
+          label: "Portal Organisasi",
+          href: "/organization",
+        },
+        {
+          label: "Produk & Hasil",
+          href: "/organization/products",
+        },
+      ]}
+    />
+
+    <section class="products-content">
+      <div class="products-container">
+        <div class="products-layout">
+          <div class="products-main">
+            <section class="products-card">
+              <div class="products-card__header">
+                <div>
+                  <span class="products-card__eyebrow">
+                    OUTPUT ORGANISASI
+                  </span>
+
+                  <h2 class="products-card__title">
+                    Tambahkan produk atau hasil
+                  </h2>
+
+                  <p class="products-card__description">
+                    Informasikan output yang memang dihasilkan oleh organisasi
+                    dari aktivitas pengelolaan material.
+                  </p>
+                </div>
+
+                <div class="products-card__icon">
+                  <Package
+                    size={22}
+                    stroke-width={1.9}
+                    aria-hidden="true"
+                  />
+                </div>
+              </div>
+
+              <div class="products-notice">
+                <div class="products-notice__icon">
+                  <Leaf
+                    size={19}
+                    stroke-width={2}
+                    aria-hidden="true"
+                  />
+                </div>
+
+                <div>
+                  <strong>
+                    Fokus pada hasil yang benar-benar tersedia
+                  </strong>
+
+                  <p>
+                    Produk atau output sebaiknya menggambarkan kegiatan nyata
+                    organisasi, bukan target atau rencana yang belum terealisasi.
+                  </p>
+                </div>
+              </div>
+
+              <div class="product-builder">
+                <div class="product-builder__header">
+                  <div>
+                    <span class="product-builder__eyebrow">
+                      JENIS OUTPUT
+                    </span>
+
+                    <h3>
+                      Pilih kategori hasil
+                    </h3>
+                  </div>
+
+                  <span
+                    class="product-builder__count"
+                    data-product-count
+                  >
+                    0 produk
+                  </span>
+                </div>
+
+                <div
+                  class="product-type-grid"
+                  data-product-type-grid
+                >
+                  {
+                    productTypes.map((type) => (
+                      <button
+                        type="button"
+                        class="product-type-option"
+                        data-product-type={type.id}
+                      >
+                        <span class="product-type-option__icon">
+                          <Package
+                            size={18}
+                            stroke-width={1.9}
+                            aria-hidden="true"
+                          />
+                        </span>
+
+                        <span class="product-type-option__body">
+                          <strong>
+                            {type.label}
+                          </strong>
+
+                          <small>
+                            {type.description}
+                          </small>
+                        </span>
+
+                        <span class="product-type-option__arrow">
+                          <Plus
+                            size={16}
+                            stroke-width={2}
+                            aria-hidden="true"
+                          />
+                        </span>
+                      </button>
+                    ))
+                  }
+                </div>
+              </div>
+
+              <div class="product-list-section">
+                <div class="product-list-section__header">
+                  <div>
+                    <span class="product-builder__eyebrow">
+                      DAFTAR PRODUK
+                    </span>
+
+                    <h3>
+                      Produk yang ditampilkan
+                    </h3>
+                  </div>
+
+                  <span
+                    class="product-list-section__count"
+                    data-selected-product-count
+                  >
+                    0 produk
+                  </span>
+                </div>
+
+                <div
+                  class="product-list"
+                  data-product-list
+                >
+                  <div
+                    class="product-list-empty"
+                    data-product-empty
+                  >
+                    <Package
+                      size={26}
+                      stroke-width={1.7}
+                      aria-hidden="true"
+                    />
+
+                    <strong>
+                      Belum ada produk
+                    </strong>
+
+                    <span>
+                      Pilih jenis output di atas untuk menambahkan produk.
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section class="products-card">
+              <div class="products-card__header">
+                <div>
+                  <span class="products-card__eyebrow">
+                    INFORMASI PUBLIK
+                  </span>
+
+                  <h2 class="products-card__title">
+                    Jelaskan produk atau hasil
+                  </h2>
+
+                  <p class="products-card__description">
+                    Tambahkan keterangan yang membantu masyarakat memahami
+                    bentuk, penggunaan, atau tujuan dari output organisasi.
+                  </p>
+                </div>
+
+                <div class="products-card__icon">
+                  <Image
+                    size={22}
+                    stroke-width={1.9}
+                    aria-hidden="true"
+                  />
+                </div>
+              </div>
+
+              <div class="field">
+                <label
+                  class="field__label"
+                  for="productsDescription"
+                >
+                  Deskripsi produk & hasil
+                </label>
+
+                <p
+                  class="field__hint"
+                  id="productsDescriptionHint"
+                >
+                  Jelaskan hasil yang tersedia, karakteristik umum,
+                  penggunaan, atau informasi relevan lain yang dapat
+                  dibagikan kepada publik.
+                </p>
+
+                <textarea
+                  id="productsDescription"
+                  name="productsDescription"
+                  class="field__textarea"
+                  rows="8"
+                  maxlength="2200"
+                  placeholder="Contoh: Material yang telah dipilah dan diproses dapat diteruskan sebagai bahan baku atau produk yang sesuai dengan karakteristik material..."
+                  aria-describedby="productsDescriptionHint productsDescriptionCounter"
+                  data-products-description
+                ></textarea>
+
+                <div class="field__footer">
+                  <span
+                    class="field__counter"
+                    data-products-description-counter
+                  >
+                    0 / 2200
+                  </span>
+                </div>
+              </div>
+
+              <div class="product-guidelines">
+                <div class="product-guideline">
+                  <div class="product-guideline__icon">
+                    <CircleCheck
+                      size={17}
+                      stroke-width={2}
+                      aria-hidden="true"
+                    />
+                  </div>
+
+                  <div>
+                    <strong>
+                      Jelaskan output secara spesifik
+                    </strong>
+
+                    <span>
+                      Gunakan istilah yang mudah dipahami dan sesuai dengan
+                      hasil pengelolaan yang tersedia.
+                    </span>
+                  </div>
+                </div>
+
+                <div class="product-guideline">
+                  <div class="product-guideline__icon">
+                    <ShieldCheck
+                      size={17}
+                      stroke-width={2}
+                      aria-hidden="true"
+                    />
+                  </div>
+
+                  <div>
+                    <strong>
+                      Hindari klaim yang belum dapat dibuktikan
+                    </strong>
+
+                    <span>
+                      Jangan menampilkan kapasitas, kualitas, atau penggunaan
+                      tertentu apabila belum benar-benar tersedia.
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section class="products-card">
+              <div class="products-card__header">
+                <div>
+                  <span class="products-card__eyebrow">
+                    TAUTAN INFORMASI
+                  </span>
+
+                  <h2 class="products-card__title">
+                    Referensi tambahan
+                  </h2>
+
+                  <p class="products-card__description">
+                    Tambahkan halaman atau sumber publik yang membantu
+                    menjelaskan produk atau hasil organisasi.
+                  </p>
+                </div>
+
+                <div class="products-card__icon">
+                  <ExternalLink
+                    size={22}
+                    stroke-width={1.9}
+                    aria-hidden="true"
+                  />
+                </div>
+              </div>
+
+              <div class="field">
+                <label
+                  class="field__label"
+                  for="productWebsite"
+                >
+                  URL informasi
+                </label>
+
+                <p
+                  class="field__hint"
+                  id="productWebsiteHint"
+                >
+                  Opsional. Gunakan URL publik yang benar-benar dapat
+                  diakses masyarakat.
+                </p>
+
+                <input
+                  id="productWebsite"
+                  name="productWebsite"
+                  class="field__input"
+                  type="url"
+                  maxlength="300"
+                  autocomplete="url"
+                  placeholder="https://..."
+                  aria-describedby="productWebsiteHint"
+                />
+              </div>
+            </section>
+
+            <section class="products-card products-card--save">
+              <div class="save-box">
+                <div class="save-box__icon">
+                  <Save
+                    size={21}
+                    stroke-width={2}
+                    aria-hidden="true"
+                  />
+                </div>
+
+                <div class="save-box__content">
+                  <h2>
+                    Simpan informasi produk
+                  </h2>
+
+                  <p>
+                    Data produk, deskripsi, dan referensi akan dipersiapkan
+                    untuk proses penyimpanan dan peninjauan organisasi.
+                  </p>
+                </div>
+              </div>
+
+              <div class="form-actions">
+                <a
+                  class="form-actions__back"
+                  href="/organization"
+                >
+                  <ArrowLeft
+                    size={17}
+                    stroke-width={2}
+                    aria-hidden="true"
+                  />
+
+                  <span>
+                    Kembali
+                  </span>
+                </a>
+
+                <button
+                  type="button"
+                  class="form-actions__submit"
+                  data-save-products
+                >
+                  <Save
+                    size={17}
+                    stroke-width={2}
+                    aria-hidden="true"
+                  />
+
+                  <span data-save-label>
+                    Simpan informasi
+                  </span>
+                </button>
+              </div>
+
+              <p
+                class="save-message"
+                data-save-message
+                hidden
+              ></p>
+            </section>
+
+            <div
+              class="save-success"
+              data-save-success
+              hidden
+            >
+              <div class="save-success__icon">
+                <CircleCheck
+                  size={33}
+                  stroke-width={1.8}
+                  aria-hidden="true"
+                />
+              </div>
+
+              <span class="save-success__eyebrow">
+                PRODUK DIPERSIAPKAN
+              </span>
+
+              <h2>
+                Informasi produk berhasil dipersiapkan
+              </h2>
+
+              <p>
+                Data produk dan hasil telah melalui pemeriksaan dasar pada
+                browser dan siap diteruskan ke proses penyimpanan atau
+                verifikasi.
+              </p>
+
+              <div class="save-success__actions">
+                <a
+                  class="form-actions__submit"
+                  href="/organization"
+                >
+                  Kembali ke portal
+
+                  <ArrowRight
+                    size={17}
+                    stroke-width={2}
+                    aria-hidden="true"
+                  />
+                </a>
+
+                <button
+                  type="button"
+                  class="form-actions__back"
+                  data-edit-products
+                >
+                  Edit kembali
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <aside class="products-sidebar">
+            <div class="sidebar-card sidebar-card--highlight">
+              <div class="sidebar-card__icon">
+                <Package
+                  size={20}
+                  stroke-width={2}
+                  aria-hidden="true"
+                />
+              </div>
+
+              <span class="sidebar-card__eyebrow">
+                RINGKASAN
+              </span>
+
+              <h2>
+                Produk & hasil
+              </h2>
+
+              <div class="summary-number">
+                <strong data-sidebar-product-count>
+                  0
+                </strong>
+
+                <span>
+                  produk tercatat
+                </span>
+              </div>
+
+              <p>
+                Tambahkan hanya output yang memang tersedia sebagai hasil
+                aktivitas pengelolaan organisasi.
+              </p>
+            </div>
+
+            <div class="sidebar-card">
+              <span class="sidebar-card__eyebrow">
+                PRINSIP INFORMASI
+              </span>
+
+              <h2>
+                Tampilkan nilai yang nyata
+              </h2>
+
+              <div class="sidebar-check-list">
+                <div class="sidebar-check">
+                  <CircleCheck
+                    size={16}
+                    stroke-width={2}
+                    aria-hidden="true"
+                  />
+
+                  <span>
+                    Produk benar-benar dihasilkan
+                  </span>
+                </div>
+
+                <div class="sidebar-check">
+                  <CircleCheck
+                    size={16}
+                    stroke-width={2}
+                    aria-hidden="true"
+                  />
+
+                  <span>
+                    Deskripsi mudah dipahami
+                  </span>
+                </div>
+
+                <div class="sidebar-check">
+                  <CircleCheck
+                    size={16}
+                    stroke-width={2}
+                    aria-hidden="true"
+                  />
+
+                  <span>
+                    Referensi publik dapat diverifikasi
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div class="sidebar-card sidebar-card--warning">
+              <div class="sidebar-warning__icon">
+                <TriangleAlert
+                  size={18}
+                  stroke-width={2}
+                  aria-hidden="true"
+                />
+              </div>
+
+              <div>
+                <strong>
+                  Hindari klaim berlebihan
+                </strong>
+
+                <p>
+                  Jangan menampilkan produk atau hasil yang belum benar-benar
+                  tersedia atau belum dapat dibuktikan.
+                </p>
+              </div>
+            </div>
+
+            <div class="sidebar-card sidebar-card--next">
+              <span class="sidebar-card__eyebrow">
+                PORTAL ORGANISASI
+              </span>
+
+              <h2>
+                Lengkapi informasi lainnya
+              </h2>
+
+              <a href="/organization/profile">
+                Profil organisasi
+
+                <ArrowRight
+                  size={16}
+                  stroke-width={2}
+                  aria-hidden="true"
+                />
+              </a>
+
+              <a href="/organization/waste">
+                Sampah yang dikelola
+
+                <ArrowRight
+                  size={16}
+                  stroke-width={2}
+                  aria-hidden="true"
+                />
+              </a>
+
+              <a href="/organization/process">
+                Proses pengelolaan
+
+                <ArrowRight
+                  size={16}
+                  stroke-width={2}
+                  aria-hidden="true"
+                />
+              </a>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </section>
+  </main>
+</OrganizationLayout>
+
+<style>
+  .organization-products-page {
+    min-height: 100vh;
+    background: var(--color-background);
+  }
+
+  .products-content {
+    padding: var(--space-10) 0 var(--space-14);
+  }
+
+  .products-container {
+    width: min(1180px, calc(100% - 40px));
+    margin-inline: auto;
+  }
+
+  .products-layout {
+    display: grid;
+    grid-template-columns:
+      minmax(0, 1fr)
+      320px;
+    gap: var(--space-7);
+    align-items: start;
+  }
+
+  .products-main {
+    min-width: 0;
+  }
+
+  .products-card {
+    margin-bottom: var(--space-5);
+    padding: var(--space-7);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-xs);
+  }
+
+  .products-card__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-5);
+    padding-bottom: var(--space-6);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .products-card__eyebrow,
+  .product-builder__eyebrow,
+  .sidebar-card__eyebrow,
+  .save-success__eyebrow {
+    display: block;
+    color: var(--color-primary-dark);
+    font-size: 0.64rem;
+    font-weight: 850;
+    letter-spacing: 0.11em;
+  }
+
+  .products-card__title {
+    margin: var(--space-2) 0 0;
+    color: var(--color-text-strong);
+    font-size: 1.1rem;
+    font-weight: 850;
+    line-height: 1.3;
+  }
+
+  .products-card__description {
+    max-width: 720px;
+    margin: 5px 0 0;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-sm);
+    line-height: 1.65;
+  }
+
+  .products-card__icon {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 13px;
+    background: var(--color-primary-soft);
+    color: var(--color-primary);
+  }
+
+  .products-notice {
+    display: flex;
+    align-items: flex-start;
+    gap: 11px;
+    margin-top: var(--space-6);
+    padding: var(--space-4);
+    border: 1px solid var(--color-primary-soft);
+    border-radius: var(--radius-lg);
+    background: var(--color-primary-soft);
+  }
+
+  .products-notice__icon {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 11px;
+    background: var(--color-surface);
+    color: var(--color-primary);
+  }
+
+  .products-notice strong,
+  .products-notice p {
+    display: block;
+  }
+
+  .products-notice strong {
+    color: var(--color-text-strong);
+    font-size: var(--font-size-xs);
+  }
+
+  .products-notice p {
+    margin: 3px 0 0;
+    color: var(--color-text-muted);
+    font-size: 0.68rem;
+    line-height: 1.55;
+  }
+
+  .product-builder {
+    margin-top: var(--space-7);
+  }
+
+  .product-builder__header,
+  .product-list-section__header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--space-4);
+  }
+
+  .product-builder h3,
+  .product-list-section h3 {
+    margin: 4px 0 0;
+    color: var(--color-text-strong);
+    font-size: 0.95rem;
+    font-weight: 800;
+  }
+
+  .product-builder__count,
+  .product-list-section__count {
+    color: var(--color-text-faint);
+    font-size: 0.66rem;
+    font-weight: 750;
+  }
+
+  .product-type-grid {
+    display: grid;
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+    gap: var(--space-3);
+    margin-top: var(--space-4);
+  }
+
+  .product-type-option {
+    display: grid;
+    grid-template-columns:
+      40px
+      minmax(0, 1fr)
+      30px;
+    gap: 10px;
+    align-items: start;
+    min-width: 0;
+    padding: 14px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background: var(--color-surface);
+    color: inherit;
+    cursor: pointer;
+    font: inherit;
+    text-align: left;
+    transition:
+      border-color 160ms ease,
+      background 160ms ease,
+      box-shadow 160ms ease,
+      transform 160ms ease;
+  }
+
+  .product-type-option:hover {
+    transform: translateY(-1px);
+    border-color: var(--color-primary);
+    box-shadow: var(--shadow-xs);
+  }
+
+  .product-type-option__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 11px;
+    background: var(--color-primary-soft);
+    color: var(--color-primary);
+  }
+
+  .product-type-option__body {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+  }
+
+  .product-type-option__body strong {
+    color: var(--color-text-strong);
+    font-size: var(--font-size-xs);
+    font-weight: 800;
+  }
+
+  .product-type-option__body small {
+    margin-top: 3px;
+    color: var(--color-text-muted);
+    font-size: 0.64rem;
+    line-height: 1.5;
+  }
+
+  .product-type-option__arrow {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border: 1px solid var(--color-border);
+    border-radius: 9px;
+    background: var(--color-surface-soft);
+    color: var(--color-primary);
+  }
+
+  .product-list-section {
+    margin-top: var(--space-8);
+  }
+
+  .product-list {
+    display: grid;
+    gap: var(--space-3);
+    margin-top: var(--space-4);
+  }
+
+  .product-list-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    min-height: 190px;
+    padding: var(--space-6);
+    border: 1px dashed var(--color-border-strong);
+    border-radius: var(--radius-lg);
+    color: var(--color-text-faint);
+    text-align: center;
+  }
+
+  .product-list-empty strong {
+    margin-top: 9px;
+    color: var(--color-text-strong);
+    font-size: var(--font-size-sm);
+  }
+
+  .product-list-empty span {
+    max-width: 350px;
+    margin-top: 4px;
+    color: var(--color-text-muted);
+    font-size: 0.68rem;
+    line-height: 1.55;
+  }
+
+  .product-item {
+    display: grid;
+    grid-template-columns:
+      42px
+      minmax(0, 1fr)
+      auto;
+    gap: 12px;
+    align-items: center;
+    padding: 13px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background: var(--color-surface-soft);
+  }
+
+  .product-item__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    background: var(--color-primary-soft);
+    color: var(--color-primary);
+  }
+
+  .product-item__body {
+    min-width: 0;
+  }
+
+  .product-item__body strong,
+  .product-item__body span {
+    display: block;
+  }
+
+  .product-item__body strong {
+    color: var(--color-text-strong);
+    font-size: var(--font-size-xs);
+    font-weight: 800;
+  }
+
+  .product-item__body span {
+    margin-top: 3px;
+    color: var(--color-text-muted);
+    font-size: 0.65rem;
+    line-height: 1.5;
+  }
+
+  .product-item__remove {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border: 1px solid var(--color-border);
+    border-radius: 9px;
+    background: var(--color-surface);
+    color: var(--color-text-muted);
+    cursor: pointer;
+  }
+
+  .product-item__remove:hover {
+    border-color: var(--color-danger);
+    color: var(--color-danger);
+  }
+
+  .field {
+    padding-top: var(--space-6);
+  }
+
+  .field__label {
+    display: inline-flex;
+    margin-bottom: var(--space-2);
+    color: var(--color-text-strong);
+    font-size: var(--font-size-sm);
+    font-weight: 750;
+  }
+
+  .field__hint {
+    margin: 0 0 var(--space-2);
+    color: var(--color-text-faint);
+    font-size: var(--font-size-xs);
+    line-height: 1.55;
+  }
+
+  .field__input,
+  .field__textarea {
+    width: 100%;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+    color: var(--color-text-strong);
+    font: inherit;
+    font-size: var(--font-size-sm);
+  }
+
+  .field__input {
+    min-height: 45px;
+    padding: 0 13px;
+  }
+
+  .field__textarea {
+    min-height: 155px;
+    padding: 12px 13px;
+    resize: vertical;
+    line-height: 1.65;
+  }
+
+  .field__input::placeholder,
+  .field__textarea::placeholder {
+    color: var(--color-text-faint);
+  }
+
+  .field__input:hover,
+  .field__textarea:hover {
+    border-color: var(--color-border-strong);
+  }
+
+  .field__input:focus,
+  .field__textarea:focus {
+    border-color: var(--color-primary);
+    outline: none;
+    box-shadow:
+      0 0 0 3px var(--color-primary-ring);
+  }
+
+  .field__footer {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .field__counter {
+    margin-top: 7px;
+    color: var(--color-text-faint);
+    font-size: 0.67rem;
+  }
+
+  .product-guidelines {
+    display: grid;
+    gap: var(--space-3);
+    margin-top: var(--space-6);
+  }
+
+  .product-guideline {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: var(--space-4);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background: var(--color-surface-soft);
+  }
+
+  .product-guideline__icon {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    width: 35px;
+    height: 35px;
+    border-radius: 10px;
+    background: var(--color-primary-soft);
+    color: var(--color-primary);
+  }
+
+  .product-guideline strong,
+  .product-guideline span {
+    display: block;
+  }
+
+  .product-guideline strong {
+    color: var(--color-text-strong);
+    font-size: var(--font-size-xs);
+  }
+
+  .product-guideline span {
+    margin-top: 3px;
+    color: var(--color-text-muted);
+    font-size: 0.67rem;
+    line-height: 1.55;
+  }
+
+  .products-card--save {
+    padding-top: var(--space-6);
+  }
+
+  .save-box {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+    padding: var(--space-4);
+    border: 1px solid var(--color-primary-soft);
+    border-radius: var(--radius-lg);
+    background: var(--color-primary-soft);
+  }
+
+  .save-box__icon {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    background: var(--color-surface);
+    color: var(--color-primary);
+  }
+
+  .save-box__content h2 {
+    margin: 1px 0 0;
+    color: var(--color-text-strong);
+    font-size: var(--font-size-sm);
+    font-weight: 800;
+  }
+
+  .save-box__content p {
+    margin: 4px 0 0;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-xs);
+    line-height: 1.6;
+  }
+
+  .form-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+    margin-top: var(--space-6);
+    padding-top: var(--space-5);
+    border-top: 1px solid var(--color-border);
+  }
+
+  .form-actions__back {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    min-height: 44px;
+    padding: 0 12px;
+    border: 1px solid transparent;
+    border-radius: var(--radius-md);
+    background: transparent;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    font: inherit;
+    font-size: var(--font-size-sm);
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  .form-actions__back:hover {
+    background: var(--color-surface-soft);
+    color: var(--color-text-strong);
+  }
+
+  .form-actions__submit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 45px;
+    padding: 0 var(--space-5);
+    border: 1px solid var(--color-primary);
+    border-radius: var(--radius-md);
+    background: var(--color-primary);
+    color: var(--color-white);
+    cursor: pointer;
+    font: inherit;
+    font-size: var(--font-size-sm);
+    font-weight: 800;
+    text-decoration: none;
+    box-shadow: var(--shadow-sm);
+    transition:
+      transform 160ms ease,
+      background 160ms ease,
+      box-shadow 160ms ease;
+  }
+
+  .form-actions__submit:hover {
+    transform: translateY(-1px);
+    background: var(--color-primary-dark);
+    box-shadow: var(--shadow-md);
+  }
+
+  .form-actions__submit:disabled {
+    opacity: 0.65;
+    cursor: wait;
+    transform: none;
+  }
+
+  .form-actions__submit:focus-visible,
+  .form-actions__back:focus-visible,
+  .product-type-option:focus-visible,
+  .product-item__remove:focus-visible {
+    outline: 3px solid var(--color-primary-ring);
+    outline-offset: 3px;
+  }
+
+  .save-message {
+    margin: var(--space-3) 0 0;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-xs);
+    text-align: right;
+  }
+
+  .save-message[hidden],
+  .save-success[hidden] {
+    display: none;
+  }
+
+  .products-sidebar {
+    position: sticky;
+    top: var(--space-6);
+    display: grid;
+    gap: var(--space-4);
+  }
+
+  .sidebar-card {
+    padding: var(--space-5);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-xs);
+  }
+
+  .sidebar-card--highlight {
+    background:
+      linear-gradient(
+        145deg,
+        var(--color-primary-soft),
+        var(--color-surface)
+      );
+  }
+
+  .sidebar-card__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    margin-bottom: var(--space-3);
+    border-radius: 12px;
+    background: var(--color-surface);
+    color: var(--color-primary);
+  }
+
+  .sidebar-card h2 {
+    margin: var(--space-2) 0 0;
+    color: var(--color-text-strong);
+    font-size: 1rem;
+    font-weight: 800;
+    line-height: 1.4;
+  }
+
+  .sidebar-card > p {
+    margin: var(--space-3) 0 0;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-xs);
+    line-height: 1.65;
+  }
+
+  .summary-number {
+    display: flex;
+    align-items: baseline;
+    gap: 7px;
+    margin-top: var(--space-5);
+  }
+
+  .summary-number strong {
+    color: var(--color-primary);
+    font-size: 2.15rem;
+    line-height: 1;
+  }
+
+  .summary-number span {
+    color: var(--color-text-muted);
+    font-size: var(--font-size-xs);
+  }
+
+  .sidebar-check-list {
+    display: grid;
+    gap: 12px;
+    margin-top: var(--space-5);
+  }
+
+  .sidebar-check {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-xs);
+    line-height: 1.55;
+  }
+
+  .sidebar-check svg {
+    flex: 0 0 auto;
+    margin-top: 1px;
+    color: var(--color-primary);
+  }
+
+  .sidebar-card--warning {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .sidebar-warning__icon {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 11px;
+    background: var(--color-warning-soft);
+    color: var(--color-warning-text);
+  }
+
+  .sidebar-card--warning strong {
+    display: block;
+    color: var(--color-text-strong);
+    font-size: var(--font-size-sm);
+  }
+
+  .sidebar-card--warning p {
+    margin-top: 4px;
+  }
+
+  .sidebar-card--next {
+    display: grid;
+  }
+
+  .sidebar-card--next a {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--color-border);
+    color: var(--color-primary);
+    font-size: var(--font-size-xs);
+    font-weight: 750;
+    text-decoration: none;
+  }
+
+  .sidebar-card--next a:hover {
+    color: var(--color-primary-dark);
+  }
+
+  .save-success {
+    padding: var(--space-10);
+    border: 1px solid var(--color-primary-soft);
+    border-radius: var(--radius-xl);
+    background:
+      linear-gradient(
+        145deg,
+        var(--color-primary-soft),
+        var(--color-surface)
+      );
+    box-shadow: var(--shadow-sm);
+    text-align: center;
+  }
+
+  .save-success__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 68px;
+    height: 68px;
+    border-radius: 50%;
+    background: var(--color-surface);
+    color: var(--color-primary);
+  }
+
+  .save-success__eyebrow {
+    margin-top: var(--space-4);
+  }
+
+  .save-success h2 {
+    margin: var(--space-2) 0 0;
+    color: var(--color-text-strong);
+    font-size: clamp(1.45rem, 3vw, 2rem);
+    letter-spacing: -0.025em;
+  }
+
+  .save-success p {
+    max-width: 660px;
+    margin: var(--space-3) auto 0;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-sm);
+    line-height: 1.7;
+  }
+
+  .save-success__actions {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    margin-top: var(--space-6);
+  }
+
+  @media (max-width: 1000px) {
+    .products-layout {
+      grid-template-columns: 1fr;
+    }
+
+    .products-sidebar {
+      position: static;
+      grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+    }
+
+    .sidebar-card--highlight,
+    .sidebar-card--next {
+      grid-column: 1 / -1;
+    }
+  }
+
+  @media (max-width: 720px) {
+    .products-container {
+      width: min(
+        100%,
+        calc(100% - 28px)
+      );
+    }
+
+    .products-content {
+      padding-top: var(--space-6);
+    }
+
+    .products-card {
+      padding: var(--space-5);
+    }
+
+    .products-card__header {
+      gap: var(--space-3);
+      padding-bottom: var(--space-5);
+    }
+
+    .products-card__icon {
+      width: 39px;
+      height: 39px;
+    }
+
+    .product-type-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .product-item {
+      grid-template-columns:
+        38px
+        minmax(0, 1fr)
+        auto;
+    }
+
+    .product-item__icon {
+      width: 38px;
+      height: 38px;
+    }
+
+    .form-actions {
+      align-items: stretch;
+      flex-direction: column-reverse;
+    }
+
+    .form-actions__submit,
+    .form-actions__back {
+      width: 100%;
+    }
+
+    .save-message {
+      text-align: center;
+    }
+
+    .products-sidebar {
+      grid-template-columns: 1fr;
+    }
+
+    .sidebar-card--highlight,
+    .sidebar-card--next {
+      grid-column: auto;
+    }
+
+    .save-success {
+      padding: var(--space-7) var(--space-5);
+    }
+  }
+</style>
+
+<script>
+// @ts-nocheck
+
+  const productTypeButtons =
+    Array.from(
+      document.querySelectorAll(
+        "[data-product-type]",
+      ),
+    );
+
+  const productList =
+    document.querySelector(
+      "[data-product-list]",
+    );
+
+  const productEmpty =
+    document.querySelector(
+      "[data-product-empty]",
+    );
+
+  const selectedProductCount =
+    document.querySelector(
+      "[data-selected-product-count]",
+    );
+
+  const sidebarProductCount =
+    document.querySelector(
+      "[data-sidebar-product-count]",
+    );
+
+  const productCount =
+    document.querySelector(
+      "[data-product-count]",
+    );
+
+  const descriptionField =
+    document.querySelector(
+      "[data-products-description]",
+    );
+
+  const descriptionCounter =
+    document.querySelector(
+      "[data-products-description-counter]",
+    );
+
+  const websiteField =
+    document.querySelector(
+      "[name='productWebsite']",
+    );
+
+  const saveButton =
+    document.querySelector(
+      "[data-save-products]",
+    );
+
+  const saveLabel =
+    document.querySelector(
+      "[data-save-label]",
+    );
+
+  const saveMessage =
+    document.querySelector(
+      "[data-save-message]",
+    );
+
+  const saveSuccess =
+    document.querySelector(
+      "[data-save-success]",
+    );
+
+  const editProductsButton =
+    document.querySelector(
+      "[data-edit-products]",
+    );
+
+  const productDefinitions = {
+    "recycled-material": {
+      id: "recycled-material",
+      label: "Material hasil olahan",
+      description:
+        "Material yang dihasilkan setelah melalui proses pengolahan atau pemilahan.",
+    },
+
+    "reusable-product": {
+      id: "reusable-product",
+      label: "Produk guna ulang",
+      description:
+        "Produk yang masih dapat digunakan kembali atau diperpanjang masa pakainya.",
+    },
+
+    "recovered-material": {
+      id: "recovered-material",
+      label: "Material recovery",
+      description:
+        "Material atau nilai yang berhasil dipulihkan dari aliran sampah.",
+    },
+
+    compost: {
+      id: "compost",
+      label: "Kompos",
+      description:
+        "Hasil pengolahan material organik melalui proses yang sesuai.",
+    },
+
+    other: {
+      id: "other",
+      label: "Hasil lainnya",
+      description:
+        "Output pengelolaan lain yang relevan dan benar-benar dihasilkan organisasi.",
+    },
+  };
+
+  let selectedProducts = [];
+
+  function updateCounts() {
+    const count =
+      selectedProducts.length;
+
+    if (
+      selectedProductCount instanceof HTMLElement
+    ) {
+      selectedProductCount.textContent =
+        `${count} produk`;
+    }
+
+    if (
+      sidebarProductCount instanceof HTMLElement
+    ) {
+      sidebarProductCount.textContent =
+        String(count);
+    }
+
+    if (
+      productCount instanceof HTMLElement
+    ) {
+      productCount.textContent =
+        `${count} produk`;
+    }
+  }
+
+  function updateAvailableButtons() {
+    productTypeButtons.forEach(
+      (button) => {
+        const id =
+          button.getAttribute(
+            "data-product-type",
+          );
+
+        const isSelected =
+          id &&
+          selectedProducts.includes(
+            id,
+          );
+
+        button.disabled =
+          Boolean(isSelected);
+      },
+    );
+  }
+
+  function createRemoveButton(
+    productId,
+    productLabel,
+  ) {
+    const button =
+      document.createElement(
+        "button",
+      );
+
+    button.type = "button";
+
+    button.className =
+      "product-item__remove";
+
+    button.setAttribute(
+      "data-remove-product",
+      productId,
+    );
+
+    button.setAttribute(
+      "aria-label",
+      `Hapus ${productLabel}`,
+    );
+
+    button.innerHTML =
+      "<span aria-hidden=\"true\">×</span>";
+
+    return button;
+  }
+
+  function renderProducts() {
+    if (
+      !(productList instanceof HTMLElement)
+    ) {
+      return;
+    }
+
+    productList
+      .querySelectorAll(
+        ".product-item",
+      )
+      .forEach(
+        (item) => {
+          item.remove();
+        },
+      );
+
+    if (
+      selectedProducts.length === 0
+    ) {
+      if (
+        productEmpty instanceof HTMLElement
+      ) {
+        productEmpty.hidden = false;
+      }
+
+      updateCounts();
+      updateAvailableButtons();
+
+      return;
+    }
+
+    if (
+      productEmpty instanceof HTMLElement
+    ) {
+      productEmpty.hidden = true;
+    }
+
+    selectedProducts.forEach(
+      (productId) => {
+        const definition =
+          productDefinitions[
+            productId
+          ];
+
+        if (!definition) {
+          return;
+        }
+
+        const item =
+          document.createElement(
+            "div",
+          );
+
+        item.className =
+          "product-item";
+
+        item.setAttribute(
+          "data-product-item",
+          productId,
+        );
+
+        const icon =
+          document.createElement(
+            "div",
+          );
+
+        icon.className =
+          "product-item__icon";
+
+        icon.innerHTML =
+          "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"19\" height=\"19\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.9\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M16 16.5V7.5a2.5 2.5 0 0 0-5 0v9a3.5 3.5 0 0 1-7 0V8a4 4 0 0 1 8 0v8.5a2.5 2.5 0 0 0 5 0v-7a3.5 3.5 0 0 1 7 0v8\"/></svg>";
+
+        const body =
+          document.createElement(
+            "div",
+          );
+
+        body.className =
+          "product-item__body";
+
+        const title =
+          document.createElement(
+            "strong",
+          );
+
+        title.textContent =
+          definition.label;
+
+        const description =
+          document.createElement(
+            "span",
+          );
+
+        description.textContent =
+          definition.description;
+
+        body.append(
+          title,
+          description,
+        );
+
+        const removeButton =
+          createRemoveButton(
+            productId,
+            definition.label,
+          );
+
+        item.append(
+          icon,
+          body,
+          removeButton,
+        );
+
+        productList.appendChild(
+          item,
+        );
+      },
+    );
+
+    productList
+      .querySelectorAll(
+        "[data-remove-product]",
+      )
+      .forEach(
+        (button) => {
+          button.addEventListener(
+            "click",
+            () => {
+              const productId =
+                button.getAttribute(
+                  "data-remove-product",
+                );
+
+              if (!productId) {
+                return;
+              }
+
+              selectedProducts =
+                selectedProducts.filter(
+                  (id) =>
+                    id !== productId,
+                );
+
+              renderProducts();
+            },
+          );
+        },
+      );
+
+    updateCounts();
+    updateAvailableButtons();
+  }
+
+  function addProduct(
+    productId,
+  ) {
+    if (
+      !productId ||
+      !productDefinitions[productId]
+    ) {
+      return;
+    }
+
+    if (
+      selectedProducts.includes(
+        productId,
+      )
+    ) {
+      return;
+    }
+
+    selectedProducts.push(
+      productId,
+    );
+
+    renderProducts();
+  }
+
+  function updateDescriptionCounter() {
+    if (
+      !(descriptionField instanceof HTMLTextAreaElement) ||
+      !(descriptionCounter instanceof HTMLElement)
+    ) {
+      return;
+    }
+
+    descriptionCounter.textContent =
+      `${descriptionField.value.length} / 2200`;
+  }
+
+  function validateProducts() {
+    if (
+      selectedProducts.length === 0
+    ) {
+      if (
+        saveMessage instanceof HTMLElement
+      ) {
+        saveMessage.textContent =
+          "Tambahkan minimal satu produk atau hasil sebelum menyimpan.";
+
+        saveMessage.hidden = false;
+      }
+
+      if (
+        productList instanceof HTMLElement
+      ) {
+        productList.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
+      }
+
+      return false;
+    }
+
+    if (
+      descriptionField instanceof HTMLTextAreaElement
+    ) {
+      const description =
+        descriptionField.value.trim();
+
+      if (
+        description.length > 0 &&
+        description.length < 20
+      ) {
+        descriptionField.setAttribute(
+          "aria-invalid",
+          "true",
+        );
+
+        if (
+          saveMessage instanceof HTMLElement
+        ) {
+          saveMessage.textContent =
+            "Deskripsi produk yang diisi minimal 20 karakter.";
+
+          saveMessage.hidden = false;
+        }
+
+        descriptionField.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
+
+        descriptionField.focus();
+
+        return false;
+      }
+
+      descriptionField.removeAttribute(
+        "aria-invalid",
+      );
+    }
+
+    if (
+      websiteField instanceof HTMLInputElement
+    ) {
+      const website =
+        websiteField.value.trim();
+
+      if (website !== "") {
+        try {
+          new URL(
+            website,
+          );
+          websiteField.removeAttribute(
+            "aria-invalid",
+          );
+        } catch {
+          websiteField.setAttribute(
+            "aria-invalid",
+            "true",
+          );
+
+          if (
+            saveMessage instanceof HTMLElement
+          ) {
+            saveMessage.textContent =
+              "URL informasi tambahan tidak valid.";
+
+            saveMessage.hidden = false;
+          }
+
+          websiteField.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+          });
+
+          websiteField.focus();
+
+          return false;
+        }
+      }
+    }
+
+    return true;
+  }
+
+  function buildProductsPayload() {
+    return {
+      products:
+        selectedProducts.map(
+          (productId) => {
+            const definition =
+              productDefinitions[
+                productId
+              ];
+
+            return {
+              id: productId,
+              name:
+                definition?.label ??
+                productId,
+              description:
+                definition?.description ??
+                "",
+            };
+          },
+        ),
+
+      description:
+        descriptionField instanceof
+        HTMLTextAreaElement
+          ? descriptionField.value.trim()
+          : "",
+
+      website:
+        websiteField instanceof
+        HTMLInputElement
+          ? websiteField.value.trim()
+          : "",
+
+      updatedAt:
+        new Date().toISOString(),
+    };
+  }
+
+  async function saveProducts() {
+    if (!validateProducts()) {
+      return;
+    }
+
+    const payload =
+      buildProductsPayload();
+
+    if (
+      saveButton instanceof HTMLButtonElement
+    ) {
+      saveButton.disabled = true;
+    }
+
+    if (
+      saveLabel instanceof HTMLElement
+    ) {
+      saveLabel.textContent =
+        "Menyiapkan...";
+    }
+
+    if (
+      saveMessage instanceof HTMLElement
+    ) {
+      saveMessage.textContent =
+        "Memeriksa informasi produk...";
+
+      saveMessage.hidden = false;
+    }
+
+    await Promise.resolve();
+
+    window.dispatchEvent(
+      new CustomEvent(
+        "binsight:organization-products-save",
+        {
+          detail: payload,
+        },
+      ),
+    );
+
+    document
+      .querySelectorAll(
+        ".products-card",
+      )
+      .forEach(
+        (section) => {
+          section.hidden = true;
+        },
+      );
+
+    const sidebar =
+      document.querySelector(
+        ".products-sidebar",
+      );
+
+    if (
+      sidebar instanceof HTMLElement
+    ) {
+      sidebar.hidden = true;
+    }
+
+    if (
+      saveSuccess instanceof HTMLElement
+    ) {
+      saveSuccess.hidden = false;
+
+      saveSuccess.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }
+
+    if (
+      saveMessage instanceof HTMLElement
+    ) {
+      saveMessage.hidden = true;
+    }
+  }
+
+  function restoreProductsEditor() {
+    document
+      .querySelectorAll(
+        ".products-card",
+      )
+      .forEach(
+        (section) => {
+          section.hidden = false;
+        },
+      );
+
+    const sidebar =
+      document.querySelector(
+        ".products-sidebar",
+      );
+
+    if (
+      sidebar instanceof HTMLElement
+    ) {
+      sidebar.hidden = false;
+    }
+
+    if (
+      saveSuccess instanceof HTMLElement
+    ) {
+      saveSuccess.hidden = true;
+    }
+
+    if (
+      saveButton instanceof HTMLButtonElement
+    ) {
+      saveButton.disabled = false;
+    }
+
+    if (
+      saveLabel instanceof HTMLElement
+    ) {
+      saveLabel.textContent =
+        "Simpan informasi";
+    }
+
+    if (
+      saveMessage instanceof HTMLElement
+    ) {
+      saveMessage.textContent = "";
+      saveMessage.hidden = true;
+    }
+  }
+
+  productTypeButtons.forEach(
+    (button) => {
+      button.addEventListener(
+        "click",
+        () => {
+          const productId =
+            button.getAttribute(
+              "data-product-type",
+            );
+
+          addProduct(
+            productId,
+          );
+        },
+      );
+    },
+  );
+
+  descriptionField?.addEventListener(
+    "input",
+    updateDescriptionCounter,
+  );
+
+  saveButton?.addEventListener(
+    "click",
+    saveProducts,
+  );
+
+  editProductsButton?.addEventListener(
+    "click",
+    restoreProductsEditor,
+  );
+
+  updateDescriptionCounter();
+  renderProducts();
+</script>

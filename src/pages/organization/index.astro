@@ -1,0 +1,1486 @@
+---
+import {
+  ArrowRight,
+  Building2,
+  CircleCheck,
+  ClipboardList,
+  Leaf,
+  Map,
+  MapPin,
+  Recycle,
+  ShieldCheck,
+  Users,
+} from "@lucide/astro";
+
+import OrganizationLayout from "../../layouts/OrganizationLayout.astro";
+import PageHeader from "../../components/layout/PageHeader.astro";
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  name: "Portal Organisasi — BINSIGHT",
+  description:
+    "Portal organisasi BINSIGHT untuk mengelola profil, informasi sampah, proses pengelolaan, dan informasi organisasi.",
+  url: "https://binsight.id/organization",
+  isPartOf: {
+    "@type": "WebSite",
+    name: "BINSIGHT — Badung Waste Intelligence",
+    url: "https://binsight.id",
+  },
+};
+---
+
+<OrganizationLayout
+  title="Portal Organisasi"
+  description="Kelola informasi organisasi dan pengelolaan sampah melalui BINSIGHT."
+>
+  <script
+    type="application/ld+json"
+    is:inline
+    set:html={JSON.stringify(jsonLd)}
+  />
+
+  <main class="organization-page">
+    <PageHeader
+      eyebrow="PORTAL ORGANISASI"
+      title="Kelola informasi organisasi Anda di BINSIGHT"
+      description="Gunakan portal organisasi untuk membangun profil yang informatif, menjelaskan sampah yang dikelola, memperkenalkan proses pengelolaan, dan menampilkan informasi yang relevan kepada masyarakat."
+      icon="organization"
+      tone="green"
+      breadcrumbs={[
+        {
+          label: "Beranda",
+          href: "/",
+        },
+        {
+          label: "Portal Organisasi",
+          href: "/organization",
+        },
+      ]}
+    />
+
+    <section class="organization-hero">
+      <div class="organization-container">
+        <div class="organization-hero__grid">
+          <div class="organization-hero__content">
+            <span class="organization-eyebrow">
+              ORGANIZATION MANAGEMENT
+            </span>
+
+            <h1 class="organization-hero__title">
+              Jadikan organisasi Anda
+              <span>
+                lebih mudah ditemukan.
+              </span>
+            </h1>
+
+            <p class="organization-hero__description">
+              BINSIGHT membantu organisasi pengelola sampah menyajikan
+              informasi yang lebih terstruktur tentang identitas, lokasi,
+              material yang dikelola, proses, dan kontribusinya dalam
+              ekosistem persampahan Badung.
+            </p>
+
+            <div class="organization-hero__actions">
+              <a
+                class="organization-button organization-button--primary"
+                href="/organization/profile"
+              >
+                <Building2
+                  size={18}
+                  stroke-width={2}
+                  aria-hidden="true"
+                />
+
+                <span>
+                  Kelola profil
+                </span>
+
+                <ArrowRight
+                  size={17}
+                  stroke-width={2}
+                  aria-hidden="true"
+                />
+              </a>
+
+              <a
+                class="organization-button organization-button--secondary"
+                href="/organization/waste"
+              >
+                <Recycle
+                  size={18}
+                  stroke-width={2}
+                  aria-hidden="true"
+                />
+
+                <span>
+                  Kelola sampah
+                </span>
+              </a>
+            </div>
+          </div>
+
+          <div class="organization-hero__visual">
+            <div class="organization-console">
+              <div class="organization-console__header">
+                <div class="organization-console__brand">
+                  <div class="organization-console__brand-icon">
+                    <Leaf
+                      size={20}
+                      stroke-width={2}
+                      aria-hidden="true"
+                    />
+                  </div>
+
+                  <div>
+                    <strong>
+                      BINSIGHT
+                    </strong>
+
+                    <span>
+                      Organization Portal
+                    </span>
+                  </div>
+                </div>
+
+                <span class="organization-console__status">
+                  ORGANIZATION
+                </span>
+              </div>
+
+              <div class="organization-console__body">
+                <div class="organization-profile-card">
+                  <div class="organization-profile-card__avatar">
+                    <Building2
+                      size={23}
+                      stroke-width={1.9}
+                      aria-hidden="true"
+                    />
+                  </div>
+
+                  <div class="organization-profile-card__copy">
+                    <span>
+                      PROFIL ORGANISASI
+                    </span>
+
+                    <strong>
+                      Informasi organisasi
+                    </strong>
+
+                    <small>
+                      Profil publik yang mudah dipahami
+                    </small>
+                  </div>
+
+                  <CircleCheck
+                    size={20}
+                    stroke-width={2}
+                    aria-hidden="true"
+                  />
+                </div>
+
+                <div class="organization-console__grid">
+                  <div class="console-stat">
+                    <MapPin
+                      size={18}
+                      stroke-width={1.9}
+                      aria-hidden="true"
+                    />
+
+                    <span>
+                      LOKASI
+                    </span>
+
+                    <strong>
+                      TERPETAKAN
+                    </strong>
+                  </div>
+
+                  <div class="console-stat">
+                    <Recycle
+                      size={18}
+                      stroke-width={1.9}
+                      aria-hidden="true"
+                    />
+
+                    <span>
+                      MATERIAL
+                    </span>
+
+                    <strong>
+                      TERINFORMASI
+                    </strong>
+                  </div>
+
+                  <div class="console-stat">
+                    <ClipboardList
+                      size={18}
+                      stroke-width={1.9}
+                      aria-hidden="true"
+                    />
+
+                    <span>
+                      PROSES
+                    </span>
+
+                    <strong>
+                      TERSTRUKTUR
+                    </strong>
+                  </div>
+
+                  <div class="console-stat">
+                    <ShieldCheck
+                      size={18}
+                      stroke-width={1.9}
+                      aria-hidden="true"
+                    />
+
+                    <span>
+                      STATUS
+                    </span>
+
+                    <strong>
+                      VERIFIKASI
+                    </strong>
+                  </div>
+                </div>
+              </div>
+
+              <div class="organization-console__footer">
+                <span>
+                  BADUNG WASTE INTELLIGENCE
+                </span>
+
+                <span>
+                  BINSIGHT
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="organization-section organization-section--muted">
+      <div class="organization-container">
+        <div class="section-heading">
+          <span class="section-heading__eyebrow">
+            APA YANG DAPAT DIKELOLA
+          </span>
+
+          <h2 class="section-heading__title">
+            Satu portal untuk informasi organisasi yang lebih lengkap
+          </h2>
+
+          <p class="section-heading__description">
+            Susun informasi organisasi dari identitas dasar hingga cara
+            organisasi menangani material persampahan.
+          </p>
+        </div>
+
+        <div class="management-grid">
+          <a
+            class="management-card management-card--featured"
+            href="/organization/profile"
+          >
+            <div class="management-card__icon">
+              <Building2
+                size={22}
+                stroke-width={1.9}
+                aria-hidden="true"
+              />
+            </div>
+
+            <span class="management-card__index">
+              01
+            </span>
+
+            <h3>
+              Profil organisasi
+            </h3>
+
+            <p>
+              Atur nama organisasi, identitas, lokasi, deskripsi, dan
+              informasi dasar yang akan membantu masyarakat mengenali
+              organisasi Anda.
+            </p>
+
+            <span class="management-card__link">
+              Kelola profil
+
+              <ArrowRight
+                size={16}
+                stroke-width={2}
+                aria-hidden="true"
+              />
+            </span>
+          </a>
+
+          <a
+            class="management-card"
+            href="/organization/waste"
+          >
+            <div class="management-card__icon">
+              <Recycle
+                size={22}
+                stroke-width={1.9}
+                aria-hidden="true"
+              />
+            </div>
+
+            <span class="management-card__index">
+              02
+            </span>
+
+            <h3>
+              Sampah yang dikelola
+            </h3>
+
+            <p>
+              Tampilkan material dan kategori sampah yang menjadi bagian
+              dari aktivitas pengelolaan organisasi.
+            </p>
+
+            <span class="management-card__link">
+              Kelola sampah
+
+              <ArrowRight
+                size={16}
+                stroke-width={2}
+                aria-hidden="true"
+              />
+            </span>
+          </a>
+
+          <a
+            class="management-card"
+            href="/organization/process"
+          >
+            <div class="management-card__icon">
+              <ClipboardList
+                size={22}
+                stroke-width={1.9}
+                aria-hidden="true"
+              />
+            </div>
+
+            <span class="management-card__index">
+              03
+            </span>
+
+            <h3>
+              Proses pengelolaan
+            </h3>
+
+            <p>
+              Jelaskan tahapan pengumpulan, pemilahan, pengolahan, recovery,
+              atau proses relevan lainnya yang dilakukan organisasi.
+            </p>
+
+            <span class="management-card__link">
+              Kelola proses
+
+              <ArrowRight
+                size={16}
+                stroke-width={2}
+                aria-hidden="true"
+              />
+            </span>
+          </a>
+
+          <a
+            class="management-card"
+            href="/organization/products"
+          >
+            <div class="management-card__icon">
+              <Leaf
+                size={22}
+                stroke-width={1.9}
+                aria-hidden="true"
+              />
+            </div>
+
+            <span class="management-card__index">
+              04
+            </span>
+
+            <h3>
+              Produk & hasil
+            </h3>
+
+            <p>
+              Perkenalkan hasil, output, atau produk yang relevan dengan
+              aktivitas pengelolaan sampah organisasi.
+            </p>
+
+            <span class="management-card__link">
+              Kelola informasi
+
+              <ArrowRight
+                size={16}
+                stroke-width={2}
+                aria-hidden="true"
+              />
+            </span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <section class="organization-section">
+      <div class="organization-container">
+        <div class="value-layout">
+          <div class="value-content">
+            <span class="section-heading__eyebrow">
+              NILAI UNTUK ORGANISASI
+            </span>
+
+            <h2 class="section-heading__title">
+              Bukan sekadar halaman profil
+            </h2>
+
+            <p class="section-heading__description">
+              Profil organisasi di BINSIGHT dirancang agar masyarakat dapat
+              memahami peran organisasi secara lebih kontekstual dan
+              menemukan hubungan antara organisasi, lokasi, material,
+              serta proses pengelolaannya.
+            </p>
+          </div>
+
+          <div class="value-list">
+            <div class="value-item">
+              <div class="value-item__number">
+                01
+              </div>
+
+              <div class="value-item__icon">
+                <Map
+                  size={19}
+                  stroke-width={2}
+                  aria-hidden="true"
+                />
+              </div>
+
+              <div>
+                <h3>
+                  Lebih mudah ditemukan
+                </h3>
+
+                <p>
+                  Organisasi dapat tampil dalam konteks wilayah dan peta
+                  BINSIGHT.
+                </p>
+              </div>
+            </div>
+
+            <div class="value-item">
+              <div class="value-item__number">
+                02
+              </div>
+
+              <div class="value-item__icon">
+                <Recycle
+                  size={19}
+                  stroke-width={2}
+                  aria-hidden="true"
+                />
+              </div>
+
+              <div>
+                <h3>
+                  Lebih mudah dipahami
+                </h3>
+
+                <p>
+                  Masyarakat dapat melihat jenis material dan pendekatan
+                  pengelolaan yang dijelaskan.
+                </p>
+              </div>
+            </div>
+
+            <div class="value-item">
+              <div class="value-item__number">
+                03
+              </div>
+
+              <div class="value-item__icon">
+                <ShieldCheck
+                  size={19}
+                  stroke-width={2}
+                  aria-hidden="true"
+                />
+              </div>
+
+              <div>
+                <h3>
+                  Lebih terpercaya
+                </h3>
+
+                <p>
+                  Informasi organisasi dapat diarahkan melalui proses
+                  verifikasi sebelum ditampilkan secara publik.
+                </p>
+              </div>
+            </div>
+
+            <div class="value-item">
+              <div class="value-item__number">
+                04
+              </div>
+
+              <div class="value-item__icon">
+                <Users
+                  size={19}
+                  stroke-width={2}
+                  aria-hidden="true"
+                />
+              </div>
+
+              <div>
+                <h3>
+                  Lebih dekat dengan masyarakat
+                </h3>
+
+                <p>
+                  Informasi yang terbuka membantu masyarakat mengenali
+                  organisasi dan perannya dalam ekosistem persampahan.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="organization-section organization-section--dark">
+      <div class="organization-container">
+        <div class="trust-layout">
+          <div class="trust-content">
+            <span class="section-heading__eyebrow section-heading__eyebrow--light">
+              VERIFIKASI
+            </span>
+
+            <h2 class="trust-title">
+              Bangun profil yang informatif dan dapat dipercaya.
+            </h2>
+
+            <p class="trust-description">
+              Informasi organisasi yang lengkap membantu proses peninjauan
+              dan membuat halaman publik lebih bermanfaat bagi masyarakat.
+            </p>
+
+            <a
+              class="organization-button organization-button--light"
+              href="/organization/profile"
+            >
+              Lengkapi profil
+
+              <ArrowRight
+                size={17}
+                stroke-width={2}
+                aria-hidden="true"
+              />
+            </a>
+          </div>
+
+          <div class="trust-card">
+            <div class="trust-card__icon">
+              <ShieldCheck
+                size={25}
+                stroke-width={1.9}
+                aria-hidden="true"
+              />
+            </div>
+
+            <span class="trust-card__eyebrow">
+              ORGANIZATION PROFILE
+            </span>
+
+            <h3>
+              Informasi yang jelas menciptakan konteks yang lebih baik.
+            </h3>
+
+            <div class="trust-card__rows">
+              <div>
+                <span>
+                  IDENTITAS
+                </span>
+
+                <strong>
+                  Profil organisasi
+                </strong>
+              </div>
+
+              <div>
+                <span>
+                  LOKASI
+                </span>
+
+                <strong>
+                  Area & alamat
+                </strong>
+              </div>
+
+              <div>
+                <span>
+                  MATERIAL
+                </span>
+
+                <strong>
+                  Sampah dikelola
+                </strong>
+              </div>
+
+              <div>
+                <span>
+                  PROSES
+                </span>
+
+                <strong>
+                  Tahapan pengelolaan
+                </strong>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="organization-cta">
+      <div class="organization-container">
+        <div class="organization-cta__card">
+          <div>
+            <span class="organization-cta__eyebrow">
+              MULAI DARI PROFIL
+            </span>
+
+            <h2>
+              Jadikan informasi organisasi Anda bagian dari peta ekosistem
+              BINSIGHT.
+            </h2>
+
+            <p>
+              Lengkapi profil terlebih dahulu, lalu lanjutkan ke informasi
+              sampah dan proses pengelolaan.
+            </p>
+          </div>
+
+          <div class="organization-cta__actions">
+            <a
+              class="organization-button organization-button--primary"
+              href="/organization/profile"
+            >
+              Kelola profil
+
+              <ArrowRight
+                size={17}
+                stroke-width={2}
+                aria-hidden="true"
+              />
+            </a>
+
+            <a
+              class="organization-button organization-button--secondary"
+              href="/organization/process"
+            >
+              Kelola proses
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</OrganizationLayout>
+
+<style>
+  .organization-page {
+    min-height: 100vh;
+    background: var(--color-background);
+  }
+
+  .organization-container {
+    width: min(1180px, calc(100% - 40px));
+    margin-inline: auto;
+  }
+
+  .organization-hero {
+    overflow: hidden;
+    padding: 0 0 var(--space-12);
+    background:
+      radial-gradient(
+        circle at 78% 18%,
+        var(--color-primary-soft),
+        transparent 35%
+      );
+  }
+
+  .organization-hero__grid {
+    display: grid;
+    grid-template-columns:
+      minmax(0, 1fr)
+      minmax(390px, 0.9fr);
+    gap: var(--space-10);
+    align-items: center;
+    min-height: 500px;
+  }
+
+  .organization-hero__content {
+    max-width: 680px;
+  }
+
+  .organization-eyebrow,
+  .section-heading__eyebrow,
+  .organization-cta__eyebrow,
+  .trust-card__eyebrow {
+    display: inline-flex;
+    align-items: center;
+    color: var(--color-primary-dark);
+    font-size: 0.67rem;
+    font-weight: 850;
+    letter-spacing: 0.12em;
+    line-height: 1.2;
+  }
+
+  .organization-hero__title {
+    max-width: 700px;
+    margin: var(--space-4) 0 0;
+    color: var(--color-text-strong);
+    font-size: clamp(2.3rem, 5vw, 4rem);
+    font-weight: 850;
+    letter-spacing: -0.045em;
+    line-height: 1.03;
+  }
+
+  .organization-hero__title span {
+    display: block;
+    color: var(--color-primary);
+  }
+
+  .organization-hero__description {
+    max-width: 650px;
+    margin: var(--space-5) 0 0;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-lg);
+    line-height: 1.72;
+  }
+
+  .organization-hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    margin-top: var(--space-7);
+  }
+
+  .organization-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 46px;
+    padding: 0 var(--space-5);
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-sm);
+    font-weight: 800;
+    text-decoration: none;
+    transition:
+      transform 160ms ease,
+      background 160ms ease,
+      border-color 160ms ease,
+      box-shadow 160ms ease;
+  }
+
+  .organization-button:hover {
+    transform: translateY(-1px);
+  }
+
+  .organization-button--primary {
+    border: 1px solid var(--color-primary);
+    background: var(--color-primary);
+    color: var(--color-white);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .organization-button--primary:hover {
+    background: var(--color-primary-dark);
+    box-shadow: var(--shadow-md);
+  }
+
+  .organization-button--secondary {
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    color: var(--color-text-strong);
+  }
+
+  .organization-button--secondary:hover {
+    border-color: var(--color-border-strong);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .organization-button--light {
+    margin-top: var(--space-7);
+    border: 1px solid rgb(190 242 100 / 35%);
+    background: rgb(190 242 100 / 10%);
+    color: #bef264;
+  }
+
+  .organization-button--light:hover {
+    background: rgb(190 242 100 / 16%);
+    box-shadow: 0 10px 30px rgb(0 0 0 / 16%);
+  }
+
+  .organization-button:focus-visible {
+    outline: 3px solid var(--color-primary-ring);
+    outline-offset: 3px;
+  }
+
+  .organization-hero__visual {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .organization-console {
+    position: relative;
+    width: min(100%, 510px);
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+    border-radius: 26px;
+    background:
+      linear-gradient(
+        145deg,
+        var(--color-primary-dark),
+        #0f2419 72%
+      );
+    box-shadow: var(--shadow-lg);
+  }
+
+  .organization-console__header,
+  .organization-console__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+    padding: var(--space-5);
+  }
+
+  .organization-console__header {
+    border-bottom: 1px solid rgb(255 255 255 / 8%);
+  }
+
+  .organization-console__footer {
+    border-top: 1px solid rgb(255 255 255 / 8%);
+    color: rgb(255 255 255 / 38%);
+    font-size: 0.56rem;
+    font-weight: 850;
+    letter-spacing: 0.1em;
+  }
+
+  .organization-console__brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .organization-console__brand-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: rgb(255 255 255 / 10%);
+    color: #bef264;
+  }
+
+  .organization-console__brand strong,
+  .organization-console__brand span {
+    display: block;
+  }
+
+  .organization-console__brand strong {
+    color: #ffffff;
+    font-size: 0.78rem;
+    letter-spacing: 0.06em;
+  }
+
+  .organization-console__brand span {
+    margin-top: 2px;
+    color: rgb(255 255 255 / 56%);
+    font-size: 0.64rem;
+  }
+
+  .organization-console__status {
+    color: #bef264;
+    font-size: 0.55rem;
+    font-weight: 850;
+    letter-spacing: 0.1em;
+  }
+
+  .organization-console__body {
+    padding: var(--space-5);
+  }
+
+  .organization-profile-card {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-4);
+    border: 1px solid rgb(255 255 255 / 9%);
+    border-radius: 15px;
+    background: rgb(255 255 255 / 5%);
+  }
+
+  .organization-profile-card__avatar {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    width: 46px;
+    height: 46px;
+    border-radius: 13px;
+    background: rgb(190 242 100 / 12%);
+    color: #bef264;
+  }
+
+  .organization-profile-card__copy {
+    display: flex;
+    flex: 1;
+    min-width: 0;
+    flex-direction: column;
+  }
+
+  .organization-profile-card__copy span {
+    color: rgb(255 255 255 / 40%);
+    font-size: 0.53rem;
+    font-weight: 850;
+    letter-spacing: 0.1em;
+  }
+
+  .organization-profile-card__copy strong {
+    margin-top: 4px;
+    color: #ffffff;
+    font-size: 0.85rem;
+  }
+
+  .organization-profile-card__copy small {
+    margin-top: 3px;
+    color: rgb(255 255 255 / 47%);
+    font-size: 0.61rem;
+  }
+
+  .organization-profile-card > svg {
+    flex: 0 0 auto;
+    color: #bef264;
+  }
+
+  .organization-console__grid {
+    display: grid;
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+    gap: var(--space-3);
+    margin-top: var(--space-3);
+  }
+
+  .console-stat {
+    min-height: 108px;
+    padding: var(--space-4);
+    border: 1px solid rgb(255 255 255 / 8%);
+    border-radius: 14px;
+    background: rgb(255 255 255 / 3%);
+  }
+
+  .console-stat svg {
+    color: #bef264;
+  }
+
+  .console-stat span,
+  .console-stat strong {
+    display: block;
+  }
+
+  .console-stat span {
+    margin-top: var(--space-4);
+    color: rgb(255 255 255 / 38%);
+    font-size: 0.52rem;
+    font-weight: 850;
+    letter-spacing: 0.1em;
+  }
+
+  .console-stat strong {
+    margin-top: 5px;
+    color: #ffffff;
+    font-size: 0.67rem;
+  }
+
+  .organization-section {
+    padding: var(--space-14) 0;
+    background: var(--color-surface);
+  }
+
+  .organization-section--muted {
+    background: var(--color-surface-soft);
+  }
+
+  .section-heading {
+    max-width: 780px;
+  }
+
+  .section-heading__title {
+    margin: var(--space-3) 0 0;
+    color: var(--color-text-strong);
+    font-size: clamp(1.75rem, 3.2vw, 2.65rem);
+    font-weight: 850;
+    letter-spacing: -0.035em;
+    line-height: 1.1;
+  }
+
+  .section-heading__description {
+    margin: var(--space-4) 0 0;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-md);
+    line-height: 1.72;
+  }
+
+  .management-grid {
+    display: grid;
+    grid-template-columns:
+      repeat(4, minmax(0, 1fr));
+    gap: var(--space-4);
+    margin-top: var(--space-8);
+  }
+
+  .management-card {
+    position: relative;
+    display: flex;
+    min-height: 335px;
+    flex-direction: column;
+    padding: var(--space-6);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    background: var(--color-surface);
+    color: inherit;
+    text-decoration: none;
+    box-shadow: var(--shadow-xs);
+    transition:
+      transform 180ms ease,
+      box-shadow 180ms ease,
+      border-color 180ms ease;
+  }
+
+  .management-card:hover {
+    transform: translateY(-3px);
+    border-color: var(--color-border-strong);
+    box-shadow: var(--shadow-md);
+  }
+
+  .management-card--featured {
+    border-color: var(--color-primary);
+    background:
+      linear-gradient(
+        145deg,
+        var(--color-primary-soft),
+        var(--color-surface)
+      );
+  }
+
+  .management-card__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 46px;
+    height: 46px;
+    border-radius: 14px;
+    background: var(--color-primary-soft);
+    color: var(--color-primary);
+  }
+
+  .management-card__index {
+    position: absolute;
+    top: var(--space-6);
+    right: var(--space-6);
+    color: var(--color-text-faint);
+    font-size: 0.63rem;
+    font-weight: 850;
+    letter-spacing: 0.1em;
+  }
+
+  .management-card h3 {
+    margin: var(--space-6) 0 0;
+    color: var(--color-text-strong);
+    font-size: 1rem;
+    font-weight: 800;
+  }
+
+  .management-card p {
+    margin: var(--space-3) 0 0;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-sm);
+    line-height: 1.7;
+  }
+
+  .management-card__link {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    margin-top: auto;
+    padding-top: var(--space-5);
+    color: var(--color-primary);
+    font-size: var(--font-size-sm);
+    font-weight: 800;
+  }
+
+  .management-card:hover .management-card__link {
+    color: var(--color-primary-dark);
+  }
+
+  .value-layout {
+    display: grid;
+    grid-template-columns:
+      minmax(0, 0.8fr)
+      minmax(420px, 1fr);
+    gap: var(--space-12);
+    align-items: start;
+  }
+
+  .value-content {
+    position: sticky;
+    top: var(--space-8);
+  }
+
+  .value-list {
+    display: grid;
+    gap: var(--space-3);
+  }
+
+  .value-item {
+    display: grid;
+    grid-template-columns:
+      30px
+      42px
+      minmax(0, 1fr);
+    gap: var(--space-3);
+    align-items: start;
+    padding: var(--space-5);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    background: var(--color-surface);
+  }
+
+  .value-item__number {
+    padding-top: 5px;
+    color: var(--color-text-faint);
+    font-size: 0.6rem;
+    font-weight: 850;
+    letter-spacing: 0.08em;
+  }
+
+  .value-item__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    background: var(--color-primary-soft);
+    color: var(--color-primary);
+  }
+
+  .value-item h3 {
+    margin: 1px 0 0;
+    color: var(--color-text-strong);
+    font-size: 0.95rem;
+    font-weight: 800;
+  }
+
+  .value-item p {
+    margin: 5px 0 0;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-xs);
+    line-height: 1.65;
+  }
+
+  .organization-section--dark {
+    background:
+      radial-gradient(
+        circle at 84% 18%,
+        rgb(132 204 22 / 8%),
+        transparent 25%
+      ),
+      #0f2418;
+  }
+
+  .trust-layout {
+    display: grid;
+    grid-template-columns:
+      minmax(0, 1fr)
+      minmax(340px, 0.72fr);
+    gap: var(--space-10);
+    align-items: center;
+  }
+
+  .section-heading__eyebrow--light {
+    color: #bef264;
+  }
+
+  .trust-title {
+    max-width: 720px;
+    margin: var(--space-4) 0 0;
+    color: #ffffff;
+    font-size: clamp(2rem, 4vw, 3.25rem);
+    font-weight: 850;
+    letter-spacing: -0.04em;
+    line-height: 1.08;
+  }
+
+  .trust-description {
+    max-width: 680px;
+    margin: var(--space-5) 0 0;
+    color: rgb(255 255 255 / 66%);
+    font-size: var(--font-size-md);
+    line-height: 1.75;
+  }
+
+  .trust-card {
+    padding: var(--space-7);
+    border: 1px solid rgb(255 255 255 / 10%);
+    border-radius: 24px;
+    background:
+      linear-gradient(
+        145deg,
+        rgb(255 255 255 / 7%),
+        rgb(255 255 255 / 3%)
+      );
+    box-shadow:
+      0 24px 80px rgb(0 0 0 / 22%);
+  }
+
+  .trust-card__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 50px;
+    height: 50px;
+    border-radius: 15px;
+    background: rgb(190 242 100 / 11%);
+    color: #bef264;
+  }
+
+  .trust-card__eyebrow {
+    margin-top: var(--space-6);
+    color: #bef264;
+  }
+
+  .trust-card h3 {
+    margin: var(--space-3) 0 0;
+    color: #ffffff;
+    font-size: 1.4rem;
+    line-height: 1.28;
+  }
+
+  .trust-card__rows {
+    display: grid;
+    gap: 0;
+    margin-top: var(--space-7);
+    border-top: 1px solid rgb(255 255 255 / 9%);
+  }
+
+  .trust-card__rows > div {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+    padding: 14px 0;
+    border-bottom: 1px solid rgb(255 255 255 / 9%);
+  }
+
+  .trust-card__rows span {
+    color: rgb(255 255 255 / 36%);
+    font-size: 0.55rem;
+    font-weight: 850;
+    letter-spacing: 0.1em;
+  }
+
+  .trust-card__rows strong {
+    color: rgb(255 255 255 / 78%);
+    font-size: 0.7rem;
+    text-align: right;
+  }
+
+  .organization-cta {
+    padding: var(--space-10) 0 var(--space-14);
+    background: var(--color-background);
+  }
+
+  .organization-cta__card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-8);
+    padding: var(--space-8);
+    border: 1px solid var(--color-border);
+    border-radius: 24px;
+    background:
+      linear-gradient(
+        135deg,
+        var(--color-primary-soft),
+        var(--color-surface)
+      );
+    box-shadow: var(--shadow-sm);
+  }
+
+  .organization-cta__card h2 {
+    max-width: 700px;
+    margin: var(--space-3) 0 0;
+    color: var(--color-text-strong);
+    font-size: clamp(1.6rem, 3vw, 2.4rem);
+    font-weight: 850;
+    letter-spacing: -0.035em;
+    line-height: 1.1;
+  }
+
+  .organization-cta__card p {
+    max-width: 700px;
+    margin: var(--space-3) 0 0;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-sm);
+    line-height: 1.65;
+  }
+
+  .organization-cta__actions {
+    display: flex;
+    flex: 0 0 auto;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+  }
+
+  @media (max-width: 1080px) {
+    .management-grid {
+      grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 920px) {
+    .organization-hero__grid,
+    .value-layout,
+    .trust-layout {
+      grid-template-columns: 1fr;
+    }
+
+    .organization-hero__visual {
+      justify-content: flex-start;
+    }
+
+    .organization-console {
+      max-width: 620px;
+    }
+
+    .value-content {
+      position: static;
+    }
+
+    .organization-cta__card {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  }
+
+  @media (max-width: 680px) {
+    .organization-container {
+      width: min(
+        100%,
+        calc(100% - 28px)
+      );
+    }
+
+    .organization-hero {
+      padding-bottom: var(--space-8);
+    }
+
+    .organization-hero__grid {
+      min-height: auto;
+      gap: var(--space-7);
+      padding-top: var(--space-5);
+    }
+
+    .organization-hero__title {
+      font-size: clamp(2rem, 10vw, 3rem);
+    }
+
+    .organization-hero__description {
+      font-size: var(--font-size-md);
+    }
+
+    .organization-hero__actions,
+    .organization-button {
+      width: 100%;
+    }
+
+    .organization-console {
+      border-radius: 21px;
+    }
+
+    .organization-console__header,
+    .organization-console__footer {
+      padding: var(--space-4);
+    }
+
+    .organization-console__status {
+      display: none;
+    }
+
+    .organization-console__body {
+      padding: var(--space-4);
+    }
+
+    .organization-console__grid {
+      grid-template-columns: 1fr;
+    }
+
+    .console-stat {
+      min-height: auto;
+    }
+
+    .organization-section {
+      padding: var(--space-10) 0;
+    }
+
+    .management-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .management-card {
+      min-height: 270px;
+      padding: var(--space-5);
+    }
+
+    .value-list {
+      gap: var(--space-3);
+    }
+
+    .value-item {
+      grid-template-columns:
+        28px
+        40px
+        minmax(0, 1fr);
+      padding: var(--space-4);
+    }
+
+    .trust-card {
+      padding: var(--space-5);
+    }
+
+    .organization-cta {
+      padding-top: var(--space-7);
+    }
+
+    .organization-cta__card {
+      padding: var(--space-6);
+      border-radius: 20px;
+    }
+
+    .organization-cta__actions,
+    .organization-cta__actions .organization-button {
+      width: 100%;
+    }
+  }
+</style>

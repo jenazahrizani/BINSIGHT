@@ -1,0 +1,2107 @@
+---
+import {
+  ArrowLeft,
+  ArrowRight,
+  Building2,
+  CircleCheck,
+  Globe,
+  Mail,
+  MapPin,
+  Phone,
+  Save,
+  ShieldCheck,
+  UserRound,
+} from "@lucide/astro";
+
+import OrganizationLayout from "../../layouts/OrganizationLayout.astro";
+import PageHeader from "../../components/layout/PageHeader.astro";
+---
+
+<OrganizationLayout
+  title="Profil Organisasi"
+  description="Kelola informasi profil organisasi yang ditampilkan melalui BINSIGHT."
+>
+  <main class="organization-profile-page">
+    <PageHeader
+      eyebrow="PORTAL ORGANISASI"
+      title="Profil organisasi"
+      description="Lengkapi informasi organisasi agar masyarakat dapat mengenali identitas, lokasi, dan peran organisasi Anda dalam ekosistem persampahan Badung."
+      icon="organization"
+      tone="green"
+      breadcrumbs={[
+        {
+          label: "Beranda",
+          href: "/",
+        },
+        {
+          label: "Portal Organisasi",
+          href: "/organization",
+        },
+        {
+          label: "Profil",
+          href: "/organization/profile",
+        },
+      ]}
+    />
+
+    <section class="profile-content">
+      <div class="profile-container">
+        <div class="profile-layout">
+          <div class="profile-main">
+            <form
+              class="profile-form"
+              id="organization-profile-form"
+              data-profile-form
+            >
+              <section class="profile-card">
+                <div class="profile-card__header">
+                  <div>
+                    <span class="profile-card__eyebrow">
+                      IDENTITAS
+                    </span>
+
+                    <h2 class="profile-card__title">
+                      Informasi utama organisasi
+                    </h2>
+
+                    <p class="profile-card__description">
+                      Gunakan nama dan deskripsi yang jelas agar organisasi
+                      mudah dikenali oleh masyarakat.
+                    </p>
+                  </div>
+
+                  <div class="profile-card__icon">
+                    <Building2
+                      size={22}
+                      stroke-width={1.9}
+                      aria-hidden="true"
+                    />
+                  </div>
+                </div>
+
+                <div class="profile-grid">
+                  <div class="field field--full">
+                    <label
+                      class="field__label"
+                      for="organizationName"
+                    >
+                      Nama organisasi
+                      <span
+                        class="field__required"
+                        aria-hidden="true"
+                      >
+                        *
+                      </span>
+                    </label>
+
+                    <p
+                      class="field__hint"
+                      id="organizationNameHint"
+                    >
+                      Nama resmi organisasi yang akan ditampilkan kepada publik.
+                    </p>
+
+                    <input
+                      id="organizationName"
+                      name="organizationName"
+                      class="field__input"
+                      type="text"
+                      maxlength="160"
+                      minlength="2"
+                      required
+                      autocomplete="organization"
+                      aria-describedby="organizationNameHint organizationNameError"
+                      placeholder="Contoh: Bank Sampah Lestari Badung"
+                    />
+
+                    <p
+                      id="organizationNameError"
+                      class="field__error"
+                      data-field-error="organizationName"
+                      hidden
+                    ></p>
+                  </div>
+
+                  <div class="field">
+                    <label
+                      class="field__label"
+                      for="organizationType"
+                    >
+                      Jenis organisasi
+                      <span
+                        class="field__required"
+                        aria-hidden="true"
+                      >
+                        *
+                      </span>
+                    </label>
+
+                    <select
+                      id="organizationType"
+                      name="organizationType"
+                      class="field__select"
+                      required
+                      aria-describedby="organizationTypeError"
+                    >
+                      <option value="">
+                        Pilih jenis organisasi
+                      </option>
+
+                      <option value="government">
+                        Pemerintah
+                      </option>
+
+                      <option value="community">
+                        Komunitas
+                      </option>
+
+                      <option value="private">
+                        Swasta
+                      </option>
+
+                      <option value="social-enterprise">
+                        Social enterprise
+                      </option>
+
+                      <option value="cooperative">
+                        Koperasi
+                      </option>
+
+                      <option value="educational">
+                        Pendidikan
+                      </option>
+
+                      <option value="nonprofit">
+                        Nonprofit
+                      </option>
+
+                      <option value="other">
+                        Lainnya
+                      </option>
+                    </select>
+
+                    <p
+                      id="organizationTypeError"
+                      class="field__error"
+                      data-field-error="organizationType"
+                      hidden
+                    ></p>
+                  </div>
+
+                  <div class="field">
+                    <label
+                      class="field__label"
+                      for="organizationStatus"
+                    >
+                      Status profil
+                    </label>
+
+                    <div class="status-control">
+                      <div class="status-control__icon">
+                        <ShieldCheck
+                          size={18}
+                          stroke-width={2}
+                          aria-hidden="true"
+                        />
+                      </div>
+
+                      <div>
+                        <strong>
+                          Menunggu verifikasi
+                        </strong>
+
+                        <span>
+                          Status dapat berubah setelah peninjauan administrator.
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="field field--full">
+                    <label
+                      class="field__label"
+                      for="description"
+                    >
+                      Deskripsi organisasi
+                    </label>
+
+                    <p
+                      class="field__hint"
+                      id="descriptionHint"
+                    >
+                      Jelaskan secara singkat aktivitas, peran, atau fokus
+                      organisasi dalam pengelolaan persampahan.
+                    </p>
+
+                    <textarea
+                      id="description"
+                      name="description"
+                      class="field__textarea"
+                      rows="7"
+                      maxlength="1500"
+                      aria-describedby="descriptionHint descriptionError descriptionCounter"
+                      placeholder="Contoh: Organisasi kami bergerak dalam pengumpulan dan pengelolaan material yang dapat didaur ulang dari masyarakat..."
+                    ></textarea>
+
+                    <div class="field__footer">
+                      <p
+                        id="descriptionError"
+                        class="field__error"
+                        data-field-error="description"
+                        hidden
+                      ></p>
+
+                      <span
+                        id="descriptionCounter"
+                        class="field__counter"
+                        data-description-counter
+                      >
+                        0 / 1500
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <section class="profile-card">
+                <div class="profile-card__header">
+                  <div>
+                    <span class="profile-card__eyebrow">
+                      LOKASI
+                    </span>
+
+                    <h2 class="profile-card__title">
+                      Informasi lokasi organisasi
+                    </h2>
+
+                    <p class="profile-card__description">
+                      Lokasi membantu masyarakat menemukan organisasi dan
+                      menghubungkannya dengan peta BINSIGHT.
+                    </p>
+                  </div>
+
+                  <div class="profile-card__icon">
+                    <MapPin
+                      size={22}
+                      stroke-width={1.9}
+                      aria-hidden="true"
+                    />
+                  </div>
+                </div>
+
+                <div class="profile-grid">
+                  <div class="field">
+                    <label
+                      class="field__label"
+                      for="area"
+                    >
+                      Area / Kecamatan
+                      <span
+                        class="field__required"
+                        aria-hidden="true"
+                      >
+                        *
+                      </span>
+                    </label>
+
+                    <select
+                      id="area"
+                      name="area"
+                      class="field__select"
+                      required
+                      aria-describedby="areaError"
+                    >
+                      <option value="">
+                        Pilih area
+                      </option>
+
+                      <option value="abiansemal">
+                        Abiansemal
+                      </option>
+
+                      <option value="kuta">
+                        Kuta
+                      </option>
+
+                      <option value="kuta-selatan">
+                        Kuta Selatan
+                      </option>
+
+                      <option value="kuta-utara">
+                        Kuta Utara
+                      </option>
+
+                      <option value="mengwi">
+                        Mengwi
+                      </option>
+
+                      <option value="petang">
+                        Petang
+                      </option>
+                    </select>
+
+                    <p
+                      id="areaError"
+                      class="field__error"
+                      data-field-error="area"
+                      hidden
+                    ></p>
+                  </div>
+
+                  <div class="field">
+                    <label
+                      class="field__label"
+                      for="address"
+                    >
+                      Alamat
+                      <span
+                        class="field__required"
+                        aria-hidden="true"
+                      >
+                        *
+                      </span>
+                    </label>
+
+                    <input
+                      id="address"
+                      name="address"
+                      class="field__input"
+                      type="text"
+                      maxlength="300"
+                      minlength="5"
+                      required
+                      autocomplete="street-address"
+                      aria-describedby="addressError"
+                      placeholder="Alamat lengkap organisasi"
+                    />
+
+                    <p
+                      id="addressError"
+                      class="field__error"
+                      data-field-error="address"
+                      hidden
+                    ></p>
+                  </div>
+
+                  <div class="field">
+                    <label
+                      class="field__label"
+                      for="latitude"
+                    >
+                      Latitude
+                    </label>
+
+                    <input
+                      id="latitude"
+                      name="latitude"
+                      class="field__input"
+                      type="number"
+                      inputmode="decimal"
+                      min="-90"
+                      max="90"
+                      step="any"
+                      placeholder="-8.650000"
+                      aria-describedby="coordinatesHint"
+                    />
+                  </div>
+
+                  <div class="field">
+                    <label
+                      class="field__label"
+                      for="longitude"
+                    >
+                      Longitude
+                    </label>
+
+                    <input
+                      id="longitude"
+                      name="longitude"
+                      class="field__input"
+                      type="number"
+                      inputmode="decimal"
+                      min="-180"
+                      max="180"
+                      step="any"
+                      placeholder="115.216667"
+                      aria-describedby="coordinatesHint"
+                    />
+                  </div>
+
+                  <div class="field field--full">
+                    <div
+                      class="coordinates-notice"
+                      id="coordinatesHint"
+                    >
+                      <MapPin
+                        size={17}
+                        stroke-width={2}
+                        aria-hidden="true"
+                      />
+
+                      <span>
+                        Koordinat bersifat opsional. Isi hanya apabila
+                        koordinat organisasi tersedia dan telah diperiksa.
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <section class="profile-card">
+                <div class="profile-card__header">
+                  <div>
+                    <span class="profile-card__eyebrow">
+                      KONTAK
+                    </span>
+
+                    <h2 class="profile-card__title">
+                      Informasi yang dapat dihubungi
+                    </h2>
+
+                    <p class="profile-card__description">
+                      Tambahkan saluran komunikasi yang relevan untuk
+                      membantu masyarakat mengenali organisasi.
+                    </p>
+                  </div>
+
+                  <div class="profile-card__icon">
+                    <Phone
+                      size={22}
+                      stroke-width={1.9}
+                      aria-hidden="true"
+                    />
+                  </div>
+                </div>
+
+                <div class="profile-grid">
+                  <div class="field">
+                    <label
+                      class="field__label"
+                      for="contactName"
+                    >
+                      Nama kontak
+                    </label>
+
+                    <div class="field__input-wrap">
+                      <UserRound
+                        size={17}
+                        stroke-width={1.9}
+                        aria-hidden="true"
+                      />
+
+                      <input
+                        id="contactName"
+                        name="contactName"
+                        class="field__input field__input--with-icon"
+                        type="text"
+                        maxlength="120"
+                        autocomplete="name"
+                        placeholder="Nama narahubung"
+                      />
+                    </div>
+                  </div>
+
+                  <div class="field">
+                    <label
+                      class="field__label"
+                      for="phone"
+                    >
+                      Nomor telepon
+                    </label>
+
+                    <div class="field__input-wrap">
+                      <Phone
+                        size={17}
+                        stroke-width={1.9}
+                        aria-hidden="true"
+                      />
+
+                      <input
+                        id="phone"
+                        name="phone"
+                        class="field__input field__input--with-icon"
+                        type="tel"
+                        maxlength="40"
+                        autocomplete="tel"
+                        placeholder="+62 812 ..."
+                      />
+                    </div>
+                  </div>
+
+                  <div class="field">
+                    <label
+                      class="field__label"
+                      for="email"
+                    >
+                      Email
+                    </label>
+
+                    <div class="field__input-wrap">
+                      <Mail
+                        size={17}
+                        stroke-width={1.9}
+                        aria-hidden="true"
+                      />
+
+                      <input
+                        id="email"
+                        name="email"
+                        class="field__input field__input--with-icon"
+                        type="email"
+                        maxlength="160"
+                        autocomplete="email"
+                        placeholder="nama@organisasi.id"
+                      />
+                    </div>
+                  </div>
+
+                  <div class="field">
+                    <label
+                      class="field__label"
+                      for="website"
+                    >
+                      Website
+                    </label>
+
+                    <div class="field__input-wrap">
+                      <Globe
+                        size={17}
+                        stroke-width={1.9}
+                        aria-hidden="true"
+                      />
+
+                      <input
+                        id="website"
+                        name="website"
+                        class="field__input field__input--with-icon"
+                        type="url"
+                        maxlength="250"
+                        autocomplete="url"
+                        placeholder="https://..."
+                      />
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <section class="profile-card profile-card--publish">
+                <div class="publish-box">
+                  <div class="publish-box__icon">
+                    <CircleCheck
+                      size={21}
+                      stroke-width={2}
+                      aria-hidden="true"
+                    />
+                  </div>
+
+                  <div class="publish-box__content">
+                    <h2>
+                      Siap untuk ditinjau
+                    </h2>
+
+                    <p>
+                      Setelah informasi disimpan, profil dapat ditinjau oleh
+                      administrator sebelum ditampilkan sebagai informasi
+                      publik.
+                    </p>
+                  </div>
+                </div>
+
+                <div class="form-actions">
+                  <a
+                    class="form-actions__back"
+                    href="/organization"
+                  >
+                    <ArrowLeft
+                      size={17}
+                      stroke-width={2}
+                      aria-hidden="true"
+                    />
+
+                    <span>
+                      Kembali
+                    </span>
+                  </a>
+
+                  <button
+                    type="submit"
+                    class="form-actions__submit"
+                    data-save-button
+                  >
+                    <Save
+                      size={17}
+                      stroke-width={2}
+                      aria-hidden="true"
+                    />
+
+                    <span data-save-label>
+                      Simpan profil
+                    </span>
+                  </button>
+                </div>
+
+                <p
+                  class="save-message"
+                  data-save-message
+                  hidden
+                ></p>
+              </section>
+            </form>
+
+            <div
+              class="save-success"
+              data-save-success
+              hidden
+            >
+              <div class="save-success__icon">
+                <CircleCheck
+                  size={32}
+                  stroke-width={1.8}
+                  aria-hidden="true"
+                />
+              </div>
+
+              <span class="save-success__eyebrow">
+                PROFIL DIPERSIAPKAN
+              </span>
+
+              <h2>
+                Informasi profil berhasil disiapkan
+              </h2>
+
+              <p>
+                Perubahan telah melalui pemeriksaan dasar pada browser dan
+                siap diteruskan ke proses penyimpanan serta verifikasi.
+              </p>
+
+              <div class="save-success__actions">
+                <a
+                  class="form-actions__submit"
+                  href="/organization"
+                >
+                  Kembali ke portal
+
+                  <ArrowRight
+                    size={17}
+                    stroke-width={2}
+                    aria-hidden="true"
+                  />
+                </a>
+
+                <button
+                  type="button"
+                  class="form-actions__back"
+                  data-edit-profile
+                >
+                  Edit kembali
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <aside class="profile-sidebar">
+            <div class="sidebar-card sidebar-card--status">
+              <div class="sidebar-status__header">
+                <div class="sidebar-status__icon">
+                  <ShieldCheck
+                    size={19}
+                    stroke-width={2}
+                    aria-hidden="true"
+                  />
+                </div>
+
+                <div>
+                  <span>
+                    STATUS PROFIL
+                  </span>
+
+                  <strong>
+                    Menunggu verifikasi
+                  </strong>
+                </div>
+              </div>
+
+              <p>
+                Lengkapi informasi organisasi dengan akurat agar proses
+                peninjauan dapat dilakukan dengan lebih baik.
+              </p>
+            </div>
+
+            <div class="sidebar-card">
+              <span class="sidebar-card__eyebrow">
+                CHECKLIST
+              </span>
+
+              <h2>
+                Profil yang baik
+              </h2>
+
+              <div class="sidebar-check-list">
+                <div class="sidebar-check">
+                  <CircleCheck
+                    size={16}
+                    stroke-width={2}
+                    aria-hidden="true"
+                  />
+
+                  <span>
+                    Nama organisasi jelas
+                  </span>
+                </div>
+
+                <div class="sidebar-check">
+                  <CircleCheck
+                    size={16}
+                    stroke-width={2}
+                    aria-hidden="true"
+                  />
+
+                  <span>
+                    Deskripsi mudah dipahami
+                  </span>
+                </div>
+
+                <div class="sidebar-check">
+                  <CircleCheck
+                    size={16}
+                    stroke-width={2}
+                    aria-hidden="true"
+                  />
+
+                  <span>
+                    Lokasi dapat ditemukan
+                  </span>
+                </div>
+
+                <div class="sidebar-check">
+                  <CircleCheck
+                    size={16}
+                    stroke-width={2}
+                    aria-hidden="true"
+                  />
+
+                  <span>
+                    Kontak yang relevan
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div class="sidebar-card sidebar-card--tip">
+              <div class="sidebar-tip__icon">
+                <MapPin
+                  size={18}
+                  stroke-width={2}
+                  aria-hidden="true"
+                />
+              </div>
+
+              <div>
+                <strong>
+                  Prioritaskan lokasi
+                </strong>
+
+                <p>
+                  Lokasi yang akurat akan membuat organisasi lebih mudah
+                  dihubungkan dengan peta dan informasi wilayah BINSIGHT.
+                </p>
+              </div>
+            </div>
+
+            <div class="sidebar-card sidebar-card--next">
+              <span class="sidebar-card__eyebrow">
+                LANGKAH BERIKUTNYA
+              </span>
+
+              <h2>
+                Setelah profil selesai
+              </h2>
+
+              <a href="/organization/waste">
+                Kelola sampah
+
+                <ArrowRight
+                  size={16}
+                  stroke-width={2}
+                  aria-hidden="true"
+                />
+              </a>
+
+              <a href="/organization/process">
+                Kelola proses
+
+                <ArrowRight
+                  size={16}
+                  stroke-width={2}
+                  aria-hidden="true"
+                />
+              </a>
+
+              <a href="/organization/products">
+                Kelola produk
+
+                <ArrowRight
+                  size={16}
+                  stroke-width={2}
+                  aria-hidden="true"
+                />
+              </a>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </section>
+  </main>
+</OrganizationLayout>
+
+<style>
+  .organization-profile-page {
+    min-height: 100vh;
+    background: var(--color-background);
+  }
+
+  .profile-content {
+    padding: var(--space-10) 0 var(--space-14);
+  }
+
+  .profile-container {
+    width: min(1180px, calc(100% - 40px));
+    margin-inline: auto;
+  }
+
+  .profile-layout {
+    display: grid;
+    grid-template-columns:
+      minmax(0, 1fr)
+      320px;
+    gap: var(--space-7);
+    align-items: start;
+  }
+
+  .profile-main {
+    min-width: 0;
+  }
+
+  .profile-form {
+    display: grid;
+    gap: var(--space-5);
+  }
+
+  .profile-card {
+    padding: var(--space-7);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-xs);
+  }
+
+  .profile-card__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-5);
+    padding-bottom: var(--space-6);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .profile-card__eyebrow,
+  .sidebar-card__eyebrow,
+  .profile-card__eyebrow {
+    display: block;
+    color: var(--color-primary-dark);
+    font-size: 0.65rem;
+    font-weight: 850;
+    letter-spacing: 0.11em;
+  }
+
+  .profile-card__title {
+    margin: var(--space-2) 0 0;
+    color: var(--color-text-strong);
+    font-size: 1.08rem;
+    font-weight: 850;
+    line-height: 1.3;
+  }
+
+  .profile-card__description {
+    max-width: 680px;
+    margin: 5px 0 0;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-sm);
+    line-height: 1.6;
+  }
+
+  .profile-card__icon {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 13px;
+    background: var(--color-primary-soft);
+    color: var(--color-primary);
+  }
+
+  .profile-grid {
+    display: grid;
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+    gap: var(--space-5);
+    padding-top: var(--space-6);
+  }
+
+  .field {
+    min-width: 0;
+  }
+
+  .field--full {
+    grid-column: 1 / -1;
+  }
+
+  .field__label {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-bottom: var(--space-2);
+    color: var(--color-text-strong);
+    font-size: var(--font-size-sm);
+    font-weight: 750;
+  }
+
+  .field__required {
+    color: var(--color-danger);
+  }
+
+  .field__hint {
+    margin: 0 0 var(--space-2);
+    color: var(--color-text-faint);
+    font-size: var(--font-size-xs);
+    line-height: 1.5;
+  }
+
+  .field__input,
+  .field__select,
+  .field__textarea {
+    width: 100%;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+    color: var(--color-text-strong);
+    font: inherit;
+    font-size: var(--font-size-sm);
+    transition:
+      border-color 160ms ease,
+      box-shadow 160ms ease,
+      background 160ms ease;
+  }
+
+  .field__input,
+  .field__select {
+    min-height: 45px;
+    padding: 0 13px;
+  }
+
+  .field__textarea {
+    min-height: 142px;
+    padding: 12px 13px;
+    resize: vertical;
+    line-height: 1.65;
+  }
+
+  .field__input::placeholder,
+  .field__textarea::placeholder {
+    color: var(--color-text-faint);
+  }
+
+  .field__input:hover,
+  .field__select:hover,
+  .field__textarea:hover {
+    border-color: var(--color-border-strong);
+  }
+
+  .field__input:focus,
+  .field__select:focus,
+  .field__textarea:focus {
+    border-color: var(--color-primary);
+    outline: none;
+    box-shadow:
+      0 0 0 3px var(--color-primary-ring);
+  }
+
+  .field__input[aria-invalid="true"],
+  .field__select[aria-invalid="true"],
+  .field__textarea[aria-invalid="true"] {
+    border-color: var(--color-danger);
+  }
+
+  .field__input-wrap {
+    position: relative;
+  }
+
+  .field__input-wrap > svg {
+    position: absolute;
+    top: 50%;
+    left: 13px;
+    z-index: 1;
+    color: var(--color-text-faint);
+    transform: translateY(-50%);
+    pointer-events: none;
+  }
+
+  .field__input--with-icon {
+    padding-left: 40px;
+  }
+
+  .field__footer {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-3);
+  }
+
+  .field__error {
+    margin: var(--space-2) 0 0;
+    color: var(--color-danger-text);
+    font-size: var(--font-size-xs);
+    line-height: 1.5;
+  }
+
+  .field__error[hidden] {
+    display: none;
+  }
+
+  .field__counter {
+    flex: 0 0 auto;
+    margin-top: var(--space-2);
+    color: var(--color-text-faint);
+    font-size: var(--font-size-xs);
+  }
+
+  .status-control {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+    min-height: 45px;
+    padding: 10px 12px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface-soft);
+  }
+
+  .status-control__icon {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    width: 31px;
+    height: 31px;
+    border-radius: 9px;
+    background: var(--color-warning-soft);
+    color: var(--color-warning-text);
+  }
+
+  .status-control strong,
+  .status-control span {
+    display: block;
+  }
+
+  .status-control strong {
+    color: var(--color-text-strong);
+    font-size: var(--font-size-xs);
+  }
+
+  .status-control span {
+    margin-top: 2px;
+    color: var(--color-text-muted);
+    font-size: 0.68rem;
+    line-height: 1.45;
+  }
+
+  .coordinates-notice {
+    display: flex;
+    align-items: flex-start;
+    gap: 9px;
+    padding: 11px 12px;
+    border-radius: var(--radius-md);
+    background: var(--color-info-soft);
+    color: var(--color-info);
+    font-size: var(--font-size-xs);
+    line-height: 1.55;
+  }
+
+  .coordinates-notice svg {
+    flex: 0 0 auto;
+    margin-top: 1px;
+  }
+
+  .profile-card--publish {
+    padding-top: var(--space-6);
+  }
+
+  .publish-box {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+    padding: var(--space-4);
+    border: 1px solid var(--color-primary-soft);
+    border-radius: var(--radius-lg);
+    background: var(--color-primary-soft);
+  }
+
+  .publish-box__icon {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 11px;
+    background: var(--color-surface);
+    color: var(--color-primary);
+  }
+
+  .publish-box__content h2 {
+    margin: 1px 0 0;
+    color: var(--color-text-strong);
+    font-size: var(--font-size-sm);
+    font-weight: 800;
+  }
+
+  .publish-box__content p {
+    margin: 4px 0 0;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-xs);
+    line-height: 1.6;
+  }
+
+  .form-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+    margin-top: var(--space-6);
+    padding-top: var(--space-5);
+    border-top: 1px solid var(--color-border);
+  }
+
+  .form-actions__back {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    min-height: 44px;
+    padding: 0 13px;
+    border: 1px solid transparent;
+    border-radius: var(--radius-md);
+    background: transparent;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    font: inherit;
+    font-size: var(--font-size-sm);
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  .form-actions__back:hover {
+    color: var(--color-text-strong);
+    background: var(--color-surface-soft);
+  }
+
+  .form-actions__submit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 45px;
+    padding: 0 var(--space-5);
+    border: 1px solid var(--color-primary);
+    border-radius: var(--radius-md);
+    background: var(--color-primary);
+    color: var(--color-white);
+    cursor: pointer;
+    font: inherit;
+    font-size: var(--font-size-sm);
+    font-weight: 800;
+    text-decoration: none;
+    box-shadow: var(--shadow-sm);
+    transition:
+      background 160ms ease,
+      transform 160ms ease,
+      box-shadow 160ms ease;
+  }
+
+  .form-actions__submit:hover {
+    background: var(--color-primary-dark);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+  }
+
+  .form-actions__submit:focus-visible,
+  .form-actions__back:focus-visible {
+    outline: 3px solid var(--color-primary-ring);
+    outline-offset: 3px;
+  }
+
+  .form-actions__submit:disabled {
+    opacity: 0.65;
+    cursor: wait;
+    transform: none;
+  }
+
+  .save-message {
+    margin: var(--space-3) 0 0;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-xs);
+    line-height: 1.5;
+    text-align: right;
+  }
+
+  .save-message[hidden],
+  .save-success[hidden] {
+    display: none;
+  }
+
+  .profile-sidebar {
+    position: sticky;
+    top: var(--space-6);
+    display: grid;
+    gap: var(--space-4);
+  }
+
+  .sidebar-card {
+    padding: var(--space-5);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-xs);
+  }
+
+  .sidebar-card--status {
+    background:
+      linear-gradient(
+        145deg,
+        var(--color-primary-soft),
+        var(--color-surface)
+      );
+  }
+
+  .sidebar-status__header {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+  }
+
+  .sidebar-status__icon {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: var(--color-surface);
+    color: var(--color-primary);
+  }
+
+  .sidebar-status__header span,
+  .sidebar-status__header strong {
+    display: block;
+  }
+
+  .sidebar-status__header span {
+    color: var(--color-text-faint);
+    font-size: 0.57rem;
+    font-weight: 850;
+    letter-spacing: 0.09em;
+  }
+
+  .sidebar-status__header strong {
+    margin-top: 3px;
+    color: var(--color-text-strong);
+    font-size: var(--font-size-sm);
+  }
+
+  .sidebar-card > p {
+    margin: var(--space-4) 0 0;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-xs);
+    line-height: 1.65;
+  }
+
+  .sidebar-card > h2 {
+    margin: var(--space-2) 0 0;
+    color: var(--color-text-strong);
+    font-size: 1rem;
+    font-weight: 800;
+  }
+
+  .sidebar-check-list {
+    display: grid;
+    gap: 12px;
+    margin-top: var(--space-5);
+  }
+
+  .sidebar-check {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-xs);
+    line-height: 1.5;
+  }
+
+  .sidebar-check svg {
+    flex: 0 0 auto;
+    margin-top: 1px;
+    color: var(--color-primary);
+  }
+
+  .sidebar-card--tip {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+  }
+
+  .sidebar-tip__icon {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 11px;
+    background: var(--color-info-soft);
+    color: var(--color-info);
+  }
+
+  .sidebar-card--tip strong {
+    display: block;
+    color: var(--color-text-strong);
+    font-size: var(--font-size-sm);
+  }
+
+  .sidebar-card--tip p {
+    margin-top: 4px;
+  }
+
+  .sidebar-card--next {
+    display: grid;
+    gap: 0;
+  }
+
+  .sidebar-card--next a {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    margin-top: 10px;
+    padding: 10px 0;
+    border-top: 1px solid var(--color-border);
+    color: var(--color-primary);
+    font-size: var(--font-size-xs);
+    font-weight: 750;
+    text-decoration: none;
+  }
+
+  .sidebar-card--next a:hover {
+    color: var(--color-primary-dark);
+  }
+
+  .save-success {
+    padding: var(--space-10);
+    border: 1px solid var(--color-primary-soft);
+    border-radius: var(--radius-xl);
+    background:
+      linear-gradient(
+        145deg,
+        var(--color-primary-soft),
+        var(--color-surface)
+      );
+    box-shadow: var(--shadow-sm);
+    text-align: center;
+  }
+
+  .save-success__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 66px;
+    height: 66px;
+    border-radius: 50%;
+    background: var(--color-surface);
+    color: var(--color-primary);
+  }
+
+  .save-success__eyebrow {
+    display: block;
+    margin-top: var(--space-4);
+    color: var(--color-primary-dark);
+    font-size: 0.64rem;
+    font-weight: 850;
+    letter-spacing: 0.11em;
+  }
+
+  .save-success h2 {
+    margin: var(--space-2) 0 0;
+    color: var(--color-text-strong);
+    font-size: clamp(1.45rem, 3vw, 2rem);
+    letter-spacing: -0.025em;
+  }
+
+  .save-success p {
+    max-width: 650px;
+    margin: var(--space-3) auto 0;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-sm);
+    line-height: 1.7;
+  }
+
+  .save-success__actions {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    margin-top: var(--space-6);
+  }
+
+  @media (max-width: 980px) {
+    .profile-layout {
+      grid-template-columns: 1fr;
+    }
+
+    .profile-sidebar {
+      position: static;
+      grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+    }
+
+    .sidebar-card--status,
+    .sidebar-card--next {
+      grid-column: 1 / -1;
+    }
+  }
+
+  @media (max-width: 680px) {
+    .profile-container {
+      width: min(
+        100%,
+        calc(100% - 28px)
+      );
+    }
+
+    .profile-content {
+      padding-top: var(--space-6);
+    }
+
+    .profile-card {
+      padding: var(--space-5);
+    }
+
+    .profile-card__header {
+      gap: var(--space-3);
+      padding-bottom: var(--space-5);
+    }
+
+    .profile-card__icon {
+      width: 39px;
+      height: 39px;
+    }
+
+    .profile-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .field--full {
+      grid-column: auto;
+    }
+
+    .form-actions {
+      align-items: stretch;
+      flex-direction: column-reverse;
+    }
+
+    .form-actions__submit,
+    .form-actions__back {
+      width: 100%;
+    }
+
+    .save-message {
+      text-align: center;
+    }
+
+    .profile-sidebar {
+      grid-template-columns: 1fr;
+    }
+
+    .sidebar-card--status,
+    .sidebar-card--next {
+      grid-column: auto;
+    }
+
+    .save-success {
+      padding: var(--space-7) var(--space-5);
+    }
+  }
+</style>
+
+<script>
+// @ts-nocheck
+
+  const form =
+    document.querySelector(
+      "[data-profile-form]",
+    );
+
+  const successPanel =
+    document.querySelector(
+      "[data-save-success]",
+    );
+
+  const editProfileButton =
+    document.querySelector(
+      "[data-edit-profile]",
+    );
+
+  const saveButton =
+    document.querySelector(
+      "[data-save-button]",
+    );
+
+  const saveLabel =
+    document.querySelector(
+      "[data-save-label]",
+    );
+
+  const saveMessage =
+    document.querySelector(
+      "[data-save-message]",
+    );
+
+  const descriptionField =
+    document.querySelector(
+      "[name='description']",
+    );
+
+  const descriptionCounter =
+    document.querySelector(
+      "[data-description-counter]",
+    );
+
+  function setFieldError(
+    fieldName,
+    message,
+  ) {
+    const field =
+      form?.querySelector(
+        `[name="${fieldName}"]`,
+      );
+
+    const error =
+      form?.querySelector(
+        `[data-field-error="${fieldName}"]`,
+      );
+
+    if (
+      field instanceof HTMLElement
+    ) {
+      field.setAttribute(
+        "aria-invalid",
+        "true",
+      );
+    }
+
+    if (
+      error instanceof HTMLElement
+    ) {
+      error.textContent =
+        message;
+
+      error.hidden = false;
+    }
+  }
+
+  function clearFieldError(
+    fieldName,
+  ) {
+    const field =
+      form?.querySelector(
+        `[name="${fieldName}"]`,
+      );
+
+    const error =
+      form?.querySelector(
+        `[data-field-error="${fieldName}"]`,
+      );
+
+    if (
+      field instanceof HTMLElement
+    ) {
+      field.removeAttribute(
+        "aria-invalid",
+      );
+    }
+
+    if (
+      error instanceof HTMLElement
+    ) {
+      error.textContent = "";
+      error.hidden = true;
+    }
+  }
+
+  function clearAllErrors() {
+    [
+      "organizationName",
+      "organizationType",
+      "area",
+      "address",
+      "description",
+    ].forEach(
+      (fieldName) => {
+        clearFieldError(
+          fieldName,
+        );
+      },
+    );
+  }
+
+  function updateDescriptionCounter() {
+    if (
+      !(descriptionField instanceof HTMLTextAreaElement) ||
+      !(descriptionCounter instanceof HTMLElement)
+    ) {
+      return;
+    }
+
+    descriptionCounter.textContent =
+      `${descriptionField.value.length} / 1500`;
+  }
+
+  function validateProfileForm() {
+    if (
+      !(form instanceof HTMLFormElement)
+    ) {
+      return false;
+    }
+
+    clearAllErrors();
+
+    const organizationName =
+      form.elements.namedItem(
+        "organizationName",
+      );
+
+    const organizationType =
+      form.elements.namedItem(
+        "organizationType",
+      );
+
+    const area =
+      form.elements.namedItem(
+        "area",
+      );
+
+    const address =
+      form.elements.namedItem(
+        "address",
+      );
+
+    const description =
+      form.elements.namedItem(
+        "description",
+      );
+
+    let valid = true;
+
+    if (
+      !(
+        organizationName instanceof
+        HTMLInputElement
+      ) ||
+      organizationName.value.trim().length < 2
+    ) {
+      setFieldError(
+        "organizationName",
+        "Nama organisasi minimal 2 karakter.",
+      );
+
+      valid = false;
+    }
+
+    if (
+      !(
+        organizationType instanceof
+        HTMLSelectElement
+      ) ||
+      organizationType.value === ""
+    ) {
+      setFieldError(
+        "organizationType",
+        "Silakan pilih jenis organisasi.",
+      );
+
+      valid = false;
+    }
+
+    if (
+      !(area instanceof HTMLSelectElement) ||
+      area.value === ""
+    ) {
+      setFieldError(
+        "area",
+        "Silakan pilih area atau kecamatan.",
+      );
+
+      valid = false;
+    }
+
+    if (
+      !(address instanceof HTMLInputElement) ||
+      address.value.trim().length < 5
+    ) {
+      setFieldError(
+        "address",
+        "Alamat organisasi perlu diisi.",
+      );
+
+      valid = false;
+    }
+
+    if (
+      description instanceof HTMLTextAreaElement &&
+      description.value.trim().length > 0 &&
+      description.value.trim().length < 20
+    ) {
+      setFieldError(
+        "description",
+        "Deskripsi yang diisi minimal 20 karakter.",
+      );
+
+      valid = false;
+    }
+
+    if (!valid) {
+      const firstInvalid =
+        form.querySelector(
+          "[aria-invalid='true']",
+        );
+
+      if (
+        firstInvalid instanceof HTMLElement
+      ) {
+        firstInvalid.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
+
+        firstInvalid.focus();
+      }
+    }
+
+    return valid;
+  }
+
+  function buildProfilePayload() {
+    if (
+      !(form instanceof HTMLFormElement)
+    ) {
+      return null;
+    }
+
+    const formData =
+      new FormData(form);
+
+    const latitudeRaw =
+      String(
+        formData.get(
+          "latitude",
+        ) ?? "",
+      ).trim();
+
+    const longitudeRaw =
+      String(
+        formData.get(
+          "longitude",
+        ) ?? "",
+      ).trim();
+
+    const latitude =
+      latitudeRaw !== ""
+        ? Number(latitudeRaw)
+        : undefined;
+
+    const longitude =
+      longitudeRaw !== ""
+        ? Number(longitudeRaw)
+        : undefined;
+
+    return {
+      name:
+        String(
+          formData.get(
+            "organizationName",
+          ) ?? "",
+        ).trim(),
+
+      type:
+        String(
+          formData.get(
+            "organizationType",
+          ) ?? "",
+        ),
+
+      description:
+        String(
+          formData.get(
+            "description",
+          ) ?? "",
+        ).trim(),
+
+      location: {
+        area:
+          String(
+            formData.get(
+              "area",
+            ) ?? "",
+          ),
+
+        address:
+          String(
+            formData.get(
+              "address",
+            ) ?? "",
+          ).trim(),
+
+        latitude:
+          latitude !== undefined &&
+          Number.isFinite(latitude)
+            ? latitude
+            : undefined,
+
+        longitude:
+          longitude !== undefined &&
+          Number.isFinite(longitude)
+            ? longitude
+            : undefined,
+      },
+
+      contact: {
+        name:
+          String(
+            formData.get(
+              "contactName",
+            ) ?? "",
+          ).trim(),
+
+        phone:
+          String(
+            formData.get(
+              "phone",
+            ) ?? "",
+          ).trim(),
+
+        email:
+          String(
+            formData.get(
+              "email",
+            ) ?? "",
+          ).trim(),
+
+        website:
+          String(
+            formData.get(
+              "website",
+            ) ?? "",
+          ).trim(),
+      },
+
+      updatedAt:
+        new Date().toISOString(),
+    };
+  }
+
+  function showSaveMessage(
+    message,
+  ) {
+    if (
+      !(saveMessage instanceof HTMLElement)
+    ) {
+      return;
+    }
+
+    saveMessage.textContent =
+      message;
+
+    saveMessage.hidden = false;
+  }
+
+  function clearSaveMessage() {
+    if (
+      !(saveMessage instanceof HTMLElement)
+    ) {
+      return;
+    }
+
+    saveMessage.textContent = "";
+    saveMessage.hidden = true;
+  }
+
+  async function handleSubmit(
+    event,
+  ) {
+    event.preventDefault();
+
+    if (
+      !(form instanceof HTMLFormElement)
+    ) {
+      return;
+    }
+
+    clearSaveMessage();
+
+    if (!validateProfileForm()) {
+      return;
+    }
+
+    const payload =
+      buildProfilePayload();
+
+    if (!payload) {
+      return;
+    }
+
+    if (
+      saveButton instanceof HTMLButtonElement
+    ) {
+      saveButton.disabled = true;
+    }
+
+    if (
+      saveLabel instanceof HTMLElement
+    ) {
+      saveLabel.textContent =
+        "Menyiapkan...";
+    }
+
+    showSaveMessage(
+      "Memeriksa informasi profil...",
+    );
+
+    await Promise.resolve();
+
+    window.dispatchEvent(
+      new CustomEvent(
+        "binsight:organization-profile-save",
+        {
+          detail: payload,
+        },
+      ),
+    );
+
+    form.hidden = true;
+
+    if (
+      successPanel instanceof HTMLElement
+    ) {
+      successPanel.hidden = false;
+
+      successPanel.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }
+
+    clearSaveMessage();
+  }
+
+  function showEditForm() {
+    if (
+      !(form instanceof HTMLFormElement)
+    ) {
+      return;
+    }
+
+    form.hidden = false;
+
+    if (
+      successPanel instanceof HTMLElement
+    ) {
+      successPanel.hidden = true;
+    }
+
+    if (
+      saveButton instanceof HTMLButtonElement
+    ) {
+      saveButton.disabled = false;
+    }
+
+    if (
+      saveLabel instanceof HTMLElement
+    ) {
+      saveLabel.textContent =
+        "Simpan profil";
+    }
+
+    clearSaveMessage();
+
+    form.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  }
+
+  form?.addEventListener(
+    "submit",
+    handleSubmit,
+  );
+
+  editProfileButton?.addEventListener(
+    "click",
+    showEditForm,
+  );
+
+  descriptionField?.addEventListener(
+    "input",
+    updateDescriptionCounter,
+  );
+
+  form?.querySelectorAll(
+    "input, textarea, select",
+  ).forEach(
+    (field) => {
+      field.addEventListener(
+        "input",
+        () => {
+          const name =
+            field.getAttribute(
+              "name",
+            );
+
+          if (name) {
+            clearFieldError(
+              name,
+            );
+          }
+        },
+      );
+
+      field.addEventListener(
+        "change",
+        () => {
+          const name =
+            field.getAttribute(
+              "name",
+            );
+
+          if (name) {
+            clearFieldError(
+              name,
+            );
+          }
+        },
+      );
+    },
+  );
+
+  updateDescriptionCounter();
+</script>

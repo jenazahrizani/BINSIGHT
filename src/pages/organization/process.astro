@@ -1,0 +1,2344 @@
+---
+import {
+  ArrowLeft,
+  ArrowRight,
+  Check,
+  CheckCircle,
+  ClipboardList,
+  Leaf,
+  Plus,
+  Recycle,
+  Save,
+  ShieldCheck,
+  Trash2,
+  TriangleAlert,
+} from "@lucide/astro";
+
+import OrganizationLayout from "../../layouts/OrganizationLayout.astro";
+import PageHeader from "../../components/layout/PageHeader.astro";
+
+const processSteps = [
+  {
+    id: "collection",
+    order: 1,
+    title: "Pengumpulan",
+    description:
+      "Tahap pengumpulan material dari sumber atau titik yang telah ditentukan.",
+  },
+  {
+    id: "sorting",
+    order: 2,
+    title: "Pemilahan",
+    description:
+      "Material dipisahkan berdasarkan jenis, karakteristik, atau tujuan pengelolaannya.",
+  },
+  {
+    id: "processing",
+    order: 3,
+    title: "Pengolahan",
+    description:
+      "Material diproses menggunakan metode yang sesuai dengan karakteristiknya.",
+  },
+  {
+    id: "recovery",
+    order: 4,
+    title: "Recovery",
+    description:
+      "Material atau nilai yang masih dapat dimanfaatkan dipulihkan dari aliran sampah.",
+  },
+  {
+    id: "storage",
+    order: 5,
+    title: "Penyimpanan",
+    description:
+      "Material disimpan sementara sebelum diteruskan ke tahap berikutnya.",
+  },
+  {
+    id: "treatment",
+    order: 6,
+    title: "Penanganan khusus",
+    description:
+      "Material tertentu mendapatkan penanganan tambahan sesuai karakteristiknya.",
+  },
+  {
+    id: "disposal",
+    order: 7,
+    title: "Disposal",
+    description:
+      "Material yang tidak dapat dimanfaatkan diarahkan ke tahapan pembuangan yang sesuai.",
+  },
+];
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  name: "Proses Pengelolaan — BINSIGHT",
+  description:
+    "Kelola informasi proses pengelolaan sampah organisasi melalui portal organisasi BINSIGHT.",
+  url: "https://binsight.id/organization/process",
+  isPartOf: {
+    "@type": "WebSite",
+    name: "BINSIGHT — Badung Waste Intelligence",
+    url: "https://binsight.id",
+  },
+};
+---
+
+<OrganizationLayout
+  title="Proses Pengelolaan"
+  description="Kelola informasi tahapan proses pengelolaan sampah organisasi."
+>
+  <script
+    type="application/ld+json"
+    is:inline
+    set:html={JSON.stringify(jsonLd)}
+  />
+
+  <main class="organization-process-page">
+    <PageHeader
+      eyebrow="PORTAL ORGANISASI"
+      title="Proses pengelolaan"
+      description="Jelaskan tahapan pengelolaan yang benar-benar dilakukan organisasi agar masyarakat dapat memahami bagaimana material ditangani dari satu tahap ke tahap berikutnya."
+      icon="organization"
+      tone="green"
+      breadcrumbs={[
+        {
+          label: "Beranda",
+          href: "/",
+        },
+        {
+          label: "Portal Organisasi",
+          href: "/organization",
+        },
+        {
+          label: "Proses Pengelolaan",
+          href: "/organization/process",
+        },
+      ]}
+    />
+
+    <section class="process-content">
+      <div class="process-container">
+        <div class="process-layout">
+          <div class="process-main">
+            <section class="process-card">
+              <div class="process-card__header">
+                <div>
+                  <span class="process-card__eyebrow">
+                    TAHAPAN PENGELOLAAN
+                  </span>
+
+                  <h2 class="process-card__title">
+                    Bangun alur proses organisasi
+                  </h2>
+
+                  <p class="process-card__description">
+                    Pilih tahapan yang benar-benar dilakukan organisasi.
+                    Urutan dapat disusun agar masyarakat mendapatkan gambaran
+                    proses yang lebih jelas.
+                  </p>
+                </div>
+
+                <div class="process-card__icon">
+                  <ClipboardList
+                    size={22}
+                    stroke-width={1.9}
+                    aria-hidden="true"
+                  />
+                </div>
+              </div>
+
+              <div class="process-intro">
+                <div class="process-intro__icon">
+                  <Leaf
+                    size={19}
+                    stroke-width={2}
+                    aria-hidden="true"
+                  />
+                </div>
+
+                <div>
+                  <strong>
+                    Gunakan alur yang mencerminkan kondisi nyata
+                  </strong>
+
+                  <p>
+                    Tidak semua organisasi membutuhkan seluruh tahapan.
+                    Pilih hanya proses yang memang tersedia dan dilakukan.
+                  </p>
+                </div>
+              </div>
+
+              <div class="process-builder">
+                <div class="process-builder__label-row">
+                  <div>
+                    <span class="process-builder__eyebrow">
+                      LANGKAH TERSEDIA
+                    </span>
+
+                    <h3>
+                      Tahapan yang dapat dipilih
+                    </h3>
+                  </div>
+
+                  <span
+                    class="process-builder__count"
+                    data-available-count
+                  >
+                    7 tahapan
+                  </span>
+                </div>
+
+                <div
+                  class="available-process-grid"
+                  data-available-process-grid
+                >
+                  {
+                    processSteps.map((step) => (
+                      <button
+                        type="button"
+                        class="available-process"
+                        data-add-process={step.id}
+                      >
+                        <span class="available-process__number">
+                          {String(step.order).padStart(2, "0")}
+                        </span>
+
+                        <span class="available-process__body">
+                          <strong>
+                            {step.title}
+                          </strong>
+
+                          <small>
+                            {step.description}
+                          </small>
+                        </span>
+
+                        <span class="available-process__add">
+                          <Plus
+                            size={16}
+                            stroke-width={2}
+                            aria-hidden="true"
+                          />
+                        </span>
+                      </button>
+                    ))
+                  }
+                </div>
+              </div>
+
+              <div class="selected-process-section">
+                <div class="selected-process-section__header">
+                  <div>
+                    <span class="process-builder__eyebrow">
+                      ALUR ORGANISASI
+                    </span>
+
+                    <h3>
+                      Urutan proses yang dipilih
+                    </h3>
+                  </div>
+
+                  <span
+                    class="selected-process-section__count"
+                    data-selected-process-count
+                  >
+                    0 langkah
+                  </span>
+                </div>
+
+                <div
+                  class="selected-process-list"
+                  data-selected-process-list
+                >
+                  <div
+                    class="selected-process-empty"
+                    data-selected-process-empty
+                  >
+                    <ClipboardList
+                      size={25}
+                      stroke-width={1.7}
+                      aria-hidden="true"
+                    />
+
+                    <strong>
+                      Belum ada tahapan
+                    </strong>
+
+                    <span>
+                      Pilih tahapan di atas untuk membangun alur pengelolaan.
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section class="process-card">
+              <div class="process-card__header">
+                <div>
+                  <span class="process-card__eyebrow">
+                    PENJELASAN PROSES
+                  </span>
+
+                  <h2 class="process-card__title">
+                    Berikan konteks tambahan
+                  </h2>
+
+                  <p class="process-card__description">
+                    Jelaskan bagaimana alur tersebut dijalankan oleh
+                    organisasi dan batasan proses yang perlu diketahui.
+                  </p>
+                </div>
+
+                <div class="process-card__icon">
+                  <Recycle
+                    size={22}
+                    stroke-width={1.9}
+                    aria-hidden="true"
+                  />
+                </div>
+              </div>
+
+              <div class="field">
+                <label
+                  class="field__label"
+                  for="processDescription"
+                >
+                  Deskripsi keseluruhan proses
+                </label>
+
+                <p
+                  class="field__hint"
+                  id="processDescriptionHint"
+                >
+                  Contoh: dari mana material berasal, bagaimana pemilahan
+                  dilakukan, ke mana material diteruskan, dan informasi
+                  penting lain yang memang dapat dipublikasikan.
+                </p>
+
+                <textarea
+                  id="processDescription"
+                  name="processDescription"
+                  class="field__textarea"
+                  rows="8"
+                  maxlength="2200"
+                  placeholder="Jelaskan alur pengelolaan organisasi secara umum..."
+                  aria-describedby="processDescriptionHint processDescriptionCounter"
+                  data-process-description
+                ></textarea>
+
+                <div class="field__footer">
+                  <span
+                    class="field__counter"
+                    data-process-description-counter
+                  >
+                    0 / 2200
+                  </span>
+                </div>
+              </div>
+
+              <div class="process-guidelines">
+                <div class="process-guideline">
+                  <div class="process-guideline__icon">
+                    <CheckCircle
+                      size={17}
+                      stroke-width={2}
+                      aria-hidden="true"
+                    />
+                  </div>
+
+                  <div>
+                    <strong>
+                      Jelaskan dengan konkret
+                    </strong>
+
+                    <span>
+                      Gunakan informasi yang membantu masyarakat memahami
+                      proses tanpa membuat klaim yang berlebihan.
+                    </span>
+                  </div>
+                </div>
+
+                <div class="process-guideline">
+                  <div class="process-guideline__icon">
+                    <ShieldCheck
+                      size={17}
+                      stroke-width={2}
+                      aria-hidden="true"
+                    />
+                  </div>
+
+                  <div>
+                    <strong>
+                      Bedakan proses aktual dan rencana
+                    </strong>
+
+                    <span>
+                      Tahapan yang belum berjalan sebaiknya tidak ditampilkan
+                      sebagai aktivitas yang sudah dilakukan.
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section class="process-card process-card--save">
+              <div class="save-box">
+                <div class="save-box__icon">
+                  <Save
+                    size={21}
+                    stroke-width={2}
+                    aria-hidden="true"
+                  />
+                </div>
+
+                <div class="save-box__content">
+                  <h2>
+                    Simpan alur proses
+                  </h2>
+
+                  <p>
+                    Pilihan tahapan dan deskripsi proses akan dipersiapkan
+                    untuk proses penyimpanan serta peninjauan organisasi.
+                  </p>
+                </div>
+              </div>
+
+              <div class="form-actions">
+                <a
+                  class="form-actions__back"
+                  href="/organization"
+                >
+                  <ArrowLeft
+                    size={17}
+                    stroke-width={2}
+                    aria-hidden="true"
+                  />
+
+                  <span>
+                    Kembali
+                  </span>
+                </a>
+
+                <button
+                  type="button"
+                  class="form-actions__submit"
+                  data-save-process
+                >
+                  <Save
+                    size={17}
+                    stroke-width={2}
+                    aria-hidden="true"
+                  />
+
+                  <span data-save-label>
+                    Simpan proses
+                  </span>
+                </button>
+              </div>
+
+              <p
+                class="save-message"
+                data-save-message
+                hidden
+              ></p>
+            </section>
+
+            <div
+              class="save-success"
+              data-save-success
+              hidden
+            >
+              <div class="save-success__icon">
+                <CheckCircle
+                  size={33}
+                  stroke-width={1.8}
+                  aria-hidden="true"
+                />
+              </div>
+
+              <span class="save-success__eyebrow">
+                PROSES DIPERSIAPKAN
+              </span>
+
+              <h2>
+                Informasi proses berhasil dipersiapkan
+              </h2>
+
+              <p>
+                Alur proses dan deskripsi telah melalui pemeriksaan dasar
+                pada browser dan siap diteruskan ke proses penyimpanan atau
+                verifikasi.
+              </p>
+
+              <div class="save-success__actions">
+                <a
+                  class="form-actions__submit"
+                  href="/organization"
+                >
+                  Kembali ke portal
+
+                  <ArrowRight
+                    size={17}
+                    stroke-width={2}
+                    aria-hidden="true"
+                  />
+                </a>
+
+                <button
+                  type="button"
+                  class="form-actions__back"
+                  data-edit-process
+                >
+                  Edit kembali
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <aside class="process-sidebar">
+            <div class="sidebar-card sidebar-card--highlight">
+              <div class="sidebar-card__icon">
+                <ClipboardList
+                  size={20}
+                  stroke-width={2}
+                  aria-hidden="true"
+                />
+              </div>
+
+              <span class="sidebar-card__eyebrow">
+                RINGKASAN PROSES
+              </span>
+
+              <h2>
+                Alur organisasi
+              </h2>
+
+              <div class="process-summary-number">
+                <strong data-sidebar-step-count>
+                  0
+                </strong>
+
+                <span>
+                  langkah dipilih
+                </span>
+              </div>
+
+              <div
+                class="sidebar-mini-flow"
+                data-sidebar-mini-flow
+              >
+                <span></span>
+              </div>
+
+              <p>
+                Urutan proses membantu menjelaskan bagaimana material
+                bergerak melalui aktivitas pengelolaan organisasi.
+              </p>
+            </div>
+
+            <div class="sidebar-card">
+              <span class="sidebar-card__eyebrow">
+                PRINSIP DATA
+              </span>
+
+              <h2>
+                Tampilkan kondisi sebenarnya
+              </h2>
+
+              <div class="sidebar-check-list">
+                <div class="sidebar-check">
+                  <CheckCircle
+                    size={16}
+                    stroke-width={2}
+                    aria-hidden="true"
+                  />
+
+                  <span>
+                    Pilih tahapan yang benar-benar dilakukan
+                  </span>
+                </div>
+
+                <div class="sidebar-check">
+                  <CheckCircle
+                    size={16}
+                    stroke-width={2}
+                    aria-hidden="true"
+                  />
+
+                  <span>
+                    Susun urutan proses secara logis
+                  </span>
+                </div>
+
+                <div class="sidebar-check">
+                  <CheckCircle
+                    size={16}
+                    stroke-width={2}
+                    aria-hidden="true"
+                  />
+
+                  <span>
+                    Gunakan deskripsi yang dapat diverifikasi
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div class="sidebar-card sidebar-card--warning">
+              <div class="sidebar-warning__icon">
+                <TriangleAlert
+                  size={18}
+                  stroke-width={2}
+                  aria-hidden="true"
+                />
+              </div>
+
+              <div>
+                <strong>
+                  Hindari proses yang tidak dilakukan
+                </strong>
+
+                <p>
+                  Jangan memilih tahapan hanya karena terlihat lengkap.
+                  Informasi harus sesuai dengan kegiatan organisasi.
+                </p>
+              </div>
+            </div>
+
+            <div class="sidebar-card sidebar-card--next">
+              <span class="sidebar-card__eyebrow">
+                LANJUTKAN
+              </span>
+
+              <h2>
+                Lengkapi profil organisasi
+              </h2>
+
+              <a href="/organization/profile">
+                Kembali ke profil
+
+                <ArrowRight
+                  size={16}
+                  stroke-width={2}
+                  aria-hidden="true"
+                />
+              </a>
+
+              <a href="/organization/waste">
+                Kelola sampah
+
+                <ArrowRight
+                  size={16}
+                  stroke-width={2}
+                  aria-hidden="true"
+                />
+              </a>
+
+              <a href="/organization/products">
+                Kelola produk
+
+                <ArrowRight
+                  size={16}
+                  stroke-width={2}
+                  aria-hidden="true"
+                />
+              </a>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </section>
+  </main>
+</OrganizationLayout>
+
+<style>
+  .organization-process-page {
+    min-height: 100vh;
+    background: var(--color-background);
+  }
+
+  .process-content {
+    padding: var(--space-10) 0 var(--space-14);
+  }
+
+  .process-container {
+    width: min(1180px, calc(100% - 40px));
+    margin-inline: auto;
+  }
+
+  .process-layout {
+    display: grid;
+    grid-template-columns:
+      minmax(0, 1fr)
+      320px;
+    gap: var(--space-7);
+    align-items: start;
+  }
+
+  .process-main {
+    min-width: 0;
+  }
+
+  .process-card {
+    margin-bottom: var(--space-5);
+    padding: var(--space-7);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-xs);
+  }
+
+  .process-card__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-5);
+    padding-bottom: var(--space-6);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .process-card__eyebrow,
+  .process-builder__eyebrow,
+  .sidebar-card__eyebrow,
+  .save-success__eyebrow {
+    display: block;
+    color: var(--color-primary-dark);
+    font-size: 0.64rem;
+    font-weight: 850;
+    letter-spacing: 0.11em;
+  }
+
+  .process-card__title {
+    margin: var(--space-2) 0 0;
+    color: var(--color-text-strong);
+    font-size: 1.1rem;
+    font-weight: 850;
+    line-height: 1.3;
+  }
+
+  .process-card__description {
+    max-width: 720px;
+    margin: 5px 0 0;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-sm);
+    line-height: 1.65;
+  }
+
+  .process-card__icon {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 13px;
+    background: var(--color-primary-soft);
+    color: var(--color-primary);
+  }
+
+  .process-intro {
+    display: flex;
+    align-items: flex-start;
+    gap: 11px;
+    margin-top: var(--space-6);
+    padding: var(--space-4);
+    border: 1px solid var(--color-primary-soft);
+    border-radius: var(--radius-lg);
+    background: var(--color-primary-soft);
+  }
+
+  .process-intro__icon {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 11px;
+    background: var(--color-surface);
+    color: var(--color-primary);
+  }
+
+  .process-intro strong,
+  .process-intro p {
+    display: block;
+  }
+
+  .process-intro strong {
+    color: var(--color-text-strong);
+    font-size: var(--font-size-xs);
+  }
+
+  .process-intro p {
+    margin: 3px 0 0;
+    color: var(--color-text-muted);
+    font-size: 0.68rem;
+    line-height: 1.55;
+  }
+
+  .process-builder {
+    margin-top: var(--space-7);
+  }
+
+  .process-builder__label-row,
+  .selected-process-section__header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--space-4);
+  }
+
+  .process-builder h3,
+  .selected-process-section h3 {
+    margin: 4px 0 0;
+    color: var(--color-text-strong);
+    font-size: 0.95rem;
+    font-weight: 800;
+  }
+
+  .process-builder__count,
+  .selected-process-section__count {
+    flex: 0 0 auto;
+    color: var(--color-text-faint);
+    font-size: 0.66rem;
+    font-weight: 750;
+  }
+
+  .available-process-grid {
+    display: grid;
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+    gap: var(--space-3);
+    margin-top: var(--space-4);
+  }
+
+  .available-process {
+    display: grid;
+    grid-template-columns:
+      32px
+      minmax(0, 1fr)
+      30px;
+    gap: 10px;
+    align-items: start;
+    padding: 13px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background: var(--color-surface);
+    color: inherit;
+    cursor: pointer;
+    font: inherit;
+    text-align: left;
+    transition:
+      border-color 160ms ease,
+      background 160ms ease,
+      transform 160ms ease,
+      box-shadow 160ms ease;
+  }
+
+  .available-process:hover:not(:disabled) {
+    transform: translateY(-1px);
+    border-color: var(--color-primary);
+    box-shadow: var(--shadow-xs);
+  }
+
+  .available-process:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+
+  .available-process__number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 9px;
+    background: var(--color-primary-soft);
+    color: var(--color-primary-dark);
+    font-size: 0.58rem;
+    font-weight: 850;
+  }
+
+  .available-process__body {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+  }
+
+  .available-process__body strong {
+    color: var(--color-text-strong);
+    font-size: var(--font-size-xs);
+    font-weight: 800;
+  }
+
+  .available-process__body small {
+    margin-top: 3px;
+    color: var(--color-text-muted);
+    font-size: 0.64rem;
+    line-height: 1.5;
+  }
+
+  .available-process__add {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border: 1px solid var(--color-border);
+    border-radius: 9px;
+    color: var(--color-primary);
+    background: var(--color-surface-soft);
+  }
+
+  .selected-process-section {
+    margin-top: var(--space-8);
+  }
+
+  .selected-process-list {
+    display: grid;
+    gap: 9px;
+    margin-top: var(--space-4);
+  }
+
+  .selected-process-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    min-height: 180px;
+    padding: var(--space-6);
+    border: 1px dashed var(--color-border-strong);
+    border-radius: var(--radius-lg);
+    color: var(--color-text-faint);
+    text-align: center;
+  }
+
+  .selected-process-empty strong {
+    margin-top: 9px;
+    color: var(--color-text-strong);
+    font-size: var(--font-size-sm);
+  }
+
+  .selected-process-empty span {
+    max-width: 340px;
+    margin-top: 4px;
+    color: var(--color-text-muted);
+    font-size: 0.68rem;
+    line-height: 1.55;
+  }
+
+  .selected-process {
+    display: grid;
+    grid-template-columns:
+      38px
+      minmax(0, 1fr)
+      auto;
+    gap: 11px;
+    align-items: center;
+    padding: 12px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background: var(--color-surface-soft);
+  }
+
+  .selected-process__number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 11px;
+    background: var(--color-primary);
+    color: var(--color-white);
+    font-size: 0.62rem;
+    font-weight: 850;
+  }
+
+  .selected-process__body {
+    min-width: 0;
+  }
+
+  .selected-process__body strong,
+  .selected-process__body span {
+    display: block;
+  }
+
+  .selected-process__body strong {
+    color: var(--color-text-strong);
+    font-size: var(--font-size-xs);
+    font-weight: 800;
+  }
+
+  .selected-process__body span {
+    margin-top: 3px;
+    color: var(--color-text-muted);
+    font-size: 0.65rem;
+    line-height: 1.5;
+  }
+
+  .selected-process__actions {
+    display: flex;
+    gap: 4px;
+  }
+
+  .selected-process__action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    background: var(--color-surface);
+    color: var(--color-text-muted);
+    cursor: pointer;
+  }
+
+  .selected-process__action:hover {
+    border-color: var(--color-border-strong);
+    color: var(--color-text-strong);
+  }
+
+  .selected-process__action--remove:hover {
+    border-color: var(--color-danger);
+    color: var(--color-danger);
+  }
+
+  .field {
+    padding-top: var(--space-6);
+  }
+
+  .field__label {
+    display: inline-flex;
+    margin-bottom: var(--space-2);
+    color: var(--color-text-strong);
+    font-size: var(--font-size-sm);
+    font-weight: 750;
+  }
+
+  .field__hint {
+    margin: 0 0 var(--space-2);
+    color: var(--color-text-faint);
+    font-size: var(--font-size-xs);
+    line-height: 1.55;
+  }
+
+  .field__textarea {
+    width: 100%;
+    min-height: 155px;
+    padding: 12px 13px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+    color: var(--color-text-strong);
+    font: inherit;
+    font-size: var(--font-size-sm);
+    line-height: 1.65;
+    resize: vertical;
+  }
+
+  .field__textarea::placeholder {
+    color: var(--color-text-faint);
+  }
+
+  .field__textarea:focus {
+    border-color: var(--color-primary);
+    outline: none;
+    box-shadow:
+      0 0 0 3px var(--color-primary-ring);
+  }
+
+  .field__textarea[aria-invalid="true"] {
+    border-color: var(--color-danger);
+  }
+
+  .field__footer {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .field__counter {
+    margin-top: 7px;
+    color: var(--color-text-faint);
+    font-size: 0.67rem;
+  }
+
+  .process-guidelines {
+    display: grid;
+    gap: var(--space-3);
+    margin-top: var(--space-6);
+  }
+
+  .process-guideline {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: var(--space-4);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background: var(--color-surface-soft);
+  }
+
+  .process-guideline__icon {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    width: 35px;
+    height: 35px;
+    border-radius: 10px;
+    background: var(--color-primary-soft);
+    color: var(--color-primary);
+  }
+
+  .process-guideline strong,
+  .process-guideline span {
+    display: block;
+  }
+
+  .process-guideline strong {
+    color: var(--color-text-strong);
+    font-size: var(--font-size-xs);
+  }
+
+  .process-guideline span {
+    margin-top: 3px;
+    color: var(--color-text-muted);
+    font-size: 0.67rem;
+    line-height: 1.55;
+  }
+
+  .process-card--save {
+    padding-top: var(--space-6);
+  }
+
+  .save-box {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+    padding: var(--space-4);
+    border: 1px solid var(--color-primary-soft);
+    border-radius: var(--radius-lg);
+    background: var(--color-primary-soft);
+  }
+
+  .save-box__icon {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    background: var(--color-surface);
+    color: var(--color-primary);
+  }
+
+  .save-box__content h2 {
+    margin: 1px 0 0;
+    color: var(--color-text-strong);
+    font-size: var(--font-size-sm);
+    font-weight: 800;
+  }
+
+  .save-box__content p {
+    margin: 4px 0 0;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-xs);
+    line-height: 1.6;
+  }
+
+  .form-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+    margin-top: var(--space-6);
+    padding-top: var(--space-5);
+    border-top: 1px solid var(--color-border);
+  }
+
+  .form-actions__back {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    min-height: 44px;
+    padding: 0 12px;
+    border: 1px solid transparent;
+    border-radius: var(--radius-md);
+    background: transparent;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    font: inherit;
+    font-size: var(--font-size-sm);
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  .form-actions__back:hover {
+    background: var(--color-surface-soft);
+    color: var(--color-text-strong);
+  }
+
+  .form-actions__submit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 45px;
+    padding: 0 var(--space-5);
+    border: 1px solid var(--color-primary);
+    border-radius: var(--radius-md);
+    background: var(--color-primary);
+    color: var(--color-white);
+    cursor: pointer;
+    font: inherit;
+    font-size: var(--font-size-sm);
+    font-weight: 800;
+    text-decoration: none;
+    box-shadow: var(--shadow-sm);
+    transition:
+      transform 160ms ease,
+      background 160ms ease,
+      box-shadow 160ms ease;
+  }
+
+  .form-actions__submit:hover {
+    transform: translateY(-1px);
+    background: var(--color-primary-dark);
+    box-shadow: var(--shadow-md);
+  }
+
+  .form-actions__submit:disabled {
+    opacity: 0.65;
+    cursor: wait;
+    transform: none;
+  }
+
+  .form-actions__submit:focus-visible,
+  .form-actions__back:focus-visible,
+  .available-process:focus-visible,
+  .selected-process__action:focus-visible {
+    outline: 3px solid var(--color-primary-ring);
+    outline-offset: 3px;
+  }
+
+  .save-message {
+    margin: var(--space-3) 0 0;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-xs);
+    text-align: right;
+  }
+
+  .save-message[hidden],
+  .save-success[hidden] {
+    display: none;
+  }
+
+  .process-sidebar {
+    position: sticky;
+    top: var(--space-6);
+    display: grid;
+    gap: var(--space-4);
+  }
+
+  .sidebar-card {
+    padding: var(--space-5);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-xs);
+  }
+
+  .sidebar-card--highlight {
+    background:
+      linear-gradient(
+        145deg,
+        var(--color-primary-soft),
+        var(--color-surface)
+      );
+  }
+
+  .sidebar-card__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    margin-bottom: var(--space-3);
+    border-radius: 12px;
+    background: var(--color-surface);
+    color: var(--color-primary);
+  }
+
+  .sidebar-card h2 {
+    margin: var(--space-2) 0 0;
+    color: var(--color-text-strong);
+    font-size: 1rem;
+    font-weight: 800;
+    line-height: 1.4;
+  }
+
+  .sidebar-card > p {
+    margin: var(--space-3) 0 0;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-xs);
+    line-height: 1.65;
+  }
+
+  .process-summary-number {
+    display: flex;
+    align-items: baseline;
+    gap: 7px;
+    margin-top: var(--space-5);
+  }
+
+  .process-summary-number strong {
+    color: var(--color-primary);
+    font-size: 2.15rem;
+    line-height: 1;
+  }
+
+  .process-summary-number span {
+    color: var(--color-text-muted);
+    font-size: var(--font-size-xs);
+  }
+
+  .sidebar-mini-flow {
+    display: flex;
+    gap: 5px;
+    margin-top: var(--space-4);
+  }
+
+  .sidebar-mini-flow span,
+  .sidebar-mini-flow span::before,
+  .sidebar-mini-flow span::after {
+    display: block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--color-border);
+  }
+
+  .sidebar-mini-flow span::before,
+  .sidebar-mini-flow span::after {
+    content: "";
+  }
+
+  .sidebar-mini-flow span {
+    margin-right: 12px;
+    background: var(--color-primary);
+    box-shadow:
+      20px 0 0 var(--color-border),
+      40px 0 0 var(--color-border),
+      60px 0 0 var(--color-border),
+      80px 0 0 var(--color-border);
+  }
+
+  .sidebar-check-list {
+    display: grid;
+    gap: 12px;
+    margin-top: var(--space-5);
+  }
+
+  .sidebar-check {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-xs);
+    line-height: 1.55;
+  }
+
+  .sidebar-check svg {
+    flex: 0 0 auto;
+    margin-top: 1px;
+    color: var(--color-primary);
+  }
+
+  .sidebar-card--warning {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .sidebar-warning__icon {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 11px;
+    background: var(--color-warning-soft);
+    color: var(--color-warning-text);
+  }
+
+  .sidebar-card--warning strong {
+    display: block;
+    color: var(--color-text-strong);
+    font-size: var(--font-size-sm);
+  }
+
+  .sidebar-card--warning p {
+    margin-top: 4px;
+  }
+
+  .sidebar-card--next {
+    display: grid;
+  }
+
+  .sidebar-card--next a {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--color-border);
+    color: var(--color-primary);
+    font-size: var(--font-size-xs);
+    font-weight: 750;
+    text-decoration: none;
+  }
+
+  .sidebar-card--next a:hover {
+    color: var(--color-primary-dark);
+  }
+
+  .save-success {
+    padding: var(--space-10);
+    border: 1px solid var(--color-primary-soft);
+    border-radius: var(--radius-xl);
+    background:
+      linear-gradient(
+        145deg,
+        var(--color-primary-soft),
+        var(--color-surface)
+      );
+    box-shadow: var(--shadow-sm);
+    text-align: center;
+  }
+
+  .save-success__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 68px;
+    height: 68px;
+    border-radius: 50%;
+    background: var(--color-surface);
+    color: var(--color-primary);
+  }
+
+  .save-success__eyebrow {
+    margin-top: var(--space-4);
+  }
+
+  .save-success h2 {
+    margin: var(--space-2) 0 0;
+    color: var(--color-text-strong);
+    font-size: clamp(1.45rem, 3vw, 2rem);
+    letter-spacing: -0.025em;
+  }
+
+  .save-success p {
+    max-width: 660px;
+    margin: var(--space-3) auto 0;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-sm);
+    line-height: 1.7;
+  }
+
+  .save-success__actions {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    margin-top: var(--space-6);
+  }
+
+  @media (max-width: 1000px) {
+    .process-layout {
+      grid-template-columns: 1fr;
+    }
+
+    .process-sidebar {
+      position: static;
+      grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+    }
+
+    .sidebar-card--highlight,
+    .sidebar-card--next {
+      grid-column: 1 / -1;
+    }
+  }
+
+  @media (max-width: 720px) {
+    .process-container {
+      width: min(
+        100%,
+        calc(100% - 28px)
+      );
+    }
+
+    .process-content {
+      padding-top: var(--space-6);
+    }
+
+    .process-card {
+      padding: var(--space-5);
+    }
+
+    .process-card__header {
+      gap: var(--space-3);
+      padding-bottom: var(--space-5);
+    }
+
+    .process-card__icon {
+      width: 39px;
+      height: 39px;
+    }
+
+    .available-process-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .selected-process {
+      grid-template-columns:
+        34px
+        minmax(0, 1fr);
+    }
+
+    .selected-process__number {
+      width: 34px;
+      height: 34px;
+    }
+
+    .selected-process__actions {
+      grid-column: 2;
+    }
+
+    .form-actions {
+      align-items: stretch;
+      flex-direction: column-reverse;
+    }
+
+    .form-actions__submit,
+    .form-actions__back {
+      width: 100%;
+    }
+
+    .save-message {
+      text-align: center;
+    }
+
+    .process-sidebar {
+      grid-template-columns: 1fr;
+    }
+
+    .sidebar-card--highlight,
+    .sidebar-card--next {
+      grid-column: auto;
+    }
+
+    .save-success {
+      padding: var(--space-7) var(--space-5);
+    }
+  }
+</style>
+
+<script>
+// @ts-nocheck
+
+  const availableProcessButtons =
+    Array.from(
+      document.querySelectorAll(
+        "[data-add-process]",
+      ),
+    );
+
+  const selectedProcessList =
+    document.querySelector(
+      "[data-selected-process-list]",
+    );
+
+  const selectedProcessEmpty =
+    document.querySelector(
+      "[data-selected-process-empty]",
+    );
+
+  const selectedProcessCount =
+    document.querySelector(
+      "[data-selected-process-count]",
+    );
+
+  const sidebarStepCount =
+    document.querySelector(
+      "[data-sidebar-step-count]",
+    );
+
+  const availableCount =
+    document.querySelector(
+      "[data-available-count]",
+    );
+
+  const descriptionField =
+    document.querySelector(
+      "[data-process-description]",
+    );
+
+  const descriptionCounter =
+    document.querySelector(
+      "[data-process-description-counter]",
+    );
+
+  const saveButton =
+    document.querySelector(
+      "[data-save-process]",
+    );
+
+  const saveLabel =
+    document.querySelector(
+      "[data-save-label]",
+    );
+
+  const saveMessage =
+    document.querySelector(
+      "[data-save-message]",
+    );
+
+  const saveSuccess =
+    document.querySelector(
+      "[data-save-success]",
+    );
+
+  const editProcessButton =
+    document.querySelector(
+      "[data-edit-process]",
+    );
+
+  const stepDefinitions = {
+    collection: {
+      id: "collection",
+      order: 1,
+      title: "Pengumpulan",
+      description:
+        "Tahap pengumpulan material dari sumber atau titik yang telah ditentukan.",
+    },
+
+    sorting: {
+      id: "sorting",
+      order: 2,
+      title: "Pemilahan",
+      description:
+        "Material dipisahkan berdasarkan jenis, karakteristik, atau tujuan pengelolaannya.",
+    },
+
+    processing: {
+      id: "processing",
+      order: 3,
+      title: "Pengolahan",
+      description:
+        "Material diproses menggunakan metode yang sesuai dengan karakteristiknya.",
+    },
+
+    recovery: {
+      id: "recovery",
+      order: 4,
+      title: "Recovery",
+      description:
+        "Material atau nilai yang masih dapat dimanfaatkan dipulihkan dari aliran sampah.",
+    },
+
+    storage: {
+      id: "storage",
+      order: 5,
+      title: "Penyimpanan",
+      description:
+        "Material disimpan sementara sebelum diteruskan ke tahap berikutnya.",
+    },
+
+    treatment: {
+      id: "treatment",
+      order: 6,
+      title: "Penanganan khusus",
+      description:
+        "Material tertentu mendapatkan penanganan tambahan sesuai karakteristiknya.",
+    },
+
+    disposal: {
+      id: "disposal",
+      order: 7,
+      title: "Disposal",
+      description:
+        "Material yang tidak dapat dimanfaatkan diarahkan ke tahapan pembuangan yang sesuai.",
+    },
+  };
+
+  let selectedProcessIds = [];
+
+  function getAvailableProcessCount() {
+    return Object.keys(
+      stepDefinitions,
+    ).length - selectedProcessIds.length;
+  }
+
+  function updateAvailableCount() {
+    if (
+      !(availableCount instanceof HTMLElement)
+    ) {
+      return;
+    }
+
+    const count =
+      getAvailableProcessCount();
+
+    availableCount.textContent =
+      `${count} tahapan`;
+  }
+
+  function updateSelectedProcessCount() {
+    const count =
+      selectedProcessIds.length;
+
+    if (
+      selectedProcessCount instanceof HTMLElement
+    ) {
+      selectedProcessCount.textContent =
+        `${count} langkah`;
+    }
+
+    if (
+      sidebarStepCount instanceof HTMLElement
+    ) {
+      sidebarStepCount.textContent =
+        String(count);
+    }
+
+    updateAvailableCount();
+  }
+
+  function updateAvailableButtons() {
+    availableProcessButtons.forEach(
+      (button) => {
+        const id =
+          button.getAttribute(
+            "data-add-process",
+          );
+
+        const selected =
+          id &&
+          selectedProcessIds.includes(
+            id,
+          );
+
+        button.disabled =
+          Boolean(selected);
+      },
+    );
+  }
+
+  function createActionButton(
+    action,
+    label,
+    icon,
+  ) {
+    const button =
+      document.createElement(
+        "button",
+      );
+
+    button.type = "button";
+
+    button.className =
+      "selected-process__action";
+
+    button.setAttribute(
+      "data-process-action",
+      action,
+    );
+
+    button.setAttribute(
+      "aria-label",
+      label,
+    );
+
+    button.innerHTML = icon;
+
+    return button;
+  }
+
+  function renderSelectedProcesses() {
+    if (
+      !(selectedProcessList instanceof HTMLElement)
+    ) {
+      return;
+    }
+
+    selectedProcessList
+      .querySelectorAll(
+        ".selected-process",
+      )
+      .forEach(
+        (element) => {
+          element.remove();
+        },
+      );
+
+    if (
+      selectedProcessIds.length === 0
+    ) {
+      if (
+        selectedProcessEmpty instanceof HTMLElement
+      ) {
+        selectedProcessEmpty.hidden =
+          false;
+      }
+
+      updateSelectedProcessCount();
+      updateAvailableButtons();
+
+      return;
+    }
+
+    if (
+      selectedProcessEmpty instanceof HTMLElement
+    ) {
+      selectedProcessEmpty.hidden =
+        true;
+    }
+
+    selectedProcessIds.forEach(
+      (
+        processId,
+        index,
+      ) => {
+        const definition =
+          stepDefinitions[
+            processId
+          ];
+
+        if (!definition) {
+          return;
+        }
+
+        const item =
+          document.createElement(
+            "div",
+          );
+
+        item.className =
+          "selected-process";
+
+        item.setAttribute(
+          "data-selected-process",
+          processId,
+        );
+
+        const number =
+          document.createElement(
+            "span",
+          );
+
+        number.className =
+          "selected-process__number";
+
+        number.textContent =
+          String(
+            index + 1,
+          ).padStart(2, "0");
+
+        const body =
+          document.createElement(
+            "div",
+          );
+
+        body.className =
+          "selected-process__body";
+
+        const title =
+          document.createElement(
+            "strong",
+          );
+
+        title.textContent =
+          definition.title;
+
+        const description =
+          document.createElement(
+            "span",
+          );
+
+        description.textContent =
+          definition.description;
+
+        body.append(
+          title,
+          description,
+        );
+
+        const actions =
+          document.createElement(
+            "div",
+          );
+
+        actions.className =
+          "selected-process__actions";
+
+        const upButton =
+          createActionButton(
+            "up",
+            `Pindahkan ${definition.title} ke atas`,
+            "↑",
+          );
+
+        const downButton =
+          createActionButton(
+            "down",
+            `Pindahkan ${definition.title} ke bawah`,
+            "↓",
+          );
+
+        const removeButton =
+          createActionButton(
+            "remove",
+            `Hapus ${definition.title}`,
+            "×",
+          );
+
+        if (index === 0) {
+          upButton.disabled = true;
+        }
+
+        if (
+          index ===
+          selectedProcessIds.length - 1
+        ) {
+          downButton.disabled = true;
+        }
+
+        actions.append(
+          upButton,
+          downButton,
+          removeButton,
+        );
+
+        item.append(
+          number,
+          body,
+          actions,
+        );
+
+        selectedProcessList.appendChild(
+          item,
+        );
+      },
+    );
+
+    updateSelectedProcessCount();
+    updateAvailableButtons();
+
+    selectedProcessList
+      .querySelectorAll(
+        "[data-process-action]",
+      )
+      .forEach(
+        (button) => {
+          button.addEventListener(
+            "click",
+            () => {
+              const parent =
+                button.closest(
+                  "[data-selected-process]",
+                );
+
+              if (
+                !(parent instanceof HTMLElement)
+              ) {
+                return;
+              }
+
+              const processId =
+                parent.getAttribute(
+                  "data-selected-process",
+                );
+
+              if (!processId) {
+                return;
+              }
+
+              const action =
+                button.getAttribute(
+                  "data-process-action",
+                );
+
+              const index =
+                selectedProcessIds.indexOf(
+                  processId,
+                );
+
+              if (index < 0) {
+                return;
+              }
+
+              if (action === "up" && index > 0) {
+                const previous =
+                  selectedProcessIds[
+                    index - 1
+                  ];
+
+                selectedProcessIds[
+                  index - 1
+                ] = processId;
+
+                selectedProcessIds[
+                  index
+                ] = previous;
+              }
+
+              if (
+                action === "down" &&
+                index <
+                  selectedProcessIds.length - 1
+              ) {
+                const next =
+                  selectedProcessIds[
+                    index + 1
+                  ];
+
+                selectedProcessIds[
+                  index + 1
+                ] = processId;
+
+                selectedProcessIds[
+                  index
+                ] = next;
+              }
+
+              if (action === "remove") {
+                selectedProcessIds =
+                  selectedProcessIds.filter(
+                    (value) =>
+                      value !== processId,
+                  );
+              }
+
+              renderSelectedProcesses();
+            },
+          );
+        },
+      );
+  }
+
+  function addProcess(
+    processId,
+  ) {
+    if (
+      !processId ||
+      !stepDefinitions[processId]
+    ) {
+      return;
+    }
+
+    if (
+      selectedProcessIds.includes(
+        processId,
+      )
+    ) {
+      return;
+    }
+
+    selectedProcessIds.push(
+      processId,
+    );
+
+    renderSelectedProcesses();
+  }
+
+  function updateDescriptionCounter() {
+    if (
+      !(descriptionField instanceof HTMLTextAreaElement) ||
+      !(descriptionCounter instanceof HTMLElement)
+    ) {
+      return;
+    }
+
+    descriptionCounter.textContent =
+      `${descriptionField.value.length} / 2200`;
+  }
+
+  function validateProcessData() {
+    if (
+      selectedProcessIds.length === 0
+    ) {
+      if (
+        saveMessage instanceof HTMLElement
+      ) {
+        saveMessage.textContent =
+          "Pilih minimal satu tahapan proses sebelum menyimpan.";
+
+        saveMessage.hidden = false;
+      }
+
+      if (
+        selectedProcessList instanceof HTMLElement
+      ) {
+        selectedProcessList.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
+      }
+
+      return false;
+    }
+
+    if (
+      descriptionField instanceof HTMLTextAreaElement
+    ) {
+      const description =
+        descriptionField.value.trim();
+
+      if (
+        description.length > 0 &&
+        description.length < 20
+      ) {
+        descriptionField.setAttribute(
+          "aria-invalid",
+          "true",
+        );
+
+        if (
+          saveMessage instanceof HTMLElement
+        ) {
+          saveMessage.textContent =
+            "Deskripsi proses yang diisi minimal 20 karakter.";
+
+          saveMessage.hidden = false;
+        }
+
+        descriptionField.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
+
+        descriptionField.focus();
+
+        return false;
+      }
+
+      descriptionField.removeAttribute(
+        "aria-invalid",
+      );
+    }
+
+    return true;
+  }
+
+  function buildProcessPayload() {
+    return {
+      steps:
+        selectedProcessIds.map(
+          (
+            processId,
+            index,
+          ) => {
+            const definition =
+              stepDefinitions[
+                processId
+              ];
+
+            return {
+              id: processId,
+              name:
+                definition?.title ??
+                processId,
+              description:
+                definition?.description ??
+                "",
+              order:
+                index + 1,
+            };
+          },
+        ),
+
+      description:
+        descriptionField instanceof
+        HTMLTextAreaElement
+          ? descriptionField.value.trim()
+          : "",
+
+      updatedAt:
+        new Date().toISOString(),
+    };
+  }
+
+  async function saveProcess() {
+    if (!validateProcessData()) {
+      return;
+    }
+
+    const payload =
+      buildProcessPayload();
+
+    if (
+      saveButton instanceof HTMLButtonElement
+    ) {
+      saveButton.disabled = true;
+    }
+
+    if (
+      saveLabel instanceof HTMLElement
+    ) {
+      saveLabel.textContent =
+        "Menyiapkan...";
+    }
+
+    if (
+      saveMessage instanceof HTMLElement
+    ) {
+      saveMessage.textContent =
+        "Memeriksa informasi proses...";
+
+      saveMessage.hidden = false;
+    }
+
+    await Promise.resolve();
+
+    window.dispatchEvent(
+      new CustomEvent(
+        "binsight:organization-process-save",
+        {
+          detail: payload,
+        },
+      ),
+    );
+
+    document
+      .querySelectorAll(
+        ".process-card",
+      )
+      .forEach(
+        (section) => {
+          section.hidden = true;
+        },
+      );
+
+    const sidebar =
+      document.querySelector(
+        ".process-sidebar",
+      );
+
+    if (
+      sidebar instanceof HTMLElement
+    ) {
+      sidebar.hidden = true;
+    }
+
+    if (
+      saveSuccess instanceof HTMLElement
+    ) {
+      saveSuccess.hidden = false;
+
+      saveSuccess.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }
+
+    if (
+      saveMessage instanceof HTMLElement
+    ) {
+      saveMessage.hidden = true;
+    }
+  }
+
+  function restoreEditor() {
+    document
+      .querySelectorAll(
+        ".process-card",
+      )
+      .forEach(
+        (section) => {
+          section.hidden = false;
+        },
+      );
+
+    const sidebar =
+      document.querySelector(
+        ".process-sidebar",
+      );
+
+    if (
+      sidebar instanceof HTMLElement
+    ) {
+      sidebar.hidden = false;
+    }
+
+    if (
+      saveSuccess instanceof HTMLElement
+    ) {
+      saveSuccess.hidden = true;
+    }
+
+    if (
+      saveButton instanceof HTMLButtonElement
+    ) {
+      saveButton.disabled = false;
+    }
+
+    if (
+      saveLabel instanceof HTMLElement
+    ) {
+      saveLabel.textContent =
+        "Simpan proses";
+    }
+
+    if (
+      saveMessage instanceof HTMLElement
+    ) {
+      saveMessage.textContent = "";
+      saveMessage.hidden = true;
+    }
+  }
+
+  availableProcessButtons.forEach(
+    (button) => {
+      button.addEventListener(
+        "click",
+        () => {
+          const processId =
+            button.getAttribute(
+              "data-add-process",
+            );
+
+          addProcess(
+            processId,
+          );
+        },
+      );
+    },
+  );
+
+  descriptionField?.addEventListener(
+    "input",
+    updateDescriptionCounter,
+  );
+
+  saveButton?.addEventListener(
+    "click",
+    saveProcess,
+  );
+
+  editProcessButton?.addEventListener(
+    "click",
+    restoreEditor,
+  );
+
+  updateDescriptionCounter();
+  updateSelectedProcessCount();
+  updateAvailableButtons();
+</script>
