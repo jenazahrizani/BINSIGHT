@@ -2,7 +2,7 @@
 import {
   ArrowRight,
   Building2,
-  CheckCircle2,
+  CircleCheck,
   MapPin,
   Search,
   ShieldCheck,
@@ -100,11 +100,6 @@ const organizationCount =
 const areaCount =
   areaSummary.length;
 
-const pendingPublicCount =
-  publicOrganizations.filter(
-    (organization: Organization) =>
-      organization.status === "pending",
-  ).length;
 ---
 
 <PublicLayout
@@ -116,7 +111,7 @@ const pendingPublicCount =
     description={pageDescription}
     breadcrumbs={breadcrumbs}
     icon="organization"
-    eyebrow="BINSIGHT · ORGANISASI"
+    eyebrow="BINSIGHT Â· ORGANISASI"
     tone="green"
   />
 
@@ -411,7 +406,7 @@ const pendingPublicCount =
                         </div>
 
                         <span class="verified-badge">
-                          <CheckCircle2
+                          <CircleCheck
                             size={14}
                             stroke-width={2}
                             aria-hidden="true"

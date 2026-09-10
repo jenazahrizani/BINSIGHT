@@ -1,11 +1,11 @@
 ---
 import {
-  AlertTriangle,
-  CheckCircle,
+  TriangleAlert,
+  CircleCheck,
   ChevronRight,
   Clock3,
   ExternalLink,
-  FileWarning,
+
   MapPin,
   ShieldAlert,
 } from "@lucide/astro";
@@ -200,7 +200,7 @@ function formatDate(
 
       {
         report.status === "verified" && (
-          <CheckCircle
+          <CircleCheck
             size={19}
             stroke-width={1.9}
           />
@@ -218,7 +218,7 @@ function formatDate(
 
       {
         report.status === "resolved" && (
-          <CheckCircle
+          <CircleCheck
             size={19}
             stroke-width={1.9}
           />
@@ -227,7 +227,7 @@ function formatDate(
 
       {
         report.status === "rejected" && (
-          <FileWarning
+          <TriangleAlert
             size={19}
             stroke-width={1.9}
           />
@@ -290,7 +290,7 @@ function formatDate(
               {
                 areaName &&
                 address
-                  ? `${areaName} · ${address}`
+                  ? `${areaName} Â· ${address}`
                   : areaName ||
                     address
               }
@@ -315,7 +315,7 @@ function formatDate(
                     class="report-marker__separator"
                     aria-hidden="true"
                   >
-                    •
+                    â€¢
                   </span>
 
                   <span
@@ -327,7 +327,7 @@ function formatDate(
                     {
                       report.priority ===
                         "high" && (
-                        <AlertTriangle
+                        <TriangleAlert
                           size={12}
                           stroke-width={2}
                           aria-hidden="true"
@@ -708,3 +708,4 @@ function formatDate(
     }
   }
 </style>
+

@@ -1,0 +1,1501 @@
+---
+
+/**
+
+* ============================================================================
+* BINSIGHT â€” WASTE DIRECTORY
+* ============================================================================
+* Public waste taxonomy / education page.
+*
+* Route:
+* /waste
+*
+* Source of truth:
+* src/lib/constants/waste.ts
+*
+* This page presents taxonomy only.
+* No invented operational statistics are shown.
+* ============================================================================
+  */
+
+import {
+ArrowRight,
+Check,
+Leaf,
+Package,
+Recycle,
+Search,
+ShieldAlert,
+Smartphone,
+Trash,
+} from "@lucide/astro";
+
+import PublicLayout from "@layouts/PublicLayout.astro";
+import PageHeader from "@components/layout/PageHeader.astro";
+
+import {
+WASTE_CATEGORIES,
+WASTE_MATERIALS,
+getWasteCategoryLabel,
+getWasteCharacteristicLabel,
+getWasteMethodLabel,
+type WasteCategory,
+type WasteMaterialDefinition,
+} from "@lib/constants/waste";
+
+/* -------------------------------------------------------------------------- */
+/* Types                                                                      */
+/* -------------------------------------------------------------------------- */
+
+interface CategoryView {
+id: WasteCategory;
+label: string;
+shortLabel: string;
+description: string;
+color: string;
+softColor: string;
+icon: string;
+count: number;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Data                                                                       */
+/* -------------------------------------------------------------------------- */
+
+const categoryViews: CategoryView[] =
+WASTE_CATEGORIES.map((category) => ({
+id: category.id,
+label: category.label,
+shortLabel: category.shortLabel,
+description: category.description,
+color: category.color,
+softColor: category.softColor,
+icon: category.icon,
+count: WASTE_MATERIALS.filter(
+(material: WasteMaterialDefinition) =>
+material.category === category.id,
+).length,
+}));
+
+const materialViews: WasteMaterialDefinition[] =
+[...WASTE_MATERIALS].sort(
+(
+first: WasteMaterialDefinition,
+second: WasteMaterialDefinition,
+) => first.order - second.order,
+);
+
+const totalMaterials = materialViews.length;
+
+const breadcrumbs = [
+{
+label: "Beranda",
+href: "/",
+},
+{
+label: "Jenis Sampah",
+},
+];
+
+/* -------------------------------------------------------------------------- */
+/* Helpers                                                                    */
+/* -------------------------------------------------------------------------- */
+
+const getCategory = (
+category: WasteCategory,
+): CategoryView => {
+const found = categoryViews.find(
+(item: CategoryView) =>
+item.id === category,
+);
+
+return (
+found ?? {
+id: category,
+label: getWasteCategoryLabel(category),
+shortLabel: getWasteCategoryLabel(category),
+description:
+"Kategori sampah dalam taksonomi BINSIGHT.",
+color: "#64748B",
+softColor: "#F1F5F9",
+icon: "recycle",
+count: 0,
+}
+);
+};
+
+const getCategoryIconMarkup = (
+category: WasteCategory,
+size = 22,
+) => {
+switch (category) {
+case "organic":
+return ( <Leaf
+       size={size}
+       stroke-width={1.8}
+       aria-hidden="true"
+     />
+);
+case "inorganic":
+  return (
+    <Package
+      size={size}
+      stroke-width={1.8}
+      aria-hidden="true"
+    />
+  );
+
+case "hazardous":
+  return (
+    <ShieldAlert
+      size={size}
+      stroke-width={1.8}
+      aria-hidden="true"
+    />
+  );
+
+case "electronic":
+  return (
+    <Smartphone
+      size={size}
+      stroke-width={1.8}
+      aria-hidden="true"
+    />
+  );
+
+case "residual":
+  return (
+    <Trash
+      size={size}
+      stroke-width={1.8}
+      aria-hidden="true"
+    />
+  );
+
+default:
+  return (
+    <Recycle
+      size={size}
+      stroke-width={1.8}
+      aria-hidden="true"
+    />
+  );
+}
+};
+
+const getCharacteristicLabels = (
+material: WasteMaterialDefinition,
+): string[] =>
+material.characteristics.map(
+(characteristic) =>
+getWasteCharacteristicLabel(
+characteristic,
+),
+);
+
+const getMethodLabels = (
+material: WasteMaterialDefinition,
+): string[] =>
+material.recommendedMethods.map(
+(method) =>
+getWasteMethodLabel(method),
+);
+
+---
+
+<PublicLayout
+title="Jenis Sampah â€” BINSIGHT"
+description="Pelajari kategori, material, karakteristik, dan metode pengelolaan sampah dalam ekosistem BINSIGHT."
+
+>
+
+<PageHeader
+ eyebrow="Edukasi Persampahan"
+ title="Jenis Sampah"
+ description="Kenali berbagai kategori dan material sampah, karakteristiknya, serta pendekatan pengelolaan yang sesuai."
+ icon="waste"
+ tone="green"
+ breadcrumbs={breadcrumbs}
+/>
+
+  <main class="waste-page">
+    <section class="waste-page__container">
+<div class="waste-intro">
+    <div class="waste-intro__copy">
+      <span class="waste-intro__eyebrow">
+        Taksonomi BINSIGHT
+      </span>
+
+      <h1 class="waste-intro__title">
+        Memahami sampah sebelum mengelolanya
+      </h1>
+
+      <p class="waste-intro__description">
+        Setiap material memiliki karakteristik dan
+        jalur pengelolaan yang berbeda. Gunakan
+        direktori ini untuk memahami material yang
+        tersedia dalam sistem BINSIGHT.
+      </p>
+    </div>
+
+    <div class="waste-intro__stats">
+      <div class="waste-stat">
+        <span class="waste-stat__value">
+          {categoryViews.length}
+        </span>
+
+        <span class="waste-stat__label">
+          Kategori
+        </span>
+      </div>
+
+      <div class="waste-stat">
+        <span class="waste-stat__value">
+          {totalMaterials}
+        </span>
+
+        <span class="waste-stat__label">
+          Material
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <section
+    class="category-section"
+    aria-labelledby="category-title"
+  >
+    <div class="section-heading">
+      <span class="section-heading__eyebrow">
+        Struktur data
+      </span>
+
+      <h2
+        id="category-title"
+        class="section-heading__title"
+      >
+        Kategori sampah
+      </h2>
+
+      <p class="section-heading__description">
+        Kelompok utama yang digunakan untuk
+        mengorganisasi material pada sistem BINSIGHT.
+      </p>
+    </div>
+
+    <div class="category-grid">
+      {
+        categoryViews.map(
+          (category: CategoryView) => (
+            <button
+              type="button"
+              class="category-card"
+              data-category-filter={category.id}
+              aria-pressed="false"
+              aria-label={`Filter material kategori ${category.label}`}
+            >
+              <span
+                class="category-card__icon"
+                style={`--category-color:${category.color};--category-soft:${category.softColor};`}
+              >
+                {getCategoryIconMarkup(
+                  category.id,
+                  24,
+                )}
+              </span>
+
+              <span class="category-card__body">
+                <span class="category-card__label">
+                  {category.label}
+                </span>
+
+                <span class="category-card__description">
+                  {category.description}
+                </span>
+
+                <span class="category-card__meta">
+                  {category.count} material
+
+                  <ArrowRight
+                    size={14}
+                    stroke-width={1.9}
+                    aria-hidden="true"
+                  />
+                </span>
+              </span>
+            </button>
+          ),
+        )
+      }
+    </div>
+  </section>
+
+  <section
+    class="directory-section"
+    aria-labelledby="directory-title"
+  >
+    <div class="directory-toolbar">
+      <div>
+        <span class="section-heading__eyebrow">
+          Direktori material
+        </span>
+
+        <h2
+          id="directory-title"
+          class="section-heading__title"
+        >
+          Jelajahi material
+        </h2>
+
+        <p class="section-heading__description">
+          Cari berdasarkan nama material, kategori,
+          karakteristik, atau metode pengelolaan.
+        </p>
+      </div>
+
+      <label class="directory-search">
+        <Search
+          size={18}
+          stroke-width={1.9}
+          aria-hidden="true"
+        />
+
+        <span class="sr-only">
+          Cari material sampah
+        </span>
+
+        <input
+          id="waste-search"
+          type="search"
+          placeholder="Cari material..."
+          autocomplete="off"
+          aria-label="Cari material sampah"
+        />
+      </label>
+    </div>
+
+    <div
+      class="active-filter"
+      data-active-filter
+      hidden
+    >
+      <span>Filter:</span>
+
+      <strong data-active-filter-label>
+        Semua
+      </strong>
+
+      <button
+        type="button"
+        data-clear-filter
+      >
+        Hapus
+      </button>
+    </div>
+
+    <div
+      class="material-grid"
+      data-material-grid
+    >
+      {
+        materialViews.map(
+          (
+            material: WasteMaterialDefinition,
+          ) => {
+            const category = getCategory(
+              material.category,
+            );
+
+            const characteristicLabels =
+              getCharacteristicLabels(
+                material,
+              );
+
+            const methodLabels =
+              getMethodLabels(material);
+
+            const searchableText = [
+              material.label,
+              material.id,
+              material.description,
+              category.label,
+              category.shortLabel,
+              ...characteristicLabels,
+              ...methodLabels,
+            ]
+              .join(" ")
+              .toLowerCase();
+
+            return (
+              <article
+                class="material-card"
+                data-material-card
+                data-category={
+                  material.category
+                }
+                data-search-text={
+                  searchableText
+                }
+              >
+                <div class="material-card__top">
+                  <span
+                    class="material-card__icon"
+                    style={`--category-color:${category.color};--category-soft:${category.softColor};`}
+                  >
+                    {getCategoryIconMarkup(
+                      material.category,
+                      21,
+                    )}
+                  </span>
+
+                  <span
+                    class="material-card__category"
+                    style={`--category-color:${category.color};--category-soft:${category.softColor};`}
+                  >
+                    {category.shortLabel}
+                  </span>
+                </div>
+
+                <div class="material-card__content">
+                  <h3 class="material-card__title">
+                    {material.label}
+                  </h3>
+
+                  <p class="material-card__description">
+                    {material.description}
+                  </p>
+
+                  <div class="material-card__section">
+                    <span class="material-card__section-title">
+                      Karakteristik
+                    </span>
+
+                    <div class="material-card__tags">
+                      {
+                        characteristicLabels.map(
+                          (
+                            label: string,
+                          ) => (
+                            <span class="material-tag">
+                              <Check
+                                size={12}
+                                stroke-width={2}
+                                aria-hidden="true"
+                              />
+
+                              {label}
+                            </span>
+                          ),
+                        )
+                      }
+                    </div>
+                  </div>
+
+                  <div class="material-card__section">
+                    <span class="material-card__section-title">
+                      Metode yang direkomendasikan
+                    </span>
+
+                    <div class="method-list">
+                      {
+                        methodLabels.map(
+                          (
+                            label: string,
+                          ) => (
+                            <span class="method-item">
+                              <span class="method-item__dot"></span>
+                              {label}
+                            </span>
+                          ),
+                        )
+                      }
+                    </div>
+                  </div>
+                </div>
+
+                <footer class="material-card__footer">
+                  <a
+                    href={`/waste/${encodeURIComponent(material.id)}`}
+                    class="material-card__link"
+                  >
+                    Pelajari material
+
+                    <ArrowRight
+                      size={15}
+                      stroke-width={1.9}
+                      aria-hidden="true"
+                    />
+                  </a>
+                </footer>
+              </article>
+            );
+          },
+        )
+      }
+    </div>
+
+    <div
+      class="directory-empty"
+      data-directory-empty
+      hidden
+    >
+      <div class="directory-empty__icon">
+        <Search
+          size={28}
+          stroke-width={1.7}
+          aria-hidden="true"
+        />
+      </div>
+
+      <h3>
+        Material tidak ditemukan
+      </h3>
+
+      <p>
+        Tidak ada material yang cocok dengan
+        pencarian atau filter yang dipilih.
+      </p>
+
+      <button
+        type="button"
+        data-clear-all
+      >
+        Tampilkan semua material
+      </button>
+    </div>
+  </section>
+
+  <section class="waste-guidance">
+    <div class="waste-guidance__icon">
+      <Recycle
+        size={26}
+        stroke-width={1.8}
+        aria-hidden="true"
+      />
+    </div>
+
+    <div class="waste-guidance__content">
+      <span class="waste-guidance__eyebrow">
+        Prinsip penggunaan data
+      </span>
+
+      <h2>
+        Kenali material, pilih jalur pengelolaan
+        yang tepat
+      </h2>
+
+      <p>
+        Direktori ini berfungsi sebagai referensi
+        taksonomi. Informasi kuantitas atau statistik
+        langsung tidak ditampilkan tanpa sumber data
+        operasional yang tersedia.
+      </p>
+    </div>
+
+    <a
+      href="/organizations"
+      class="waste-guidance__link"
+    >
+      Temukan organisasi
+
+      <ArrowRight
+        size={16}
+        stroke-width={1.9}
+        aria-hidden="true"
+      />
+    </a>
+  </section>
+
+</section>
+</main>
+
+  <script>
+    const categoryFilterData = [
+      {
+        id: "organic",
+        label: "Organik",
+      },
+      {
+        id: "inorganic",
+        label: "Anorganik",
+      },
+      {
+        id: "hazardous",
+        label: "B3 / Berbahaya",
+      },
+      {
+        id: "electronic",
+        label: "Elektronik",
+      },
+      {
+        id: "residual",
+        label: "Residu",
+      },
+    ];
+
+    const searchInput =
+      document.querySelector<HTMLInputElement>(
+        "#waste-search",
+      );
+
+    const categoryButtons =
+      Array.from(
+        document.querySelectorAll<HTMLButtonElement>(
+          "[data-category-filter]",
+        ),
+      );
+
+    const materialCards =
+      Array.from(
+        document.querySelectorAll<HTMLElement>(
+          "[data-material-card]",
+        ),
+      );
+
+    const emptyState =
+      document.querySelector<HTMLElement>(
+        "[data-directory-empty]",
+      );
+
+    const activeFilter =
+      document.querySelector<HTMLElement>(
+        "[data-active-filter]",
+      );
+
+    const activeFilterLabel =
+      document.querySelector<HTMLElement>(
+        "[data-active-filter-label]",
+      );
+
+    const clearFilterButton =
+      document.querySelector<HTMLButtonElement>(
+        "[data-clear-filter]",
+      );
+
+    const clearAllButton =
+      document.querySelector<HTMLButtonElement>(
+        "[data-clear-all]",
+      );
+
+    const materialGrid =
+      document.querySelector<HTMLElement>(
+        "[data-material-grid]",
+      );
+
+    let selectedCategory = "";
+
+    const normalize = (
+      value: string,
+    ): string =>
+      value.trim().toLowerCase();
+
+    const getCategoryLabel = (
+      value: string,
+    ): string => {
+      const match = categoryFilterData.find(
+        (item: {
+          id: string;
+          label: string;
+        }) => item.id === value,
+      );
+
+      return match?.label ?? value;
+    };
+
+    const updateFilterState = (): void => {
+      const query = normalize(
+        searchInput?.value ?? "",
+      );
+
+      let visibleCount = 0;
+
+      materialCards.forEach(
+        (card: HTMLElement) => {
+          const category =
+            card.dataset["category"] ?? "";
+
+          const searchText =
+            card.dataset["searchText"] ?? "";
+
+          const categoryMatches =
+            !selectedCategory ||
+            category === selectedCategory;
+
+          const searchMatches =
+            !query ||
+            searchText.includes(query);
+
+          const visible =
+            categoryMatches &&
+            searchMatches;
+
+          card.hidden = !visible;
+
+          if (visible) {
+            visibleCount += 1;
+          }
+        },
+      );
+
+      categoryButtons.forEach(
+        (button: HTMLButtonElement) => {
+          const category =
+            button.dataset[
+              "categoryFilter"
+            ] ?? "";
+
+          const active =
+            category === selectedCategory;
+
+          button.classList.toggle(
+            "category-card--active",
+            active,
+          );
+
+          button.setAttribute(
+            "aria-pressed",
+            String(active),
+          );
+        },
+      );
+
+      if (emptyState) {
+        emptyState.hidden =
+          visibleCount > 0;
+      }
+
+      if (materialGrid) {
+        materialGrid.hidden =
+          visibleCount === 0;
+      }
+
+      if (activeFilter) {
+        activeFilter.hidden =
+          !selectedCategory;
+      }
+
+      if (
+        activeFilterLabel &&
+        selectedCategory
+      ) {
+        activeFilterLabel.textContent =
+          getCategoryLabel(
+            selectedCategory,
+          );
+      }
+    };
+
+    categoryButtons.forEach(
+      (button: HTMLButtonElement) => {
+        button.addEventListener(
+          "click",
+          () => {
+            const category =
+              button.dataset[
+                "categoryFilter"
+              ] ?? "";
+
+            selectedCategory =
+              selectedCategory === category
+                ? ""
+                : category;
+
+            updateFilterState();
+          },
+        );
+      },
+    );
+
+    searchInput?.addEventListener(
+      "input",
+      () => {
+        updateFilterState();
+      },
+    );
+
+    clearFilterButton?.addEventListener(
+      "click",
+      () => {
+        selectedCategory = "";
+        updateFilterState();
+      },
+    );
+
+    clearAllButton?.addEventListener(
+      "click",
+      () => {
+        selectedCategory = "";
+
+        if (searchInput) {
+          searchInput.value = "";
+        }
+
+        updateFilterState();
+      },
+    );
+
+    updateFilterState();
+  </script>
+
+  <style>
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    .waste-page {
+      background: #f8fafc;
+      padding: 0 0 80px;
+    }
+
+    .waste-page__container {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+    }
+
+    .waste-intro {
+      margin-top: -18px;
+      position: relative;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 32px;
+      padding: 30px;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 22px;
+      box-shadow:
+        0 18px 50px rgba(15, 23, 42, 0.06),
+        0 2px 8px rgba(15, 23, 42, 0.03);
+    }
+
+    .waste-intro__copy {
+      min-width: 0;
+      max-width: 760px;
+    }
+
+    .waste-intro__eyebrow,
+    .section-heading__eyebrow {
+      display: block;
+      margin-bottom: 5px;
+      color: #16a34a;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      line-height: 1.3;
+      text-transform: uppercase;
+    }
+
+    .waste-intro__title {
+      margin: 0;
+      color: #0f172a;
+      font-size: clamp(1.6rem, 3vw, 2.2rem);
+      line-height: 1.16;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+    }
+
+    .waste-intro__description {
+      max-width: 720px;
+      margin: 13px 0 0;
+      color: #64748b;
+      font-size: 14px;
+      line-height: 1.75;
+    }
+
+    .waste-intro__stats {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(90px, 1fr));
+      gap: 10px;
+      min-width: 215px;
+    }
+
+    .waste-stat {
+      display: grid;
+      gap: 3px;
+      padding: 17px;
+      border-radius: 14px;
+      background: #f0fdf4;
+      border: 1px solid #dcfce7;
+    }
+
+    .waste-stat__value {
+      color: #166534;
+      font-size: 24px;
+      line-height: 1;
+      font-weight: 800;
+    }
+
+    .waste-stat__label {
+      color: #64748b;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .category-section,
+    .directory-section {
+      margin-top: 48px;
+    }
+
+    .section-heading__title {
+      margin: 0;
+      color: #0f172a;
+      font-size: 23px;
+      line-height: 1.3;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .section-heading__description {
+      margin: 7px 0 0;
+      color: #64748b;
+      font-size: 13px;
+      line-height: 1.65;
+    }
+
+    .category-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 13px;
+      margin-top: 20px;
+    }
+
+    .category-card {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      min-width: 0;
+      padding: 17px;
+      text-align: left;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      cursor: pointer;
+      color: inherit;
+      transition:
+        transform 160ms ease,
+        border-color 160ms ease,
+        box-shadow 160ms ease,
+        background-color 160ms ease;
+    }
+
+    .category-card:hover,
+    .category-card--active {
+      transform: translateY(-2px);
+      border-color: #86efac;
+      background: #fbfffc;
+      box-shadow:
+        0 10px 28px rgba(15, 23, 42, 0.06);
+    }
+
+    .category-card__icon {
+      width: 46px;
+      height: 46px;
+      display: grid;
+      place-items: center;
+      border-radius: 13px;
+      color: var(--category-color);
+      background: var(--category-soft);
+      border: 1px solid color-mix(
+        in srgb,
+        var(--category-color) 18%,
+        white
+      );
+    }
+
+    .category-card__body {
+      display: grid;
+      min-width: 0;
+    }
+
+    .category-card__label {
+      color: #0f172a;
+      font-size: 14px;
+      line-height: 1.35;
+      font-weight: 800;
+    }
+
+    .category-card__description {
+      min-height: 60px;
+      margin-top: 7px;
+      color: #64748b;
+      font-size: 11px;
+      line-height: 1.6;
+    }
+
+    .category-card__meta {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      margin-top: 13px;
+      color: #166534;
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .directory-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 24px;
+    }
+
+    .directory-search {
+      width: min(360px, 100%);
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      min-height: 44px;
+      padding: 0 13px;
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 11px;
+      color: #94a3b8;
+      transition:
+        border-color 160ms ease,
+        box-shadow 160ms ease;
+    }
+
+    .directory-search:focus-within {
+      border-color: #86efac;
+      box-shadow:
+        0 0 0 3px rgba(134, 239, 172, 0.18);
+    }
+
+    .directory-search input {
+      width: 100%;
+      min-width: 0;
+      border: 0;
+      outline: 0;
+      background: transparent;
+      color: #0f172a;
+      font: inherit;
+      font-size: 13px;
+    }
+
+    .directory-search input::placeholder {
+      color: #94a3b8;
+    }
+
+    .active-filter {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      margin-top: 16px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: #ecfdf5;
+      border: 1px solid #bbf7d0;
+      color: #475569;
+      font-size: 11px;
+    }
+
+    .active-filter strong {
+      color: #166534;
+      font-weight: 800;
+    }
+
+    .active-filter button {
+      border: 0;
+      background: transparent;
+      color: #166534;
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .material-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 17px;
+      margin-top: 20px;
+    }
+
+    .material-grid[hidden] {
+      display: none;
+    }
+
+    .material-card {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 17px;
+      overflow: hidden;
+      transition:
+        transform 160ms ease,
+        box-shadow 160ms ease,
+        border-color 160ms ease;
+    }
+
+    .material-card:hover {
+      transform: translateY(-2px);
+      border-color: #cbd5e1;
+      box-shadow:
+        0 12px 32px rgba(15, 23, 42, 0.06);
+    }
+
+    .material-card[hidden] {
+      display: none;
+    }
+
+    .material-card__top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 17px 17px 0;
+    }
+
+    .material-card__icon {
+      width: 42px;
+      height: 42px;
+      display: grid;
+      place-items: center;
+      border-radius: 12px;
+      color: var(--category-color);
+      background: var(--category-soft);
+    }
+
+    .material-card__category {
+      padding: 5px 9px;
+      border-radius: 999px;
+      background: var(--category-soft);
+      color: var(--category-color);
+      font-size: 10px;
+      font-weight: 800;
+    }
+
+    .material-card__content {
+      padding: 15px 17px 18px;
+    }
+
+    .material-card__title {
+      margin: 0;
+      color: #0f172a;
+      font-size: 16px;
+      line-height: 1.35;
+      font-weight: 800;
+    }
+
+    .material-card__description {
+      min-height: 67px;
+      margin: 8px 0 0;
+      color: #64748b;
+      font-size: 12px;
+      line-height: 1.7;
+    }
+
+    .material-card__section {
+      margin-top: 16px;
+    }
+
+    .material-card__section-title {
+      display: block;
+      margin-bottom: 8px;
+      color: #334155;
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .material-card__tags,
+    .method-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .material-tag,
+    .method-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 5px 8px;
+      border-radius: 8px;
+      font-size: 10px;
+      line-height: 1.3;
+      font-weight: 650;
+    }
+
+    .material-tag {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      color: #475569;
+    }
+
+    .material-tag svg {
+      color: #16a34a;
+    }
+
+    .method-item {
+      gap: 6px;
+      background: #f0fdf4;
+      color: #166534;
+      font-weight: 700;
+    }
+
+    .method-item__dot {
+      width: 5px;
+      height: 5px;
+      flex: 0 0 5px;
+      border-radius: 999px;
+      background: #16a34a;
+    }
+
+    .material-card__footer {
+      margin-top: auto;
+      padding: 0 17px 17px;
+    }
+
+    .material-card__link {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      min-height: 38px;
+      padding: 0 11px;
+      border-radius: 10px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      color: #166534;
+      text-decoration: none;
+      font-size: 11px;
+      font-weight: 800;
+      transition:
+        background-color 160ms ease,
+        border-color 160ms ease;
+    }
+
+    .material-card__link:hover {
+      background: #f0fdf4;
+      border-color: #bbf7d0;
+    }
+
+    .directory-empty {
+      margin-top: 20px;
+      padding: 38px 20px;
+      text-align: center;
+      border: 1px dashed #cbd5e1;
+      border-radius: 17px;
+      background: #ffffff;
+    }
+
+    .directory-empty[hidden] {
+      display: none;
+    }
+
+    .directory-empty__icon {
+      width: 52px;
+      height: 52px;
+      margin: 0 auto;
+      display: grid;
+      place-items: center;
+      border-radius: 14px;
+      background: #f1f5f9;
+      color: #94a3b8;
+    }
+
+    .directory-empty h3 {
+      margin: 15px 0 0;
+      color: #334155;
+      font-size: 16px;
+      font-weight: 800;
+    }
+
+    .directory-empty p {
+      max-width: 430px;
+      margin: 7px auto 0;
+      color: #64748b;
+      font-size: 12px;
+      line-height: 1.7;
+    }
+
+    .directory-empty button {
+      margin-top: 15px;
+      min-height: 38px;
+      padding: 0 13px;
+      border: 1px solid #bbf7d0;
+      border-radius: 9px;
+      background: #f0fdf4;
+      color: #166534;
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .waste-guidance {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 18px;
+      margin-top: 48px;
+      padding: 21px 22px;
+      border-radius: 17px;
+      background:
+        linear-gradient(
+          135deg,
+          #166534 0%,
+          #14532d 100%
+        );
+      color: #ffffff;
+    }
+
+    .waste-guidance__icon {
+      width: 48px;
+      height: 48px;
+      display: grid;
+      place-items: center;
+      border-radius: 13px;
+      background: rgba(255, 255, 255, 0.1);
+      color: #dcfce7;
+    }
+
+    .waste-guidance__eyebrow {
+      display: block;
+      margin-bottom: 3px;
+      color: #bbf7d0;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .waste-guidance h2 {
+      margin: 0;
+      color: #ffffff;
+      font-size: 16px;
+      line-height: 1.4;
+      font-weight: 800;
+    }
+
+    .waste-guidance p {
+      margin: 6px 0 0;
+      color: #dcfce7;
+      font-size: 12px;
+      line-height: 1.65;
+    }
+
+    .waste-guidance__link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      min-height: 39px;
+      padding: 0 12px;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.08);
+      color: #ffffff;
+      text-decoration: none;
+      white-space: nowrap;
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .waste-guidance__link:hover {
+      background: rgba(255, 255, 255, 0.13);
+    }
+
+    @media (max-width: 1050px) {
+      .category-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .material-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 820px) {
+      .waste-intro {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .waste-intro__stats {
+        width: 100%;
+      }
+
+      .directory-toolbar {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      .directory-search {
+        width: 100%;
+      }
+
+      .waste-guidance {
+        grid-template-columns: auto minmax(0, 1fr);
+      }
+
+      .waste-guidance__link {
+        grid-column: 1 / -1;
+        width: fit-content;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .waste-page {
+        padding-bottom: 52px;
+      }
+
+      .waste-page__container {
+        width: min(100% - 20px, 1180px);
+      }
+
+      .waste-intro {
+        margin-top: -10px;
+        padding: 20px;
+        border-radius: 18px;
+      }
+
+      .category-section,
+      .directory-section {
+        margin-top: 36px;
+      }
+
+      .category-grid,
+      .material-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .category-card__description,
+      .material-card__description {
+        min-height: auto;
+      }
+
+      .waste-guidance {
+        grid-template-columns: 1fr;
+        gap: 13px;
+        padding: 18px;
+      }
+
+      .waste-guidance__link {
+        grid-column: auto;
+        width: 100%;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .category-card,
+      .material-card,
+      .material-card__link,
+      .directory-search {
+        transition: none;
+      }
+    }
+  </style>
+
+</PublicLayout>
+
+

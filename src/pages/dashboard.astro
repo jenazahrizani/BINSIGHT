@@ -1,7 +1,7 @@
 ---
 /**
  * ============================================================================
- * BINSIGHT — DASHBOARD PAGE
+ * BINSIGHT â€” DASHBOARD PAGE
  * ============================================================================
  * Badung Waste Intelligence
  *
@@ -37,7 +37,7 @@ import DashboardLayout from "@layouts/DashboardLayout.astro";
 import {
   getOrganizationCount,
   getOrganizationCountByType,
-  getOrganizationsByArea,
+
   getOrganizationsByWaste,
   getOrganizationsGroupedByArea,
   getPublicOrganizations,
@@ -151,14 +151,6 @@ const typeEntries =
 const topOrganizations =
   publicOrganizations.slice(0, 4);
 
-const verifiedRate =
-  totalOrganizations > 0
-    ? Math.round(
-        (verifiedOrganizations /
-          publicOrganizations.length) *
-          100,
-      )
-    : 0;
 ---
 
 <DashboardLayout

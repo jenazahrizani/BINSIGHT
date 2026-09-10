@@ -1,17 +1,17 @@
 ---
 /**
  * ============================================================================
- * BINSIGHT — HOME PAGE
+ * BINSIGHT Ã¢â‚¬â€ HOME PAGE
  * ============================================================================
  * Badung Waste Intelligence
  *
  * Homepage publik utama.
  *
  * Alur:
- * Discover → Understand → Report
+ * Discover Ã¢â€ â€™ Understand Ã¢â€ â€™ Report
  *
  * Pilar:
- * MAP → DATA → EDUCATION → REPORT
+ * MAP Ã¢â€ â€™ DATA Ã¢â€ â€™ EDUCATION Ã¢â€ â€™ REPORT
  *
  * Catatan:
  * - Tidak menggunakan data tonase / kilogram fiktif.
@@ -22,7 +22,7 @@
 
 import {
   ArrowRight,
-  BarChart3,
+  ChartColumn,
   FileText,
   Map,
   Recycle,
@@ -52,12 +52,6 @@ const featuredOrganizations =
 
 const totalOrganizations =
   allOrganizations.length;
-
-const organizationCount =
-  Math.max(
-    featuredOrganizations.length,
-    1,
-  );
 
 const wasteCategories = [
   {
@@ -110,7 +104,7 @@ const navigationCards = [
     description:
       "Pahami ekosistem persampahan melalui informasi dan entitas yang tercatat di BINSIGHT.",
     href: "/dashboard",
-    icon: BarChart3,
+    icon: ChartColumn,
   },
   {
     title: "Kenali Pengelola",
@@ -130,7 +124,7 @@ const navigationCards = [
 ---
 
 <PublicLayout
-  title="BINSIGHT — Badung Waste Intelligence"
+  title="BINSIGHT Ã¢â‚¬â€ Badung Waste Intelligence"
   description="Platform informasi persampahan Kabupaten Badung untuk menemukan, memahami, dan melaporkan kondisi persampahan."
 >
   <main class="home">
@@ -387,7 +381,7 @@ const navigationCards = [
               </div>
 
               <div class="pillar__icon">
-                <BarChart3
+                <ChartColumn
                   size={21}
                   stroke-width="1.8"
                   aria-hidden="true"

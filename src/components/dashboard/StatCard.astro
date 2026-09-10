@@ -2,9 +2,9 @@
 import {
   ArrowDown,
   ArrowUp,
-  BarChart,
+  ChartColumn,
   Building2,
-  CheckCircle,
+  CircleCheck,
   FileText,
   Leaf,
   MapPin,
@@ -103,8 +103,6 @@ const trendText =
         ? "tetap"
         : "");
 
-const tagName = href ? "a" : "div";
-
 const hrefAttributes = href
   ? {
       href,
@@ -133,7 +131,7 @@ const hrefAttributes = href
     >
       {
         icon === "chart" && (
-          <BarChart
+          <ChartColumn
             size={20}
             stroke-width={1.9}
           />
@@ -151,7 +149,7 @@ const hrefAttributes = href
 
       {
         icon === "check" && (
-          <CheckCircle
+          <CircleCheck
             size={20}
             stroke-width={1.9}
           />

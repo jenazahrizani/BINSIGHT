@@ -1,14 +1,14 @@
 ---
 import {
-  AlertTriangle,
-  BarChart3,
-  CheckCircle,
+  TriangleAlert,
+  ChartColumn,
+  CircleCheck,
   ChevronRight,
   CircleDot,
   Clock3,
   FileText,
   LoaderCircle,
-  XCircle,
+  CircleX,
 } from "@lucide/astro";
 
 import {
@@ -211,7 +211,7 @@ function getStatusClass(
           class="report-overview__title-icon"
           aria-hidden="true"
         >
-          <BarChart3
+          <ChartColumn
             size={18}
             stroke-width={2}
           />
@@ -289,7 +289,7 @@ function getStatusClass(
 
                   {
                     icon === "check" && (
-                      <CheckCircle
+                      <CircleCheck
                         size={16}
                         stroke-width={1.9}
                       />
@@ -307,7 +307,7 @@ function getStatusClass(
 
                   {
                     icon === "resolved" && (
-                      <CheckCircle
+                      <CircleCheck
                         size={16}
                         stroke-width={1.9}
                       />
@@ -367,7 +367,7 @@ function getStatusClass(
                   {
                     report.status ===
                       "verified" && (
-                      <CheckCircle
+                      <CircleCheck
                         size={18}
                         stroke-width={1.9}
                       />
@@ -387,7 +387,7 @@ function getStatusClass(
                   {
                     report.status ===
                       "resolved" && (
-                      <CheckCircle
+                      <CircleCheck
                         size={18}
                         stroke-width={1.9}
                       />
@@ -397,7 +397,7 @@ function getStatusClass(
                   {
                     report.status ===
                       "rejected" && (
-                      <XCircle
+                      <CircleX
                         size={18}
                         stroke-width={1.9}
                       />
@@ -443,7 +443,7 @@ function getStatusClass(
                             class="report-overview__meta-separator"
                             aria-hidden="true"
                           >
-                            •
+                            â€¢
                           </span>
 
                           <span>
@@ -462,7 +462,7 @@ function getStatusClass(
                             class="report-overview__meta-separator"
                             aria-hidden="true"
                           >
-                            •
+                            â€¢
                           </span>
 
                           <span>
@@ -496,7 +496,7 @@ function getStatusClass(
                       {
                         report.priority ===
                           "high" && (
-                          <AlertTriangle
+                          <TriangleAlert
                             size={13}
                             stroke-width={2}
                             aria-hidden="true"
@@ -1129,3 +1129,4 @@ function getStatusClass(
     }
   }
 </style>
+

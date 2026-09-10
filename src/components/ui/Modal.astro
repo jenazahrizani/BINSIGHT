@@ -323,539 +323,463 @@ const classes = [
   </section>
 </div>
 
+<script
+  is:inline
+  data-binsight-modal-script
+  data-modal-id={id}
+>
+  const modalScript =
+    document.currentScript;
 
-<script define:vars={{
-  modalId: id,
-  initialOpen: open,
-  initialDismissible: dismissible,
-  initialCloseOnBackdrop: closeOnBackdrop,
-  initialCloseOnEscape: closeOnEscape,
-  initialLockScroll: lockScroll,
-}}>
-  const modal = document.getElementById(modalId);
+  if (
+    modalScript instanceof HTMLScriptElement
+  ) {
+    const modalId =
+      modalScript.getAttribute(
+        "data-modal-id"
+      ) || "";
 
-  if (modal) {
-    const dialog =
-      modal.querySelector('[role="dialog"]');
+    const modal =
+      document.getElementById(
+        modalId
+      );
 
-    const backdrop =
-      modal.querySelector('[data-modal-backdrop]');
+    if (modal instanceof HTMLElement) {
+      const dialog =
+        modal.querySelector(
+          '[role="dialog"]'
+        );
 
-    const focusableSelector = [
-      'a[href]',
-      'button:not([disabled])',
-      'input:not([disabled])',
-      'textarea:not([disabled])',
-      'select:not([disabled])',
-      'summary',
-      '[contenteditable="true"]',
-      '[tabindex]:not([tabindex="-1"])',
-    ].join(',');
+      const backdrop =
+        modal.querySelector(
+          '[data-modal-backdrop]'
+        );
 
-    /** @type {HTMLElement | null} */
-    let previousFocusedElement = null;
+      const focusableSelector = [
+        'a[href]',
+        'button:not([disabled])',
+        'input:not([disabled])',
+        'textarea:not([disabled])',
+        'select:not([disabled])',
+        'summary',
+        '[contenteditable="true"]',
+        '[tabindex]:not([tabindex="-1"])',
+      ].join(",");
 
-    /**
-     * ------------------------------------------------------------------------
-     * Helpers
-     * ------------------------------------------------------------------------
-     */
+      let previousFocusedElement = null;
 
-    const isOpen = () =>
-      modal.dataset.modalState === "open";
+      const isOpen = () =>
+        modal.dataset["modalState"] ===
+        "open";
 
-    const isDismissible = () =>
-      modal.dataset.modalDismissible === "true";
+      const isDismissible = () =>
+        modal.dataset[
+          "modalDismissible"
+        ] === "true";
 
-    const shouldCloseOnBackdrop = () =>
-      modal.dataset.modalCloseOnBackdrop === "true";
+      const shouldCloseOnBackdrop = () =>
+        modal.dataset[
+          "modalCloseOnBackdrop"
+        ] === "true";
 
-    const shouldCloseOnEscape = () =>
-      modal.dataset.modalCloseOnEscape === "true";
+      const shouldCloseOnEscape = () =>
+        modal.dataset[
+          "modalCloseOnEscape"
+        ] === "true";
 
-    const shouldLockScroll = () =>
-      modal.dataset.modalLockScroll === "true";
+      const shouldLockScroll = () =>
+        modal.dataset[
+          "modalLockScroll"
+        ] === "true";
 
-    const getFocusableElements = () =>
-      Array.from(
-        modal.querySelectorAll(
-          focusableSelector
-        )
-      ).filter(
-        (element) => {
-          if (!(element instanceof HTMLElement)) {
-            return false;
-          }
-
-          if (
-            element.hasAttribute("hidden")
-          ) {
-            return false;
-          }
-
-          if (
+      const getFocusableElements = () =>
+        Array.from(
+          modal.querySelectorAll(
+            focusableSelector
+          )
+        ).filter(
+          (element) =>
+            element instanceof HTMLElement &&
+            !element.hasAttribute("hidden") &&
             element.getAttribute(
               "aria-hidden"
-            ) === "true"
-          ) {
-            return false;
-          }
-
-          return element.offsetParent !== null;
-        }
-      );
-
-    const lockBodyScroll = () => {
-      if (!shouldLockScroll()) {
-        return;
-      }
-
-      document.body.classList.add(
-        "binsight-modal-open"
-      );
-    };
-
-    const unlockBodyScroll = () => {
-      if (!shouldLockScroll()) {
-        return;
-      }
-
-      const openModals =
-        document.querySelectorAll(
-          '[data-modal][data-modal-state="open"]'
+            ) !== "true" &&
+            element.offsetParent !== null
         );
 
-      if (openModals.length <= 1) {
-        document.body.classList.remove(
+      const lockBodyScroll = () => {
+        if (!shouldLockScroll()) {
+          return;
+        }
+
+        document.body.classList.add(
           "binsight-modal-open"
         );
-      }
-    };
+      };
 
-    const setModalState = (state) => {
-      modal.dataset.modalState =
-        state;
-
-      modal.classList.toggle(
-        "modal--open",
-        state === "open"
-      );
-
-      modal.setAttribute(
-        "aria-hidden",
-        state === "open"
-          ? "false"
-          : "true"
-      );
-    };
-
-    /**
-     * ------------------------------------------------------------------------
-     * OPEN
-     * ------------------------------------------------------------------------
-     */
-
-    const openModal = () => {
-      if (isOpen()) {
-        return;
-      }
-
-      previousFocusedElement =
-        document.activeElement instanceof HTMLElement
-          ? document.activeElement
-          : null;
-
-      setModalState("open");
-
-      lockBodyScroll();
-
-      requestAnimationFrame(() => {
-        const focusable =
-          getFocusableElements();
-
-        const firstFocusable =
-          focusable[0];
-
-        if (firstFocusable) {
-          firstFocusable.focus();
-        } else if (
-          dialog instanceof HTMLElement
-        ) {
-          dialog.focus();
-        }
-      });
-
-      modal.dispatchEvent(
-        new CustomEvent(
-          "binsight:modal-opened",
-          {
-            bubbles: true,
-            detail: {
-              id: modalId,
-            },
-          }
-        )
-      );
-    };
-
-    /**
-     * ------------------------------------------------------------------------
-     * CLOSE
-     * ------------------------------------------------------------------------
-     */
-
-    const closeModal = () => {
-      if (!isOpen()) {
-        return;
-      }
-
-      if (!isDismissible()) {
-        return;
-      }
-
-      setModalState("closed");
-
-      unlockBodyScroll();
-
-      if (
-        previousFocusedElement &&
-        document.contains(
-          previousFocusedElement
-        )
-      ) {
-        previousFocusedElement.focus();
-      } else {
-        document.body.focus({
-          preventScroll: true,
-        });
-      }
-
-      modal.dispatchEvent(
-        new CustomEvent(
-          "binsight:modal-closed",
-          {
-            bubbles: true,
-            detail: {
-              id: modalId,
-            },
-          }
-        )
-      );
-    };
-
-    /**
-     * ------------------------------------------------------------------------
-     * TOGGLE
-     * ------------------------------------------------------------------------
-     */
-
-    const toggleModal = () => {
-      if (isOpen()) {
-        closeModal();
-      } else {
-        openModal();
-      }
-    };
-
-    /**
-     * ------------------------------------------------------------------------
-     * INTERNAL CLOSE BUTTONS
-     * ------------------------------------------------------------------------
-     */
-
-    modal.addEventListener(
-      "click",
-      (event) => {
-        if (!(event.target instanceof Element)) {
+      const unlockBodyScroll = () => {
+        if (!shouldLockScroll()) {
           return;
         }
 
-        const closeTrigger =
-          event.target.closest(
-            "[data-modal-close]"
+        const openModals =
+          document.querySelectorAll(
+            '[data-modal][data-modal-state="open"]'
           );
 
-        if (closeTrigger) {
-          event.preventDefault();
-          closeModal();
+        if (openModals.length <= 1) {
+          document.body.classList.remove(
+            "binsight-modal-open"
+          );
+        }
+      };
+
+      const setModalState = (state) => {
+        modal.dataset["modalState"] =
+          state;
+
+        modal.classList.toggle(
+          "modal--open",
+          state === "open"
+        );
+
+        modal.setAttribute(
+          "aria-hidden",
+          state === "open"
+            ? "false"
+            : "true"
+        );
+      };
+
+      const openModal = () => {
+        if (isOpen()) {
           return;
         }
 
-        if (
-          event.target === backdrop &&
-          shouldCloseOnBackdrop()
-        ) {
-          event.preventDefault();
-          closeModal();
-        }
-      }
-    );
+        previousFocusedElement =
+          document.activeElement instanceof HTMLElement
+            ? document.activeElement
+            : null;
 
-    /**
-     * ------------------------------------------------------------------------
-     * KEYBOARD
-     * ------------------------------------------------------------------------
-     */
+        setModalState("open");
 
-    document.addEventListener(
-      "keydown",
-      (event) => {
-        if (!isOpen()) {
-          return;
-        }
+        lockBodyScroll();
 
-        if (
-          event.key === "Escape"
-        ) {
+        requestAnimationFrame(() => {
+          const focusable =
+            getFocusableElements();
+
+          const firstFocusable =
+            focusable[0];
+
           if (
-            shouldCloseOnEscape() &&
-            isDismissible()
+            firstFocusable instanceof HTMLElement
           ) {
-            event.preventDefault();
-            closeModal();
+            firstFocusable.focus();
+            return;
           }
-
-          return;
-        }
-
-        if (
-          event.key !== "Tab"
-        ) {
-          return;
-        }
-
-        const focusable =
-          getFocusableElements();
-
-        if (!focusable.length) {
-          event.preventDefault();
 
           if (
             dialog instanceof HTMLElement
           ) {
             dialog.focus();
           }
+        });
 
+        modal.dispatchEvent(
+          new CustomEvent(
+            "binsight:modal-opened",
+            {
+              bubbles: true,
+              detail: {
+                id: modalId,
+              },
+            }
+          )
+        );
+      };
+
+      const closeModal = () => {
+        if (!isOpen()) {
           return;
         }
 
-        const first =
-          focusable[0];
+        if (!isDismissible()) {
+          return;
+        }
 
-        const last =
-          focusable[
-            focusable.length - 1
-          ];
+        setModalState("closed");
+
+        unlockBodyScroll();
 
         if (
-          event.shiftKey &&
-          document.activeElement === first
+          previousFocusedElement &&
+          document.contains(
+            previousFocusedElement
+          )
         ) {
-          event.preventDefault();
-          last.focus();
-          return;
+          previousFocusedElement.focus();
         }
 
-        if (
-          !event.shiftKey &&
-          document.activeElement === last
-        ) {
-          event.preventDefault();
-          first.focus();
-        }
-      }
-    );
+        modal.dispatchEvent(
+          new CustomEvent(
+            "binsight:modal-closed",
+            {
+              bubbles: true,
+              detail: {
+                id: modalId,
+              },
+            }
+          )
+        );
+      };
 
-    /**
-     * ------------------------------------------------------------------------
-     * GLOBAL OPEN TRIGGER
-     * ------------------------------------------------------------------------
-     *
-     * <button data-modal-open="modal-id">
-     * ------------------------------------------------------------------------
-     */
-
-    document.addEventListener(
-      "click",
-      (event) => {
-        if (!(event.target instanceof Element)) {
-          return;
-        }
-
-        const trigger =
-          event.target.closest(
-            "[data-modal-open]"
-          );
-
-        if (!trigger) {
-          return;
-        }
-
-        const targetId =
-          trigger.getAttribute(
-            "data-modal-open"
-          );
-
-        if (
-          targetId !== modalId
-        ) {
-          return;
-        }
-
-        event.preventDefault();
-
-        openModal();
-      }
-    );
-
-    /**
-     * ------------------------------------------------------------------------
-     * GLOBAL CLOSE TRIGGER
-     * ------------------------------------------------------------------------
-     *
-     * <button data-modal-close="modal-id">
-     * ------------------------------------------------------------------------
-     */
-
-    document.addEventListener(
-      "click",
-      (event) => {
-        if (!(event.target instanceof Element)) {
-          return;
-        }
-
-        const trigger =
-          event.target.closest(
-            "[data-modal-close]"
-          );
-
-        if (!trigger) {
-          return;
-        }
-
-        const targetId =
-          trigger.getAttribute(
-            "data-modal-close"
-          );
-
-        if (
-          targetId !== modalId
-        ) {
-          return;
-        }
-
-        event.preventDefault();
-
-        closeModal();
-      }
-    );
-
-    /**
-     * ------------------------------------------------------------------------
-     * CUSTOM EVENT API
-     * ------------------------------------------------------------------------
-     *
-     * Open:
-     *
-     * document.dispatchEvent(
-     *   new CustomEvent("binsight:open-modal", {
-     *     detail: { id: "example" }
-     *   })
-     * );
-     *
-     * Close:
-     *
-     * document.dispatchEvent(
-     *   new CustomEvent("binsight:close-modal", {
-     *     detail: { id: "example" }
-     *   })
-     * );
-     * ------------------------------------------------------------------------
-     */
-
-    document.addEventListener(
-      "binsight:open-modal",
-      (event) => {
-        if (
-          !(event instanceof CustomEvent)
-        ) {
-          return;
-        }
-
-        if (
-          event.detail?.id !== modalId
-        ) {
+      const toggleModal = () => {
+        if (isOpen()) {
+          closeModal();
           return;
         }
 
         openModal();
-      }
-    );
+      };
 
-    document.addEventListener(
-      "binsight:close-modal",
-      (event) => {
-        if (
-          !(event instanceof CustomEvent)
-        ) {
-          return;
+      modal.addEventListener(
+        "click",
+        (event) => {
+          if (
+            !(event.target instanceof Element)
+          ) {
+            return;
+          }
+
+          const closeTrigger =
+            event.target.closest(
+              "[data-modal-close]"
+            );
+
+          if (closeTrigger) {
+            const targetId =
+              closeTrigger.getAttribute(
+                "data-modal-close"
+              );
+
+            if (
+              !targetId ||
+              targetId === modalId
+            ) {
+              event.preventDefault();
+              closeModal();
+              return;
+            }
+          }
+
+          if (
+            event.target === backdrop &&
+            shouldCloseOnBackdrop()
+          ) {
+            event.preventDefault();
+            closeModal();
+          }
         }
+      );
 
-        if (
-          event.detail?.id !== modalId
-        ) {
-          return;
+      document.addEventListener(
+        "keydown",
+        (event) => {
+          if (!isOpen()) {
+            return;
+          }
+
+          if (event.key === "Escape") {
+            if (
+              shouldCloseOnEscape() &&
+              isDismissible()
+            ) {
+              event.preventDefault();
+              closeModal();
+            }
+
+            return;
+          }
+
+          if (event.key !== "Tab") {
+            return;
+          }
+
+          const focusable =
+            getFocusableElements();
+
+          if (!focusable.length) {
+            event.preventDefault();
+
+            if (
+              dialog instanceof HTMLElement
+            ) {
+              dialog.focus();
+            }
+
+            return;
+          }
+
+          const first =
+            focusable[0];
+
+          const last =
+            focusable[
+              focusable.length - 1
+            ];
+
+          if (
+            event.shiftKey &&
+            document.activeElement === first
+          ) {
+            event.preventDefault();
+
+            if (
+              last instanceof HTMLElement
+            ) {
+              last.focus();
+            }
+
+            return;
+          }
+
+          if (
+            !event.shiftKey &&
+            document.activeElement === last
+          ) {
+            event.preventDefault();
+
+            if (
+              first instanceof HTMLElement
+            ) {
+              first.focus();
+            }
+          }
         }
+      );
 
-        closeModal();
+      document.addEventListener(
+        "click",
+        (event) => {
+          if (
+            !(event.target instanceof Element)
+          ) {
+            return;
+          }
+
+          const trigger =
+            event.target.closest(
+              "[data-modal-open]"
+            );
+
+          if (!trigger) {
+            return;
+          }
+
+          const targetId =
+            trigger.getAttribute(
+              "data-modal-open"
+            );
+
+          if (targetId !== modalId) {
+            return;
+          }
+
+          event.preventDefault();
+
+          openModal();
+        }
+      );
+
+      document.addEventListener(
+        "click",
+        (event) => {
+          if (
+            !(event.target instanceof Element)
+          ) {
+            return;
+          }
+
+          const trigger =
+            event.target.closest(
+              "[data-modal-close]"
+            );
+
+          if (!trigger) {
+            return;
+          }
+
+          const targetId =
+            trigger.getAttribute(
+              "data-modal-close"
+            );
+
+          if (!targetId) {
+            return;
+          }
+
+          if (targetId !== modalId) {
+            return;
+          }
+
+          event.preventDefault();
+
+          closeModal();
+        }
+      );
+
+      document.addEventListener(
+        "binsight:open-modal",
+        (event) => {
+          if (
+            !(event instanceof CustomEvent)
+          ) {
+            return;
+          }
+
+          if (
+            event.detail?.id !== modalId
+          ) {
+            return;
+          }
+
+          openModal();
+        }
+      );
+
+      document.addEventListener(
+        "binsight:close-modal",
+        (event) => {
+          if (
+            !(event instanceof CustomEvent)
+          ) {
+            return;
+          }
+
+          if (
+            event.detail?.id !== modalId
+          ) {
+            return;
+          }
+
+          closeModal();
+        }
+      );
+
+      modal.open = openModal;
+      modal.close = closeModal;
+      modal.toggle = toggleModal;
+
+      if (modal.dataset["modalState"] === "open") {
+        setModalState("open");
+        lockBodyScroll();
+      } else {
+        setModalState("closed");
       }
-    );
-
-    /**
-     * ------------------------------------------------------------------------
-     * EXPOSE API
-     * ------------------------------------------------------------------------
-     */
-
-    modal.open = openModal;
-    modal.close = closeModal;
-    modal.toggle = toggleModal;
-
-    /**
-     * ------------------------------------------------------------------------
-     * INITIAL STATE
-     * ------------------------------------------------------------------------
-     */
-
-    modal.dataset.modalDismissible =
-      initialDismissible
-        ? "true"
-        : "false";
-
-    modal.dataset.modalCloseOnBackdrop =
-      initialCloseOnBackdrop
-        ? "true"
-        : "false";
-
-    modal.dataset.modalCloseOnEscape =
-      initialCloseOnEscape
-        ? "true"
-        : "false";
-
-    modal.dataset.modalLockScroll =
-      initialLockScroll
-        ? "true"
-        : "false";
-
-    if (initialOpen) {
-      setModalState("open");
-      lockBodyScroll();
-    } else {
-      setModalState("closed");
     }
   }
 </script>
-
 
 <style>
   /* ==========================================================================

@@ -1,0 +1,1390 @@
+---
+
+/**
+
+* ============================================================================
+* BINSIGHT ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â WASTE DETAIL
+* ============================================================================
+* Public educational detail page for one waste material.
+*
+* Route:
+* /waste/[slug]
+*
+* Source of truth:
+* src/lib/constants/waste.ts
+*
+* The taxonomy contains:
+* * Waste categories
+* * Waste materials
+* * Characteristics
+* * Recommended management methods
+*
+* This page intentionally does NOT invent live quantities, prices, capacity,
+* collection schedules, or organization statistics.
+* ============================================================================
+  */
+
+import {
+ArrowLeft,
+ArrowRight,
+Check,
+ChevronRight,
+Info,
+Package,
+Recycle,
+} from "@lucide/astro";
+
+import PublicLayout from "@layouts/PublicLayout.astro";
+import PageHeader from "@components/layout/PageHeader.astro";
+
+import {
+WASTE_MATERIALS,
+WASTE_CATEGORIES,
+getWasteCategoryLabel,
+getWasteCharacteristicLabel,
+getWasteMethodLabel,
+type WasteCategory,
+type WasteMaterialDefinition,
+} from "@lib/constants/waste";
+
+/* -------------------------------------------------------------------------- */
+/* Route generation                                                           */
+/* -------------------------------------------------------------------------- */
+
+export function getStaticPaths() {
+return WASTE_MATERIALS.map(
+(material: WasteMaterialDefinition) => ({
+params: {
+slug: material.id,
+},
+}),
+);
+}
+
+/* -------------------------------------------------------------------------- */
+/* Route resolution                                                           */
+/* -------------------------------------------------------------------------- */
+
+const requestedSlug =
+Astro.params.slug?.trim().toLowerCase() ?? "";
+
+const material =
+WASTE_MATERIALS.find(
+(item: WasteMaterialDefinition) =>
+item.id.toLowerCase() === requestedSlug,
+) ?? null;
+
+if (!material) {
+return Astro.redirect("/waste", 302);
+}
+
+/* -------------------------------------------------------------------------- */
+/* Derived data                                                               */
+/* -------------------------------------------------------------------------- */
+
+const category = WASTE_CATEGORIES.find(
+(item) =>
+item.id === material.category,
+);
+
+const categoryLabel =
+category?.label ??
+getWasteCategoryLabel(material.category);
+
+const characteristics =
+material.characteristics.map(
+(characteristic) =>
+getWasteCharacteristicLabel(
+characteristic,
+),
+);
+
+const methods =
+material.recommendedMethods.map(
+(method) =>
+getWasteMethodLabel(method),
+);
+
+const categoryMaterials =
+WASTE_MATERIALS
+.filter(
+(item: WasteMaterialDefinition) =>
+item.category === material.category,
+)
+.sort(
+(
+first: WasteMaterialDefinition,
+second: WasteMaterialDefinition,
+) => first.order - second.order,
+);
+
+const relatedMaterials =
+categoryMaterials
+.filter(
+(item: WasteMaterialDefinition) =>
+item.id !== material.id,
+)
+.slice(0, 4);
+
+const materialIndex =
+WASTE_MATERIALS.findIndex(
+(item: WasteMaterialDefinition) =>
+item.id === material.id,
+);
+
+const previousMaterial =
+materialIndex > 0
+? WASTE_MATERIALS[materialIndex - 1]
+: null;
+
+const nextMaterial =
+materialIndex >= 0 &&
+materialIndex < WASTE_MATERIALS.length - 1
+? WASTE_MATERIALS[materialIndex + 1]
+: null;
+
+const breadcrumbs = [
+{
+label: "Beranda",
+href: "/",
+},
+{
+label: "Jenis Sampah",
+href: "/waste",
+},
+{
+label: material.label,
+},
+];
+
+/* -------------------------------------------------------------------------- */
+/* Structured data                                                            */
+/* -------------------------------------------------------------------------- */
+
+const siteOrigin =
+Astro.site?.toString() ??
+Astro.url.origin;
+
+const canonicalUrl = new URL(
+`/waste/${encodeURIComponent(material.id)}`,
+siteOrigin,
+).toString();
+
+const schema = {
+"@context": "https://schema.org",
+"@type": "Article",
+headline: `${material.label} ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â BINSIGHT`,
+description: material.description,
+url: canonicalUrl,
+about: {
+"@type": "Thing",
+name: material.label,
+},
+};
+
+---
+
+<PublicLayout
+title={`${material.label} ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â Jenis Sampah | BINSIGHT`}
+description={material.description}
+
+>
+
+  <script
+    type="application/ld+json"
+    is:inline
+    set:html={JSON.stringify(schema)}
+  ></script>
+
+<PageHeader
+ eyebrow={categoryLabel}
+ title={material.label}
+ description={material.description}
+ icon="waste"
+ tone="green"
+ breadcrumbs={breadcrumbs}
+/>
+
+  <main class="waste-detail">
+    <section class="waste-detail__container">
+<div class="waste-detail__back">
+    <a href="/waste">
+      <ArrowLeft
+        size={16}
+        stroke-width={1.9}
+        aria-hidden="true"
+      />
+      Kembali ke jenis sampah
+    </a>
+  </div>
+
+  <div
+    class="waste-detail__hero"
+    style={`--category-color:${category?.color ?? "#16A34A"};--category-soft:${category?.softColor ?? "#DCFCE7"};`}
+  >
+    <div class="waste-detail__hero-icon">
+      <Recycle size={20} stroke-width={1.9} aria-hidden="true" />
+    </div>
+
+    <div class="waste-detail__hero-content">
+
+      <div class="waste-detail__chips">
+        <span class="waste-detail__category">
+          <Recycle size={20} stroke-width={1.9} aria-hidden="true" />
+          {categoryLabel}
+        </span>
+
+        <span class="waste-detail__order">
+          Material #{material.order}
+        </span>
+      </div>
+
+      <h1>
+        {material.label}
+      </h1>
+
+      <p>
+        {material.description}
+      </p>
+    </div>
+  </div>
+
+  <div class="waste-detail__grid">
+
+    <div class="waste-detail__main">
+
+      <section class="detail-card">
+        <div class="detail-card__header">
+          <div>
+            <span class="detail-card__eyebrow">
+              Tentang material
+            </span>
+
+            <h2>
+              Mengenal {material.label}
+            </h2>
+          </div>
+
+          <span class="detail-card__icon">
+            <Info
+              size={20}
+              stroke-width={1.8}
+              aria-hidden="true"
+            />
+          </span>
+        </div>
+
+        <div class="detail-card__body">
+          <p class="detail-card__lead">
+            {material.description}
+          </p>
+
+          <p class="detail-card__text">
+            Material ini termasuk dalam kategori
+            <strong>{categoryLabel}</strong>
+            pada taksonomi persampahan BINSIGHT.
+            Karakteristik dan metode pengelolaan di
+            bawah menjadi referensi untuk memahami
+            material sebelum menentukan penanganannya.
+          </p>
+        </div>
+      </section>
+
+      <section class="detail-card">
+        <div class="detail-card__header">
+          <div>
+            <span class="detail-card__eyebrow">
+              Karakteristik
+            </span>
+
+            <h2>
+              Karakteristik material
+            </h2>
+          </div>
+
+          <span class="detail-card__icon">
+            <Check
+              size={20}
+              stroke-width={2}
+              aria-hidden="true"
+            />
+          </span>
+        </div>
+
+        <div class="detail-card__body">
+
+          {
+            characteristics.length > 0 ? (
+              <div class="characteristic-grid">
+                {
+                  characteristics.map(
+                    (characteristic: string) => (
+                      <div class="characteristic-item">
+                        <span class="characteristic-item__icon">
+                          <Check
+                            size={16}
+                            stroke-width={2}
+                            aria-hidden="true"
+                          />
+                        </span>
+
+                        <span>
+                          {characteristic}
+                        </span>
+                      </div>
+                    ),
+                  )
+                }
+              </div>
+            ) : (
+              <div class="detail-empty">
+                Belum ada karakteristik yang
+                tercatat untuk material ini.
+              </div>
+            )
+          }
+
+        </div>
+      </section>
+
+      <section class="detail-card">
+        <div class="detail-card__header">
+          <div>
+            <span class="detail-card__eyebrow">
+              Pengelolaan
+            </span>
+
+            <h2>
+              Metode pengelolaan yang direkomendasikan
+            </h2>
+          </div>
+
+          <span class="detail-card__icon">
+            <Recycle
+              size={20}
+              stroke-width={1.8}
+              aria-hidden="true"
+            />
+          </span>
+        </div>
+
+        <div class="detail-card__body">
+
+          {
+            methods.length > 0 ? (
+              <div class="method-list">
+                {
+                  methods.map(
+                    (
+                      method: string,
+                      index: number,
+                    ) => (
+                      <div class="method-row">
+                        <span class="method-row__number">
+                          {index + 1}
+                        </span>
+
+                        <div class="method-row__content">
+                          <strong>
+                            {method}
+                          </strong>
+
+                          <span>
+                            Tahapan yang direkomendasikan
+                            dalam penanganan material
+                            {material.label.toLowerCase()}.
+                          </span>
+                        </div>
+
+                        <Check
+                          size={17}
+                          stroke-width={2}
+                          aria-hidden="true"
+                        />
+                      </div>
+                    ),
+                  )
+                }
+              </div>
+            ) : (
+              <div class="detail-empty">
+                Belum ada metode pengelolaan yang
+                tercatat untuk material ini.
+              </div>
+            )
+          }
+
+        </div>
+      </section>
+
+      <section class="detail-card">
+        <div class="detail-card__header">
+          <div>
+            <span class="detail-card__eyebrow">
+              Dalam kategori
+            </span>
+
+            <h2>
+              Material lain dalam {categoryLabel}
+            </h2>
+          </div>
+
+          <span class="detail-card__icon">
+            <Package
+              size={20}
+              stroke-width={1.8}
+              aria-hidden="true"
+            />
+          </span>
+        </div>
+
+        <div class="detail-card__body">
+
+          {
+            relatedMaterials.length > 0 ? (
+              <div class="related-materials">
+                {
+                  relatedMaterials.map(
+                    (
+                      related: WasteMaterialDefinition,
+                    ) => (
+                      <a
+                        href={`/waste/${encodeURIComponent(related.id)}`}
+                        class:list={[
+                          "related-material",
+                          {
+                            "related-material--current":
+                              related.id === material.id,
+                          },
+                        ]}
+                      >
+                        <span
+                          class="related-material__icon"
+                          style={`--related-color:${category?.color ?? "#16A34A"};--related-soft:${category?.softColor ?? "#DCFCE7"};`}
+                        >
+                          <Recycle size={20} stroke-width={1.9} aria-hidden="true" />
+                        </span>
+
+                        <span class="related-material__content">
+                          <strong>
+                            {related.label}
+                          </strong>
+
+                          <span>
+                            {related.description}
+                          </span>
+                        </span>
+
+                        <ArrowRight
+                          size={16}
+                          stroke-width={1.9}
+                          aria-hidden="true"
+                        />
+                      </a>
+                    ),
+                  )
+                }
+              </div>
+            ) : (
+              <div class="detail-empty">
+                Material lain dalam kategori ini
+                belum tersedia.
+              </div>
+            )
+          }
+
+          <a
+            href={`/waste#${material.category}`}
+            class="category-link"
+          >
+            Lihat seluruh material {categoryLabel}
+            <ArrowRight
+              size={15}
+              stroke-width={1.9}
+              aria-hidden="true"
+            />
+          </a>
+
+        </div>
+      </section>
+
+    </div>
+
+    <aside class="waste-detail__sidebar">
+
+      <section
+        class="summary-card"
+        style={`--category-color:${category?.color ?? "#16A34A"};--category-soft:${category?.softColor ?? "#DCFCE7"};`}
+      >
+        <div class="summary-card__icon">
+          <Recycle size={20} stroke-width={1.9} aria-hidden="true" />
+        </div>
+
+        <span class="summary-card__eyebrow">
+          Kategori
+        </span>
+
+        <h2>
+          {categoryLabel}
+        </h2>
+
+        {
+          category?.description && (
+            <p>
+              {category.description}
+            </p>
+          )
+        }
+
+        <a
+          href={`/waste#${material.category}`}
+          class="summary-card__link"
+        >
+          Jelajahi kategori
+          <ArrowRight
+            size={15}
+            stroke-width={1.9}
+            aria-hidden="true"
+          />
+        </a>
+      </section>
+
+      <section class="sidebar-card">
+        <div class="sidebar-card__header">
+          <Recycle
+            size={18}
+            stroke-width={1.8}
+            aria-hidden="true"
+          />
+
+          <h2>
+            Ringkasan
+          </h2>
+        </div>
+
+        <dl class="summary-list">
+
+          <div>
+            <dt>
+              Material
+            </dt>
+
+            <dd>
+              {material.label}
+            </dd>
+          </div>
+
+          <div>
+            <dt>
+              Kategori
+            </dt>
+
+            <dd>
+              {categoryLabel}
+            </dd>
+          </div>
+
+          <div>
+            <dt>
+              Karakteristik
+            </dt>
+
+            <dd>
+              {characteristics.length}
+            </dd>
+          </div>
+
+          <div>
+            <dt>
+              Metode pengelolaan
+            </dt>
+
+            <dd>
+              {methods.length}
+            </dd>
+          </div>
+
+        </dl>
+      </section>
+
+      <section class="sidebar-card sidebar-card--green">
+        <div class="sidebar-card__header">
+          <Info
+            size={18}
+            stroke-width={1.8}
+            aria-hidden="true"
+          />
+
+          <h2>
+            Catatan data
+          </h2>
+        </div>
+
+        <p>
+          Halaman ini menjelaskan taksonomi material.
+          Informasi jumlah, volume, kapasitas, atau
+          statistik operasional tidak ditampilkan tanpa
+          sumber data aktual.
+        </p>
+      </section>
+
+      <section class="navigation-card">
+        <a
+          href={
+            previousMaterial
+              ? `/waste/${encodeURIComponent(previousMaterial.id)}`
+              : "/waste"
+          }
+          class="navigation-card__item"
+        >
+          <span class="navigation-card__direction">
+            <ArrowLeft
+              size={15}
+              stroke-width={1.9}
+              aria-hidden="true"
+            />
+            Sebelumnya
+          </span>
+
+          <strong>
+            {previousMaterial?.label ??
+              "Daftar jenis sampah"}
+          </strong>
+        </a>
+
+        <div class="navigation-card__divider"></div>
+
+        <a
+          href={
+            nextMaterial
+              ? `/waste/${encodeURIComponent(nextMaterial.id)}`
+              : "/waste"
+          }
+          class="navigation-card__item navigation-card__item--next"
+        >
+          <span class="navigation-card__direction">
+            Berikutnya
+            <ArrowRight
+              size={15}
+              stroke-width={1.9}
+              aria-hidden="true"
+            />
+          </span>
+
+          <strong>
+            {nextMaterial?.label ??
+              "Daftar jenis sampah"}
+          </strong>
+        </a>
+      </section>
+
+    </aside>
+
+  </div>
+
+  <nav
+    class="waste-breadcrumb-nav"
+    aria-label="Navigasi halaman"
+  >
+    <a href="/waste">
+      <ArrowLeft
+        size={15}
+        stroke-width={1.9}
+        aria-hidden="true"
+      />
+      Semua jenis sampah
+    </a>
+
+    <ChevronRight
+      size={14}
+      stroke-width={1.8}
+      aria-hidden="true"
+    />
+
+    <span>
+      {material.label}
+    </span>
+  </nav>
+
+</section>
+</main>
+
+  <style>
+    .waste-detail {
+      background: #f8fafc;
+      padding: 0 0 82px;
+    }
+
+    .waste-detail__container {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+    }
+
+    .waste-detail__back {
+      margin-top: -8px;
+      position: relative;
+      z-index: 3;
+    }
+
+    .waste-detail__back a,
+    .waste-breadcrumb-nav a {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      color: #64748b;
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 750;
+      transition: color 160ms ease;
+    }
+
+    .waste-detail__back a:hover,
+    .waste-breadcrumb-nav a:hover {
+      color: #166534;
+    }
+
+    .waste-detail__hero {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      align-items: flex-start;
+      gap: 24px;
+      margin-top: 14px;
+      padding: 28px;
+      border: 1px solid #e2e8f0;
+      border-radius: 22px;
+      background: #ffffff;
+      box-shadow:
+        0 18px 50px rgba(15, 23, 42, 0.06),
+        0 2px 8px rgba(15, 23, 42, 0.03);
+    }
+
+    .waste-detail__hero-icon {
+      width: 92px;
+      height: 92px;
+      flex: 0 0 92px;
+      display: grid;
+      place-items: center;
+      color: var(--category-color);
+      background: var(--category-soft);
+      border: 1px solid color-mix(
+        in srgb,
+        var(--category-color) 18%,
+        white
+      );
+      border-radius: 20px;
+    }
+
+    .waste-detail__hero-content {
+      min-width: 0;
+    }
+
+    .waste-detail__chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .waste-detail__category,
+    .waste-detail__order {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      min-height: 29px;
+      padding: 5px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .waste-detail__category {
+      color: var(--category-color);
+      background: var(--category-soft);
+    }
+
+    .waste-detail__order {
+      color: #64748b;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+    }
+
+    .waste-detail__hero h1 {
+      margin: 0;
+      color: #0f172a;
+      font-size: clamp(2rem, 4vw, 3rem);
+      line-height: 1.1;
+      letter-spacing: -0.04em;
+      font-weight: 850;
+    }
+
+    .waste-detail__hero-content > p {
+      max-width: 760px;
+      margin: 13px 0 0;
+      color: #64748b;
+      font-size: 14px;
+      line-height: 1.8;
+    }
+
+    .waste-detail__grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 320px;
+      gap: 22px;
+      align-items: start;
+      margin-top: 22px;
+    }
+
+    .waste-detail__main,
+    .waste-detail__sidebar {
+      display: grid;
+      gap: 22px;
+    }
+
+    .detail-card,
+    .sidebar-card,
+    .summary-card,
+    .navigation-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 18px;
+      overflow: hidden;
+    }
+
+    .detail-card__header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 18px;
+      padding: 22px 22px 17px;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .detail-card__eyebrow {
+      display: block;
+      margin-bottom: 4px;
+      color: #16a34a;
+      font-size: 10px;
+      font-weight: 850;
+      line-height: 1.3;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .detail-card__header h2 {
+      margin: 0;
+      color: #0f172a;
+      font-size: 18px;
+      line-height: 1.4;
+      letter-spacing: -0.015em;
+      font-weight: 800;
+    }
+
+    .detail-card__icon {
+      width: 40px;
+      height: 40px;
+      flex: 0 0 40px;
+      display: grid;
+      place-items: center;
+      color: #166534;
+      background: #f0fdf4;
+      border: 1px solid #dcfce7;
+      border-radius: 12px;
+    }
+
+    .detail-card__body {
+      padding: 22px;
+    }
+
+    .detail-card__lead,
+    .detail-card__text {
+      margin: 0;
+      color: #475569;
+      font-size: 14px;
+      line-height: 1.8;
+    }
+
+    .detail-card__lead {
+      color: #334155;
+      font-size: 15px;
+      font-weight: 650;
+    }
+
+    .detail-card__text {
+      margin-top: 14px;
+    }
+
+    .detail-card__text strong {
+      color: #166534;
+    }
+
+    .characteristic-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .characteristic-item {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      min-height: 50px;
+      padding: 10px 12px;
+      color: #334155;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 11px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .characteristic-item__icon {
+      width: 28px;
+      height: 28px;
+      flex: 0 0 28px;
+      display: grid;
+      place-items: center;
+      border-radius: 8px;
+      color: #166534;
+      background: #dcfce7;
+    }
+
+    .method-list {
+      display: grid;
+      gap: 9px;
+    }
+
+    .method-row {
+      display: grid;
+      grid-template-columns: 32px minmax(0, 1fr) auto;
+      gap: 11px;
+      align-items: center;
+      padding: 11px 12px;
+      border: 1px solid #e2e8f0;
+      border-radius: 11px;
+      background: #f8fafc;
+    }
+
+    .method-row__number {
+      width: 30px;
+      height: 30px;
+      display: grid;
+      place-items: center;
+      border-radius: 8px;
+      background: #dcfce7;
+      color: #166534;
+      font-size: 11px;
+      font-weight: 850;
+    }
+
+    .method-row__content {
+      display: grid;
+      gap: 2px;
+      min-width: 0;
+    }
+
+    .method-row__content strong {
+      color: #334155;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .method-row__content span {
+      color: #64748b;
+      font-size: 11px;
+      line-height: 1.5;
+    }
+
+    .method-row > svg {
+      color: #16a34a;
+    }
+
+    .detail-empty {
+      padding: 16px;
+      border: 1px dashed #cbd5e1;
+      border-radius: 11px;
+      background: #f8fafc;
+      color: #64748b;
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    .related-materials {
+      display: grid;
+      gap: 8px;
+    }
+
+    .related-material {
+      display: grid;
+      grid-template-columns: 38px minmax(0, 1fr) auto;
+      gap: 10px;
+      align-items: center;
+      padding: 10px;
+      border: 1px solid #e2e8f0;
+      border-radius: 11px;
+      background: #ffffff;
+      color: inherit;
+      text-decoration: none;
+      transition:
+        transform 160ms ease,
+        border-color 160ms ease,
+        background-color 160ms ease;
+    }
+
+    .related-material:hover {
+      transform: translateY(-1px);
+      border-color: #bbf7d0;
+      background: #fafffb;
+    }
+
+    .related-material__icon {
+      width: 38px;
+      height: 38px;
+      display: grid;
+      place-items: center;
+      color: var(--related-color);
+      background: var(--related-soft);
+      border-radius: 10px;
+    }
+
+    .related-material__content {
+      display: grid;
+      min-width: 0;
+      gap: 3px;
+    }
+
+    .related-material__content strong {
+      color: #334155;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .related-material__content span {
+      overflow: hidden;
+      color: #64748b;
+      font-size: 10px;
+      line-height: 1.5;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .related-material > svg {
+      color: #94a3b8;
+    }
+
+    .category-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 15px;
+      color: #166534;
+      text-decoration: none;
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .category-link:hover {
+      text-decoration: underline;
+    }
+
+    .summary-card {
+      padding: 20px;
+      border-color: color-mix(
+        in srgb,
+        var(--category-color) 18%,
+        #e2e8f0
+      );
+      background: linear-gradient(
+        145deg,
+        var(--category-soft),
+        #ffffff 72%
+      );
+    }
+
+    .summary-card__icon {
+      width: 48px;
+      height: 48px;
+      display: grid;
+      place-items: center;
+      color: var(--category-color);
+      background: #ffffff;
+      border: 1px solid color-mix(
+        in srgb,
+        var(--category-color) 15%,
+        #e2e8f0
+      );
+      border-radius: 13px;
+    }
+
+    .summary-card__eyebrow {
+      display: block;
+      margin-top: 18px;
+      color: #64748b;
+      font-size: 10px;
+      font-weight: 850;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+    }
+
+    .summary-card h2 {
+      margin: 4px 0 0;
+      color: #0f172a;
+      font-size: 21px;
+      font-weight: 850;
+      letter-spacing: -0.02em;
+    }
+
+    .summary-card p {
+      margin: 8px 0 0;
+      color: #64748b;
+      font-size: 12px;
+      line-height: 1.7;
+    }
+
+    .summary-card__link {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: 17px;
+      min-height: 39px;
+      padding: 0 11px;
+      border-radius: 9px;
+      background: #ffffff;
+      color: var(--category-color);
+      border: 1px solid color-mix(
+        in srgb,
+        var(--category-color) 18%,
+        #e2e8f0
+      );
+      text-decoration: none;
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .summary-card__link:hover {
+      border-color: var(--category-color);
+    }
+
+    .sidebar-card {
+      padding: 18px;
+    }
+
+    .sidebar-card__header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #166534;
+    }
+
+    .sidebar-card__header h2 {
+      margin: 0;
+      color: #0f172a;
+      font-size: 15px;
+      font-weight: 800;
+    }
+
+    .summary-list {
+      display: grid;
+      gap: 0;
+      margin: 14px 0 0;
+    }
+
+    .summary-list > div {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      padding: 10px 0;
+      border-top: 1px solid #f1f5f9;
+    }
+
+    .summary-list dt,
+    .summary-list dd {
+      margin: 0;
+      font-size: 11px;
+      line-height: 1.5;
+    }
+
+    .summary-list dt {
+      color: #64748b;
+    }
+
+    .summary-list dd {
+      color: #334155;
+      font-weight: 800;
+      text-align: right;
+    }
+
+    .sidebar-card--green {
+      background: #f0fdf4;
+      border-color: #bbf7d0;
+    }
+
+    .sidebar-card--green .sidebar-card__header {
+      color: #166534;
+    }
+
+    .sidebar-card--green p {
+      margin: 11px 0 0;
+      color: #475569;
+      font-size: 12px;
+      line-height: 1.7;
+    }
+
+    .navigation-card {
+      padding: 7px;
+    }
+
+    .navigation-card__item {
+      display: grid;
+      gap: 4px;
+      padding: 11px;
+      border-radius: 10px;
+      color: inherit;
+      text-decoration: none;
+      transition: background-color 160ms ease;
+    }
+
+    .navigation-card__item:hover {
+      background: #f8fafc;
+    }
+
+    .navigation-card__item--next {
+      text-align: right;
+    }
+
+    .navigation-card__direction {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: #16a34a;
+      font-size: 10px;
+      font-weight: 850;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .navigation-card__item--next
+      .navigation-card__direction {
+      justify-content: flex-end;
+    }
+
+    .navigation-card__item strong {
+      color: #334155;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .navigation-card__divider {
+      height: 1px;
+      margin: 0 11px;
+      background: #f1f5f9;
+    }
+
+    .waste-breadcrumb-nav {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 27px;
+      color: #94a3b8;
+      font-size: 11px;
+    }
+
+    .waste-breadcrumb-nav span {
+      color: #64748b;
+      font-weight: 700;
+    }
+
+    @media (max-width: 960px) {
+      .waste-detail__grid {
+        grid-template-columns: 1fr;
+      }
+
+      .waste-detail__sidebar {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        align-items: start;
+      }
+
+      .summary-card {
+        grid-column: 1 / -1;
+      }
+
+      .navigation-card {
+        grid-column: 1 / -1;
+      }
+    }
+
+    @media (max-width: 680px) {
+      .waste-detail {
+        padding-bottom: 52px;
+      }
+
+      .waste-detail__container {
+        width: min(100% - 20px, 1180px);
+      }
+
+      .waste-detail__hero {
+        flex-direction: column;
+        margin-top: 10px;
+        padding: 20px;
+        gap: 17px;
+        border-radius: 18px;
+      }
+
+      .waste-detail__hero-icon {
+        width: 72px;
+        height: 72px;
+        flex-basis: 72px;
+        border-radius: 16px;
+      }
+
+      .waste-detail__hero h1 {
+        font-size: 2rem;
+      }
+
+      .waste-detail__grid {
+        gap: 14px;
+        margin-top: 14px;
+      }
+
+      .waste-detail__main,
+      .waste-detail__sidebar {
+        gap: 14px;
+      }
+
+      .waste-detail__sidebar {
+        grid-template-columns: 1fr;
+      }
+
+      .summary-card,
+      .navigation-card {
+        grid-column: auto;
+      }
+
+      .detail-card__header,
+      .detail-card__body,
+      .sidebar-card,
+      .summary-card {
+        padding: 17px;
+      }
+
+      .characteristic-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .related-material__content span {
+        white-space: normal;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .waste-detail__back a,
+      .waste-breadcrumb-nav a,
+      .related-material,
+      .navigation-card__item,
+      .summary-card__link {
+        transition: none;
+      }
+    }
+  </style>
+
+</PublicLayout>

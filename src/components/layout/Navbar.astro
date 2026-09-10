@@ -1,6 +1,6 @@
 ---
 /**
- * BINSIGHT — NAVBAR
+ * BINSIGHT â€” NAVBAR
  * --------------------------------------------------------------------------
  * Primary navigation for the public-facing BINSIGHT platform.
  *
@@ -21,7 +21,7 @@
  * --------------------------------------------------------------------------
  */
 
-import { Menu, X, ChevronDown, Map, BarChart3, Building2, Recycle, FileWarning, Info } from "@lucide/astro";
+import { Menu, X, ChevronDown, Map, ChartColumn, Building2, Recycle, TriangleAlert, Info } from "@lucide/astro";
 
 interface NavItem {
   label: string;
@@ -46,7 +46,7 @@ const primaryLinks: NavItem[] = [
   {
     label: "Data",
     href: "/dashboard",
-    icon: BarChart3,
+    icon: ChartColumn,
   },
   {
     label: "Organisasi",
@@ -64,7 +64,7 @@ const exploreItems: NavItem[] = [
   {
     label: "Laporan Masyarakat",
     href: "/reports",
-    icon: FileWarning,
+    icon: TriangleAlert,
   },
   {
     label: "Tentang BINSIGHT",
@@ -109,7 +109,7 @@ const isExploreActive = exploreItems.some((item) =>
     <a
       class="navbar__brand"
       href="/"
-      aria-label="BINSIGHT — Badung Waste Intelligence, kembali ke beranda"
+      aria-label="BINSIGHT â€” Badung Waste Intelligence, kembali ke beranda"
     >
       <span class="navbar__brand-mark" aria-hidden="true">
         <img
@@ -252,7 +252,7 @@ const isExploreActive = exploreItems.some((item) =>
 
       <div class="navbar__actions">
         <a class="navbar__report-button" href="/reports/create">
-          <FileWarning
+          <TriangleAlert
             size={17}
             stroke-width={2}
             aria-hidden="true"
@@ -269,7 +269,7 @@ const isExploreActive = exploreItems.some((item) =>
         href="/reports/create"
         aria-label="Buat laporan persampahan"
       >
-        <FileWarning
+        <TriangleAlert
           size={18}
           stroke-width={2}
           aria-hidden="true"
@@ -387,7 +387,7 @@ const isExploreActive = exploreItems.some((item) =>
           href="/reports/create"
         >
           <span class="navbar__mobile-report-icon">
-            <FileWarning
+            <TriangleAlert
               size={19}
               stroke-width={2}
               aria-hidden="true"

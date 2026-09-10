@@ -1,6 +1,6 @@
 ---
 /**
- * BINSIGHT — PUBLIC LAYOUT
+ * BINSIGHT ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â PUBLIC LAYOUT
  * --------------------------------------------------------------------------
  * Global layout for all public-facing BINSIGHT pages.
  *
@@ -45,7 +45,7 @@ interface Props {
 }
 
 const {
-  title = "BINSIGHT — Badung Waste Intelligence",
+  title = "BINSIGHT ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â Badung Waste Intelligence",
   description = "Platform informasi, data, pemetaan, edukasi, dan pelaporan persampahan untuk Kabupaten Badung.",
   image = "/images/logo.svg",
   canonical,
@@ -89,7 +89,7 @@ const fullTitle =
   title === appName ||
   title.startsWith("BINSIGHT")
     ? title
-    : `${title} — BINSIGHT`;
+    : `${title} ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â BINSIGHT`;
 
 const pageDescription =
   description ||
@@ -258,7 +258,7 @@ const isCompanyPage =
 
     <!-- Structured data -->
     <script
-      type="application/ld+json"
+      type="application/ld+json" is:inline
       set:html={JSON.stringify({
         "@context": "https://schema.org",
         "@type": "WebSite",
@@ -372,7 +372,6 @@ const isCompanyPage =
        * after mouse / pointer interaction while preserving
        * keyboard accessibility.
        */
-      let usingKeyboard = false;
 
       document.addEventListener(
         "keydown",
@@ -383,7 +382,6 @@ const isCompanyPage =
             event.key === "Enter" ||
             event.key === " "
           ) {
-            usingKeyboard = true;
             document.documentElement.classList.add(
               "using-keyboard"
             );
@@ -395,7 +393,6 @@ const isCompanyPage =
       document.addEventListener(
         "pointerdown",
         () => {
-          usingKeyboard = false;
           document.documentElement.classList.remove(
             "using-keyboard"
           );
