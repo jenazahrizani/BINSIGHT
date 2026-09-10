@@ -14,12 +14,6 @@
  * - Map details
  * - Image / information previews
  *
- * Design system:
- * src/styles/variables.css
- *
- * Component system:
- * src/styles/components.css
- *
  * ============================================================================
  * Usage
  * ============================================================================
@@ -32,43 +26,17 @@
  *   Content
  * </Modal>
  *
- * <Modal
- *   id="delete-modal"
- *   title="Hapus organisasi?"
- *   size="sm"
- *   variant="danger"
- * >
- *   Content
- * </Modal>
+ * Open:
  *
- * <Modal
- *   id="form-modal"
- *   title="Tambah Organisasi"
- *   size="lg"
- * >
- *   Form
+ * <Button data-modal-open="report-modal">
+ *   Lihat Detail
+ * </Button>
  *
- *   <Fragment slot="footer">
- *     <Button variant="ghost">Batal</Button>
- *     <Button>Simpan</Button>
- *   </Fragment>
- * </Modal>
+ * Close:
  *
- * ============================================================================
- * Open / Close
- * ============================================================================
- *
- * Any element can open the modal with:
- *
- * data-modal-open="report-modal"
- *
- * Any element can close the modal with:
- *
- * data-modal-close="report-modal"
- *
- * Or inside the modal:
- *
- * data-modal-close
+ * <Button data-modal-close="report-modal">
+ *   Tutup
+ * </Button>
  *
  * ============================================================================
  */
@@ -175,13 +143,15 @@ const {
   dataTestid,
 } = Astro.props;
 
-const titleId = title
-  ? `${id}-title`
-  : undefined;
+const titleId =
+  title
+    ? `${id}-title`
+    : undefined;
 
-const descriptionId = description
-  ? `${id}-description`
-  : undefined;
+const descriptionId =
+  description
+    ? `${id}-description`
+    : undefined;
 
 const resolvedLabelledBy =
   ariaLabelledBy ?? titleId;
@@ -189,35 +159,61 @@ const resolvedLabelledBy =
 const resolvedDescribedBy =
   ariaDescribedBy ?? descriptionId;
 
+const resolvedAriaLabel =
+  ariaLabel ??
+  (
+    !resolvedLabelledBy
+      ? "Dialog"
+      : undefined
+  );
+
 const classes = [
   "modal",
   `modal--${size}`,
   `modal--${variant}`,
-  centered ? "modal--centered" : "",
-  open ? "modal--open" : "",
+  centered
+    ? "modal--centered"
+    : "",
   className,
 ]
   .filter(Boolean)
   .join(" ");
-
-const resolvedAriaLabel =
-  ariaLabel ??
-  (!resolvedLabelledBy
-    ? "Dialog"
-    : undefined);
 ---
 
 <div
   id={id}
   class={classes}
   data-modal
-  data-modal-state={open ? "open" : "closed"}
-  data-modal-size={size}
-  data-modal-variant={variant}
-  data-modal-dismissible={dismissible ? "true" : "false"}
-  data-modal-close-on-backdrop={closeOnBackdrop ? "true" : "false"}
-  data-modal-close-on-escape={closeOnEscape ? "true" : "false"}
-  data-modal-lock-scroll={lockScroll ? "true" : "false"}
+  data-modal-state={
+    open
+      ? "open"
+      : "closed"
+  }
+  data-modal-dismissible={
+    dismissible
+      ? "true"
+      : "false"
+  }
+  data-modal-close-on-backdrop={
+    closeOnBackdrop
+      ? "true"
+      : "false"
+  }
+  data-modal-close-on-escape={
+    closeOnEscape
+      ? "true"
+      : "false"
+  }
+  data-modal-lock-scroll={
+    lockScroll
+      ? "true"
+      : "false"
+  }
+  aria-hidden={
+    open
+      ? "false"
+      : "true"
+  }
   data-testid={dataTestid}
 >
   <button
@@ -226,9 +222,9 @@ const resolvedAriaLabel =
       backdropClass,
     ]}
     type="button"
-    aria-label="Tutup dialog"
-    data-modal-close
     tabindex="-1"
+    aria-label="Tutup dialog"
+    data-modal-backdrop
   ></button>
 
   <section
@@ -331,40 +327,19 @@ const resolvedAriaLabel =
 <script define:vars={{
   modalId: id,
   initialOpen: open,
-  closeOnBackdrop,
-  closeOnEscape,
-  dismissible,
-  lockScroll,
+  initialDismissible: dismissible,
+  initialCloseOnBackdrop: closeOnBackdrop,
+  initialCloseOnEscape: closeOnEscape,
+  initialLockScroll: lockScroll,
 }}>
-  /**
-   * ==========================================================================
-   * BINSIGHT MODAL ENGINE
-   * ==========================================================================
-   *
-   * The script is intentionally scoped to one modal instance.
-   */
-
   const modal = document.getElementById(modalId);
 
-  if (!modal) {
-    console.warn(
-      `[BINSIGHT Modal] Modal "${modalId}" tidak ditemukan.`
-    );
-  } else {
-    const dialog = modal.querySelector(
-      '[role="dialog"]'
-    );
+  if (modal) {
+    const dialog =
+      modal.querySelector('[role="dialog"]');
 
-    const backdrop = modal.querySelector(
-      '.modal__backdrop'
-    );
-
-    const closeButtons =
-      modal.querySelectorAll(
-        '[data-modal-close]'
-      );
-
-    let previousFocusedElement = null;
+    const backdrop =
+      modal.querySelector('[data-modal-backdrop]');
 
     const focusableSelector = [
       'a[href]',
@@ -372,33 +347,113 @@ const resolvedAriaLabel =
       'input:not([disabled])',
       'textarea:not([disabled])',
       'select:not([disabled])',
-      'details > summary',
+      'summary',
       '[contenteditable="true"]',
       '[tabindex]:not([tabindex="-1"])',
     ].join(',');
 
+    /** @type {HTMLElement | null} */
+    let previousFocusedElement = null;
+
+    /**
+     * ------------------------------------------------------------------------
+     * Helpers
+     * ------------------------------------------------------------------------
+     */
+
     const isOpen = () =>
-      modal.dataset.modalState === 'open';
+      modal.dataset.modalState === "open";
+
+    const isDismissible = () =>
+      modal.dataset.modalDismissible === "true";
+
+    const shouldCloseOnBackdrop = () =>
+      modal.dataset.modalCloseOnBackdrop === "true";
+
+    const shouldCloseOnEscape = () =>
+      modal.dataset.modalCloseOnEscape === "true";
+
+    const shouldLockScroll = () =>
+      modal.dataset.modalLockScroll === "true";
 
     const getFocusableElements = () =>
       Array.from(
-        modal.querySelectorAll(focusableSelector)
+        modal.querySelectorAll(
+          focusableSelector
+        )
       ).filter(
-        (element) =>
-          !element.hasAttribute('hidden') &&
-          element.getAttribute('aria-hidden') !== 'true'
+        (element) => {
+          if (!(element instanceof HTMLElement)) {
+            return false;
+          }
+
+          if (
+            element.hasAttribute("hidden")
+          ) {
+            return false;
+          }
+
+          if (
+            element.getAttribute(
+              "aria-hidden"
+            ) === "true"
+          ) {
+            return false;
+          }
+
+          return element.offsetParent !== null;
+        }
       );
 
-    const setBodyLock = (locked) => {
-      if (!lockScroll) {
+    const lockBodyScroll = () => {
+      if (!shouldLockScroll()) {
         return;
       }
 
-      document.body.classList.toggle(
-        'binsight-modal-open',
-        locked
+      document.body.classList.add(
+        "binsight-modal-open"
       );
     };
+
+    const unlockBodyScroll = () => {
+      if (!shouldLockScroll()) {
+        return;
+      }
+
+      const openModals =
+        document.querySelectorAll(
+          '[data-modal][data-modal-state="open"]'
+        );
+
+      if (openModals.length <= 1) {
+        document.body.classList.remove(
+          "binsight-modal-open"
+        );
+      }
+    };
+
+    const setModalState = (state) => {
+      modal.dataset.modalState =
+        state;
+
+      modal.classList.toggle(
+        "modal--open",
+        state === "open"
+      );
+
+      modal.setAttribute(
+        "aria-hidden",
+        state === "open"
+          ? "false"
+          : "true"
+      );
+    };
+
+    /**
+     * ------------------------------------------------------------------------
+     * OPEN
+     * ------------------------------------------------------------------------
+     */
 
     const openModal = () => {
       if (isOpen()) {
@@ -406,32 +461,33 @@ const resolvedAriaLabel =
       }
 
       previousFocusedElement =
-        document.activeElement;
+        document.activeElement instanceof HTMLElement
+          ? document.activeElement
+          : null;
 
-      modal.classList.add('modal--open');
-      modal.dataset.modalState = 'open';
-      modal.setAttribute('aria-hidden', 'false');
+      setModalState("open");
 
-      setBodyLock(true);
+      lockBodyScroll();
 
       requestAnimationFrame(() => {
         const focusable =
           getFocusableElements();
 
         const firstFocusable =
-          focusable.find(
-            (element) =>
-              !element.matches(
-                '[data-modal-close]'
-              )
-          ) ?? dialog;
+          focusable[0];
 
-        firstFocusable?.focus();
+        if (firstFocusable) {
+          firstFocusable.focus();
+        } else if (
+          dialog instanceof HTMLElement
+        ) {
+          dialog.focus();
+        }
       });
 
       modal.dispatchEvent(
         new CustomEvent(
-          'binsight:modal-open',
+          "binsight:modal-opened",
           {
             bubbles: true,
             detail: {
@@ -441,31 +497,42 @@ const resolvedAriaLabel =
         )
       );
     };
+
+    /**
+     * ------------------------------------------------------------------------
+     * CLOSE
+     * ------------------------------------------------------------------------
+     */
 
     const closeModal = () => {
       if (!isOpen()) {
         return;
       }
 
-      if (!dismissible) {
+      if (!isDismissible()) {
         return;
       }
 
-      modal.classList.remove('modal--open');
-      modal.dataset.modalState = 'closed';
-      modal.setAttribute('aria-hidden', 'true');
+      setModalState("closed");
 
-      setBodyLock(false);
+      unlockBodyScroll();
 
       if (
-        previousFocusedElement instanceof HTMLElement
+        previousFocusedElement &&
+        document.contains(
+          previousFocusedElement
+        )
       ) {
         previousFocusedElement.focus();
+      } else {
+        document.body.focus({
+          preventScroll: true,
+        });
       }
 
       modal.dispatchEvent(
         new CustomEvent(
-          'binsight:modal-close',
+          "binsight:modal-closed",
           {
             bubbles: true,
             detail: {
@@ -476,255 +543,316 @@ const resolvedAriaLabel =
       );
     };
 
-    const handleBackdropClick = (event) => {
-      if (!closeOnBackdrop) {
-        return;
-      }
-
-      if (
-        event.target === backdrop
-      ) {
-        closeModal();
-      }
-    };
-
-    const handleKeydown = (event) => {
-      if (!isOpen()) {
-        return;
-      }
-
-      if (
-        event.key === 'Escape' &&
-        closeOnEscape &&
-        dismissible
-      ) {
-        event.preventDefault();
-        closeModal();
-        return;
-      }
-
-      if (event.key !== 'Tab') {
-        return;
-      }
-
-      const focusable =
-        getFocusableElements();
-
-      if (!focusable.length) {
-        event.preventDefault();
-        dialog?.focus();
-        return;
-      }
-
-      const first =
-        focusable[0];
-
-      const last =
-        focusable[focusable.length - 1];
-
-      if (
-        event.shiftKey &&
-        document.activeElement === first
-      ) {
-        event.preventDefault();
-        last.focus();
-      } else if (
-        !event.shiftKey &&
-        document.activeElement === last
-      ) {
-        event.preventDefault();
-        first.focus();
-      }
-    };
-
-    closeButtons.forEach((button) => {
-      button.addEventListener(
-        'click',
-        closeModal
-      );
-    });
-
-    backdrop?.addEventListener(
-      'click',
-      handleBackdropClick
-    );
-
-    document.addEventListener(
-      'keydown',
-      handleKeydown
-    );
-
-    /*
-     * Global open triggers:
-     *
-     * <button data-modal-open="example">
-     *   Open
-     * </button>
+    /**
+     * ------------------------------------------------------------------------
+     * TOGGLE
+     * ------------------------------------------------------------------------
      */
-    const handleGlobalClick = (event) => {
-      const target =
-        event.target instanceof Element
-          ? event.target.closest(
-              '[data-modal-open]'
-            )
-          : null;
 
-      if (!target) {
-        return;
-      }
-
-      const targetId =
-        target.getAttribute(
-          'data-modal-open'
-        );
-
-      if (
-        targetId !== modalId
-      ) {
-        return;
-      }
-
-      event.preventDefault();
-      openModal();
-    };
-
-    document.addEventListener(
-      'click',
-      handleGlobalClick
-    );
-
-    /*
-     * Public API through CustomEvent.
-     *
-     * document.dispatchEvent(
-     *   new CustomEvent('binsight:modal-open', {
-     *     detail: { id: 'example' }
-     *   })
-     * )
-     *
-     * This listener ignores its own event if another instance
-     * dispatches it, keeping multiple modals independent.
-     */
-    const handleExternalOpen = (event) => {
-      if (
-        !(event instanceof CustomEvent)
-      ) {
-        return;
-      }
-
-      const eventId =
-        event.detail?.id;
-
-      if (
-        eventId !== modalId
-      ) {
-        return;
-      }
-
-      if (
-        event.type ===
-        'binsight:modal-open'
-      ) {
-        openModal();
-      }
-
-      if (
-        event.type ===
-        'binsight:modal-close'
-      ) {
-        closeModal();
-      }
-    };
-
-    document.addEventListener(
-      'binsight:modal-open',
-      handleExternalOpen
-    );
-
-    document.addEventListener(
-      'binsight:modal-close',
-      handleExternalOpen
-    );
-
-    /*
-     * Close triggers anywhere in the document:
-     *
-     * <button data-modal-close="example">
-     *   Close
-     * </button>
-     *
-     * Without a value:
-     *
-     * <button data-modal-close>
-     *   Close
-     * </button>
-     *
-     * The latter is scoped to this modal.
-     */
-    const handleGlobalClose = (event) => {
-      const target =
-        event.target instanceof Element
-          ? event.target.closest(
-              '[data-modal-close]'
-            )
-          : null;
-
-      if (!target) {
-        return;
-      }
-
-      const targetId =
-        target.getAttribute(
-          'data-modal-close'
-        );
-
-      if (
-        targetId &&
-        targetId !== modalId
-      ) {
-        return;
-      }
-
-      if (!targetId && !modal.contains(target)) {
-        return;
-      }
-
-      closeModal();
-    };
-
-    document.addEventListener(
-      'click',
-      handleGlobalClose
-    );
-
-    /*
-     * Initial state.
-     */
-    if (initialOpen) {
-      modal.classList.add('modal--open');
-      modal.dataset.modalState = 'open';
-      modal.setAttribute('aria-hidden', 'false');
-      setBodyLock(true);
-    } else {
-      modal.setAttribute('aria-hidden', 'true');
-    }
-
-    /*
-     * Reusable element API:
-     *
-     * modal.open()
-     * modal.close()
-     * modal.toggle()
-     */
-    modal.open = openModal;
-    modal.close = closeModal;
-    modal.toggle = () => {
+    const toggleModal = () => {
       if (isOpen()) {
         closeModal();
       } else {
         openModal();
       }
     };
+
+    /**
+     * ------------------------------------------------------------------------
+     * INTERNAL CLOSE BUTTONS
+     * ------------------------------------------------------------------------
+     */
+
+    modal.addEventListener(
+      "click",
+      (event) => {
+        if (!(event.target instanceof Element)) {
+          return;
+        }
+
+        const closeTrigger =
+          event.target.closest(
+            "[data-modal-close]"
+          );
+
+        if (closeTrigger) {
+          event.preventDefault();
+          closeModal();
+          return;
+        }
+
+        if (
+          event.target === backdrop &&
+          shouldCloseOnBackdrop()
+        ) {
+          event.preventDefault();
+          closeModal();
+        }
+      }
+    );
+
+    /**
+     * ------------------------------------------------------------------------
+     * KEYBOARD
+     * ------------------------------------------------------------------------
+     */
+
+    document.addEventListener(
+      "keydown",
+      (event) => {
+        if (!isOpen()) {
+          return;
+        }
+
+        if (
+          event.key === "Escape"
+        ) {
+          if (
+            shouldCloseOnEscape() &&
+            isDismissible()
+          ) {
+            event.preventDefault();
+            closeModal();
+          }
+
+          return;
+        }
+
+        if (
+          event.key !== "Tab"
+        ) {
+          return;
+        }
+
+        const focusable =
+          getFocusableElements();
+
+        if (!focusable.length) {
+          event.preventDefault();
+
+          if (
+            dialog instanceof HTMLElement
+          ) {
+            dialog.focus();
+          }
+
+          return;
+        }
+
+        const first =
+          focusable[0];
+
+        const last =
+          focusable[
+            focusable.length - 1
+          ];
+
+        if (
+          event.shiftKey &&
+          document.activeElement === first
+        ) {
+          event.preventDefault();
+          last.focus();
+          return;
+        }
+
+        if (
+          !event.shiftKey &&
+          document.activeElement === last
+        ) {
+          event.preventDefault();
+          first.focus();
+        }
+      }
+    );
+
+    /**
+     * ------------------------------------------------------------------------
+     * GLOBAL OPEN TRIGGER
+     * ------------------------------------------------------------------------
+     *
+     * <button data-modal-open="modal-id">
+     * ------------------------------------------------------------------------
+     */
+
+    document.addEventListener(
+      "click",
+      (event) => {
+        if (!(event.target instanceof Element)) {
+          return;
+        }
+
+        const trigger =
+          event.target.closest(
+            "[data-modal-open]"
+          );
+
+        if (!trigger) {
+          return;
+        }
+
+        const targetId =
+          trigger.getAttribute(
+            "data-modal-open"
+          );
+
+        if (
+          targetId !== modalId
+        ) {
+          return;
+        }
+
+        event.preventDefault();
+
+        openModal();
+      }
+    );
+
+    /**
+     * ------------------------------------------------------------------------
+     * GLOBAL CLOSE TRIGGER
+     * ------------------------------------------------------------------------
+     *
+     * <button data-modal-close="modal-id">
+     * ------------------------------------------------------------------------
+     */
+
+    document.addEventListener(
+      "click",
+      (event) => {
+        if (!(event.target instanceof Element)) {
+          return;
+        }
+
+        const trigger =
+          event.target.closest(
+            "[data-modal-close]"
+          );
+
+        if (!trigger) {
+          return;
+        }
+
+        const targetId =
+          trigger.getAttribute(
+            "data-modal-close"
+          );
+
+        if (
+          targetId !== modalId
+        ) {
+          return;
+        }
+
+        event.preventDefault();
+
+        closeModal();
+      }
+    );
+
+    /**
+     * ------------------------------------------------------------------------
+     * CUSTOM EVENT API
+     * ------------------------------------------------------------------------
+     *
+     * Open:
+     *
+     * document.dispatchEvent(
+     *   new CustomEvent("binsight:open-modal", {
+     *     detail: { id: "example" }
+     *   })
+     * );
+     *
+     * Close:
+     *
+     * document.dispatchEvent(
+     *   new CustomEvent("binsight:close-modal", {
+     *     detail: { id: "example" }
+     *   })
+     * );
+     * ------------------------------------------------------------------------
+     */
+
+    document.addEventListener(
+      "binsight:open-modal",
+      (event) => {
+        if (
+          !(event instanceof CustomEvent)
+        ) {
+          return;
+        }
+
+        if (
+          event.detail?.id !== modalId
+        ) {
+          return;
+        }
+
+        openModal();
+      }
+    );
+
+    document.addEventListener(
+      "binsight:close-modal",
+      (event) => {
+        if (
+          !(event instanceof CustomEvent)
+        ) {
+          return;
+        }
+
+        if (
+          event.detail?.id !== modalId
+        ) {
+          return;
+        }
+
+        closeModal();
+      }
+    );
+
+    /**
+     * ------------------------------------------------------------------------
+     * EXPOSE API
+     * ------------------------------------------------------------------------
+     */
+
+    modal.open = openModal;
+    modal.close = closeModal;
+    modal.toggle = toggleModal;
+
+    /**
+     * ------------------------------------------------------------------------
+     * INITIAL STATE
+     * ------------------------------------------------------------------------
+     */
+
+    modal.dataset.modalDismissible =
+      initialDismissible
+        ? "true"
+        : "false";
+
+    modal.dataset.modalCloseOnBackdrop =
+      initialCloseOnBackdrop
+        ? "true"
+        : "false";
+
+    modal.dataset.modalCloseOnEscape =
+      initialCloseOnEscape
+        ? "true"
+        : "false";
+
+    modal.dataset.modalLockScroll =
+      initialLockScroll
+        ? "true"
+        : "false";
+
+    if (initialOpen) {
+      setModalState("open");
+      lockBodyScroll();
+    } else {
+      setModalState("closed");
+    }
   }
 </script>
 
@@ -740,13 +868,13 @@ const resolvedAriaLabel =
 
     inset: 0;
 
-    display: none;
+    display: block;
 
     width: 100%;
     height: 100%;
 
-    opacity: 0;
     visibility: hidden;
+    opacity: 0;
 
     pointer-events: none;
 
@@ -756,11 +884,8 @@ const resolvedAriaLabel =
   }
 
   .modal--open {
-    display: block;
-
-    opacity: 1;
     visibility: visible;
-
+    opacity: 1;
     pointer-events: auto;
   }
 
@@ -801,7 +926,7 @@ const resolvedAriaLabel =
 
 
   /* ==========================================================================
-     03. DIALOG WRAPPER
+     03. DIALOG
      ========================================================================== */
 
   .modal__dialog {
@@ -811,13 +936,17 @@ const resolvedAriaLabel =
     top: 50%;
     left: 50%;
 
+    display: flex;
+    flex-direction: column;
+
     width: calc(
       100% - (var(--space-6) * 2)
     );
 
-    max-height: calc(
-      100dvh - (var(--space-8) * 2)
-    );
+    max-height:
+      calc(
+        100dvh - (var(--space-8) * 2)
+      );
 
     overflow: hidden;
 
@@ -830,7 +959,8 @@ const resolvedAriaLabel =
       var(--border-style)
       var(--color-border);
 
-    border-radius: var(--modal-radius);
+    border-radius:
+      var(--modal-radius);
 
     background:
       var(--color-surface);
@@ -841,9 +971,11 @@ const resolvedAriaLabel =
     box-shadow:
       var(--modal-shadow);
 
-    outline: none;
+    outline:
+      none;
 
-    opacity: 0;
+    opacity:
+      0;
 
     transition:
       transform var(--duration-normal) var(--ease-emphasized),
@@ -880,13 +1012,15 @@ const resolvedAriaLabel =
   }
 
   .modal--full .modal__dialog {
-    width: calc(
-      100% - (var(--space-4) * 2)
-    );
+    width:
+      calc(
+        100% - (var(--space-4) * 2)
+      );
 
-    height: calc(
-      100dvh - (var(--space-4) * 2)
-    );
+    height:
+      calc(
+        100dvh - (var(--space-4) * 2)
+      );
 
     max-width: none;
     max-height: none;
@@ -903,6 +1037,8 @@ const resolvedAriaLabel =
     justify-content: space-between;
 
     gap: var(--space-5);
+
+    flex: 0 0 auto;
 
     padding:
       var(--space-6)
@@ -921,41 +1057,65 @@ const resolvedAriaLabel =
   }
 
   .modal__title {
-    color: var(--color-text-strong);
+    color:
+      var(--color-text-strong);
 
-    font-family: var(--font-display);
-    font-size: var(--font-size-xl);
-    font-weight: var(--font-weight-bold);
-    line-height: var(--line-height-snug);
-    letter-spacing: var(--letter-spacing-tight);
+    font-family:
+      var(--font-display);
+
+    font-size:
+      var(--font-size-xl);
+
+    font-weight:
+      var(--font-weight-bold);
+
+    line-height:
+      var(--line-height-snug);
+
+    letter-spacing:
+      var(--letter-spacing-tight);
+
+    text-wrap:
+      balance;
   }
 
   .modal__description {
     max-width: 42rem;
 
-    margin-top: var(--space-2);
+    margin-top:
+      var(--space-2);
 
-    color: var(--color-text-muted);
+    color:
+      var(--color-text-muted);
 
-    font-size: var(--font-size-sm);
-    line-height: var(--line-height-relaxed);
+    font-size:
+      var(--font-size-sm);
+
+    line-height:
+      var(--line-height-relaxed);
   }
 
 
   /* ==========================================================================
-     06. CLOSE
+     06. CLOSE BUTTON
      ========================================================================== */
 
   .modal__close {
     display: inline-flex;
     flex: 0 0 auto;
+
     align-items: center;
     justify-content: center;
 
     width: 2.5rem;
     height: 2.5rem;
 
-    margin: -0.375rem -0.375rem 0 0;
+    margin:
+      -0.375rem
+      -0.375rem
+      0
+      0;
+
     padding: 0;
 
     border:
@@ -963,12 +1123,17 @@ const resolvedAriaLabel =
       var(--border-style)
       transparent;
 
-    border-radius: var(--radius-md);
+    border-radius:
+      var(--radius-md);
 
-    background: transparent;
-    color: var(--color-text-muted);
+    background:
+      transparent;
 
-    cursor: pointer;
+    color:
+      var(--color-text-muted);
+
+    cursor:
+      pointer;
 
     transition:
       background-color var(--transition-fast),
@@ -978,13 +1143,19 @@ const resolvedAriaLabel =
   }
 
   .modal__close:hover {
-    border-color: var(--color-border);
-    background: var(--color-surface-soft);
-    color: var(--color-text-strong);
+    border-color:
+      var(--color-border);
+
+    background:
+      var(--color-surface-soft);
+
+    color:
+      var(--color-text-strong);
   }
 
   .modal__close:active {
-    transform: scale(0.96);
+    transform:
+      scale(0.96);
   }
 
   .modal__close:focus-visible {
@@ -993,19 +1164,27 @@ const resolvedAriaLabel =
       solid
       var(--color-focus-ring);
 
-    outline-offset: var(--focus-ring-offset);
+    outline-offset:
+      var(--focus-ring-offset);
   }
 
   .modal__close-icon {
-    display: inline-flex;
+    display:
+      inline-flex;
 
-    width: 1.25rem;
-    height: 1.25rem;
+    width:
+      1.25rem;
+
+    height:
+      1.25rem;
   }
 
   .modal__close-icon svg {
-    width: 100%;
-    height: 100%;
+    width:
+      100%;
+
+    height:
+      100%;
   }
 
 
@@ -1016,24 +1195,61 @@ const resolvedAriaLabel =
   .modal__body {
     min-width: 0;
 
+    flex: 1 1 auto;
+
     max-height:
       calc(
-        100dvh -
-        12rem
+        100dvh - 12rem
       );
 
-    padding: var(--space-6);
+    padding:
+      var(--space-6);
 
-    overflow-y: auto;
+    overflow-y:
+      auto;
 
-    overscroll-behavior: contain;
+    overscroll-behavior:
+      contain;
+
+    scrollbar-width:
+      thin;
+
+    scrollbar-color:
+      var(--color-slate-300)
+      transparent;
+  }
+
+  .modal__body::-webkit-scrollbar {
+    width:
+      9px;
+  }
+
+  .modal__body::-webkit-scrollbar-track {
+    background:
+      transparent;
+  }
+
+  .modal__body::-webkit-scrollbar-thumb {
+    border:
+      2px solid
+      transparent;
+
+    border-radius:
+      var(--radius-full);
+
+    background-clip:
+      padding-box;
+
+    background-color:
+      var(--color-slate-300);
   }
 
   .modal--full .modal__body {
-    max-height: none;
-    height: calc(
-      100% - 9rem
-    );
+    max-height:
+      none;
+
+    height:
+      auto;
   }
 
 
@@ -1044,10 +1260,13 @@ const resolvedAriaLabel =
   .modal__footer {
     display: flex;
     flex-wrap: wrap;
+
     align-items: center;
     justify-content: flex-end;
 
     gap: var(--space-2);
+
+    flex: 0 0 auto;
 
     padding:
       var(--space-4)
@@ -1065,161 +1284,128 @@ const resolvedAriaLabel =
 
 
   /* ==========================================================================
-     09. VARIANT — DEFAULT
+     09. DEFAULT
      ========================================================================== */
 
   .modal--default .modal__title {
-    color: var(--color-text-strong);
+    color:
+      var(--color-text-strong);
   }
 
 
   /* ==========================================================================
-     10. VARIANT — DANGER
+     10. DANGER
      ========================================================================== */
 
-  .modal--danger {
-    --modal-accent:
-      var(--color-danger);
-  }
-
   .modal--danger .modal__title {
-    color: var(--color-danger-text);
+    color:
+      var(--color-danger-text);
   }
 
   .modal--danger .modal__header {
     border-top:
-      3px
-      solid
+      3px solid
       var(--color-danger);
   }
 
 
   /* ==========================================================================
-     11. VARIANT — WARNING
+     11. WARNING
      ========================================================================== */
 
-  .modal--warning {
-    --modal-accent:
-      var(--color-warning);
-  }
-
   .modal--warning .modal__title {
-    color: var(--color-warning-text);
+    color:
+      var(--color-warning-text);
   }
 
   .modal--warning .modal__header {
     border-top:
-      3px
-      solid
+      3px solid
       var(--color-warning);
   }
 
 
   /* ==========================================================================
-     12. VARIANT — SUCCESS
+     12. SUCCESS
      ========================================================================== */
 
-  .modal--success {
-    --modal-accent:
-      var(--color-success);
-  }
-
   .modal--success .modal__title {
-    color: var(--color-success-text);
+    color:
+      var(--color-success-text);
   }
 
   .modal--success .modal__header {
     border-top:
-      3px
-      solid
+      3px solid
       var(--color-success);
   }
 
 
   /* ==========================================================================
-     13. VARIANT — INFO
+     13. INFO
      ========================================================================== */
 
-  .modal--info {
-    --modal-accent:
-      var(--color-info);
-  }
-
   .modal--info .modal__title {
-    color: var(--color-info-text);
+    color:
+      var(--color-info-text);
   }
 
   .modal--info .modal__header {
     border-top:
-      3px
-      solid
+      3px solid
       var(--color-info);
   }
 
 
   /* ==========================================================================
-     14. SCROLLBAR
-     ========================================================================== */
-
-  .modal__body {
-    scrollbar-width: thin;
-
-    scrollbar-color:
-      var(--color-slate-300)
-      transparent;
-  }
-
-  .modal__body::-webkit-scrollbar {
-    width: 9px;
-  }
-
-  .modal__body::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  .modal__body::-webkit-scrollbar-thumb {
-    border: 2px solid transparent;
-    border-radius: var(--radius-full);
-
-    background-clip: padding-box;
-    background-color: var(--color-slate-300);
-  }
-
-
-  /* ==========================================================================
-     15. BODY LOCK
+     14. BODY SCROLL LOCK
      ========================================================================== */
 
   :global(body.binsight-modal-open) {
-    overflow: hidden;
-    overscroll-behavior: none;
+    overflow:
+      hidden;
+
+    overscroll-behavior:
+      none;
   }
 
 
   /* ==========================================================================
-     16. MOBILE
+     15. MOBILE
      ========================================================================== */
 
   @media (max-width: 767px) {
     .modal__dialog {
-      top: auto;
-      bottom: var(--space-3);
-      left: var(--space-3);
+      top:
+        auto;
 
-      width: calc(
-        100% - (var(--space-3) * 2)
-      );
+      right:
+        var(--space-3);
+
+      bottom:
+        var(--space-3);
+
+      left:
+        var(--space-3);
+
+      width:
+        calc(
+          100% -
+          (var(--space-3) * 2)
+        );
 
       max-height:
         calc(
-          100dvh - var(--space-6)
+          100dvh -
+          var(--space-6)
         );
 
       transform:
         translateY(1.5rem)
         scale(0.985);
 
-      border-radius: var(--radius-xl);
+      border-radius:
+        var(--radius-xl);
     }
 
     .modal--open .modal__dialog {
@@ -1232,20 +1418,34 @@ const resolvedAriaLabel =
     .modal--md .modal__dialog,
     .modal--lg .modal__dialog,
     .modal--xl .modal__dialog {
-      max-width: none;
+      max-width:
+        none;
     }
 
     .modal--full .modal__dialog {
-      top: var(--space-3);
-      bottom: var(--space-3);
-      left: var(--space-3);
+      top:
+        var(--space-3);
 
-      width: calc(
-        100% - (var(--space-3) * 2)
-      );
+      right:
+        var(--space-3);
 
-      height: auto;
-      max-height: none;
+      bottom:
+        var(--space-3);
+
+      left:
+        var(--space-3);
+
+      width:
+        calc(
+          100% -
+          (var(--space-3) * 2)
+        );
+
+      height:
+        auto;
+
+      max-height:
+        none;
     }
 
     .modal__header {
@@ -1256,12 +1456,13 @@ const resolvedAriaLabel =
     }
 
     .modal__body {
+      padding:
+        var(--space-5);
+
       max-height:
         calc(
           100dvh - 12rem
         );
-
-      padding: var(--space-5);
     }
 
     .modal__footer {
@@ -1274,17 +1475,25 @@ const resolvedAriaLabel =
 
 
   /* ==========================================================================
-     17. SMALL MOBILE
+     16. SMALL MOBILE
      ========================================================================== */
 
   @media (max-width: 479px) {
     .modal__dialog {
-      bottom: 0;
-      left: 0;
+      right:
+        0;
 
-      width: 100%;
+      bottom:
+        0;
 
-      max-height: 100dvh;
+      left:
+        0;
+
+      width:
+        100%;
+
+      max-height:
+        100dvh;
 
       border-radius:
         var(--radius-xl)
@@ -1294,40 +1503,40 @@ const resolvedAriaLabel =
     }
 
     .modal--full .modal__dialog {
-      top: 0;
-      right: 0;
-      bottom: 0;
-      left: 0;
+      top:
+        0;
 
-      width: 100%;
-      height: 100%;
+      right:
+        0;
 
-      border-radius: 0;
+      bottom:
+        0;
+
+      left:
+        0;
+
+      width:
+        100%;
+
+      height:
+        100%;
+
+      border-radius:
+        0;
     }
 
     .modal__footer {
-      flex-direction: column-reverse;
-      align-items: stretch;
+      flex-direction:
+        column-reverse;
+
+      align-items:
+        stretch;
     }
   }
 
 
   /* ==========================================================================
-     18. REDUCED MOTION
-     ========================================================================== */
-
-  @media (prefers-reduced-motion: reduce) {
-    .modal,
-    .modal__backdrop,
-    .modal__dialog,
-    .modal__close {
-      transition: none;
-    }
-  }
-
-
-  /* ==========================================================================
-     19. DARK THEME
+     17. DARK THEME
      ========================================================================== */
 
   [data-theme="dark"] .modal__backdrop {
@@ -1342,12 +1551,28 @@ const resolvedAriaLabel =
 
 
   /* ==========================================================================
-     20. PRINT
+     18. REDUCED MOTION
+     ========================================================================== */
+
+  @media (prefers-reduced-motion: reduce) {
+    .modal,
+    .modal__backdrop,
+    .modal__dialog,
+    .modal__close {
+      transition:
+        none;
+    }
+  }
+
+
+  /* ==========================================================================
+     19. PRINT
      ========================================================================== */
 
   @media print {
     .modal {
-      display: none !important;
+      display:
+        none !important;
     }
   }
 </style>

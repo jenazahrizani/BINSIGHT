@@ -17,84 +17,15 @@
  * - Waste / organization data
  *
  * Supports:
- * - input
- * - textarea
+ * - Input
+ * - Textarea
+ * - Checkbox
  *
  * Design system:
  * src/styles/variables.css
  *
  * Component system:
  * src/styles/components.css
- *
- * ============================================================================
- * Basic usage
- * ============================================================================
- *
- * <Input
- *   name="name"
- *   label="Nama"
- *   placeholder="Masukkan nama"
- * />
- *
- * ============================================================================
- * Required
- * ============================================================================
- *
- * <Input
- *   name="email"
- *   type="email"
- *   label="Email"
- *   required
- * />
- *
- * ============================================================================
- * Error
- * ============================================================================
- *
- * <Input
- *   name="email"
- *   type="email"
- *   label="Email"
- *   error="Format email tidak valid."
- * />
- *
- * ============================================================================
- * Textarea
- * ============================================================================
- *
- * <Input
- *   name="description"
- *   label="Deskripsi"
- *   multiline
- *   rows={6}
- * />
- *
- * ============================================================================
- * Search
- * ============================================================================
- *
- * <Input
- *   name="search"
- *   type="search"
- *   placeholder="Cari organisasi..."
- * />
- *
- * ============================================================================
- * Prefix / suffix
- * ============================================================================
- *
- * <Input
- *   name="website"
- *   label="Website"
- *   prefix="https://"
- * />
- *
- * <Input
- *   name="capacity"
- *   label="Kapasitas"
- *   suffix="unit"
- * />
- *
  * ============================================================================
  */
 
@@ -113,7 +44,18 @@ type InputType =
   | "week"
   | "color"
   | "file"
-  | "hidden";
+  | "hidden"
+  | "checkbox";
+
+type InputMode =
+  | "none"
+  | "text"
+  | "search"
+  | "tel"
+  | "url"
+  | "email"
+  | "numeric"
+  | "decimal";
 
 type Size =
   | "sm"
@@ -122,55 +64,40 @@ type Size =
 
 interface Props {
   name?: string;
-
   id?: string;
-
   type?: InputType;
 
   label?: string;
-
   description?: string;
-
   hint?: string;
-
   error?: string;
 
   placeholder?: string;
 
   value?: string | number;
-
   defaultValue?: string | number;
 
   autocomplete?: string;
-
-  inputmode?: string;
+  inputmode?: InputMode;
 
   pattern?: string;
 
   minlength?: number;
-
   maxlength?: number;
 
   min?: string | number;
-
   max?: string | number;
-
   step?: string | number;
 
   rows?: number;
-
   cols?: number;
 
   required?: boolean;
-
   disabled?: boolean;
-
   readonly?: boolean;
-
   autofocus?: boolean;
 
   multiple?: boolean;
-
   checked?: boolean;
 
   accept?: string;
@@ -180,17 +107,13 @@ interface Props {
   multiline?: boolean;
 
   prefix?: string;
-
   suffix?: string;
 
   prefixIcon?: boolean;
-
   suffixIcon?: boolean;
 
   ariaLabel?: string;
-
   ariaDescribedBy?: string;
-
   ariaLabelledBy?: string;
 
   title?: string;
@@ -198,17 +121,12 @@ interface Props {
   form?: string;
 
   class?: string;
-
   inputClass?: string;
-
   labelClass?: string;
-
   wrapperClass?: string;
 
   dataTestid?: string;
-
   dataValue?: string;
-
   dataContext?: string;
 
   loading?: boolean;
@@ -216,55 +134,40 @@ interface Props {
 
 const {
   name,
-
   id,
-
   type = "text",
 
   label,
-
   description,
-
   hint,
-
   error,
 
   placeholder,
 
   value,
-
   defaultValue,
 
   autocomplete,
-
   inputmode,
 
   pattern,
 
   minlength,
-
   maxlength,
 
   min,
-
   max,
-
   step,
 
   rows = 4,
-
   cols,
 
   required = false,
-
   disabled = false,
-
   readonly = false,
-
   autofocus = false,
 
   multiple = false,
-
   checked = false,
 
   accept,
@@ -274,17 +177,13 @@ const {
   multiline = false,
 
   prefix,
-
   suffix,
 
   prefixIcon = false,
-
   suffixIcon = false,
 
   ariaLabel,
-
   ariaDescribedBy,
-
   ariaLabelledBy,
 
   title,
@@ -292,23 +191,20 @@ const {
   form,
 
   class: className = "",
-
   inputClass = "",
-
   labelClass = "",
-
   wrapperClass = "",
 
   dataTestid,
-
   dataValue,
-
   dataContext,
 
   loading = false,
 } = Astro.props;
 
 const isTextarea = multiline;
+const isCheckbox = type === "checkbox";
+const isHidden = type === "hidden";
 
 const generatedId =
   id ??
@@ -322,8 +218,7 @@ const generatedId =
   );
 
 const hintId =
-  generatedId &&
-  (description || hint)
+  generatedId && (description || hint)
     ? `${generatedId}-hint`
     : undefined;
 
@@ -334,13 +229,14 @@ const errorId =
 
 const describedBy =
   ariaDescribedBy ??
-  [
-    hintId,
-    errorId,
-  ]
-    .filter(Boolean)
-    .join(" ") ||
-  undefined;
+  (
+    [
+      hintId,
+      errorId,
+    ]
+      .filter(Boolean)
+      .join(" ") || undefined
+  );
 
 const labelId =
   ariaLabelledBy ??
@@ -353,27 +249,39 @@ const labelId =
 const classes = [
   "input-field",
   `input-field--${size}`,
+
   error
     ? "input-field--error"
     : "",
+
   disabled
     ? "input-field--disabled"
     : "",
+
   readonly
     ? "input-field--readonly"
     : "",
+
   multiline
     ? "input-field--multiline"
     : "",
+
   loading
     ? "input-field--loading"
     : "",
+
   prefix
     ? "input-field--has-prefix"
     : "",
+
   suffix
     ? "input-field--has-suffix"
     : "",
+
+  isCheckbox
+    ? "input-field--checkbox-mode"
+    : "",
+
   className,
 ]
   .filter(Boolean)
@@ -405,25 +313,32 @@ const commonProps = {
   multiple,
   title,
   form,
+
   "aria-label":
     ariaLabel ??
     (!label
       ? title
       : undefined),
+
   "aria-labelledby":
     label
       ? labelId
       : undefined,
+
   "aria-describedby":
     describedBy,
+
   "aria-invalid":
     error
       ? "true"
       : undefined,
+
   "data-testid":
     dataTestid,
+
   "data-value":
     dataValue,
+
   "data-context":
     dataContext,
 };
@@ -436,7 +351,7 @@ const commonProps = {
   ]}
 >
   {
-    label && (
+    label && !isCheckbox && (
       <label
         id={labelId}
         class:list={[
@@ -464,7 +379,7 @@ const commonProps = {
   }
 
   {
-    (description || hint) && (
+    (description || hint) && !isCheckbox && (
       <p
         id={hintId}
         class="input-field__hint"
@@ -502,7 +417,7 @@ const commonProps = {
           </span>
         )}
       </div>
-    ) : type === "hidden" ? (
+    ) : isHidden ? (
       <input
         {...commonProps}
         class={inputClasses}
@@ -513,7 +428,7 @@ const commonProps = {
             : undefined
         }
       />
-    ) : type === "checkbox" ? (
+    ) : isCheckbox ? (
       <label class="input-field__checkbox">
         <input
           {...commonProps}
@@ -527,10 +442,34 @@ const commonProps = {
           }
         />
 
-        <span class="input-field__checkbox-box"></span>
+        <span
+          class="input-field__checkbox-box"
+          aria-hidden="true"
+        ></span>
 
         <span class="input-field__checkbox-content">
-          <slot />
+          {
+            label ? (
+              <>
+                <span>
+                  {label}
+                </span>
+
+                {
+                  required && (
+                    <span
+                      class="input-field__required"
+                      aria-hidden="true"
+                    >
+                      *
+                    </span>
+                  )
+                }
+              </>
+            ) : (
+              <slot />
+            )
+          }
         </span>
       </label>
     ) : (
@@ -735,20 +674,35 @@ const commonProps = {
       var(--border-style)
       var(--input-border);
 
-    border-radius: var(--input-radius);
+    border-radius:
+      var(--input-radius);
 
-    background: var(--input-background);
-    color: var(--color-text);
+    background:
+      var(--input-background);
 
-    font-family: var(--font-sans);
-    font-size: var(--font-size-sm);
-    font-weight: var(--font-weight-regular);
-    line-height: var(--line-height-normal);
+    color:
+      var(--color-text);
 
-    outline: none;
+    font-family:
+      var(--font-sans);
 
-    appearance: none;
-    -webkit-appearance: none;
+    font-size:
+      var(--font-size-sm);
+
+    font-weight:
+      var(--font-weight-regular);
+
+    line-height:
+      var(--line-height-normal);
+
+    outline:
+      none;
+
+    appearance:
+      none;
+
+    -webkit-appearance:
+      none;
 
     transition:
       border-color var(--transition-fast),
@@ -758,8 +712,11 @@ const commonProps = {
   }
 
   .input-field__control::placeholder {
-    color: var(--color-text-subtle);
-    opacity: 1;
+    color:
+      var(--color-text-subtle);
+
+    opacity:
+      1;
   }
 
   .input-field__control:hover:not(:disabled) {
@@ -805,7 +762,8 @@ const commonProps = {
 
   .input-field--multiline
     .input-field__wrapper {
-    align-items: stretch;
+    align-items:
+      stretch;
   }
 
   .input-field--multiline
@@ -833,13 +791,20 @@ const commonProps = {
 
   .input-field__prefix,
   .input-field__suffix {
-    position: absolute;
-    z-index: 2;
+    position:
+      absolute;
 
-    display: inline-flex;
-    align-items: center;
+    z-index:
+      2;
 
-    height: 100%;
+    display:
+      inline-flex;
+
+    align-items:
+      center;
+
+    height:
+      100%;
 
     color:
       var(--color-text-muted);
@@ -855,11 +820,13 @@ const commonProps = {
   }
 
   .input-field__prefix {
-    left: var(--space-4);
+    left:
+      var(--space-4);
   }
 
   .input-field__suffix {
-    right: var(--space-4);
+    right:
+      var(--space-4);
   }
 
   .input-field--has-prefix
@@ -886,53 +853,50 @@ const commonProps = {
      ========================================================================== */
 
   .input-field__icon {
-    position: absolute;
-    z-index: 2;
+    position:
+      absolute;
 
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+    z-index:
+      2;
 
-    width: var(--icon-size-md);
-    height: var(--icon-size-md);
+    display:
+      inline-flex;
+
+    align-items:
+      center;
+
+    justify-content:
+      center;
+
+    width:
+      var(--icon-size-md);
+
+    height:
+      var(--icon-size-md);
 
     color:
       var(--color-text-subtle);
 
-    pointer-events: none;
+    pointer-events:
+      none;
   }
 
   .input-field__icon--prefix {
-    left: var(--space-3);
+    left:
+      var(--space-3);
   }
 
   .input-field__icon--suffix {
-    right: var(--space-3);
+    right:
+      var(--space-3);
   }
 
   .input-field__icon svg {
-    width: 100%;
-    height: 100%;
-  }
+    width:
+      100%;
 
-  .input-field--has-prefix
-    .input-field__control {
-    padding-left:
-      calc(
-        var(--space-3) +
-        var(--icon-size-md) +
-        var(--space-3)
-      );
-  }
-
-  .input-field--has-suffix
-    .input-field__control {
-    padding-right:
-      calc(
-        var(--space-3) +
-        var(--icon-size-md) +
-        var(--space-3)
-      );
+    height:
+      100%;
   }
 
 
@@ -942,25 +906,34 @@ const commonProps = {
 
   .input-field--loading
     .input-field__control {
-    color: transparent;
+    color:
+      transparent;
   }
 
   .input-field__spinner {
-    position: absolute;
-    z-index: 3;
+    position:
+      absolute;
 
-    top: 50%;
-    right: var(--space-4);
+    z-index:
+      3;
 
-    width: 1rem;
-    height: 1rem;
+    top:
+      50%;
+
+    right:
+      var(--space-4);
+
+    width:
+      1rem;
+
+    height:
+      1rem;
 
     transform:
       translateY(-50%);
 
     border:
-      2px
-      solid
+      2px solid
       var(--color-border-strong);
 
     border-right-color:
@@ -993,51 +966,82 @@ const commonProps = {
      ========================================================================== */
 
   .input-field__checkbox {
-    position: relative;
+    position:
+      relative;
 
-    display: inline-flex;
-    align-items: flex-start;
+    display:
+      inline-flex;
 
-    gap: var(--space-3);
+    align-items:
+      flex-start;
 
-    width: fit-content;
+    gap:
+      var(--space-3);
 
-    cursor: pointer;
+    width:
+      fit-content;
+
+    cursor:
+      pointer;
   }
 
   .input-field__checkbox
     .input-field__control {
-    position: absolute;
+    position:
+      absolute;
 
-    width: 1px;
-    height: 1px;
+    width:
+      1px;
 
-    padding: 0;
-    margin: -1px;
+    height:
+      1px;
 
-    overflow: hidden;
+    padding:
+      0;
 
-    clip: rect(0, 0, 0, 0);
-    clip-path: inset(50%);
+    margin:
+      -1px;
 
-    white-space: nowrap;
+    overflow:
+      hidden;
 
-    border: 0;
+    clip:
+      rect(0, 0, 0, 0);
+
+    clip-path:
+      inset(50%);
+
+    white-space:
+      nowrap;
+
+    border:
+      0;
   }
 
   .input-field__checkbox-box {
-    position: relative;
+    position:
+      relative;
 
-    display: inline-flex;
-    flex: 0 0 auto;
+    display:
+      inline-flex;
 
-    align-items: center;
-    justify-content: center;
+    flex:
+      0 0 auto;
 
-    width: 1.25rem;
-    height: 1.25rem;
+    align-items:
+      center;
 
-    margin-top: 0.0625rem;
+    justify-content:
+      center;
+
+    width:
+      1.25rem;
+
+    height:
+      1.25rem;
+
+    margin-top:
+      0.0625rem;
 
     border:
       var(--border-width-1)
@@ -1057,10 +1061,14 @@ const commonProps = {
   }
 
   .input-field__checkbox-box::after {
-    width: 0.45rem;
-    height: 0.7rem;
+    width:
+      0.45rem;
 
-    content: "";
+    height:
+      0.7rem;
+
+    content:
+      "";
 
     transform:
       rotate(45deg)
@@ -1108,6 +1116,15 @@ const commonProps = {
   }
 
   .input-field__checkbox-content {
+    display:
+      inline-flex;
+
+    align-items:
+      center;
+
+    gap:
+      var(--space-1);
+
     color:
       var(--color-text-secondary);
 
@@ -1124,14 +1141,18 @@ const commonProps = {
      ========================================================================== */
 
   .input-field__control[type="file"] {
-    height: auto;
-    min-height: var(--input-height);
+    height:
+      auto;
+
+    min-height:
+      var(--input-height);
 
     padding:
       var(--space-2)
       var(--space-3);
 
-    cursor: pointer;
+    cursor:
+      pointer;
   }
 
   .input-field__control[type="file"]::file-selector-button {
@@ -1190,7 +1211,8 @@ const commonProps = {
   .input-field__control[type="search"]::-webkit-search-decoration,
   .input-field__control[type="search"]::-webkit-search-results-button,
   .input-field__control[type="search"]::-webkit-search-results-decoration {
-    display: none;
+    display:
+      none;
   }
 
 
@@ -1200,10 +1222,14 @@ const commonProps = {
 
   .input-field__control[type="number"]::-webkit-inner-spin-button,
   .input-field__control[type="number"]::-webkit-outer-spin-button {
-    margin: 0;
+    margin:
+      0;
 
-    appearance: none;
-    -webkit-appearance: none;
+    appearance:
+      none;
+
+    -webkit-appearance:
+      none;
   }
 
   .input-field__control[type="number"] {
@@ -1383,11 +1409,13 @@ const commonProps = {
     .input-field__control,
     .input-field__checkbox-box,
     .input-field__checkbox-box::after {
-      transition: none;
+      transition:
+        none;
     }
 
     .input-field__spinner {
-      animation-duration: 1.2s;
+      animation-duration:
+        1.2s;
     }
   }
 </style>
