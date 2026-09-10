@@ -1,0 +1,1978 @@
+---
+/**
+ * BINSIGHT — ADMIN LAYOUT
+ * --------------------------------------------------------------------------
+ * Internal administration workspace for BINSIGHT.
+ *
+ * Responsibilities:
+ * - Internal admin shell
+ * - Admin sidebar navigation
+ * - System / verification context
+ * - Breadcrumbs
+ * - Page title / description
+ * - Header actions slot
+ * - Responsive mobile navigation
+ * - Footer
+ * - Lightweight UI behavior
+ *
+ * Intended pages:
+ * - /admin
+ * - /admin/organizations
+ * - /admin/locations
+ * - /admin/waste
+ * - /admin/reports
+ * - /admin/users
+ * - /admin/content
+ *
+ * Security note:
+ * - This layout is UI infrastructure only.
+ * - It does NOT replace server-side authentication / authorization.
+ * - Access control belongs to src/lib/auth/*
+ * - Firebase security rules remain authoritative.
+ * --------------------------------------------------------------------------
+ */
+
+import {
+  Activity,
+  BarChart3,
+  BellRing,
+  Building2,
+  CheckCircle2,
+  ChevronRight,
+  Database,
+  FileText,
+  FileWarning,
+  LayoutDashboard,
+  LockKeyhole,
+  MapPin,
+  Menu,
+  Newspaper,
+  Recycle,
+  ShieldCheck,
+  Users,
+  X,
+} from "@lucide/astro";
+
+import Navbar from "@components/layout/Navbar.astro";
+import Footer from "@components/layout/Footer.astro";
+
+type AdminSection =
+  | "overview"
+  | "organizations"
+  | "locations"
+  | "waste"
+  | "reports"
+  | "users"
+  | "content";
+
+interface Breadcrumb {
+  label: string;
+  href?: string;
+}
+
+interface Props {
+  title?: string;
+  description?: string;
+  breadcrumbs?: Breadcrumb[];
+  activeSection?: AdminSection;
+  adminName?: string;
+  adminInitials?: string;
+  bodyClass?: string;
+  noindex?: boolean;
+}
+
+const {
+  title = "Admin Dashboard",
+  description = "Kelola data, verifikasi, konten, dan aktivitas platform BINSIGHT.",
+  breadcrumbs = [
+    {
+      label: "Admin",
+      href: "/admin",
+    },
+    {
+      label: "Dashboard",
+    },
+  ],
+  activeSection = "overview",
+  adminName = "Administrator",
+  adminInitials = "AD",
+  bodyClass = "",
+  noindex = true,
+} = Astro.props;
+
+const siteUrl =
+  import.meta.env.PUBLIC_SITE_URL ||
+  Astro.site?.toString() ||
+  "https://binsight.id";
+
+const appName =
+  import.meta.env.PUBLIC_APP_NAME ||
+  "BINSIGHT";
+
+const absoluteUrl = (value: string): string => {
+  if (
+    value.startsWith("http://") ||
+    value.startsWith("https://")
+  ) {
+    return value;
+  }
+
+  return new URL(
+    value.startsWith("/") ? value : `/${value}`,
+    siteUrl
+  ).toString();
+};
+
+const canonicalUrl = absoluteUrl(
+  Astro.url.pathname
+);
+
+const fullTitle =
+  title.startsWith("BINSIGHT")
+    ? title
+    : `${title} — BINSIGHT`;
+
+const robotsContent = noindex
+  ? "noindex, nofollow"
+  : "index, follow";
+
+const navItems: Array<{
+  id: AdminSection;
+  label: string;
+  description: string;
+  href: string;
+  icon: typeof LayoutDashboard;
+}> = [
+  {
+    id: "overview",
+    label: "Ringkasan",
+    description: "Overview platform",
+    href: "/admin",
+    icon: LayoutDashboard,
+  },
+  {
+    id: "organizations",
+    label: "Organisasi",
+    description: "Verifikasi & kelola",
+    href: "/admin/organizations",
+    icon: Building2,
+  },
+  {
+    id: "locations",
+    label: "Lokasi",
+    description: "Wilayah & titik",
+    href: "/admin/locations",
+    icon: MapPin,
+  },
+  {
+    id: "waste",
+    label: "Sampah",
+    description: "Kategori & data",
+    href: "/admin/waste",
+    icon: Recycle,
+  },
+  {
+    id: "reports",
+    label: "Laporan",
+    description: "Tinjau & tindak lanjut",
+    href: "/admin/reports",
+    icon: FileWarning,
+  },
+  {
+    id: "users",
+    label: "Pengguna",
+    description: "Akun & akses",
+    href: "/admin/users",
+    icon: Users,
+  },
+  {
+    id: "content",
+    label: "Konten",
+    description: "Edukasi & informasi",
+    href: "/admin/content",
+    icon: Newspaper,
+  },
+];
+
+const managementLinks = [
+  {
+    label: "Dashboard Publik",
+    href: "/dashboard",
+    icon: BarChart3,
+  },
+  {
+    label: "Lihat Peta",
+    href: "/map",
+    icon: MapPin,
+  },
+];
+
+const isActive = (section: AdminSection) =>
+  activeSection === section;
+---
+
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1"
+    />
+
+    <meta
+      name="theme-color"
+      content="#0F172A"
+    />
+
+    <meta
+      name="color-scheme"
+      content="light dark"
+    />
+
+    <meta
+      name="application-name"
+      content={appName}
+    />
+
+    <meta
+      name="robots"
+      content={robotsContent}
+    />
+
+    <meta
+      name="googlebot"
+      content={robotsContent}
+    />
+
+    <title>{fullTitle}</title>
+
+    <meta
+      name="description"
+      content={description}
+    />
+
+    <link
+      rel="canonical"
+      href={canonicalUrl}
+    />
+
+    <link
+      rel="icon"
+      href="/favicon.svg"
+      type="image/svg+xml"
+    />
+
+    <link
+      rel="apple-touch-icon"
+      href="/images/logo.svg"
+    />
+
+    <meta
+      property="og:type"
+      content="website"
+    />
+
+    <meta
+      property="og:site_name"
+      content="BINSIGHT"
+    />
+
+    <meta
+      property="og:locale"
+      content="id_ID"
+    />
+
+    <meta
+      property="og:title"
+      content={fullTitle}
+    />
+
+    <meta
+      property="og:description"
+      content={description}
+    />
+
+    <meta
+      property="og:url"
+      content={canonicalUrl}
+    />
+
+    <meta
+      property="og:image"
+      content={absoluteUrl("/images/logo.svg")}
+    />
+
+    <meta
+      property="og:image:alt"
+      content={fullTitle}
+    />
+
+    <meta
+      name="twitter:card"
+      content="summary"
+    />
+
+    <meta
+      name="twitter:title"
+      content={fullTitle}
+    />
+
+    <meta
+      name="twitter:description"
+      content={description}
+    />
+
+    <meta
+      name="twitter:image"
+      content={absoluteUrl("/images/logo.svg")}
+    />
+
+    <script
+      type="application/ld+json"
+      set:html={JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        name: title,
+        url: canonicalUrl,
+        description,
+        inLanguage: "id-ID",
+        isPartOf: {
+          "@type": "WebSite",
+          name: "BINSIGHT",
+          url: siteUrl,
+        },
+      })}
+    />
+
+    <slot name="head" />
+  </head>
+
+  <body
+    class:list={[
+      "admin-layout",
+      bodyClass,
+    ]}
+  >
+    <a
+      class="admin-layout__skip-link"
+      href="#admin-main-content"
+    >
+      Lewati ke konten admin
+    </a>
+
+    <div class="admin-layout__shell">
+      <Navbar />
+
+      <div class="admin-layout__workspace">
+        <aside
+          id="admin-sidebar"
+          class="admin-layout__sidebar"
+          data-admin-sidebar
+          aria-label="Navigasi administrasi"
+        >
+          <div class="admin-layout__sidebar-inner">
+            <div class="admin-layout__system-heading">
+              <div class="admin-layout__system-title">
+                <span class="admin-layout__system-icon">
+                  <ShieldCheck
+                    size={17}
+                    strokeWidth={2}
+                    aria-hidden="true"
+                  />
+                </span>
+
+                <span>Admin BINSIGHT</span>
+              </div>
+
+              <span class="admin-layout__system-badge">
+                INTERNAL
+              </span>
+            </div>
+
+            <div class="admin-layout__admin-card">
+              <div
+                class="admin-layout__admin-avatar"
+                aria-hidden="true"
+              >
+                {adminInitials}
+              </div>
+
+              <div class="admin-layout__admin-copy">
+                <strong>{adminName}</strong>
+
+                <span>
+                  <LockKeyhole
+                    size={12}
+                    strokeWidth={2}
+                    aria-hidden="true"
+                  />
+
+                  Administrator
+                </span>
+              </div>
+            </div>
+
+            <nav
+              class="admin-layout__nav"
+              aria-label="Menu administrasi"
+            >
+              <p class="admin-layout__nav-label">
+                Manajemen platform
+              </p>
+
+              {
+                navItems.map((item) => {
+                  const active = isActive(item.id);
+
+                  return (
+                    <a
+                      href={item.href}
+                      class:list={[
+                        "admin-layout__nav-item",
+                        {
+                          "admin-layout__nav-item--active":
+                            active,
+                        },
+                      ]}
+                      aria-current={
+                        active ? "page" : undefined
+                      }
+                    >
+                      <span class="admin-layout__nav-icon">
+                        <item.icon
+                          size={17}
+                          strokeWidth={1.9}
+                          aria-hidden="true"
+                        />
+                      </span>
+
+                      <span class="admin-layout__nav-copy">
+                        <strong>{item.label}</strong>
+                        <small>{item.description}</small>
+                      </span>
+                    </a>
+                  );
+                })
+              }
+            </nav>
+
+            <div class="admin-layout__divider"></div>
+
+            <div class="admin-layout__system-status">
+              <div class="admin-layout__system-status-header">
+                <span class="admin-layout__system-status-icon">
+                  <Activity
+                    size={14}
+                    strokeWidth={2}
+                    aria-hidden="true"
+                  />
+                </span>
+
+                <span>Status platform</span>
+              </div>
+
+              <div class="admin-layout__status-row">
+                <span class="admin-layout__status-dot"></span>
+
+                <span>Operasional</span>
+              </div>
+
+              <p>
+                Status yang ditampilkan di sini bersifat
+                informatif. Validasi akses tetap dilakukan
+                oleh sistem autentikasi dan Firebase Rules.
+              </p>
+            </div>
+
+            <div class="admin-layout__divider"></div>
+
+            <nav
+              class="admin-layout__secondary-nav"
+              aria-label="Akses cepat"
+            >
+              <p class="admin-layout__nav-label">
+                Akses cepat
+              </p>
+
+              {
+                managementLinks.map((item) => (
+                  <a
+                    href={item.href}
+                    class="admin-layout__secondary-link"
+                  >
+                    <span>
+                      <item.icon
+                        size={15}
+                        strokeWidth={1.9}
+                        aria-hidden="true"
+                      />
+                    </span>
+
+                    {item.label}
+                  </a>
+                ))
+              }
+            </nav>
+
+            <div class="admin-layout__security-note">
+              <span class="admin-layout__security-icon">
+                <LockKeyhole
+                  size={14}
+                  strokeWidth={2}
+                  aria-hidden="true"
+                />
+              </span>
+
+              <div>
+                <strong>Area terbatas</strong>
+
+                <p>
+                  Halaman admin hanya untuk pengguna
+                  dengan hak akses yang sesuai.
+                </p>
+              </div>
+            </div>
+          </div>
+        </aside>
+
+        <div class="admin-layout__content">
+          <header class="admin-layout__header">
+            <div class="admin-layout__header-container">
+              <div class="admin-layout__mobile-topbar">
+                <button
+                  type="button"
+                  class="admin-layout__mobile-toggle"
+                  data-admin-sidebar-toggle
+                  aria-controls="admin-sidebar"
+                  aria-expanded="false"
+                  aria-label="Buka navigasi admin"
+                >
+                  <Menu
+                    class="admin-layout__mobile-menu-icon"
+                    size={20}
+                    strokeWidth={2}
+                    aria-hidden="true"
+                  />
+
+                  <X
+                    class="admin-layout__mobile-close-icon"
+                    size={20}
+                    strokeWidth={2}
+                    aria-hidden="true"
+                  />
+                </button>
+
+                <div class="admin-layout__mobile-context">
+                  <span>Admin BINSIGHT</span>
+
+                  <strong>{title}</strong>
+                </div>
+
+                <div class="admin-layout__mobile-status">
+                  <CheckCircle2
+                    size={17}
+                    strokeWidth={2}
+                    aria-hidden="true"
+                  />
+                </div>
+              </div>
+
+              <div class="admin-layout__header-bar">
+                <nav
+                  class="admin-layout__breadcrumbs"
+                  aria-label="Breadcrumb admin"
+                >
+                  <ol class="admin-layout__breadcrumb-list">
+                    {
+                      breadcrumbs.map(
+                        (breadcrumb, index) => {
+                          const isLast =
+                            index ===
+                            breadcrumbs.length - 1;
+
+                          return (
+                            <li class="admin-layout__breadcrumb-item">
+                              {
+                                breadcrumb.href &&
+                                !isLast ? (
+                                  <a
+                                    href={
+                                      breadcrumb.href
+                                    }
+                                    class="admin-layout__breadcrumb-link"
+                                  >
+                                    {
+                                      breadcrumb.label
+                                    }
+                                  </a>
+                                ) : (
+                                  <span
+                                    class="admin-layout__breadcrumb-current"
+                                    aria-current={
+                                      isLast
+                                        ? "page"
+                                        : undefined
+                                    }
+                                  >
+                                    {
+                                      breadcrumb.label
+                                    }
+                                  </span>
+                                )
+                              }
+
+                              {
+                                !isLast && (
+                                  <ChevronRight
+                                    size={13}
+                                    strokeWidth={1.8}
+                                    aria-hidden="true"
+                                  />
+                                )
+                              }
+                            </li>
+                          );
+                        }
+                      )
+                    }
+                  </ol>
+                </nav>
+
+                <div class="admin-layout__header-system">
+                  <span class="admin-layout__header-system-dot"></span>
+
+                  <span>System operational</span>
+
+                  <BellRing
+                    size={16}
+                    strokeWidth={1.8}
+                    aria-hidden="true"
+                  />
+                </div>
+              </div>
+
+              <div class="admin-layout__title-row">
+                <div class="admin-layout__heading">
+                  <p class="admin-layout__eyebrow">
+                    BINSIGHT ADMINISTRATION
+                  </p>
+
+                  <h1 class="admin-layout__title">
+                    {title}
+                  </h1>
+
+                  <p class="admin-layout__description">
+                    {description}
+                  </p>
+                </div>
+
+                <div class="admin-layout__actions">
+                  <slot name="actions" />
+                </div>
+              </div>
+            </div>
+          </header>
+
+          <main
+            id="admin-main-content"
+            class="admin-layout__main"
+            tabindex="-1"
+          >
+            <div class="admin-layout__main-container">
+              <slot />
+            </div>
+          </main>
+
+          <Footer />
+        </div>
+      </div>
+    </div>
+
+    <div
+      class="admin-layout__backdrop"
+      data-admin-backdrop
+      aria-hidden="true"
+    ></div>
+
+    <div
+      class="admin-layout__progress"
+      data-admin-progress
+      aria-hidden="true"
+    ></div>
+
+    <script>
+      const adminRoot =
+        document.querySelector<HTMLElement>(
+          ".admin-layout"
+        );
+
+      if (adminRoot) {
+        const sidebar =
+          adminRoot.querySelector<HTMLElement>(
+            "[data-admin-sidebar]"
+          );
+
+        const toggle =
+          adminRoot.querySelector<HTMLButtonElement>(
+            "[data-admin-sidebar-toggle]"
+          );
+
+        const backdrop =
+          adminRoot.querySelector<HTMLElement>(
+            "[data-admin-backdrop]"
+          );
+
+        const progress =
+          adminRoot.querySelector<HTMLElement>(
+            "[data-admin-progress]"
+          );
+
+        const openSidebar = () => {
+          if (!sidebar || !toggle) {
+            return;
+          }
+
+          sidebar.classList.add(
+            "admin-layout__sidebar--open"
+          );
+
+          adminRoot.classList.add(
+            "admin-layout--sidebar-open"
+          );
+
+          toggle.setAttribute(
+            "aria-expanded",
+            "true"
+          );
+
+          toggle.setAttribute(
+            "aria-label",
+            "Tutup navigasi admin"
+          );
+
+          document.documentElement.classList.add(
+            "admin-scroll-locked"
+          );
+
+          document.body.classList.add(
+            "admin-scroll-locked"
+          );
+        };
+
+        const closeSidebar = () => {
+          if (!sidebar || !toggle) {
+            return;
+          }
+
+          sidebar.classList.remove(
+            "admin-layout__sidebar--open"
+          );
+
+          adminRoot.classList.remove(
+            "admin-layout--sidebar-open"
+          );
+
+          toggle.setAttribute(
+            "aria-expanded",
+            "false"
+          );
+
+          toggle.setAttribute(
+            "aria-label",
+            "Buka navigasi admin"
+          );
+
+          document.documentElement.classList.remove(
+            "admin-scroll-locked"
+          );
+
+          document.body.classList.remove(
+            "admin-scroll-locked"
+          );
+        };
+
+        toggle?.addEventListener(
+          "click",
+          () => {
+            const isOpen =
+              sidebar?.classList.contains(
+                "admin-layout__sidebar--open"
+              ) ?? false;
+
+            if (isOpen) {
+              closeSidebar();
+            } else {
+              openSidebar();
+            }
+          }
+        );
+
+        backdrop?.addEventListener(
+          "click",
+          closeSidebar
+        );
+
+        sidebar
+          ?.querySelectorAll("a")
+          .forEach((link) => {
+            link.addEventListener(
+              "click",
+              closeSidebar
+            );
+          });
+
+        document.addEventListener(
+          "keydown",
+          (event) => {
+            if (event.key === "Escape") {
+              closeSidebar();
+            }
+          }
+        );
+
+        window.addEventListener(
+          "resize",
+          () => {
+            if (window.innerWidth > 1000) {
+              closeSidebar();
+            }
+          }
+        );
+
+        const updateProgress = () => {
+          if (!progress) {
+            return;
+          }
+
+          const height =
+            document.documentElement.scrollHeight -
+            window.innerHeight;
+
+          if (height <= 0) {
+            progress.style.transform =
+              "scaleX(0)";
+
+            return;
+          }
+
+          const ratio =
+            Math.min(
+              Math.max(
+                window.scrollY / height,
+                0
+              ),
+              1
+            );
+
+          progress.style.transform =
+            `scaleX(${ratio})`;
+        };
+
+        updateProgress();
+
+        window.addEventListener(
+          "scroll",
+          updateProgress,
+          { passive: true }
+        );
+
+        window.addEventListener(
+          "resize",
+          updateProgress,
+          { passive: true }
+        );
+      }
+    </script>
+  </body>
+</html>
+
+<style>
+  .admin-layout {
+    min-height: 100vh;
+
+    margin: 0;
+
+    color: var(--color-text);
+    background: var(--color-background);
+  }
+
+  .admin-layout__shell {
+    min-height: 100vh;
+
+    display: flex;
+    flex-direction: column;
+  }
+
+  .admin-layout__workspace {
+    min-height: 0;
+    flex: 1 1 auto;
+
+    display: flex;
+    align-items: stretch;
+  }
+
+  /* -----------------------------------------------------------------------
+   * SIDEBAR
+   * --------------------------------------------------------------------- */
+
+  .admin-layout__sidebar {
+    position: sticky;
+    top: 76px;
+
+    width: 286px;
+    min-width: 286px;
+
+    height: calc(100vh - 76px);
+
+    align-self: flex-start;
+
+    overflow-y: auto;
+
+    border-right: 1px solid var(--color-border);
+
+    background:
+      linear-gradient(
+        180deg,
+        #ffffff 0%,
+        #f8fafc 100%
+      );
+  }
+
+  .admin-layout__sidebar-inner {
+    padding: 22px 14px 28px;
+  }
+
+  .admin-layout__system-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+
+    padding: 2px 8px 14px;
+  }
+
+  .admin-layout__system-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    min-width: 0;
+
+    color: var(--color-text);
+
+    font-size: 0.76rem;
+    font-weight: 900;
+  }
+
+  .admin-layout__system-icon {
+    width: 29px;
+    height: 29px;
+
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+
+    border-radius: 8px;
+
+    color: #ffffff;
+    background:
+      linear-gradient(
+        145deg,
+        #1e293b,
+        #0f172a
+      );
+  }
+
+  .admin-layout__system-badge {
+    display: inline-flex;
+    align-items: center;
+
+    min-height: 21px;
+    padding: 0 7px;
+
+    border: 1px solid #cbd5e1;
+    border-radius: 999px;
+
+    color: #475569;
+    background: #f8fafc;
+
+    font-size: 0.54rem;
+    font-weight: 900;
+    line-height: 1;
+
+    letter-spacing: 0.08em;
+  }
+
+  .admin-layout__admin-card {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+
+    margin: 0 2px 19px;
+    padding: 12px;
+
+    border: 1px solid #e2e8f0;
+    border-radius: 13px;
+
+    background:
+      linear-gradient(
+        145deg,
+        #f8fafc,
+        #ffffff
+      );
+  }
+
+  .admin-layout__admin-avatar {
+    width: 42px;
+    height: 42px;
+
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+
+    border-radius: 11px;
+
+    color: #ffffff;
+
+    background:
+      linear-gradient(
+        145deg,
+        #334155,
+        #0f172a
+      );
+
+    font-size: 0.71rem;
+    font-weight: 900;
+
+    letter-spacing: 0.04em;
+  }
+
+  .admin-layout__admin-copy {
+    min-width: 0;
+
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .admin-layout__admin-copy strong {
+    overflow: hidden;
+
+    color: var(--color-text);
+
+    font-size: 0.77rem;
+    font-weight: 850;
+    line-height: 1.25;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .admin-layout__admin-copy span {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+
+    color: #64748b;
+
+    font-size: 0.61rem;
+    font-weight: 650;
+    line-height: 1.2;
+  }
+
+  .admin-layout__nav {
+    display: grid;
+    gap: 3px;
+  }
+
+  .admin-layout__nav-label {
+    margin: 0 9px 7px;
+
+    color: #94a3b8;
+
+    font-size: 0.6rem;
+    font-weight: 900;
+    line-height: 1;
+
+    letter-spacing: 0.075em;
+    text-transform: uppercase;
+  }
+
+  .admin-layout__nav-item {
+    position: relative;
+
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    min-height: 53px;
+    padding: 7px 9px;
+
+    border: 1px solid transparent;
+    border-radius: 11px;
+
+    color: var(--color-secondary);
+    background: transparent;
+
+    text-decoration: none;
+
+    transition:
+      color 160ms ease,
+      background-color 160ms ease,
+      border-color 160ms ease,
+      transform 160ms ease;
+  }
+
+  .admin-layout__nav-item:hover {
+    color: #1e293b;
+    background: #f1f5f9;
+
+    transform: translateX(1px);
+  }
+
+  .admin-layout__nav-item--active {
+    color: #0f172a;
+
+    border-color: #e2e8f0;
+
+    background:
+      linear-gradient(
+        100deg,
+        #f1f5f9,
+        #f8fafc
+      );
+  }
+
+  .admin-layout__nav-item--active::before {
+    content: "";
+
+    position: absolute;
+    top: 9px;
+    bottom: 9px;
+    left: -14px;
+
+    width: 3px;
+
+    border-radius: 0 999px 999px 0;
+
+    background: #0f172a;
+  }
+
+  .admin-layout__nav-icon {
+    width: 35px;
+    height: 35px;
+
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+
+    border-radius: 9px;
+
+    color: currentColor;
+    background: #f1f5f9;
+
+    transition:
+      background-color 160ms ease,
+      color 160ms ease;
+  }
+
+  .admin-layout__nav-item--active
+    .admin-layout__nav-icon {
+    color: #ffffff;
+    background: #1e293b;
+  }
+
+  .admin-layout__nav-copy {
+    min-width: 0;
+
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .admin-layout__nav-copy strong {
+    color: currentColor;
+
+    font-size: 0.75rem;
+    font-weight: 820;
+    line-height: 1.2;
+  }
+
+  .admin-layout__nav-copy small {
+    color: #64748b;
+
+    font-size: 0.61rem;
+    font-weight: 500;
+    line-height: 1.3;
+  }
+
+  .admin-layout__divider {
+    height: 1px;
+
+    margin: 21px 8px;
+
+    background: var(--color-border);
+  }
+
+  .admin-layout__system-status {
+    margin: 0 5px;
+    padding: 12px;
+
+    border: 1px solid #e2e8f0;
+    border-radius: 11px;
+
+    background: #ffffff;
+  }
+
+  .admin-layout__system-status-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    color: #334155;
+
+    font-size: 0.67rem;
+    font-weight: 850;
+  }
+
+  .admin-layout__system-status-icon {
+    width: 27px;
+    height: 27px;
+
+    display: grid;
+    place-items: center;
+
+    border-radius: 7px;
+
+    color: #334155;
+    background: #f1f5f9;
+  }
+
+  .admin-layout__status-row {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+
+    margin-top: 10px;
+
+    color: #334155;
+
+    font-size: 0.64rem;
+    font-weight: 750;
+  }
+
+  .admin-layout__status-dot {
+    width: 7px;
+    height: 7px;
+
+    flex-shrink: 0;
+
+    border-radius: 999px;
+
+    background: #16a34a;
+
+    box-shadow:
+      0 0 0 3px
+      rgba(22, 163, 74, 0.12);
+  }
+
+  .admin-layout__system-status p {
+    margin: 7px 0 0;
+
+    color: #64748b;
+
+    font-size: 0.6rem;
+    line-height: 1.55;
+  }
+
+  .admin-layout__secondary-nav {
+    display: grid;
+    gap: 3px;
+  }
+
+  .admin-layout__secondary-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    min-height: 36px;
+    padding: 0 7px;
+
+    border-radius: 8px;
+
+    color: #64748b;
+
+    font-size: 0.65rem;
+    font-weight: 650;
+
+    text-decoration: none;
+
+    transition:
+      color 160ms ease,
+      background-color 160ms ease;
+  }
+
+  .admin-layout__secondary-link:hover {
+    color: #0f172a;
+    background: #f1f5f9;
+  }
+
+  .admin-layout__secondary-link > span {
+    width: 26px;
+    height: 26px;
+
+    display: grid;
+    place-items: center;
+
+    border-radius: 7px;
+
+    background: #f1f5f9;
+  }
+
+  .admin-layout__security-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 9px;
+
+    margin: 18px 5px 0;
+    padding: 11px;
+
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+
+    background: #f8fafc;
+  }
+
+  .admin-layout__security-icon {
+    width: 27px;
+    height: 27px;
+
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+
+    border-radius: 7px;
+
+    color: #475569;
+    background: #ffffff;
+  }
+
+  .admin-layout__security-note strong {
+    display: block;
+
+    color: #334155;
+
+    font-size: 0.64rem;
+    font-weight: 850;
+    line-height: 1.3;
+  }
+
+  .admin-layout__security-note p {
+    margin: 4px 0 0;
+
+    color: #64748b;
+
+    font-size: 0.59rem;
+    line-height: 1.5;
+  }
+
+  /* -----------------------------------------------------------------------
+   * CONTENT
+   * --------------------------------------------------------------------- */
+
+  .admin-layout__content {
+    min-width: 0;
+    flex: 1 1 auto;
+
+    display: flex;
+    flex-direction: column;
+  }
+
+  .admin-layout__header {
+    position: relative;
+    z-index: 5;
+
+    border-bottom: 1px solid var(--color-border);
+
+    background:
+      radial-gradient(
+        circle at 88% 14%,
+        rgba(100, 116, 139, 0.08),
+        transparent 27%
+      ),
+      linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.99),
+        rgba(248, 250, 252, 0.97)
+      );
+  }
+
+  .admin-layout__header-container {
+    width: min(
+      calc(100% - 48px),
+      var(--container-xl, 1280px)
+    );
+
+    margin-inline: auto;
+
+    padding: 20px 0 27px;
+  }
+
+  .admin-layout__mobile-topbar {
+    display: none;
+  }
+
+  .admin-layout__header-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+
+    margin-bottom: 15px;
+  }
+
+  .admin-layout__breadcrumbs {
+    min-width: 0;
+  }
+
+  .admin-layout__breadcrumb-list {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 3px;
+
+    margin: 0;
+    padding: 0;
+
+    list-style: none;
+  }
+
+  .admin-layout__breadcrumb-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+
+    min-width: 0;
+
+    color: #64748b;
+  }
+
+  .admin-layout__breadcrumb-item svg {
+    flex-shrink: 0;
+    color: #94a3b8;
+  }
+
+  .admin-layout__breadcrumb-link,
+  .admin-layout__breadcrumb-current {
+    max-width: 260px;
+
+    overflow: hidden;
+
+    font-size: 0.66rem;
+    font-weight: 650;
+    line-height: 1.35;
+
+    text-decoration: none;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .admin-layout__breadcrumb-link {
+    color: #64748b;
+
+    transition: color 160ms ease;
+  }
+
+  .admin-layout__breadcrumb-link:hover {
+    color: #0f172a;
+  }
+
+  .admin-layout__breadcrumb-current {
+    color: #334155;
+    font-weight: 750;
+  }
+
+  .admin-layout__header-system {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    color: #64748b;
+
+    font-size: 0.64rem;
+    font-weight: 650;
+  }
+
+  .admin-layout__header-system-dot {
+    width: 7px;
+    height: 7px;
+
+    border-radius: 999px;
+
+    background: #16a34a;
+
+    box-shadow:
+      0 0 0 3px
+      rgba(22, 163, 74, 0.1);
+  }
+
+  .admin-layout__header-system svg {
+    margin-left: 3px;
+    color: #94a3b8;
+  }
+
+  .admin-layout__title-row {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+
+    gap: 30px;
+  }
+
+  .admin-layout__heading {
+    min-width: 0;
+    max-width: 800px;
+  }
+
+  .admin-layout__eyebrow {
+    margin: 0 0 8px;
+
+    color: #64748b;
+
+    font-size: 0.61rem;
+    font-weight: 900;
+    line-height: 1;
+
+    letter-spacing: 0.11em;
+  }
+
+  .admin-layout__title {
+    margin: 0;
+
+    color: #0f172a;
+
+    font-size: clamp(
+      1.5rem,
+      2.8vw,
+      2.18rem
+    );
+
+    font-weight: 900;
+    line-height: 1.08;
+
+    letter-spacing: -0.03em;
+  }
+
+  .admin-layout__description {
+    max-width: 700px;
+
+    margin: 9px 0 0;
+
+    color: #64748b;
+
+    font-size: 0.82rem;
+    font-weight: 500;
+    line-height: 1.65;
+  }
+
+  .admin-layout__actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+
+    flex-shrink: 0;
+
+    gap: 8px;
+
+    flex-wrap: wrap;
+  }
+
+  .admin-layout__main {
+    min-width: 0;
+    flex: 1 1 auto;
+
+    outline: none;
+  }
+
+  .admin-layout__main:focus {
+    outline: none;
+  }
+
+  .admin-layout__main-container {
+    width: min(
+      calc(100% - 48px),
+      var(--container-xl, 1280px)
+    );
+
+    margin-inline: auto;
+
+    padding: 30px 0 50px;
+  }
+
+  /* -----------------------------------------------------------------------
+   * MOBILE
+   * --------------------------------------------------------------------- */
+
+  .admin-layout__backdrop {
+    display: none;
+  }
+
+  .admin-layout__progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 2300;
+
+    width: 100%;
+    height: 2px;
+
+    background: #334155;
+
+    transform: scaleX(0);
+    transform-origin: left center;
+
+    pointer-events: none;
+  }
+
+  .admin-layout__skip-link {
+    position: fixed;
+    top: 12px;
+    left: 12px;
+    z-index: 2400;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    min-height: 42px;
+    padding: 0 15px;
+
+    border: 1px solid #0f172a;
+    border-radius: 9px;
+
+    color: #ffffff;
+    background: #0f172a;
+
+    box-shadow: var(--shadow-lg);
+
+    font-size: 0.8rem;
+    font-weight: 800;
+
+    text-decoration: none;
+
+    opacity: 0;
+    pointer-events: none;
+
+    transform: translateY(-12px);
+
+    transition:
+      opacity 140ms ease,
+      transform 140ms ease;
+  }
+
+  .admin-layout__skip-link:focus {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+  }
+
+  @media (max-width: 1000px) {
+    .admin-layout__sidebar {
+      position: fixed;
+      top: 76px;
+      left: 0;
+      z-index: 1100;
+
+      width: min(
+        310px,
+        calc(100vw - 48px)
+      );
+
+      min-width: 0;
+
+      height: calc(100vh - 76px);
+
+      box-shadow: var(--shadow-xl);
+
+      transform: translateX(-102%);
+
+      transition: transform 220ms ease;
+    }
+
+    .admin-layout__sidebar--open {
+      transform: translateX(0);
+    }
+
+    .admin-layout__backdrop {
+      position: fixed;
+      inset: 76px 0 0;
+      z-index: 1050;
+
+      display: block;
+
+      background: rgba(
+        15,
+        23,
+        42,
+        0.38
+      );
+
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+
+      transition:
+        opacity 180ms ease,
+        visibility 180ms ease;
+    }
+
+    .admin-layout--sidebar-open
+      .admin-layout__backdrop {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+    }
+
+    .admin-layout__mobile-topbar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+
+      margin-bottom: 13px;
+    }
+
+    .admin-layout__mobile-toggle {
+      width: 40px;
+      height: 40px;
+
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+
+      border: 1px solid var(--color-border);
+      border-radius: 9px;
+
+      color: #334155;
+      background: #ffffff;
+
+      cursor: pointer;
+
+      transition:
+        color 160ms ease,
+        background-color 160ms ease,
+        border-color 160ms ease;
+    }
+
+    .admin-layout__mobile-toggle:hover {
+      color: #0f172a;
+      background: #f1f5f9;
+      border-color: #cbd5e1;
+    }
+
+    .admin-layout__mobile-toggle:focus-visible {
+      outline: 3px solid
+        rgba(15, 23, 42, 0.14);
+
+      outline-offset: 2px;
+    }
+
+    .admin-layout__mobile-menu-icon,
+    .admin-layout__mobile-close-icon {
+      grid-area: 1 / 1;
+
+      transition:
+        opacity 150ms ease,
+        transform 150ms ease;
+    }
+
+    .admin-layout__mobile-close-icon {
+      opacity: 0;
+
+      transform:
+        rotate(-30deg)
+        scale(0.75);
+    }
+
+    .admin-layout--sidebar-open
+      .admin-layout__mobile-menu-icon {
+      opacity: 0;
+
+      transform:
+        rotate(30deg)
+        scale(0.75);
+    }
+
+    .admin-layout--sidebar-open
+      .admin-layout__mobile-close-icon {
+      opacity: 1;
+
+      transform:
+        rotate(0)
+        scale(1);
+    }
+
+    .admin-layout__mobile-context {
+      min-width: 0;
+      flex: 1;
+
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .admin-layout__mobile-context span {
+      color: #64748b;
+
+      font-size: 0.59rem;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .admin-layout__mobile-context strong {
+      overflow: hidden;
+
+      color: #0f172a;
+
+      font-size: 0.76rem;
+      font-weight: 800;
+      line-height: 1.25;
+
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .admin-layout__mobile-status {
+      width: 40px;
+      height: 40px;
+
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+
+      border: 1px solid #dcfce7;
+      border-radius: 9px;
+
+      color: #15803d;
+      background: #f0fdf4;
+    }
+
+    .admin-layout__header-container,
+    .admin-layout__main-container {
+      width: min(
+        calc(100% - 40px),
+        var(--container-xl, 1280px)
+      );
+    }
+  }
+
+  @media (max-width: 720px) {
+    .admin-layout__header-container {
+      padding-block: 18px 22px;
+    }
+
+    .admin-layout__header-bar {
+      align-items: flex-start;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .admin-layout__title-row {
+      align-items: flex-start;
+      flex-direction: column;
+
+      gap: 18px;
+    }
+
+    .admin-layout__actions {
+      justify-content: flex-start;
+
+      width: 100%;
+    }
+
+    .admin-layout__main-container {
+      padding-top: 24px;
+      padding-bottom: 40px;
+    }
+  }
+
+  @media (max-width: 560px) {
+    .admin-layout__sidebar {
+      top: 70px;
+      height: calc(100vh - 70px);
+    }
+
+    .admin-layout__backdrop {
+      inset: 70px 0 0;
+    }
+
+    .admin-layout__header-container,
+    .admin-layout__main-container {
+      width: min(
+        calc(100% - 24px),
+        var(--container-xl, 1280px)
+      );
+    }
+
+    .admin-layout__title {
+      font-size: 1.48rem;
+    }
+
+    .admin-layout__description {
+      font-size: 0.77rem;
+    }
+
+    .admin-layout__breadcrumb-link,
+    .admin-layout__breadcrumb-current {
+      max-width: 180px;
+
+      font-size: 0.63rem;
+    }
+
+    .admin-layout__header-system {
+      font-size: 0.6rem;
+    }
+  }
+
+  /* -----------------------------------------------------------------------
+   * FOCUS
+   * --------------------------------------------------------------------- */
+
+  .admin-layout__nav-item:focus-visible,
+  .admin-layout__secondary-link:focus-visible,
+  .admin-layout__mobile-toggle:focus-visible {
+    outline: 3px solid
+      rgba(15, 23, 42, 0.14);
+
+    outline-offset: 2px;
+  }
+
+  /* -----------------------------------------------------------------------
+   * SCROLL LOCK
+   * --------------------------------------------------------------------- */
+
+  :global(html.admin-scroll-locked),
+  :global(body.admin-scroll-locked) {
+    overflow: hidden;
+  }
+
+  /* -----------------------------------------------------------------------
+   * REDUCED MOTION
+   * --------------------------------------------------------------------- */
+
+  @media (prefers-reduced-motion: reduce) {
+    .admin-layout,
+    .admin-layout *,
+    .admin-layout::before,
+    .admin-layout::after {
+      scroll-behavior: auto !important;
+
+      transition-duration: 0.01ms !important;
+
+      animation-duration: 0.01ms !important;
+
+      animation-iteration-count: 1 !important;
+    }
+  }
+</style>

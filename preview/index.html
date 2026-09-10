@@ -1,0 +1,597 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>BINSIGHT — Badung Waste Intelligence</title>
+  <meta name="description" content="Standalone visual preview of BINSIGHT — Badung Waste Intelligence." />
+  <style>
+    :root{
+      --bg:#f3f6f5;
+      --panel:#ffffff;
+      --panel-2:#f8faf9;
+      --text:#10201b;
+      --muted:#708079;
+      --line:#e4ebe7;
+      --green:#138a62;
+      --green-2:#0d6e4e;
+      --green-soft:#e5f4ed;
+      --blue:#1976d2;
+      --blue-soft:#e8f2fd;
+      --amber:#c78c19;
+      --amber-soft:#fbf4df;
+      --red:#cf4d4d;
+      --red-soft:#fceaea;
+      --shadow:0 18px 48px rgba(21, 50, 40, .08);
+      --shadow-soft:0 7px 24px rgba(21, 50, 40, .06);
+      --sidebar:258px;
+      --radius:18px;
+    }
+
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      color:var(--text);
+      background:
+        radial-gradient(circle at 78% -10%, rgba(19,138,98,.10), transparent 30%),
+        linear-gradient(180deg,#f7faf8 0%,var(--bg) 100%);
+      font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      min-height:100vh;
+    }
+    button,input,select{font:inherit}
+    button{cursor:pointer}
+
+    .app{display:flex;min-height:100vh}
+    .sidebar{
+      position:fixed;inset:0 auto 0 0;width:var(--sidebar);
+      background:linear-gradient(180deg,#10221c 0%,#0d1c18 100%);
+      color:#dbe8e3;padding:22px 16px 18px;
+      display:flex;flex-direction:column;z-index:20;
+      box-shadow:10px 0 34px rgba(6,27,20,.10);
+    }
+    .brand{
+      display:flex;align-items:center;gap:12px;padding:2px 10px 20px;
+      border-bottom:1px solid rgba(255,255,255,.08);margin-bottom:16px;
+    }
+    .brand-mark{
+      width:40px;height:40px;border-radius:12px;display:grid;place-items:center;
+      background:linear-gradient(145deg,#25aa7e,#0f7454);
+      box-shadow:0 8px 22px rgba(37,170,126,.28);
+      color:#fff;font-weight:900;letter-spacing:-1px;
+    }
+    .brand-copy strong{display:block;font-size:15px;letter-spacing:.08em}
+    .brand-copy span{display:block;color:#8eaaa0;font-size:10px;letter-spacing:.08em;margin-top:3px}
+    .side-label{font-size:10px;text-transform:uppercase;letter-spacing:.16em;color:#6e8a80;margin:18px 10px 8px}
+    .nav{display:grid;gap:5px}
+    .nav button{
+      border:0;color:#a9bcb6;background:transparent;text-align:left;
+      padding:11px 12px;border-radius:11px;display:flex;align-items:center;gap:11px;
+      transition:.2s ease;
+    }
+    .nav button:hover{background:rgba(255,255,255,.055);color:#e8f4f0}
+    .nav button.active{
+      background:linear-gradient(90deg,rgba(31,166,119,.21),rgba(31,166,119,.06));
+      color:#fff;box-shadow:inset 3px 0 0 #2bc18f;
+    }
+    .nav svg{width:18px;height:18px;stroke:currentColor}
+    .side-bottom{
+      margin-top:auto;border-top:1px solid rgba(255,255,255,.08);padding:15px 8px 0;
+    }
+    .profile{
+      display:flex;align-items:center;gap:10px;padding:10px 4px;
+      border-radius:12px;
+    }
+    .avatar{width:34px;height:34px;border-radius:11px;display:grid;place-items:center;background:#234b40;color:#fff;font-size:12px;font-weight:800}
+    .profile b{font-size:12px;color:#eff8f4}
+    .profile span{display:block;font-size:10px;color:#769187;margin-top:3px}
+    .status-dot{width:8px;height:8px;background:#46d39e;border-radius:50%;margin-left:auto;box-shadow:0 0 0 4px rgba(70,211,158,.09)}
+
+    .main{margin-left:var(--sidebar);width:calc(100% - var(--sidebar));min-width:0}
+    .topbar{
+      height:74px;background:rgba(255,255,255,.78);backdrop-filter:blur(16px);
+      border-bottom:1px solid rgba(228,235,231,.8);
+      display:flex;align-items:center;justify-content:space-between;padding:0 30px;
+      position:sticky;top:0;z-index:10;
+    }
+    .crumbs{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:12px}
+    .crumbs strong{color:var(--text);font-weight:700}
+    .top-actions{display:flex;align-items:center;gap:10px}
+    .icon-btn{
+      width:38px;height:38px;border:1px solid var(--line);background:#fff;border-radius:11px;
+      display:grid;place-items:center;color:#5f7069;box-shadow:var(--shadow-soft);position:relative;
+    }
+    .badge{
+      position:absolute;top:5px;right:5px;width:7px;height:7px;background:#ef6464;border-radius:50%;
+      box-shadow:0 0 0 3px #fff;
+    }
+    .select{
+      border:1px solid var(--line);background:#fff;height:38px;border-radius:11px;padding:0 12px;color:#4f625a;font-size:12px;
+      outline:none;
+    }
+
+    .content{padding:30px;max-width:1680px;margin:auto}
+    .hero{
+      display:flex;align-items:flex-end;justify-content:space-between;gap:20px;margin-bottom:22px;
+    }
+    .hero h1{font-size:29px;letter-spacing:-.035em;margin:0 0 7px}
+    .hero p{margin:0;color:var(--muted);font-size:13px}
+    .hero-right{display:flex;gap:10px;align-items:center}
+    .date-pill{padding:10px 13px;border:1px solid var(--line);background:#fff;border-radius:11px;font-size:12px;color:#52645c}
+    .primary{
+      border:0;border-radius:11px;background:var(--green);color:#fff;height:40px;padding:0 15px;
+      box-shadow:0 8px 18px rgba(19,138,98,.20);font-weight:700;font-size:12px;
+    }
+
+    .kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:14px}
+    .card{
+      background:rgba(255,255,255,.94);border:1px solid var(--line);border-radius:var(--radius);
+      box-shadow:var(--shadow-soft);
+    }
+    .kpi{padding:17px 18px;position:relative;overflow:hidden}
+    .kpi:after{
+      content:"";position:absolute;right:-22px;bottom:-30px;width:110px;height:110px;border-radius:50%;
+      background:radial-gradient(circle,rgba(19,138,98,.10),transparent 68%);
+    }
+    .kpi-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:13px}
+    .kpi-icon{width:34px;height:34px;border-radius:10px;display:grid;place-items:center}
+    .kpi-icon.green{background:var(--green-soft);color:var(--green)}
+    .kpi-icon.blue{background:var(--blue-soft);color:var(--blue)}
+    .kpi-icon.amber{background:var(--amber-soft);color:var(--amber)}
+    .kpi-icon.red{background:var(--red-soft);color:var(--red)}
+    .trend{font-size:11px;font-weight:800;padding:5px 8px;border-radius:999px;background:var(--green-soft);color:var(--green)}
+    .trend.down{background:var(--red-soft);color:var(--red)}
+    .kpi-label{color:var(--muted);font-size:11px}
+    .kpi-value{font-size:28px;font-weight:850;letter-spacing:-.04em;margin-top:4px}
+    .kpi-foot{display:flex;justify-content:space-between;align-items:center;margin-top:9px;color:var(--muted);font-size:10px}
+
+    .grid-main{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(300px,.8fr);gap:14px}
+    .grid-secondary{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px;margin-top:14px}
+    .section-card{padding:18px}
+    .card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:16px}
+    .card-title{font-weight:800;font-size:14px;letter-spacing:-.01em}
+    .card-sub{font-size:10px;color:var(--muted);margin-top:4px}
+    .link-btn{border:0;background:transparent;color:var(--green);font-size:11px;font-weight:800;padding:0}
+
+    .chart-wrap{height:250px;position:relative}
+    .chart-grid{position:absolute;inset:0 0 24px;display:grid;grid-template-rows:repeat(5,1fr)}
+    .chart-grid span{border-top:1px dashed #e7eeeb}
+    .line-chart{width:100%;height:100%;overflow:visible}
+    .xlabels{position:absolute;left:38px;right:8px;bottom:0;display:flex;justify-content:space-between;color:#93a19b;font-size:10px}
+    .chart-legend{display:flex;gap:14px;align-items:center;font-size:10px;color:#718079}
+    .legend-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:5px}
+    .legend-dot.a{background:#138a62}.legend-dot.b{background:#1976d2}
+
+    .ring-area{display:grid;grid-template-columns:160px 1fr;gap:18px;align-items:center}
+    .ring{
+      width:156px;height:156px;border-radius:50%;
+      background:conic-gradient(#138a62 0 44%,#2c9fca 44% 69%,#e2b84f 69% 86%,#cc665d 86% 94%,#b3beb9 94% 100%);
+      position:relative;display:grid;place-items:center;
+    }
+    .ring:after{content:"";position:absolute;width:102px;height:102px;border-radius:50%;background:#fff}
+    .ring-center{position:relative;z-index:1;text-align:center}.ring-center strong{font-size:25px;display:block;letter-spacing:-.04em}.ring-center span{font-size:9px;color:var(--muted)}
+    .legend-list{display:grid;gap:9px}
+    .legend-row{display:flex;align-items:center;justify-content:space-between;font-size:11px}
+    .legend-left{display:flex;align-items:center;color:#566760}.dot{width:9px;height:9px;border-radius:3px;margin-right:8px}
+    .legend-row b{font-size:11px}
+
+    .map{
+      min-height:292px;position:relative;overflow:hidden;border-radius:14px;
+      background:
+        linear-gradient(115deg,rgba(16,80,66,.08) 1px,transparent 1px),
+        linear-gradient(25deg,rgba(16,80,66,.08) 1px,transparent 1px),
+        linear-gradient(180deg,#eaf4ef,#dcece6);
+      background-size:42px 42px,42px 42px,100% 100%;
+      border:1px solid #dce8e3;
+    }
+    .map:before{
+      content:"";position:absolute;inset:-20% -10%;
+      background:radial-gradient(ellipse at 48% 43%,rgba(76,141,115,.23),transparent 52%);
+      transform:rotate(-7deg);
+    }
+    .map-road{position:absolute;left:-10%;right:-10%;height:19px;background:#fff;box-shadow:0 0 0 1px rgba(139,164,154,.16);transform:rotate(-20deg);top:53%}
+    .map-road.r2{top:25%;transform:rotate(11deg);height:13px}
+    .map-river{position:absolute;width:120%;height:38px;left:-10%;top:68%;background:rgba(56,154,197,.23);filter:blur(.2px);transform:rotate(7deg);border-top:1px solid rgba(56,154,197,.38);border-bottom:1px solid rgba(56,154,197,.22)}
+    .pin{position:absolute;width:28px;height:28px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);display:grid;place-items:center;box-shadow:0 8px 16px rgba(28,74,59,.23)}
+    .pin i{width:8px;height:8px;background:#fff;border-radius:50%;display:block}
+    .pin.g{background:#138a62}.pin.b{background:#1976d2}.pin.a{background:#c78c19}
+    .p1{left:23%;top:34%}.p2{left:45%;top:57%}.p3{left:63%;top:39%}.p4{left:73%;top:68%}.p5{left:37%;top:22%}.p6{left:56%;top:77%}
+    .map-overlay{
+      position:absolute;top:11px;left:11px;right:11px;display:flex;justify-content:space-between;gap:10px;align-items:center;
+    }
+    .map-chip{background:rgba(255,255,255,.92);backdrop-filter:blur(8px);border:1px solid rgba(224,234,229,.96);padding:7px 9px;border-radius:9px;font-size:10px;color:#53675f;box-shadow:0 5px 14px rgba(30,66,54,.06)}
+    .map-caption{position:absolute;bottom:11px;left:11px;background:rgba(15,32,26,.84);color:#fff;padding:8px 10px;border-radius:9px;font-size:10px}
+    .map-key{display:flex;gap:10px;font-size:9px;color:#6d7d76}
+    .map-key span{display:flex;align-items:center;gap:4px}
+
+    .table{width:100%;border-collapse:collapse}
+    .table th{text-align:left;font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:#8b9993;padding:0 0 10px}
+    .table td{font-size:11px;padding:11px 0;border-top:1px solid #edf1ef}
+    .badge-soft{display:inline-flex;align-items:center;padding:5px 7px;border-radius:999px;font-size:9px;font-weight:800}
+    .ok{background:var(--green-soft);color:var(--green)}.warn{background:var(--amber-soft);color:#9d7314}.critical{background:var(--red-soft);color:var(--red)}
+
+    .mini-stat{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:4px}
+    .mini-box{padding:12px;background:var(--panel-2);border:1px solid var(--line);border-radius:12px}
+    .mini-box span{display:block;color:var(--muted);font-size:9px}.mini-box strong{display:block;font-size:18px;margin-top:3px}
+
+    .activity{display:grid;gap:10px}
+    .activity-item{display:grid;grid-template-columns:30px 1fr auto;gap:9px;align-items:start}
+    .a-icon{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;background:#eff5f2;color:var(--green)}
+    .activity-item b{display:block;font-size:10px}.activity-item span{display:block;font-size:9px;color:var(--muted);margin-top:3px;line-height:1.5}
+    .time{font-size:9px;color:#95a29c}
+
+    .footer-note{padding:20px 2px 4px;color:#8d9b95;font-size:10px;text-align:center}
+
+    .mobile-menu{display:none}
+    @media (max-width:1100px){
+      .kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+      .grid-main,.grid-secondary{grid-template-columns:1fr}
+      .ring-area{grid-template-columns:150px 1fr}
+    }
+    @media (max-width:800px){
+      :root{--sidebar:0px}
+      .sidebar{transform:translateX(-100%);transition:.25s ease}
+      .sidebar.open{transform:translateX(0);width:258px}
+      .main{margin-left:0;width:100%}
+      .topbar{padding:0 16px}
+      .mobile-menu{display:grid}
+      .hero{align-items:flex-start;flex-direction:column}
+      .hero-right{width:100%;justify-content:space-between}
+      .content{padding:18px 14px 28px}
+    }
+    @media (max-width:560px){
+      .kpis{grid-template-columns:1fr}
+      .ring-area{grid-template-columns:1fr}.ring{margin:auto}
+      .topbar .crumbs{display:none}
+      .top-actions .select{max-width:130px}
+      .hero h1{font-size:24px}
+    }
+
+    /* tiny built-in icon utility */
+    .ico{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+  </style>
+</head>
+<body>
+<div class="app">
+
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="brand-mark">B</div>
+      <div class="brand-copy">
+        <strong>BINSIGHT</strong>
+        <span>BADUNG WASTE INTELLIGENCE</span>
+      </div>
+    </div>
+
+    <div class="side-label">Workspace</div>
+    <nav class="nav">
+      <button class="active" data-page="overview">
+        <svg class="ico" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Overview
+      </button>
+      <button data-page="monitoring">
+        <svg class="ico" viewBox="0 0 24 24"><path d="M3 12h4l2-7 4 14 2-7h6"/></svg>
+        Monitoring
+      </button>
+      <button data-page="collection">
+        <svg class="ico" viewBox="0 0 24 24"><path d="M4 7h16l-1 13H5L4 7Z"/><path d="M8 7V5h8v2"/></svg>
+        Collection
+      </button>
+      <button data-page="sites">
+        <svg class="ico" viewBox="0 0 24 24"><path d="M12 21s7-5.3 7-11a7 7 0 1 0-14 0c0 5.7 7 11 7 11Z"/><circle cx="12" cy="10" r="2.3"/></svg>
+        Waste Sites
+      </button>
+      <button data-page="reports">
+        <svg class="ico" viewBox="0 0 24 24"><path d="M5 4h14v16H5z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>
+        Reports
+      </button>
+      <button data-page="settings">
+        <svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.04.04-1.84 1.84-.04-.04A1.7 1.7 0 0 0 16 18.38a1.7 1.7 0 0 0-1 1.62V20h-2.6v-.06a1.7 1.7 0 0 0-1-1.56 1.7 1.7 0 0 0-1.9.34l-.04.04-1.84-1.84.04-.04A1.7 1.7 0 0 0 8.1 15a1.7 1.7 0 0 0-1.62-1H6v-2.6h.06a1.7 1.7 0 0 0 1.56-1 1.7 1.7 0 0 0-.34-1.9l-.04-.04 1.84-1.84.04.04A1.7 1.7 0 0 0 11 6.1a1.7 1.7 0 0 0 1-1.62V4h2.6v.06a1.7 1.7 0 0 0 1 1.56 1.7 1.7 0 0 0 1.9-.34l.04-.04 1.84 1.84-.04.04A1.7 1.7 0 0 0 18.38 9a1.7 1.7 0 0 0 1.62 1H20v2.6h-.06a1.7 1.7 0 0 0-1.54 1.4Z"/></svg>
+        Settings
+      </button>
+    </nav>
+
+    <div class="side-label">System</div>
+    <nav class="nav">
+      <button>
+        <svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 2"/></svg>
+        Data freshness
+        <span style="margin-left:auto;width:7px;height:7px;background:#48d19f;border-radius:50%"></span>
+      </button>
+      <button>
+        <svg class="ico" viewBox="0 0 24 24"><path d="M4 5h16v12H4z"/><path d="M8 21h8"/></svg>
+        API status
+        <span style="margin-left:auto;color:#7f988e;font-size:10px">99.9%</span>
+      </button>
+    </nav>
+
+    <div class="side-bottom">
+      <div class="profile">
+        <div class="avatar">AD</div>
+        <div>
+          <b>Admin Dashboard</b>
+          <span>Badung Data Office</span>
+        </div>
+        <span class="status-dot"></span>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div class="crumbs">
+        <button class="icon-btn mobile-menu" aria-label="Open menu" id="menuBtn">
+          <svg class="ico" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+        </button>
+        <span>Workspace</span><span>/</span><strong id="pageName">Overview</strong>
+      </div>
+      <div class="top-actions">
+        <select class="select" aria-label="Area">
+          <option>Badung Regency</option>
+          <option>North Badung</option>
+          <option>South Badung</option>
+          <option>Central Badung</option>
+        </select>
+        <button class="icon-btn" aria-label="Search">
+          <svg class="ico" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></svg>
+        </button>
+        <button class="icon-btn" aria-label="Notifications">
+          <svg class="ico" viewBox="0 0 24 24"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg>
+          <span class="badge"></span>
+        </button>
+      </div>
+    </header>
+
+    <section class="content">
+      <div class="hero">
+        <div>
+          <h1>Waste Intelligence Dashboard</h1>
+          <p>Real-time operational overview of waste generation, collection, and field conditions across Badung.</p>
+        </div>
+        <div class="hero-right">
+          <div class="date-pill">10 September 2026 · 09:20 WITA</div>
+          <button class="primary" id="refreshBtn">↻ Refresh data</button>
+        </div>
+      </div>
+
+      <div class="kpis">
+        <article class="card kpi">
+          <div class="kpi-top">
+            <div class="kpi-icon green"><svg class="ico" viewBox="0 0 24 24"><path d="M6 18c3.5-1 5.5-3.2 6.5-6.2C13.4 9 15 6.6 19 5c.4 4.2-.8 8.3-4.1 10.4C11.2 17.8 8 17 6 18Z"/><path d="M5 20c2.4-3.4 4.4-5.6 7-7.8"/></svg></div>
+            <span class="trend">+8.4%</span>
+          </div>
+          <div class="kpi-label">Waste handled today</div>
+          <div class="kpi-value">86.4 <span style="font-size:14px;font-weight:700;color:#7b8983">ton</span></div>
+          <div class="kpi-foot"><span>vs. daily target</span><b style="color:var(--green)">92%</b></div>
+        </article>
+
+        <article class="card kpi">
+          <div class="kpi-top">
+            <div class="kpi-icon blue"><svg class="ico" viewBox="0 0 24 24"><path d="M4 17h16"/><path d="m6 17 1.2-7h9.6l1.2 7"/><path d="M9 10V7h6v3"/></svg></div>
+            <span class="trend">+4.2%</span>
+          </div>
+          <div class="kpi-label">Collection completion</div>
+          <div class="kpi-value">94.8<span style="font-size:15px">%</span></div>
+          <div class="kpi-foot"><span>routes completed</span><b style="color:var(--blue)">124 / 131</b></div>
+        </article>
+
+        <article class="card kpi">
+          <div class="kpi-top">
+            <div class="kpi-icon amber"><svg class="ico" viewBox="0 0 24 24"><path d="M12 3v18"/><path d="M5 7h14M7 12h10M9 17h6"/></svg></div>
+            <span class="trend">-2.1%</span>
+          </div>
+          <div class="kpi-label">Recyclable recovery</div>
+          <div class="kpi-value">31.6<span style="font-size:15px">%</span></div>
+          <div class="kpi-foot"><span>of total inflow</span><b style="color:#a77713">on target</b></div>
+        </article>
+
+        <article class="card kpi">
+          <div class="kpi-top">
+            <div class="kpi-icon red"><svg class="ico" viewBox="0 0 24 24"><path d="M12 5v7"/><circle cx="12" cy="16.5" r="1"/><path d="M10.3 3.8 3.7 17.5A2 2 0 0 0 5.5 20h13a2 2 0 0 0 1.8-2.5L13.7 3.8a1.9 1.9 0 0 0-3.4 0Z"/></svg></div>
+            <span class="trend down">3 alerts</span>
+          </div>
+          <div class="kpi-label">Field alerts</div>
+          <div class="kpi-value">07</div>
+          <div class="kpi-foot"><span>requiring attention</span><b style="color:var(--red)">2 critical</b></div>
+        </article>
+      </div>
+
+      <div class="grid-main">
+        <article class="card section-card">
+          <div class="card-head">
+            <div>
+              <div class="card-title">Waste flow · last 7 days</div>
+              <div class="card-sub">Inflow volume and successfully processed tonnage</div>
+            </div>
+            <div class="chart-legend">
+              <span><i class="legend-dot a"></i>Incoming</span>
+              <span><i class="legend-dot b"></i>Processed</span>
+            </div>
+          </div>
+          <div class="chart-wrap">
+            <div class="chart-grid"><span></span><span></span><span></span><span></span><span></span></div>
+            <svg class="line-chart" viewBox="0 0 820 250" preserveAspectRatio="none" aria-label="Waste flow line chart">
+              <defs>
+                <linearGradient id="areaA" x1="0" x2="0" y1="0" y2="1">
+                  <stop offset="0" stop-color="#138a62" stop-opacity=".18"/>
+                  <stop offset="1" stop-color="#138a62" stop-opacity="0"/>
+                </linearGradient>
+              </defs>
+              <path d="M40 191 C100 170,130 183,180 152 S280 128,315 142 S400 102,445 118 S520 92,560 99 S650 60,700 81 S765 66,800 52 L800 226 L40 226 Z" fill="url(#areaA)"/>
+              <path d="M40 191 C100 170,130 183,180 152 S280 128,315 142 S400 102,445 118 S520 92,560 99 S650 60,700 81 S765 66,800 52" fill="none" stroke="#138a62" stroke-width="3.2" stroke-linecap="round"/>
+              <path d="M40 202 C100 188,130 192,180 169 S280 145,315 154 S400 123,445 135 S520 110,560 118 S650 86,700 97 S765 82,800 70" fill="none" stroke="#1976d2" stroke-width="2.8" stroke-linecap="round"/>
+              <g fill="#138a62">
+                <circle cx="180" cy="152" r="4"/><circle cx="315" cy="142" r="4"/><circle cx="445" cy="118" r="4"/><circle cx="560" cy="99" r="4"/><circle cx="700" cy="81" r="4"/><circle cx="800" cy="52" r="4"/>
+              </g>
+              <g fill="#1976d2">
+                <circle cx="180" cy="169" r="3.5"/><circle cx="315" cy="154" r="3.5"/><circle cx="445" cy="135" r="3.5"/><circle cx="560" cy="118" r="3.5"/><circle cx="700" cy="97" r="3.5"/><circle cx="800" cy="70" r="3.5"/>
+              </g>
+              <line x1="40" y1="226" x2="800" y2="226" stroke="#e7eeeb"/>
+            </svg>
+            <div class="xlabels"><span>04 Sep</span><span>05 Sep</span><span>06 Sep</span><span>07 Sep</span><span>08 Sep</span><span>09 Sep</span><span>10 Sep</span></div>
+          </div>
+        </article>
+
+        <article class="card section-card">
+          <div class="card-head">
+            <div>
+              <div class="card-title">Waste composition</div>
+              <div class="card-sub">Today · estimated from recorded inflow</div>
+            </div>
+            <button class="link-btn">View analysis →</button>
+          </div>
+          <div class="ring-area">
+            <div class="ring"><div class="ring-center"><strong>86.4</strong><span>ton today</span></div></div>
+            <div class="legend-list">
+              <div class="legend-row"><div class="legend-left"><span class="dot" style="background:#138a62"></span>Organic</div><b>44%</b></div>
+              <div class="legend-row"><div class="legend-left"><span class="dot" style="background:#2c9fca"></span>Plastic</div><b>25%</b></div>
+              <div class="legend-row"><div class="legend-left"><span class="dot" style="background:#e2b84f"></span>Paper</div><b>17%</b></div>
+              <div class="legend-row"><div class="legend-left"><span class="dot" style="background:#cc665d"></span>Textile</div><b>8%</b></div>
+              <div class="legend-row"><div class="legend-left"><span class="dot" style="background:#b3beb9"></span>Other</div><b>6%</b></div>
+            </div>
+          </div>
+        </article>
+      </div>
+
+      <div class="grid-secondary">
+        <article class="card section-card">
+          <div class="card-head">
+            <div>
+              <div class="card-title">Operational map</div>
+              <div class="card-sub">Active collection points & field condition</div>
+            </div>
+            <div class="map-key">
+              <span><i style="width:7px;height:7px;border-radius:50%;background:#138a62"></i>Normal</span>
+              <span><i style="width:7px;height:7px;border-radius:50%;background:#c78c19"></i>Warning</span>
+              <span><i style="width:7px;height:7px;border-radius:50%;background:#cf4d4d"></i>Critical</span>
+            </div>
+          </div>
+          <div class="map">
+            <div class="map-river"></div>
+            <div class="map-road"></div><div class="map-road r2"></div>
+            <div class="pin g p1"><i></i></div>
+            <div class="pin g p2"><i></i></div>
+            <div class="pin b p3"><i></i></div>
+            <div class="pin a p4"><i></i></div>
+            <div class="pin g p5"><i></i></div>
+            <div class="pin b p6"><i></i></div>
+            <div class="map-overlay">
+              <div class="map-chip">31 monitored locations</div>
+              <div class="map-chip">Live · 09:18 WITA</div>
+            </div>
+            <div class="map-caption">Badung · operational layer</div>
+          </div>
+        </article>
+
+        <article class="card section-card">
+          <div class="card-head">
+            <div>
+              <div class="card-title">Collection performance</div>
+              <div class="card-sub">Top routes by completion rate</div>
+            </div>
+            <button class="link-btn">All routes →</button>
+          </div>
+          <table class="table">
+            <thead><tr><th>Route</th><th>Coverage</th><th>Completion</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td><b>BT-07</b><br><span style="font-size:9px;color:#8c9a95">South Badung</span></td><td>18 pts</td><td><b>100%</b></td><td><span class="badge-soft ok">On track</span></td></tr>
+              <tr><td><b>TR-14</b><br><span style="font-size:9px;color:#8c9a95">Central Badung</span></td><td>22 pts</td><td><b>96%</b></td><td><span class="badge-soft ok">On track</span></td></tr>
+              <tr><td><b>NG-03</b><br><span style="font-size:9px;color:#8c9a95">North Badung</span></td><td>16 pts</td><td><b>88%</b></td><td><span class="badge-soft warn">Delayed</span></td></tr>
+              <tr><td><b>KS-11</b><br><span style="font-size:9px;color:#8c9a95">Kuta Selatan</span></td><td>21 pts</td><td><b>71%</b></td><td><span class="badge-soft critical">Attention</span></td></tr>
+            </tbody>
+          </table>
+          <div class="mini-stat">
+            <div class="mini-box"><span>Active fleets</span><strong>42</strong></div>
+            <div class="mini-box"><span>On route</span><strong>31</strong></div>
+            <div class="mini-box"><span>Idle / service</span><strong>11</strong></div>
+          </div>
+        </article>
+      </div>
+
+      <div class="grid-secondary">
+        <article class="card section-card">
+          <div class="card-head">
+            <div>
+              <div class="card-title">Latest field alerts</div>
+              <div class="card-sub">Prioritized events requiring review</div>
+            </div>
+            <button class="link-btn">Open incident center →</button>
+          </div>
+          <table class="table">
+            <thead><tr><th>Issue</th><th>Location</th><th>Detected</th><th>Priority</th></tr></thead>
+            <tbody>
+              <tr><td><b>Container overflow</b><br><span style="font-size:9px;color:#8c9a95">Capacity threshold &gt; 90%</span></td><td>Depot Jimbaran 04</td><td>09:11</td><td><span class="badge-soft critical">Critical</span></td></tr>
+              <tr><td><b>Route deviation</b><br><span style="font-size:9px;color:#8c9a95">Vehicle outside expected corridor</span></td><td>Route KS-11</td><td>08:54</td><td><span class="badge-soft warn">Warning</span></td></tr>
+              <tr><td><b>Collection delay</b><br><span style="font-size:9px;color:#8c9a95">ETA exceeds schedule by 18 min</span></td><td>BT-07 Sector C</td><td>08:37</td><td><span class="badge-soft warn">Warning</span></td></tr>
+            </tbody>
+          </table>
+        </article>
+
+        <article class="card section-card">
+          <div class="card-head">
+            <div>
+              <div class="card-title">System activity</div>
+              <div class="card-sub">Latest data and workflow events</div>
+            </div>
+            <button class="link-btn">View audit log →</button>
+          </div>
+          <div class="activity">
+            <div class="activity-item">
+              <div class="a-icon">✓</div>
+              <div><b>Collection dataset synchronized</b><span>131 route records accepted and validated.</span></div>
+              <div class="time">09:18</div>
+            </div>
+            <div class="activity-item">
+              <div class="a-icon">↻</div>
+              <div><b>Waste composition recalculated</b><span>New material split available for today.</span></div>
+              <div class="time">09:13</div>
+            </div>
+            <div class="activity-item">
+              <div class="a-icon">!</div>
+              <div><b>Critical overflow alert created</b><span>Depot Jimbaran 04 crossed threshold.</span></div>
+              <div class="time">09:11</div>
+            </div>
+            <div class="activity-item">
+              <div class="a-icon">◉</div>
+              <div><b>Map telemetry updated</b><span>31 locations reported healthy heartbeat.</span></div>
+              <div class="time">09:08</div>
+            </div>
+          </div>
+        </article>
+      </div>
+
+      <div class="footer-note">BINSIGHT · Badung Waste Intelligence · Standalone visual preview · Data shown here is illustrative.</div>
+    </section>
+  </main>
+</div>
+
+<script>
+  const sidebar = document.getElementById('sidebar');
+  const menuBtn = document.getElementById('menuBtn');
+  const pageName = document.getElementById('pageName');
+  const navButtons = [...document.querySelectorAll('.nav button[data-page]')];
+  const refreshBtn = document.getElementById('refreshBtn');
+
+  menuBtn?.addEventListener('click', () => sidebar.classList.toggle('open'));
+
+  navButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      navButtons.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      pageName.textContent = btn.textContent.trim();
+      sidebar.classList.remove('open');
+    });
+  });
+
+  refreshBtn.addEventListener('click', () => {
+    const original = refreshBtn.textContent;
+    refreshBtn.textContent = '✓ Updated just now';
+    refreshBtn.style.background = '#0f7454';
+    setTimeout(() => {
+      refreshBtn.textContent = original;
+      refreshBtn.style.background = '';
+    }, 1800);
+  });
+</script>
+</body>
+</html>
