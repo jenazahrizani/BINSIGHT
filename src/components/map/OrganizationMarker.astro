@@ -1,0 +1,484 @@
+---
+import {
+  Building2,
+  CircleCheck,
+  ExternalLink,
+  MapPin,
+} from "@lucide/astro";
+
+import type {
+  Organization,
+  OrganizationLocation,
+} from "@lib/data/organizations";
+
+interface Props {
+  organization: Organization;
+  location?: OrganizationLocation;
+  href?: string;
+  compact?: boolean;
+  showAddress?: boolean;
+  showVerification?: boolean;
+  showLink?: boolean;
+  class?: string;
+}
+
+const {
+  organization,
+  location,
+  href,
+  compact = false,
+  showAddress = true,
+  showVerification = true,
+  showLink = true,
+  class: className = "",
+} = Astro.props;
+
+/* -------------------------------------------------------------------------- */
+/* Normalized organization data                                               */
+/* -------------------------------------------------------------------------- */
+
+const organizationName =
+  organization.name?.trim() ||
+  "Organisasi";
+
+const organizationDescription =
+  organization.shortDescription?.trim() ||
+  organization.description?.trim() ||
+  "Pengelola sampah dalam ekosistem BINSIGHT.";
+
+const organizationType =
+  organization.type?.trim() ||
+  "Organisasi";
+
+/*
+ * OrganizationLocation does not expose `areaName`, so this component
+ * intentionally uses only the location fields guaranteed by the
+ * OrganizationLocation contract.
+ */
+const organizationAddress =
+  location?.address?.trim() ||
+  organization.location?.address?.trim() ||
+  "";
+
+const hasAddress =
+  Boolean(organizationAddress);
+
+/*
+ * The current OrganizationStatus union does not contain `active`.
+ * Verification is therefore determined from the public verification
+ * state available in the existing organization model.
+ */
+const isVerified =
+  organization.status ===
+    "verified" ||
+  organization.status ===
+    "pending";
+
+const organizationHref =
+  href?.trim() ||
+  `/organizations/${organization.slug}`;
+
+const hasHref =
+  Boolean(
+    showLink &&
+      organizationHref,
+  );
+
+/* -------------------------------------------------------------------------- */
+/* Status label                                                               */
+/* -------------------------------------------------------------------------- */
+
+function getOrganizationStatusLabel(
+  status: Organization["status"],
+): string {
+  switch (status) {
+    case "verified":
+      return "Terverifikasi";
+
+    case "pending":
+      return "Menunggu verifikasi";
+
+    case "unverified":
+      return "Belum terverifikasi";
+
+    default:
+      return "Status tidak diketahui";
+  }
+}
+
+const statusLabel =
+  getOrganizationStatusLabel(
+    organization.status,
+  );
+---
+
+<article
+  class:list={[
+    "organization-marker",
+    {
+      "organization-marker--compact":
+        compact,
+      "organization-marker--linked":
+        hasHref,
+    },
+    className,
+  ]}
+  data-organization-marker
+  data-organization-id={organization.id}
+  data-organization-slug={organization.slug}
+>
+  <div class="organization-marker__main">
+    <div
+      class="organization-marker__icon"
+      aria-hidden="true"
+    >
+      <Building2
+        size={19}
+        stroke-width={1.9}
+      />
+    </div>
+
+    <div class="organization-marker__content">
+      <div class="organization-marker__heading">
+        <div class="organization-marker__name-row">
+          <h3 class="organization-marker__name">
+            {organizationName}
+          </h3>
+
+          {
+            showVerification &&
+            isVerified && (
+              <span
+                class="organization-marker__verified"
+                title="Organisasi terverifikasi"
+                aria-label="Organisasi terverifikasi"
+              >
+                <CircleCheck
+                  size={14}
+                  stroke-width={2}
+                  aria-hidden="true"
+                />
+              </span>
+            )
+          }
+        </div>
+
+        <span class="organization-marker__type">
+          {organizationType}
+        </span>
+
+        {
+          !compact && (
+            <span class="organization-marker__status">
+              {statusLabel}
+            </span>
+          )
+        }
+      </div>
+
+      {
+        !compact && (
+          <p class="organization-marker__description">
+            {organizationDescription}
+          </p>
+        )
+      }
+
+      {
+        !compact &&
+        showAddress &&
+        hasAddress && (
+          <div class="organization-marker__location">
+            <MapPin
+              size={13}
+              stroke-width={1.9}
+              aria-hidden="true"
+            />
+
+            <span>
+              {organizationAddress}
+            </span>
+          </div>
+        )
+      }
+    </div>
+
+    {
+      compact && (
+        <span
+          class="organization-marker__compact-arrow"
+          aria-hidden="true"
+        >
+          →
+        </span>
+      )
+    }
+  </div>
+
+  {
+    hasHref && (
+      <a
+        class="organization-marker__link"
+        href={organizationHref}
+        aria-label={`Lihat profil ${organizationName}`}
+      >
+        <span>
+          Lihat profil
+        </span>
+
+        <ExternalLink
+          size={13}
+          stroke-width={1.9}
+          aria-hidden="true"
+        />
+      </a>
+    )
+  }
+</article>
+
+<style>
+  .organization-marker {
+    width: min(
+      100%,
+      23rem
+    );
+    min-width: 0;
+    overflow: hidden;
+    border: 1px solid
+      var(--color-border, #e2e8f0);
+    border-radius: 0.9rem;
+    background: var(
+      --color-surface,
+      #ffffff
+    );
+    color: var(
+      --color-text,
+      #0f172a
+    );
+    box-shadow:
+      0 2px 6px
+        rgb(15 23 42 / 0.06),
+      0 12px 28px
+        rgb(15 23 42 / 0.08);
+  }
+
+  .organization-marker--linked {
+    transition:
+      border-color 160ms ease,
+      box-shadow 160ms ease,
+      transform 160ms ease;
+  }
+
+  .organization-marker--linked:hover {
+    border-color: #bbf7d0;
+    box-shadow:
+      0 3px 8px
+        rgb(15 23 42 / 0.08),
+      0 15px 32px
+        rgb(15 23 42 / 0.1);
+    transform: translateY(
+      -1px
+    );
+  }
+
+  .organization-marker__main {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.7rem;
+    padding: 0.85rem;
+  }
+
+  .organization-marker__icon {
+    width: 2.35rem;
+    height: 2.35rem;
+    flex: 0 0 2.35rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #bbf7d0;
+    border-radius: 0.7rem;
+    background: #f0fdf4;
+    color: #166534;
+  }
+
+  .organization-marker__content {
+    min-width: 0;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+
+  .organization-marker__heading {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+  }
+
+  .organization-marker__name-row {
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+
+  .organization-marker__name {
+    min-width: 0;
+    margin: 0;
+    overflow: hidden;
+    color: #0f172a;
+    font-size: 0.8rem;
+    font-weight: 750;
+    line-height: 1.35;
+    letter-spacing: -0.01em;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .organization-marker__verified {
+    width: 1rem;
+    height: 1rem;
+    flex: 0 0 1rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #15803d;
+  }
+
+  .organization-marker__type {
+    overflow: hidden;
+    color: #64748b;
+    font-size: 0.62rem;
+    font-weight: 650;
+    line-height: 1.3;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    text-transform: capitalize;
+  }
+
+  .organization-marker__status {
+    display: inline-flex;
+    align-self: flex-start;
+    min-height: 1.4rem;
+    align-items: center;
+    padding: 0.18rem 0.45rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 999px;
+    background: #f8fafc;
+    color: #64748b;
+    font-size: 0.57rem;
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  .organization-marker__description {
+    display: -webkit-box;
+    overflow: hidden;
+    margin: 0;
+    color: #475569;
+    font-size: 0.68rem;
+    line-height: 1.5;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  .organization-marker__location {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.3rem;
+    color: #64748b;
+    font-size: 0.63rem;
+    line-height: 1.4;
+  }
+
+  .organization-marker__location svg {
+    flex: 0 0 auto;
+    margin-top: 0.05rem;
+    color: #166534;
+  }
+
+  .organization-marker__compact-arrow {
+    flex: 0 0 auto;
+    align-self: center;
+    color: #94a3b8;
+    font-size: 1rem;
+    font-weight: 600;
+    transition:
+      color 160ms ease,
+      transform 160ms ease;
+  }
+
+  .organization-marker--linked:hover
+    .organization-marker__compact-arrow {
+    color: #166534;
+    transform: translateX(
+      2px
+    );
+  }
+
+  .organization-marker__link {
+    min-height: 2.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.55rem
+      0.85rem;
+    border-top: 1px solid
+      #f1f5f9;
+    color: #166534;
+    font-size: 0.67rem;
+    font-weight: 750;
+    line-height: 1.3;
+    text-decoration: none;
+  }
+
+  .organization-marker__link:hover {
+    background: #f8fafc;
+  }
+
+  .organization-marker__link:focus-visible {
+    outline: 3px solid
+      rgb(37 99 235 / 0.18);
+    outline-offset: -2px;
+  }
+
+  .organization-marker--compact
+    .organization-marker__main {
+    align-items: center;
+    padding: 0.7rem;
+  }
+
+  .organization-marker--compact
+    .organization-marker__icon {
+    width: 2.1rem;
+    height: 2.1rem;
+    flex-basis: 2.1rem;
+  }
+
+  .organization-marker--compact
+    .organization-marker__status {
+    display: none;
+  }
+
+  @media (max-width: 480px) {
+    .organization-marker {
+      width: min(
+        100%,
+        20rem
+      );
+    }
+
+    .organization-marker__main {
+      padding: 0.75rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .organization-marker--linked,
+    .organization-marker__compact-arrow {
+      transition: none;
+    }
+  }
+</style>

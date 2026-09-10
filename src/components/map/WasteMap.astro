@@ -1,0 +1,1634 @@
+---
+import {
+  Layers,
+  LocateFixed,
+  MapPin,
+  Maximize2,
+  Minus,
+  Plus,
+  RefreshCw,
+} from "@lucide/astro";
+
+import {
+  getPublicLocations,
+  type WasteLocation,
+} from "@lib/data/locations";
+
+export interface WasteMapLocation
+  extends WasteLocation {}
+
+interface Props {
+  locations?: WasteMapLocation[];
+  height?: string;
+  showControls?: boolean;
+  showLayerControl?: boolean;
+  showLocateControl?: boolean;
+  showFullscreenControl?: boolean;
+  showLegend?: boolean;
+  showSearch?: boolean;
+  initialZoom?: number;
+  minZoom?: number;
+  maxZoom?: number;
+  centerLat?: number;
+  centerLng?: number;
+  class?: string;
+}
+
+const {
+  locations = getPublicLocations(),
+  height = "520px",
+  showControls = true,
+  showLayerControl = true,
+  showLocateControl = true,
+  showFullscreenControl = true,
+  showLegend = true,
+  showSearch = true,
+  initialZoom = 11,
+  minZoom = 9,
+  maxZoom = 18,
+  centerLat = -8.55,
+  centerLng = 115.18,
+  class: className = "",
+} = Astro.props;
+
+const mapLocations = locations.filter(
+  (location) =>
+    location.status === "active" &&
+    Number.isFinite(
+      location.coordinates.lat,
+    ) &&
+    Number.isFinite(
+      location.coordinates.lng,
+    ),
+);
+
+const locationPayload =
+  mapLocations.map((location) => ({
+    id: location.id,
+    slug: location.slug,
+    name: location.name,
+    description:
+      location.description,
+    address: location.address,
+    areaId: location.areaId,
+    areaName:
+      location.areaName,
+    type: location.type,
+    coordinates: {
+      lat: location.coordinates.lat,
+      lng: location.coordinates.lng,
+    },
+  }));
+
+const mapId = `waste-map-${Math.random()
+  .toString(36)
+  .slice(2, 10)}`;
+---
+
+<div
+  class:list={[
+    "waste-map",
+    className,
+  ]}
+  data-waste-map
+  data-map-id={mapId}
+  data-locations={JSON.stringify(
+    locationPayload,
+  )}
+  data-center-lat={centerLat}
+  data-center-lng={centerLng}
+  data-initial-zoom={initialZoom}
+  data-min-zoom={minZoom}
+  data-max-zoom={maxZoom}
+  style={`--waste-map-height: ${height};`}
+>
+  <div class="waste-map__stage">
+    <div
+      id={mapId}
+      class="waste-map__canvas"
+      aria-label="Peta lokasi pengelolaan sampah Kabupaten Badung"
+    ></div>
+
+    {
+      showSearch && (
+        <div class="waste-map__search">
+          <label
+            class="waste-map__sr-only"
+            for={`${mapId}-search`}
+          >
+            Cari lokasi
+          </label>
+
+          <div class="waste-map__search-box">
+            <MapPin
+              size={16}
+              stroke-width={1.9}
+              aria-hidden="true"
+            />
+
+            <input
+              id={`${mapId}-search`}
+              class="waste-map__search-input"
+              type="search"
+              placeholder="Cari lokasi atau area..."
+              autocomplete="off"
+              spellcheck="false"
+              data-map-search
+            />
+
+            <button
+              type="button"
+              class="waste-map__search-clear"
+              data-map-search-clear
+              aria-label="Hapus pencarian"
+              hidden
+            >
+              ×
+            </button>
+          </div>
+
+          <div
+            class="waste-map__search-results"
+            data-map-search-results
+            hidden
+          ></div>
+        </div>
+      )
+    }
+
+    {
+      showControls && (
+        <div
+          class="waste-map__controls"
+          aria-label="Kontrol peta"
+        >
+          <button
+            type="button"
+            class="waste-map__control"
+            data-map-zoom-in
+            aria-label="Perbesar peta"
+            title="Perbesar"
+          >
+            <Plus
+              size={17}
+              stroke-width={2}
+              aria-hidden="true"
+            />
+          </button>
+
+          <button
+            type="button"
+            class="waste-map__control"
+            data-map-zoom-out
+            aria-label="Perkecil peta"
+            title="Perkecil"
+          >
+            <Minus
+              size={17}
+              stroke-width={2}
+              aria-hidden="true"
+            />
+          </button>
+
+          {
+            showLocateControl && (
+              <button
+                type="button"
+                class="waste-map__control"
+                data-map-locate
+                aria-label="Gunakan lokasi saya"
+                title="Lokasi saya"
+              >
+                <LocateFixed
+                  size={17}
+                  stroke-width={1.9}
+                  aria-hidden="true"
+                />
+              </button>
+            )
+          }
+
+          {
+            showFullscreenControl && (
+              <button
+                type="button"
+                class="waste-map__control"
+                data-map-fullscreen
+                aria-label="Tampilkan peta layar penuh"
+                title="Layar penuh"
+              >
+                <Maximize2
+                  size={17}
+                  stroke-width={1.9}
+                  aria-hidden="true"
+                />
+              </button>
+            )
+          }
+
+          {
+            showLayerControl && (
+              <button
+                type="button"
+                class="waste-map__control"
+                data-map-fit
+                aria-label="Tampilkan seluruh lokasi"
+                title="Tampilkan semua lokasi"
+              >
+                <Layers
+                  size={17}
+                  stroke-width={1.9}
+                  aria-hidden="true"
+                />
+              </button>
+            )
+          }
+
+          <button
+            type="button"
+            class="waste-map__control"
+            data-map-refresh
+            aria-label="Atur ulang peta"
+            title="Atur ulang"
+          >
+            <RefreshCw
+              size={17}
+              stroke-width={1.9}
+              aria-hidden="true"
+            />
+          </button>
+        </div>
+      )
+    }
+
+    <div
+      class="waste-map__status"
+      aria-live="polite"
+      data-map-status
+    >
+      Memuat peta...
+    </div>
+
+    {
+      showLegend && (
+        <div
+          class="waste-map__legend"
+          aria-label="Legenda peta"
+        >
+          <div class="waste-map__legend-title">
+            Lokasi
+          </div>
+
+          <div class="waste-map__legend-item">
+            <span
+              class="waste-map__legend-marker"
+              aria-hidden="true"
+            ></span>
+
+            <span>
+              Titik pengelolaan
+            </span>
+          </div>
+        </div>
+      )
+    }
+
+    <noscript>
+      <div class="waste-map__no-script">
+        <strong>
+          Peta membutuhkan JavaScript
+        </strong>
+
+        <p>
+          Aktifkan JavaScript untuk melihat
+          lokasi pengelolaan sampah pada peta.
+        </p>
+      </div>
+    </noscript>
+  </div>
+</div>
+
+<script is:inline>
+  (() => {
+    const root = document.currentScript
+      ?.previousElementSibling;
+
+    if (
+      !(root instanceof HTMLElement) ||
+      !root.matches("[data-waste-map]")
+    ) {
+      return;
+    }
+
+    if (root.dataset.mapInitialized === "true") {
+      return;
+    }
+
+    root.dataset.mapInitialized = "true";
+
+    const canvas =
+      root.querySelector(
+        ".waste-map__canvas",
+      );
+
+    if (!(canvas instanceof HTMLElement)) {
+      return;
+    }
+
+    const status =
+      root.querySelector(
+        "[data-map-status]",
+      );
+
+    const locations = (() => {
+      try {
+        const raw =
+          root.dataset.locations ?? "[]";
+
+        const parsed =
+          JSON.parse(raw);
+
+        return Array.isArray(parsed)
+          ? parsed
+          : [];
+      } catch {
+        return [];
+      }
+    })();
+
+    const centerLat = Number(
+      root.dataset.centerLat ??
+        "-8.55",
+    );
+
+    const centerLng = Number(
+      root.dataset.centerLng ??
+        "115.18",
+    );
+
+    const initialZoom = Number(
+      root.dataset.initialZoom ??
+        "11",
+    );
+
+    const minZoom = Number(
+      root.dataset.minZoom ?? "9",
+    );
+
+    const maxZoom = Number(
+      root.dataset.maxZoom ?? "18",
+    );
+
+    const setStatus = (
+      message,
+    ) => {
+      if (
+        status instanceof HTMLElement
+      ) {
+        status.textContent =
+          message;
+      }
+    };
+
+    const loadLeaflet = async () => {
+      if (
+        window.__BINSIGHT_LEAFLET__
+      ) {
+        return window.__BINSIGHT_LEAFLET__;
+      }
+
+      const [
+        leafletModule,
+      ] = await Promise.all([
+        import("leaflet"),
+        import("leaflet/dist/leaflet.css"),
+      ]);
+
+      const leaflet =
+        leafletModule.default ??
+        leafletModule;
+
+      window.__BINSIGHT_LEAFLET__ =
+        leaflet;
+
+      return leaflet;
+    };
+
+    const createMarkerIcon = (
+      leaflet,
+    ) =>
+      leaflet.divIcon({
+        className:
+          "binsight-map-marker-wrapper",
+        html: `
+          <span class="binsight-map-marker" aria-hidden="true">
+            <span class="binsight-map-marker__dot"></span>
+          </span>
+        `,
+        iconSize: [28, 36],
+        iconAnchor: [14, 35],
+        popupAnchor: [0, -32],
+      });
+
+    const escapeHtml = (
+      value,
+    ) => {
+      const text =
+        String(value ?? "");
+
+      return text
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll(
+          "'",
+          "&#039;",
+        );
+    };
+
+    const formatLocationType = (
+      type,
+    ) => {
+      const labels = {
+        "collection-point":
+          "Titik pengumpulan",
+        "recycling-center":
+          "Pusat daur ulang",
+        "waste-bank":
+          "Bank sampah",
+        "processing-facility":
+          "Fasilitas pengolahan",
+        "drop-point":
+          "Drop point",
+        other: "Lokasi pengelolaan",
+      };
+
+      return (
+        labels[type] ??
+        "Lokasi pengelolaan"
+      );
+    };
+
+    let map = null;
+    let markerLayer = null;
+    let leaflet = null;
+
+    const markerById =
+      new Map();
+
+    const fitToLocations = () => {
+      if (
+        !map ||
+        !leaflet ||
+        locations.length === 0
+      ) {
+        return;
+      }
+
+      const bounds =
+        leaflet.latLngBounds(
+          locations.map(
+            (location) => [
+              location.coordinates.lat,
+              location.coordinates.lng,
+            ],
+          ),
+        );
+
+      if (bounds.isValid()) {
+        map.fitBounds(
+          bounds,
+          {
+            padding: [32, 32],
+            maxZoom: Math.min(
+              initialZoom + 2,
+              maxZoom,
+            ),
+          },
+        );
+      }
+    };
+
+    const resetMap = () => {
+      if (!map) {
+        return;
+      }
+
+      map.setView(
+        [centerLat, centerLng],
+        initialZoom,
+        {
+          animate: false,
+        },
+      );
+
+      if (
+        locations.length > 0
+      ) {
+        fitToLocations();
+      }
+    };
+
+    const openLocation = (
+      location,
+    ) => {
+      const marker =
+        markerById.get(
+          location.id,
+        );
+
+      if (!marker || !map) {
+        return;
+      }
+
+      marker.openPopup();
+
+      map.panTo(
+        [
+          location.coordinates.lat,
+          location.coordinates.lng,
+        ],
+        {
+          animate: true,
+        },
+      );
+    };
+
+    const renderSearchResults = (
+      query,
+    ) => {
+      const resultsContainer =
+        root.querySelector(
+          "[data-map-search-results]",
+        );
+
+      const clearButton =
+        root.querySelector(
+          "[data-map-search-clear]",
+        );
+
+      if (
+        !(resultsContainer instanceof HTMLElement)
+      ) {
+        return;
+      }
+
+      const normalizedQuery =
+        String(query ?? "")
+          .trim()
+          .toLowerCase();
+
+      if (
+        clearButton instanceof HTMLButtonElement
+      ) {
+        clearButton.hidden =
+          normalizedQuery.length ===
+          0;
+      }
+
+      if (!normalizedQuery) {
+        resultsContainer.hidden =
+          true;
+        resultsContainer.innerHTML =
+          "";
+        return;
+      }
+
+      const matches =
+        locations
+          .filter(
+            (location) => {
+              const haystack = [
+                location.name,
+                location.address,
+                location.areaName,
+                location.type,
+              ]
+                .join(" ")
+                .toLowerCase();
+
+              return haystack.includes(
+                normalizedQuery,
+              );
+            },
+          )
+          .slice(0, 6);
+
+      resultsContainer.innerHTML =
+        "";
+
+      if (matches.length === 0) {
+        resultsContainer.innerHTML =
+          `
+            <div class="waste-map__search-empty">
+              Tidak ada lokasi yang cocok.
+            </div>
+          `;
+
+        resultsContainer.hidden =
+          false;
+
+        return;
+      }
+
+      for (const location of matches) {
+        const button =
+          document.createElement(
+            "button",
+          );
+
+        button.type = "button";
+        button.className =
+          "waste-map__search-result";
+
+        button.innerHTML = `
+          <span class="waste-map__search-result-icon" aria-hidden="true">
+            <span class="waste-map__search-result-dot"></span>
+          </span>
+
+          <span class="waste-map__search-result-copy">
+            <strong>${escapeHtml(
+              location.name,
+            )}</strong>
+            <span>${escapeHtml(
+              location.areaName,
+            )} · ${escapeHtml(
+              formatLocationType(
+                location.type,
+              ),
+            )}</span>
+          </span>
+        `;
+
+        button.addEventListener(
+          "click",
+          () => {
+            openLocation(
+              location,
+            );
+
+            resultsContainer.hidden =
+              true;
+          },
+        );
+
+        resultsContainer.appendChild(
+          button,
+        );
+      }
+
+      resultsContainer.hidden =
+        false;
+    };
+
+    const initialize = async () => {
+      try {
+        setStatus(
+          locations.length > 0
+            ? "Memuat peta..."
+            : "Tidak ada lokasi untuk ditampilkan.",
+        );
+
+        leaflet =
+          await loadLeaflet();
+
+        map =
+          leaflet.map(
+            canvas,
+            {
+              center: [
+                centerLat,
+                centerLng,
+              ],
+              zoom: initialZoom,
+              minZoom,
+              maxZoom,
+              zoomControl: false,
+              attributionControl: true,
+            },
+          );
+
+        leaflet
+          .tileLayer(
+            "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+            {
+              maxZoom,
+              attribution:
+                '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a> contributors',
+            },
+          )
+          .addTo(map);
+
+        markerLayer =
+          leaflet.layerGroup().addTo(
+            map,
+          );
+
+        const markerIcon =
+          createMarkerIcon(
+            leaflet,
+          );
+
+        for (const location of locations) {
+          const {
+            lat,
+            lng,
+          } = location.coordinates;
+
+          const marker =
+            leaflet.marker(
+              [lat, lng],
+              {
+                icon: markerIcon,
+                title: location.name,
+                alt: location.name,
+              },
+            );
+
+          const popupContent = `
+            <div class="binsight-map-popup">
+              <div class="binsight-map-popup__eyebrow">
+                ${escapeHtml(
+                  formatLocationType(
+                    location.type,
+                  ),
+                )}
+              </div>
+
+              <h3 class="binsight-map-popup__title">
+                ${escapeHtml(
+                  location.name,
+                )}
+              </h3>
+
+              <p class="binsight-map-popup__area">
+                ${escapeHtml(
+                  location.areaName,
+                )}
+              </p>
+
+              <p class="binsight-map-popup__address">
+                ${escapeHtml(
+                  location.address,
+                )}
+              </p>
+
+              <a
+                class="binsight-map-popup__link"
+                href="/map/${encodeURIComponent(
+                  location.areaId,
+                )}"
+              >
+                Lihat area
+                <span aria-hidden="true">→</span>
+              </a>
+            </div>
+          `;
+
+          marker.bindPopup(
+            popupContent,
+            {
+              maxWidth: 300,
+              className:
+                "binsight-leaflet-popup",
+            },
+          );
+
+          markerLayer.addLayer(
+            marker,
+          );
+
+          markerById.set(
+            location.id,
+            marker,
+          );
+        }
+
+        map.on(
+          "zoomend moveend",
+          () => {
+            const zoom =
+              map.getZoom();
+
+            setStatus(
+              `${locations.length.toLocaleString(
+                "id-ID",
+              )} lokasi · zoom ${zoom}`,
+            );
+          },
+        );
+
+        const zoomIn =
+          root.querySelector(
+            "[data-map-zoom-in]",
+          );
+
+        const zoomOut =
+          root.querySelector(
+            "[data-map-zoom-out]",
+          );
+
+        const locateButton =
+          root.querySelector(
+            "[data-map-locate]",
+          );
+
+        const fullscreenButton =
+          root.querySelector(
+            "[data-map-fullscreen]",
+          );
+
+        const fitButton =
+          root.querySelector(
+            "[data-map-fit]",
+          );
+
+        const refreshButton =
+          root.querySelector(
+            "[data-map-refresh]",
+          );
+
+        const searchInput =
+          root.querySelector(
+            "[data-map-search]",
+          );
+
+        const searchClear =
+          root.querySelector(
+            "[data-map-search-clear]",
+          );
+
+        zoomIn?.addEventListener(
+          "click",
+          () => {
+            map?.zoomIn();
+          },
+        );
+
+        zoomOut?.addEventListener(
+          "click",
+          () => {
+            map?.zoomOut();
+          },
+        );
+
+        locateButton?.addEventListener(
+          "click",
+          () => {
+            if (!navigator.geolocation) {
+              setStatus(
+                "Browser tidak mendukung lokasi.",
+              );
+
+              return;
+            }
+
+            setStatus(
+              "Mencari lokasi Anda...",
+            );
+
+            navigator.geolocation.getCurrentPosition(
+              (position) => {
+                const lat =
+                  position.coords
+                    .latitude;
+
+                const lng =
+                  position.coords
+                    .longitude;
+
+                map?.setView(
+                  [lat, lng],
+                  Math.max(
+                    15,
+                    initialZoom,
+                  ),
+                );
+
+                leaflet
+                  .circleMarker(
+                    [lat, lng],
+                    {
+                      radius: 7,
+                      className:
+                        "binsight-user-location",
+                    },
+                  )
+                  .addTo(map);
+
+                setStatus(
+                  "Lokasi Anda ditampilkan di peta.",
+                );
+              },
+              () => {
+                setStatus(
+                  "Lokasi Anda tidak dapat diakses.",
+                );
+              },
+              {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 60000,
+              },
+            );
+          },
+        );
+
+        fullscreenButton?.addEventListener(
+          "click",
+          async () => {
+            try {
+              if (
+                !document.fullscreenElement
+              ) {
+                await root.requestFullscreen?.();
+              } else {
+                await document.exitFullscreen();
+              }
+            } catch {
+              setStatus(
+                "Mode layar penuh tidak tersedia.",
+              );
+            }
+          },
+        );
+
+        fitButton?.addEventListener(
+          "click",
+          () => {
+            fitToLocations();
+          },
+        );
+
+        refreshButton?.addEventListener(
+          "click",
+          () => {
+            map?.invalidateSize({
+              pan: false,
+              debounceMoveend: true,
+            });
+
+            resetMap();
+          },
+        );
+
+        searchInput?.addEventListener(
+          "input",
+          (event) => {
+            const target =
+              event.target;
+
+            if (
+              target instanceof
+              HTMLInputElement
+            ) {
+              renderSearchResults(
+                target.value,
+              );
+            }
+          },
+        );
+
+        searchClear?.addEventListener(
+          "click",
+          () => {
+            if (
+              searchInput instanceof
+              HTMLInputElement
+            ) {
+              searchInput.value =
+                "";
+              searchInput.focus();
+            }
+
+            renderSearchResults(
+              "",
+            );
+          },
+        );
+
+        if (
+          locations.length > 0
+        ) {
+          fitToLocations();
+        }
+
+        requestAnimationFrame(
+          () => {
+            map?.invalidateSize();
+          },
+        );
+
+        setStatus(
+          `${locations.length.toLocaleString(
+            "id-ID",
+          )} lokasi tersedia`,
+        );
+      } catch (error) {
+        console.error(
+          "[BINSIGHT] Failed to initialize map:",
+          error,
+        );
+
+        setStatus(
+          "Peta tidak dapat dimuat.",
+        );
+
+        canvas.innerHTML = `
+          <div class="waste-map__error">
+            <div class="waste-map__error-icon">
+              !
+            </div>
+
+            <strong>
+              Peta tidak tersedia
+            </strong>
+
+            <p>
+              Periksa koneksi internet lalu
+              coba muat ulang halaman.
+            </p>
+
+            <button
+              type="button"
+              class="waste-map__error-button"
+              data-map-retry
+            >
+              Coba lagi
+            </button>
+          </div>
+        `;
+
+        canvas
+          .querySelector(
+            "[data-map-retry]",
+          )
+          ?.addEventListener(
+            "click",
+            () => {
+              window.location.reload();
+            },
+          );
+      }
+    };
+
+    void initialize();
+  })();
+</script>
+
+<style>
+  .waste-map {
+    position: relative;
+    min-width: 0;
+    width: 100%;
+    overflow: hidden;
+    border: 1px solid
+      var(--color-border, #e2e8f0);
+    border-radius: 1rem;
+    background: #e2e8f0;
+    box-shadow:
+      0 1px 2px
+        rgb(15 23 42 / 0.03),
+      0 12px 32px
+        rgb(15 23 42 / 0.08);
+  }
+
+  .waste-map__stage {
+    position: relative;
+    height: var(--waste-map-height);
+    min-height: 320px;
+    background: #e2e8f0;
+  }
+
+  .waste-map__canvas {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .waste-map__canvas :global(.leaflet-container) {
+    width: 100%;
+    height: 100%;
+    font-family:
+      inherit;
+    background: #e2e8f0;
+  }
+
+  .waste-map__controls {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .waste-map__control {
+    width: 2.35rem;
+    height: 2.35rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid
+      rgb(226 232 240 / 0.95);
+    border-radius: 0.65rem;
+    background: rgb(
+      255 255 255 / 0.96
+    );
+    color: #334155;
+    box-shadow:
+      0 2px 6px
+        rgb(15 23 42 / 0.08);
+    cursor: pointer;
+    backdrop-filter: blur(
+      8px
+    );
+    transition:
+      background-color 160ms ease,
+      border-color 160ms ease,
+      color 160ms ease,
+      transform 160ms ease;
+  }
+
+  .waste-map__control:hover {
+    border-color: #bbf7d0;
+    background: #f0fdf4;
+    color: #166534;
+    transform: translateY(
+      -1px
+    );
+  }
+
+  .waste-map__control:focus-visible {
+    outline: 3px solid
+      rgb(37 99 235 / 0.2);
+    outline-offset: 2px;
+  }
+
+  .waste-map__search {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    z-index: 1000;
+    width: min(
+      25rem,
+      calc(100% - 5rem)
+    );
+  }
+
+  .waste-map__search-box {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    min-height: 2.7rem;
+    padding: 0 0.75rem;
+    border: 1px solid
+      rgb(226 232 240 / 0.95);
+    border-radius: 0.75rem;
+    background: rgb(
+      255 255 255 / 0.96
+    );
+    color: #64748b;
+    box-shadow:
+      0 2px 10px
+        rgb(15 23 42 / 0.08);
+    backdrop-filter: blur(
+      10px
+    );
+  }
+
+  .waste-map__search-input {
+    min-width: 0;
+    flex: 1;
+    height: 2.5rem;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: #0f172a;
+    font: inherit;
+    font-size: 0.8rem;
+  }
+
+  .waste-map__search-input::placeholder {
+    color: #94a3b8;
+  }
+
+  .waste-map__search-clear {
+    width: 1.5rem;
+    height: 1.5rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 1.5rem;
+    border: 0;
+    border-radius: 999px;
+    background: #f1f5f9;
+    color: #64748b;
+    cursor: pointer;
+    font-size: 1rem;
+    line-height: 1;
+  }
+
+  .waste-map__search-clear:hover {
+    background: #e2e8f0;
+    color: #334155;
+  }
+
+  .waste-map__search-results {
+    max-height: 20rem;
+    margin-top: 0.4rem;
+    overflow: auto;
+    border: 1px solid
+      rgb(226 232 240 / 0.95);
+    border-radius: 0.75rem;
+    background: rgb(
+      255 255 255 / 0.98
+    );
+    box-shadow:
+      0 10px 28px
+        rgb(15 23 42 / 0.12);
+    backdrop-filter: blur(
+      10px
+    );
+  }
+
+  .waste-map__search-result {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 0.7rem 0.75rem;
+    border: 0;
+    border-bottom: 1px solid
+      #f1f5f9;
+    background: transparent;
+    color: #0f172a;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .waste-map__search-result:last-child {
+    border-bottom: 0;
+  }
+
+  .waste-map__search-result:hover {
+    background: #f8fafc;
+  }
+
+  .waste-map__search-result:focus-visible {
+    outline: 2px solid
+      #2563eb;
+    outline-offset: -2px;
+  }
+
+  .waste-map__search-result-icon {
+    width: 1.8rem;
+    height: 1.8rem;
+    flex: 0 0 1.8rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.55rem;
+    background: #f0fdf4;
+  }
+
+  .waste-map__search-result-dot {
+    width: 0.55rem;
+    height: 0.55rem;
+    border-radius: 999px;
+    background: #166534;
+  }
+
+  .waste-map__search-result-copy {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+  }
+
+  .waste-map__search-result-copy strong {
+    overflow: hidden;
+    font-size: 0.75rem;
+    font-weight: 700;
+    line-height: 1.3;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .waste-map__search-result-copy span {
+    overflow: hidden;
+    color: #64748b;
+    font-size: 0.65rem;
+    line-height: 1.3;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .waste-map__search-empty {
+    padding: 0.9rem;
+    color: #64748b;
+    font-size: 0.72rem;
+  }
+
+  .waste-map__status {
+    position: absolute;
+    left: 1rem;
+    bottom: 1rem;
+    z-index: 900;
+    display: inline-flex;
+    align-items: center;
+    min-height: 1.75rem;
+    max-width: calc(100% - 2rem);
+    padding: 0.3rem 0.6rem;
+    border: 1px solid
+      rgb(226 232 240 / 0.95);
+    border-radius: 999px;
+    background: rgb(
+      255 255 255 / 0.94
+    );
+    color: #475569;
+    box-shadow:
+      0 2px 8px
+        rgb(15 23 42 / 0.07);
+    font-size: 0.65rem;
+    font-weight: 600;
+    backdrop-filter: blur(
+      8px
+    );
+  }
+
+  .waste-map__legend {
+    position: absolute;
+    right: 1rem;
+    bottom: 1rem;
+    z-index: 900;
+    min-width: 10rem;
+    padding: 0.65rem 0.75rem;
+    border: 1px solid
+      rgb(226 232 240 / 0.95);
+    border-radius: 0.7rem;
+    background: rgb(
+      255 255 255 / 0.94
+    );
+    color: #475569;
+    box-shadow:
+      0 2px 8px
+        rgb(15 23 42 / 0.07);
+    font-size: 0.65rem;
+    backdrop-filter: blur(
+      8px
+    );
+  }
+
+  .waste-map__legend-title {
+    margin-bottom: 0.4rem;
+    color: #334155;
+    font-size: 0.65rem;
+    font-weight: 750;
+  }
+
+  .waste-map__legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+  }
+
+  .waste-map__legend-marker {
+    width: 0.6rem;
+    height: 0.6rem;
+    border: 2px solid
+      #ffffff;
+    border-radius: 999px;
+    background: #166534;
+    box-shadow:
+      0 0 0 2px
+        rgb(22 101 52 / 0.25);
+  }
+
+  .waste-map__error,
+  .waste-map__no-script {
+    position: absolute;
+    inset: 0;
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    background: #f8fafc;
+    color: #475569;
+    text-align: center;
+  }
+
+  .waste-map__error-icon {
+    width: 2.75rem;
+    height: 2.75rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 0.75rem;
+    border-radius: 0.75rem;
+    background: #fef2f2;
+    color: #b91c1c;
+    font-size: 1.25rem;
+    font-weight: 800;
+  }
+
+  .waste-map__error strong,
+  .waste-map__no-script strong {
+    color: #0f172a;
+    font-size: 0.9rem;
+  }
+
+  .waste-map__error p,
+  .waste-map__no-script p {
+    max-width: 28rem;
+    margin: 0.35rem 0 1rem;
+    color: #64748b;
+    font-size: 0.75rem;
+    line-height: 1.6;
+  }
+
+  .waste-map__error-button {
+    min-height: 2.2rem;
+    padding: 0 0.8rem;
+    border: 1px solid #166534;
+    border-radius: 0.6rem;
+    background: #166534;
+    color: #ffffff;
+    font: inherit;
+    font-size: 0.7rem;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .waste-map__error-button:hover {
+    background: #14532d;
+  }
+
+  .waste-map__sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(
+      0,
+      0,
+      0,
+      0
+    );
+    white-space: nowrap;
+    border: 0;
+  }
+
+  :global(.binsight-map-marker-wrapper) {
+    background: transparent;
+    border: 0;
+  }
+
+  :global(.binsight-map-marker) {
+    position: relative;
+    display: block;
+    width: 28px;
+    height: 36px;
+    transform: rotate(
+      -45deg
+    );
+    border-radius:
+      50% 50% 50% 0;
+    background: #166534;
+    box-shadow:
+      0 3px 10px
+        rgb(15 23 42 / 0.2);
+  }
+
+  :global(.binsight-map-marker__dot) {
+    position: absolute;
+    top: 7px;
+    left: 7px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #ffffff;
+    box-shadow:
+      inset 0 0 0 4px #84cc16;
+  }
+
+  :global(.binsight-map-popup) {
+    min-width: 220px;
+    font-family:
+      inherit;
+  }
+
+  :global(.binsight-map-popup__eyebrow) {
+    margin-bottom: 0.3rem;
+    color: #166534;
+    font-size: 0.6rem;
+    font-weight: 750;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  :global(.binsight-map-popup__title) {
+    margin: 0;
+    color: #0f172a;
+    font-size: 0.85rem;
+    font-weight: 750;
+    line-height: 1.35;
+  }
+
+  :global(.binsight-map-popup__area) {
+    margin: 0.3rem 0 0;
+    color: #334155;
+    font-size: 0.7rem;
+    font-weight: 650;
+  }
+
+  :global(.binsight-map-popup__address) {
+    margin: 0.25rem 0 0.75rem;
+    color: #64748b;
+    font-size: 0.68rem;
+    line-height: 1.45;
+  }
+
+  :global(.binsight-map-popup__link) {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    color: #166534;
+    font-size: 0.68rem;
+    font-weight: 750;
+    text-decoration: none;
+  }
+
+  :global(.binsight-map-popup__link:hover) {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  :global(.binsight-user-location) {
+    fill: #2563eb;
+    stroke: #ffffff;
+    stroke-width: 3px;
+  }
+
+  :global(.binsight-leaflet-popup .leaflet-popup-content-wrapper) {
+    border-radius: 0.8rem;
+  }
+
+  :global(.binsight-leaflet-popup .leaflet-popup-content) {
+    margin: 0.9rem;
+  }
+
+  @media (max-width: 640px) {
+    .waste-map__stage {
+      min-height: 360px;
+    }
+
+    .waste-map__search {
+      width: calc(
+        100% - 5rem
+      );
+    }
+
+    .waste-map__legend {
+      display: none;
+    }
+
+    .waste-map__status {
+      left: 0.75rem;
+      bottom: 0.75rem;
+    }
+
+    .waste-map__controls {
+      top: 0.75rem;
+      right: 0.75rem;
+    }
+
+    .waste-map__control {
+      width: 2.2rem;
+      height: 2.2rem;
+    }
+
+    .waste-map__search {
+      top: 0.75rem;
+      left: 0.75rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .waste-map__control {
+      transition: none;
+    }
+
+    :global(.leaflet-zoom-animated) {
+      transition: none !important;
+    }
+  }
+</style>
