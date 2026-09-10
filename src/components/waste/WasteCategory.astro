@@ -1,0 +1,372 @@
+---
+/**
+ * ============================================================================
+ * BINSIGHT — WASTE CATEGORY
+ * ============================================================================
+ * Badung Waste Intelligence
+ *
+ * Component untuk menampilkan kategori sampah sebagai entry point navigasi.
+ *
+ * Prinsip:
+ * - Tidak mengarang statistik berat / volume.
+ * - Tidak bergantung pada Firebase.
+ * - Dapat digunakan di halaman publik maupun dashboard.
+ * - Menerima data sederhana sehingga mudah dipakai ulang.
+ * ============================================================================
+ */
+
+import {
+  ArrowRight,
+  CircleAlert,
+  CircleDot,
+  Leaf,
+  Recycle,
+  ShieldAlert,
+} from "@lucide/astro";
+
+interface Props {
+  name: string;
+  slug?: string;
+  description?: string;
+  count?: number;
+  href?: string;
+  icon?: "organic" | "inorganic" | "hazardous" | "electronic" | "residual" | "default";
+  featured?: boolean;
+  compact?: boolean;
+  showCount?: boolean;
+}
+
+const {
+  name,
+  slug,
+  description,
+  count = 0,
+  href,
+  icon = "default",
+  featured = false,
+  compact = false,
+  showCount = true,
+} = Astro.props;
+
+const destination =
+  href ??
+  (slug ? `/waste?category=${encodeURIComponent(slug)}` : "/waste");
+
+const getCategoryIcon = (
+  categoryIcon: NonNullable<Props["icon"]>,
+) => {
+  switch (categoryIcon) {
+    case "organic":
+      return Leaf;
+
+    case "hazardous":
+      return ShieldAlert;
+
+    case "electronic":
+      return CircleAlert;
+
+    case "inorganic":
+      return Recycle;
+
+    case "residual":
+      return CircleDot;
+
+    case "default":
+    default:
+      return Recycle;
+  }
+};
+
+const CategoryIcon = getCategoryIcon(icon);
+
+const hasDescription =
+  Boolean(description?.trim());
+
+const hasCount =
+  showCount && Number.isFinite(count);
+---
+
+<article
+  class:list={[
+    "waste-category",
+    compact && "waste-category--compact",
+    featured && "waste-category--featured",
+  ]}
+>
+  <a
+    href={destination}
+    class="waste-category__link"
+    aria-label={`Lihat kategori ${name}`}
+  >
+    <div class="waste-category__icon-wrap">
+      <CategoryIcon
+        size={compact ? 22 : 26}
+        stroke-width="1.8"
+        aria-hidden="true"
+      />
+    </div>
+
+    <div class="waste-category__content">
+      <div class="waste-category__top">
+        <div class="waste-category__title-wrap">
+          <span class="waste-category__eyebrow">
+            Kategori sampah
+          </span>
+
+          <h3>{name}</h3>
+        </div>
+
+        <span
+          class="waste-category__arrow"
+          aria-hidden="true"
+        >
+          <ArrowRight
+            size={17}
+            stroke-width="1.8"
+          />
+        </span>
+      </div>
+
+      {hasDescription && (
+        <p class="waste-category__description">
+          {description}
+        </p>
+      )}
+
+      <div class="waste-category__footer">
+        {hasCount ? (
+          <span class="waste-category__count">
+            <strong>{count}</strong>
+            <span>
+              {count === 1 ? "jenis terdata" : "jenis terdata"}
+            </span>
+          </span>
+        ) : (
+          <span class="waste-category__count-label">
+            Jelajahi kategori
+          </span>
+        )}
+
+        {featured && (
+          <span class="waste-category__featured">
+            Pilihan
+          </span>
+        )}
+      </div>
+    </div>
+  </a>
+</article>
+
+<style>
+  .waste-category {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    background: var(--color-surface);
+    transition:
+      border-color 160ms ease,
+      box-shadow 160ms ease,
+      transform 160ms ease;
+  }
+
+  .waste-category:hover {
+    border-color: var(--color-primary-light);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+  }
+
+  .waste-category--featured {
+    border-color: var(--color-primary-light);
+  }
+
+  .waste-category__link {
+    display: flex;
+    min-width: 0;
+    gap: 1rem;
+    padding: 1.2rem;
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .waste-category__icon-wrap {
+    display: grid;
+    width: 3.25rem;
+    height: 3.25rem;
+    flex: 0 0 3.25rem;
+    place-items: center;
+    border: 1px solid var(--color-primary-light);
+    border-radius: 0.9rem;
+    background:
+      linear-gradient(
+        145deg,
+        var(--color-primary-light),
+        rgba(132, 204, 22, 0.12)
+      );
+    color: var(--color-primary-dark);
+    transition:
+      background 160ms ease,
+      transform 160ms ease;
+  }
+
+  .waste-category:hover .waste-category__icon-wrap {
+    transform: scale(1.04);
+  }
+
+  .waste-category__content {
+    min-width: 0;
+    flex: 1;
+  }
+
+  .waste-category__top {
+    display: flex;
+    min-width: 0;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.8rem;
+  }
+
+  .waste-category__title-wrap {
+    min-width: 0;
+  }
+
+  .waste-category__eyebrow {
+    display: block;
+    margin-bottom: 0.18rem;
+    color: var(--color-primary);
+    font-size: 0.66rem;
+    font-weight: 800;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+  }
+
+  .waste-category__title-wrap h3 {
+    margin: 0;
+    overflow-wrap: anywhere;
+    color: var(--color-text);
+    font-size: 1rem;
+    font-weight: 750;
+    line-height: 1.35;
+  }
+
+  .waste-category__arrow {
+    display: grid;
+    width: 2rem;
+    height: 2rem;
+    flex: 0 0 2rem;
+    place-items: center;
+    border: 1px solid var(--color-border);
+    border-radius: 0.55rem;
+    background: var(--color-background);
+    color: var(--color-text-secondary);
+    transition:
+      border-color 160ms ease,
+      background 160ms ease,
+      color 160ms ease,
+      transform 160ms ease;
+  }
+
+  .waste-category:hover .waste-category__arrow {
+    border-color: var(--color-primary-light);
+    background: var(--color-primary-light);
+    color: var(--color-primary-dark);
+    transform: translateX(3px);
+  }
+
+  .waste-category__description {
+    display: -webkit-box;
+    overflow: hidden;
+    margin: 0.55rem 0 0;
+    color: var(--color-text-secondary);
+    font-size: 0.82rem;
+    line-height: 1.55;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  .waste-category__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-top: 0.85rem;
+  }
+
+  .waste-category__count {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.35rem;
+    color: var(--color-text-secondary);
+    font-size: 0.73rem;
+  }
+
+  .waste-category__count strong {
+    color: var(--color-text);
+    font-size: 0.88rem;
+    font-weight: 750;
+  }
+
+  .waste-category__count-label {
+    color: var(--color-primary);
+    font-size: 0.73rem;
+    font-weight: 700;
+  }
+
+  .waste-category__featured {
+    padding: 0.3rem 0.5rem;
+    border-radius: 999px;
+    background: var(--color-primary-light);
+    color: var(--color-primary-dark);
+    font-size: 0.65rem;
+    font-weight: 750;
+    line-height: 1;
+  }
+
+  .waste-category--compact .waste-category__link {
+    gap: 0.8rem;
+    padding: 0.95rem;
+  }
+
+  .waste-category--compact .waste-category__icon-wrap {
+    width: 2.75rem;
+    height: 2.75rem;
+    flex-basis: 2.75rem;
+    border-radius: 0.75rem;
+  }
+
+  .waste-category--compact .waste-category__eyebrow {
+    font-size: 0.62rem;
+  }
+
+  .waste-category--compact .waste-category__title-wrap h3 {
+    font-size: 0.92rem;
+  }
+
+  .waste-category--compact .waste-category__description {
+    font-size: 0.77rem;
+  }
+
+  .waste-category--compact .waste-category__footer {
+    margin-top: 0.65rem;
+  }
+
+  @media (max-width: 520px) {
+    .waste-category__link {
+      gap: 0.75rem;
+      padding: 1rem;
+    }
+
+    .waste-category__icon-wrap {
+      width: 2.9rem;
+      height: 2.9rem;
+      flex-basis: 2.9rem;
+    }
+
+    .waste-category__arrow {
+      width: 1.8rem;
+      height: 1.8rem;
+      flex-basis: 1.8rem;
+    }
+  }
+</style>

@@ -1,0 +1,527 @@
+---
+/**
+ * ============================================================================
+ * BINSIGHT — WASTE PROCESS
+ * ============================================================================
+ * Badung Waste Intelligence
+ *
+ * Menampilkan alur pengelolaan suatu material / kategori sampah.
+ *
+ * Prinsip:
+ * - Fokus pada proses, bukan klaim volume.
+ * - Tidak melakukan fetch data.
+ * - Tidak menggunakan icon deprecated.
+ * - Responsive dan accessible.
+ * - Dapat digunakan dengan data proses sederhana maupun data dari parent.
+ * ============================================================================
+ */
+
+import {
+  ArrowDown,
+  ArrowRight,
+  Check,
+  CircleDot,
+  Recycle,
+  ShieldCheck,
+} from "@lucide/astro";
+
+export interface WasteProcessStep {
+  id?: string;
+  name: string;
+  description?: string;
+  order?: number;
+  icon?: "collection" | "sorting" | "processing" | "recycling" | "reuse" | "final" | "default";
+}
+
+interface Props {
+  processes: WasteProcessStep[];
+  title?: string;
+  description?: string;
+  compact?: boolean;
+  numbered?: boolean;
+  showDescription?: boolean;
+}
+
+const {
+  processes,
+  title = "Proses Pengelolaan",
+  description = "Tahapan pengelolaan material sesuai karakteristik dan potensi pemanfaatannya.",
+  compact = false,
+  numbered = true,
+  showDescription = true,
+} = Astro.props;
+
+const sortedProcesses = [...processes]
+  .filter((process) => process && process.name?.trim())
+  .sort(
+    (a, b) =>
+      (a.order ?? Number.MAX_SAFE_INTEGER) -
+      (b.order ?? Number.MAX_SAFE_INTEGER),
+  );
+
+const getProcessIcon = (
+  process: WasteProcessStep,
+) => {
+  switch (process.icon) {
+    case "collection":
+      return CircleDot;
+
+    case "sorting":
+      return Check;
+
+    case "processing":
+      return Recycle;
+
+    case "recycling":
+      return Recycle;
+
+    case "reuse":
+      return ShieldCheck;
+
+    case "final":
+      return ShieldCheck;
+
+    case "default":
+    default:
+      return Recycle;
+  }
+};
+---
+
+<section
+  class:list={[
+    "waste-process",
+    compact && "waste-process--compact",
+  ]}
+  aria-labelledby="waste-process-title"
+>
+  <header class="waste-process__header">
+    <div>
+      <span class="waste-process__eyebrow">
+        Alur pengelolaan
+      </span>
+
+      <h2 id="waste-process-title">
+        {title}
+      </h2>
+
+      {description && (
+        <p>
+          {description}
+        </p>
+      )}
+    </div>
+
+    {sortedProcesses.length > 0 && (
+      <span class="waste-process__count">
+        {sortedProcesses.length} tahapan
+      </span>
+    )}
+  </header>
+
+  {sortedProcesses.length === 0 ? (
+    <div class="waste-process__empty">
+      <span class="waste-process__empty-icon">
+        <Recycle
+          size={20}
+          stroke-width="1.8"
+          aria-hidden="true"
+        />
+      </span>
+
+      <div>
+        <strong>
+          Proses pengelolaan belum tersedia
+        </strong>
+
+        <p>
+          Informasi tahapan pengelolaan untuk material ini
+          belum ditambahkan.
+        </p>
+      </div>
+    </div>
+  ) : (
+    <ol class="waste-process__list">
+      {sortedProcesses.map((process, index) => {
+        const ProcessIcon =
+          getProcessIcon(process);
+
+        const isLast =
+          index === sortedProcesses.length - 1;
+
+        const stepNumber =
+          process.order ?? index + 1;
+
+        return (
+          <li class="waste-process__item">
+            <div class="waste-process__rail">
+              <div class="waste-process__marker">
+                {numbered ? (
+                  <span>
+                    {stepNumber}
+                  </span>
+                ) : (
+                  <ProcessIcon
+                    size={18}
+                    stroke-width="1.8"
+                    aria-hidden="true"
+                  />
+                )}
+              </div>
+
+              {!isLast && (
+                <div
+                  class="waste-process__connector"
+                  aria-hidden="true"
+                ></div>
+              )}
+            </div>
+
+            <div class="waste-process__content">
+              <div class="waste-process__step-label">
+                Tahap {stepNumber}
+              </div>
+
+              <div class="waste-process__title-row">
+                <div class="waste-process__icon">
+                  <ProcessIcon
+                    size={18}
+                    stroke-width="1.8"
+                    aria-hidden="true"
+                  />
+                </div>
+
+                <h3>
+                  {process.name}
+                </h3>
+              </div>
+
+              {showDescription &&
+                process.description && (
+                  <p class="waste-process__description">
+                    {process.description}
+                  </p>
+                )}
+            </div>
+
+            {!compact && !isLast && (
+              <div
+                class="waste-process__direction"
+                aria-hidden="true"
+              >
+                <ArrowRight
+                  size={16}
+                  stroke-width="1.8"
+                />
+              </div>
+            )}
+
+            {!compact && isLast && (
+              <div
+                class="waste-process__complete"
+                aria-label="Tahap terakhir"
+              >
+                <ShieldCheck
+                  size={17}
+                  stroke-width="1.8"
+                  aria-hidden="true"
+                />
+              </div>
+            )}
+          </li>
+        );
+      })}
+    </ol>
+  )}
+</section>
+
+<style>
+  .waste-process {
+    width: 100%;
+    padding: 1.5rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    background: var(--color-surface);
+  }
+
+  .waste-process__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1.25rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .waste-process__eyebrow {
+    display: block;
+    margin-bottom: 0.25rem;
+    color: var(--color-primary);
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .waste-process__header h2 {
+    margin: 0;
+    color: var(--color-text);
+    font-size: 1.25rem;
+    font-weight: 750;
+    line-height: 1.3;
+  }
+
+  .waste-process__header p {
+    max-width: 700px;
+    margin: 0.45rem 0 0;
+    color: var(--color-text-secondary);
+    font-size: 0.88rem;
+    line-height: 1.6;
+  }
+
+  .waste-process__count {
+    flex: 0 0 auto;
+    padding: 0.4rem 0.7rem;
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    background: var(--color-background);
+    color: var(--color-text-secondary);
+    font-size: 0.72rem;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .waste-process__list {
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .waste-process__item {
+    display: grid;
+    grid-template-columns: 2.8rem minmax(0, 1fr) auto;
+    gap: 1rem;
+    min-width: 0;
+    padding-bottom: 1.5rem;
+  }
+
+  .waste-process__item:last-child {
+    padding-bottom: 0;
+  }
+
+  .waste-process__rail {
+    position: relative;
+    display: flex;
+    justify-content: center;
+  }
+
+  .waste-process__marker {
+    position: relative;
+    z-index: 2;
+    display: grid;
+    width: 2.8rem;
+    height: 2.8rem;
+    place-items: center;
+    border: 1px solid var(--color-primary-light);
+    border-radius: 0.85rem;
+    background: var(--color-primary-light);
+    color: var(--color-primary-dark);
+    box-shadow:
+      0 0 0 4px var(--color-surface);
+  }
+
+  .waste-process__marker span {
+    font-size: 0.85rem;
+    font-weight: 800;
+    line-height: 1;
+  }
+
+  .waste-process__connector {
+    position: absolute;
+    top: 2.8rem;
+    bottom: -0.15rem;
+    left: 50%;
+    width: 1px;
+    transform: translateX(-50%);
+    background:
+      linear-gradient(
+        to bottom,
+        var(--color-primary-light),
+        var(--color-border)
+      );
+  }
+
+  .waste-process__content {
+    min-width: 0;
+    padding-top: 0.05rem;
+  }
+
+  .waste-process__step-label {
+    margin-bottom: 0.25rem;
+    color: var(--color-primary);
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .waste-process__title-row {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    gap: 0.55rem;
+  }
+
+  .waste-process__icon {
+    display: grid;
+    width: 2rem;
+    height: 2rem;
+    flex: 0 0 2rem;
+    place-items: center;
+    border-radius: 0.55rem;
+    background: var(--color-background);
+    color: var(--color-primary);
+  }
+
+  .waste-process__title-row h3 {
+    min-width: 0;
+    margin: 0;
+    overflow-wrap: anywhere;
+    color: var(--color-text);
+    font-size: 0.98rem;
+    font-weight: 750;
+    line-height: 1.4;
+  }
+
+  .waste-process__description {
+    max-width: 760px;
+    margin: 0.55rem 0 0;
+    color: var(--color-text-secondary);
+    font-size: 0.84rem;
+    line-height: 1.6;
+  }
+
+  .waste-process__direction,
+  .waste-process__complete {
+    display: grid;
+    width: 2rem;
+    height: 2rem;
+    margin-top: 0.25rem;
+    place-items: center;
+    border-radius: 0.55rem;
+  }
+
+  .waste-process__direction {
+    color: var(--color-text-secondary);
+  }
+
+  .waste-process__complete {
+    background: var(--color-primary-light);
+    color: var(--color-primary-dark);
+  }
+
+  .waste-process__empty {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.85rem;
+    padding: 1rem;
+    border: 1px dashed var(--color-border);
+    border-radius: var(--radius-lg);
+    background: var(--color-background);
+  }
+
+  .waste-process__empty-icon {
+    display: grid;
+    width: 2.35rem;
+    height: 2.35rem;
+    flex: 0 0 2.35rem;
+    place-items: center;
+    border-radius: 0.7rem;
+    background: var(--color-primary-light);
+    color: var(--color-primary-dark);
+  }
+
+  .waste-process__empty strong {
+    display: block;
+    color: var(--color-text);
+    font-size: 0.88rem;
+    line-height: 1.4;
+  }
+
+  .waste-process__empty p {
+    margin: 0.25rem 0 0;
+    color: var(--color-text-secondary);
+    font-size: 0.78rem;
+    line-height: 1.5;
+  }
+
+  .waste-process--compact {
+    padding: 1.15rem;
+  }
+
+  .waste-process--compact
+    .waste-process__header {
+    margin-bottom: 1.1rem;
+  }
+
+  .waste-process--compact
+    .waste-process__item {
+    grid-template-columns: 2.5rem minmax(0, 1fr);
+    gap: 0.8rem;
+    padding-bottom: 1.1rem;
+  }
+
+  .waste-process--compact
+    .waste-process__marker {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+
+  .waste-process--compact
+    .waste-process__connector {
+    top: 2.5rem;
+  }
+
+  .waste-process--compact
+    .waste-process__direction,
+  .waste-process--compact
+    .waste-process__complete {
+    display: none;
+  }
+
+  .waste-process--compact
+    .waste-process__description {
+    font-size: 0.78rem;
+  }
+
+  @media (max-width: 640px) {
+    .waste-process {
+      padding: 1.15rem;
+    }
+
+    .waste-process__header {
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .waste-process__item {
+      grid-template-columns: 2.6rem minmax(0, 1fr);
+      gap: 0.8rem;
+    }
+
+    .waste-process__marker {
+      width: 2.6rem;
+      height: 2.6rem;
+    }
+
+    .waste-process__connector {
+      top: 2.6rem;
+    }
+
+    .waste-process__direction,
+    .waste-process__complete {
+      display: none;
+    }
+  }
+</style>
