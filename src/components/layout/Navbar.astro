@@ -1,0 +1,1474 @@
+---
+/**
+ * BINSIGHT — NAVBAR
+ * --------------------------------------------------------------------------
+ * Primary navigation for the public-facing BINSIGHT platform.
+ *
+ * Responsibilities:
+ * - Brand / logo
+ * - Primary navigation
+ * - Explore dropdown
+ * - Report CTA
+ * - Mobile navigation
+ * - Current route highlighting
+ * - Accessible keyboard / screen-reader behavior
+ *
+ * Architecture:
+ * - No external JS dependency
+ * - No framework required
+ * - Works directly inside Astro layouts
+ * - Uses BINSIGHT global design tokens
+ * --------------------------------------------------------------------------
+ */
+
+import { Menu, X, ChevronDown, Map, BarChart3, Building2, Recycle, FileWarning, Info } from "@lucide/astro";
+
+interface NavItem {
+  label: string;
+  href: string;
+  icon?: any;
+  exact?: boolean;
+}
+
+const pathname = Astro.url.pathname;
+
+const primaryLinks: NavItem[] = [
+  {
+    label: "Beranda",
+    href: "/",
+    exact: true,
+  },
+  {
+    label: "Peta",
+    href: "/map",
+    icon: Map,
+  },
+  {
+    label: "Data",
+    href: "/dashboard",
+    icon: BarChart3,
+  },
+  {
+    label: "Organisasi",
+    href: "/organizations",
+    icon: Building2,
+  },
+];
+
+const exploreItems: NavItem[] = [
+  {
+    label: "Jenis Sampah",
+    href: "/waste",
+    icon: Recycle,
+  },
+  {
+    label: "Laporan Masyarakat",
+    href: "/reports",
+    icon: FileWarning,
+  },
+  {
+    label: "Tentang BINSIGHT",
+    href: "/company",
+    icon: Info,
+  },
+];
+
+function normalizePath(path: string) {
+  if (path !== "/" && path.endsWith("/")) {
+    return path.slice(0, -1);
+  }
+
+  return path;
+}
+
+function isActive(href: string, exact = false) {
+  const currentPath = normalizePath(pathname);
+  const targetPath = normalizePath(href);
+
+  if (exact) {
+    return currentPath === targetPath;
+  }
+
+  return (
+    currentPath === targetPath ||
+    currentPath.startsWith(`${targetPath}/`)
+  );
+}
+
+const isExploreActive = exploreItems.some((item) =>
+  isActive(item.href, item.href === "/company")
+);
+---
+
+<nav
+  class="navbar"
+  data-navbar
+  aria-label="Navigasi utama BINSIGHT"
+>
+  <div class="navbar__container">
+    <a
+      class="navbar__brand"
+      href="/"
+      aria-label="BINSIGHT — Badung Waste Intelligence, kembali ke beranda"
+    >
+      <span class="navbar__brand-mark" aria-hidden="true">
+        <img
+          src="/images/logo.svg"
+          alt=""
+          width="38"
+          height="38"
+          loading="eager"
+          decoding="async"
+        />
+      </span>
+
+      <span class="navbar__brand-copy">
+        <span class="navbar__brand-name">BINSIGHT</span>
+        <span class="navbar__brand-tagline">Badung Waste Intelligence</span>
+      </span>
+    </a>
+
+    <div class="navbar__desktop">
+      <div class="navbar__links" role="list">
+        {
+          primaryLinks.map((item) => {
+            const active = isActive(item.href, item.exact);
+
+            return (
+              <a
+                class:list={[
+                  "navbar__link",
+                  {
+                    "navbar__link--active": active,
+                  },
+                ]}
+                href={item.href}
+                aria-current={active ? "page" : undefined}
+              >
+                {item.icon && (
+                  <item.icon
+                    size={17}
+                    strokeWidth={1.9}
+                    aria-hidden="true"
+                  />
+                )}
+
+                <span>{item.label}</span>
+              </a>
+            );
+          })
+        }
+
+        <div
+          class:list={[
+            "navbar__dropdown",
+            {
+              "navbar__dropdown--active": isExploreActive,
+            },
+          ]}
+          data-navbar-dropdown
+        >
+          <button
+            class:list={[
+              "navbar__link",
+              "navbar__dropdown-trigger",
+              {
+                "navbar__link--active": isExploreActive,
+              },
+            ]}
+            type="button"
+            aria-expanded="false"
+            aria-controls="navbar-explore-menu"
+            data-navbar-dropdown-trigger
+          >
+            <span>Eksplorasi</span>
+
+            <ChevronDown
+              class="navbar__dropdown-icon"
+              size={16}
+              strokeWidth={2}
+              aria-hidden="true"
+            />
+          </button>
+
+          <div
+            id="navbar-explore-menu"
+            class="navbar__dropdown-menu"
+            role="menu"
+            aria-label="Eksplorasi BINSIGHT"
+            data-navbar-dropdown-menu
+          >
+            <div class="navbar__dropdown-inner">
+              {
+                exploreItems.map((item) => {
+                  const active = isActive(
+                    item.href,
+                    item.href === "/company"
+                  );
+
+                  return (
+                    <a
+                      class:list={[
+                        "navbar__dropdown-item",
+                        {
+                          "navbar__dropdown-item--active": active,
+                        },
+                      ]}
+                      href={item.href}
+                      role="menuitem"
+                      aria-current={active ? "page" : undefined}
+                    >
+                      <span class="navbar__dropdown-item-icon">
+                        {item.icon && (
+                          <item.icon
+                            size={17}
+                            strokeWidth={1.9}
+                            aria-hidden="true"
+                          />
+                        )}
+                      </span>
+
+                      <span class="navbar__dropdown-item-copy">
+                        <strong>{item.label}</strong>
+
+                        <small>
+                          {
+                            item.href === "/waste"
+                              ? "Pelajari kategori dan pengelolaan sampah"
+                              : item.href === "/reports"
+                                ? "Pantau dan kirim laporan persampahan"
+                                : "Kenali platform dan tujuan BINSIGHT"
+                          }
+                        </small>
+                      </span>
+                    </a>
+                  );
+                })
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="navbar__actions">
+        <a class="navbar__report-button" href="/reports/create">
+          <FileWarning
+            size={17}
+            strokeWidth={2}
+            aria-hidden="true"
+          />
+
+          <span>Laporkan</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="navbar__mobile-actions">
+      <a
+        class="navbar__mobile-report"
+        href="/reports/create"
+        aria-label="Buat laporan persampahan"
+      >
+        <FileWarning
+          size={18}
+          strokeWidth={2}
+          aria-hidden="true"
+        />
+      </a>
+
+      <button
+        class="navbar__menu-toggle"
+        type="button"
+        aria-label="Buka menu navigasi"
+        aria-expanded="false"
+        aria-controls="navbar-mobile-menu"
+        data-navbar-toggle
+      >
+        <Menu
+          class="navbar__menu-icon navbar__menu-icon--open"
+          size={23}
+          strokeWidth={2}
+          aria-hidden="true"
+        />
+
+        <X
+          class="navbar__menu-icon navbar__menu-icon--close"
+          size={23}
+          strokeWidth={2}
+          aria-hidden="true"
+        />
+      </button>
+    </div>
+  </div>
+
+  <div
+    id="navbar-mobile-menu"
+    class="navbar__mobile-menu"
+    data-navbar-mobile
+    aria-hidden="true"
+  >
+    <div class="navbar__mobile-inner">
+      <div class="navbar__mobile-primary">
+        {
+          primaryLinks.map((item) => {
+            const active = isActive(item.href, item.exact);
+
+            return (
+              <a
+                class:list={[
+                  "navbar__mobile-link",
+                  {
+                    "navbar__mobile-link--active": active,
+                  },
+                ]}
+                href={item.href}
+                aria-current={active ? "page" : undefined}
+              >
+                <span class="navbar__mobile-link-icon">
+                  {item.icon && (
+                    <item.icon
+                      size={19}
+                      strokeWidth={1.9}
+                      aria-hidden="true"
+                    />
+                  )}
+                </span>
+
+                <span>{item.label}</span>
+              </a>
+            );
+          })
+        }
+      </div>
+
+      <div class="navbar__mobile-section">
+        <p class="navbar__mobile-label">Eksplorasi</p>
+
+        <div class="navbar__mobile-explore">
+          {
+            exploreItems.map((item) => {
+              const active = isActive(
+                item.href,
+                item.href === "/company"
+              );
+
+              return (
+                <a
+                  class:list={[
+                    "navbar__mobile-link",
+                    {
+                      "navbar__mobile-link--active": active,
+                    },
+                  ]}
+                  href={item.href}
+                  aria-current={active ? "page" : undefined}
+                >
+                  <span class="navbar__mobile-link-icon">
+                    {item.icon && (
+                      <item.icon
+                        size={19}
+                        strokeWidth={1.9}
+                        aria-hidden="true"
+                      />
+                    )}
+                  </span>
+
+                  <span>{item.label}</span>
+                </a>
+              );
+            })
+          }
+        </div>
+      </div>
+
+      <div class="navbar__mobile-cta">
+        <a
+          class="navbar__mobile-report-button"
+          href="/reports/create"
+        >
+          <span class="navbar__mobile-report-icon">
+            <FileWarning
+              size={19}
+              strokeWidth={2}
+              aria-hidden="true"
+            />
+          </span>
+
+          <span>
+            <strong>Laporkan Masalah</strong>
+            <small>
+              Bantu melaporkan persoalan persampahan di Badung
+            </small>
+          </span>
+        </a>
+      </div>
+
+      <div class="navbar__mobile-footer">
+        <span>BINSIGHT</span>
+        <span>Badung Waste Intelligence</span>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<script>
+  /**
+   * BINSIGHT Navbar Controller
+   *
+   * Intentionally framework-free.
+   * Handles:
+   * - Mobile menu
+   * - Dropdown
+   * - Escape
+   * - Outside click
+   * - Scroll locking
+   * - Keyboard accessibility
+   */
+
+  const navbar = document.querySelector<HTMLElement>("[data-navbar]");
+
+  if (navbar) {
+    const toggle =
+      navbar.querySelector<HTMLButtonElement>(
+        "[data-navbar-toggle]"
+      );
+
+    const mobileMenu =
+      navbar.querySelector<HTMLElement>(
+        "[data-navbar-mobile]"
+      );
+
+    const dropdown =
+      navbar.querySelector<HTMLElement>(
+        "[data-navbar-dropdown]"
+      );
+
+    const dropdownTrigger =
+      navbar.querySelector<HTMLButtonElement>(
+        "[data-navbar-dropdown-trigger]"
+      );
+
+    const dropdownMenu =
+      navbar.querySelector<HTMLElement>(
+        "[data-navbar-dropdown-menu]"
+      );
+
+    const openMobileMenu = () => {
+      if (!toggle || !mobileMenu) return;
+
+      toggle.setAttribute("aria-expanded", "true");
+      toggle.setAttribute(
+        "aria-label",
+        "Tutup menu navigasi"
+      );
+
+      mobileMenu.setAttribute("aria-hidden", "false");
+      navbar.classList.add("navbar--mobile-open");
+
+      document.documentElement.classList.add(
+        "navbar-scroll-locked"
+      );
+      document.body.classList.add(
+        "navbar-scroll-locked"
+      );
+    };
+
+    const closeMobileMenu = () => {
+      if (!toggle || !mobileMenu) return;
+
+      toggle.setAttribute("aria-expanded", "false");
+      toggle.setAttribute(
+        "aria-label",
+        "Buka menu navigasi"
+      );
+
+      mobileMenu.setAttribute("aria-hidden", "true");
+      navbar.classList.remove("navbar--mobile-open");
+
+      document.documentElement.classList.remove(
+        "navbar-scroll-locked"
+      );
+      document.body.classList.remove(
+        "navbar-scroll-locked"
+      );
+    };
+
+    const openDropdown = () => {
+      if (!dropdown || !dropdownTrigger || !dropdownMenu) {
+        return;
+      }
+
+      dropdown.classList.add("navbar__dropdown--open");
+
+      dropdownTrigger.setAttribute(
+        "aria-expanded",
+        "true"
+      );
+
+      dropdownMenu.setAttribute("aria-hidden", "false");
+    };
+
+    const closeDropdown = () => {
+      if (!dropdown || !dropdownTrigger || !dropdownMenu) {
+        return;
+      }
+
+      dropdown.classList.remove("navbar__dropdown--open");
+
+      dropdownTrigger.setAttribute(
+        "aria-expanded",
+        "false"
+      );
+
+      dropdownMenu.setAttribute("aria-hidden", "true");
+    };
+
+    const toggleDropdown = () => {
+      if (!dropdown) return;
+
+      const isOpen =
+        dropdown.classList.contains(
+          "navbar__dropdown--open"
+        );
+
+      if (isOpen) {
+        closeDropdown();
+      } else {
+        openDropdown();
+      }
+    };
+
+    toggle?.addEventListener("click", () => {
+      const expanded =
+        toggle.getAttribute("aria-expanded") === "true";
+
+      if (expanded) {
+        closeMobileMenu();
+      } else {
+        openMobileMenu();
+      }
+    });
+
+    dropdownTrigger?.addEventListener(
+      "click",
+      toggleDropdown
+    );
+
+    dropdownTrigger?.addEventListener(
+      "keydown",
+      (event) => {
+        if (event.key === "ArrowDown") {
+          event.preventDefault();
+          openDropdown();
+
+          const firstItem =
+            dropdownMenu?.querySelector<HTMLElement>(
+              '[role="menuitem"]'
+            );
+
+          firstItem?.focus();
+        }
+
+        if (event.key === "Escape") {
+          event.preventDefault();
+          closeDropdown();
+          dropdownTrigger.focus();
+        }
+      }
+    );
+
+    dropdownMenu?.addEventListener(
+      "keydown",
+      (event) => {
+        const items = Array.from(
+          dropdownMenu.querySelectorAll<HTMLElement>(
+            '[role="menuitem"]'
+          )
+        );
+
+        if (!items.length) return;
+
+        const currentIndex =
+          items.indexOf(
+            document.activeElement as HTMLElement
+          );
+
+        if (event.key === "ArrowDown") {
+          event.preventDefault();
+
+          const nextIndex =
+            currentIndex < items.length - 1
+              ? currentIndex + 1
+              : 0;
+
+          items[nextIndex]?.focus();
+        }
+
+        if (event.key === "ArrowUp") {
+          event.preventDefault();
+
+          const previousIndex =
+            currentIndex > 0
+              ? currentIndex - 1
+              : items.length - 1;
+
+          items[previousIndex]?.focus();
+        }
+
+        if (event.key === "Escape") {
+          event.preventDefault();
+          closeDropdown();
+          dropdownTrigger?.focus();
+        }
+
+        if (event.key === "Tab") {
+          closeDropdown();
+        }
+      }
+    );
+
+    document.addEventListener("click", (event) => {
+      const target = event.target;
+
+      if (!(target instanceof Node)) return;
+
+      if (
+        dropdown &&
+        !dropdown.contains(target)
+      ) {
+        closeDropdown();
+      }
+
+      if (
+        navbar &&
+        !navbar.contains(target)
+      ) {
+        closeMobileMenu();
+      }
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key !== "Escape") return;
+
+      closeDropdown();
+      closeMobileMenu();
+    });
+
+    mobileMenu?.querySelectorAll("a").forEach((link) => {
+      link.addEventListener("click", () => {
+        closeMobileMenu();
+      });
+    });
+
+    window.addEventListener("resize", () => {
+      if (window.innerWidth > 1024) {
+        closeMobileMenu();
+      }
+    });
+
+    let lastScrollY = window.scrollY;
+
+    window.addEventListener(
+      "scroll",
+      () => {
+        const currentScrollY = window.scrollY;
+
+        if (currentScrollY > 12) {
+          navbar.classList.add("navbar--scrolled");
+        } else {
+          navbar.classList.remove("navbar--scrolled");
+        }
+
+        if (
+          currentScrollY > lastScrollY &&
+          currentScrollY > 120 &&
+          !navbar.classList.contains(
+            "navbar--mobile-open"
+          )
+        ) {
+          navbar.classList.add(
+            "navbar--scroll-down"
+          );
+        } else {
+          navbar.classList.remove(
+            "navbar--scroll-down"
+          );
+        }
+
+        lastScrollY = currentScrollY;
+      },
+      { passive: true }
+    );
+  }
+</script>
+
+<style>
+  .navbar {
+    position: sticky;
+    top: 0;
+    z-index: 900;
+    width: 100%;
+    background: rgba(255, 255, 255, 0.96);
+    border-bottom: 1px solid var(--color-border);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    transition:
+      transform 240ms ease,
+      background-color 200ms ease,
+      box-shadow 200ms ease,
+      border-color 200ms ease;
+  }
+
+  .navbar--scrolled {
+    background: rgba(255, 255, 255, 0.98);
+    box-shadow: var(--shadow-sm);
+    border-color: rgba(226, 232, 240, 0.92);
+  }
+
+  .navbar--scroll-down {
+    transform: translateY(-100%);
+  }
+
+  .navbar--mobile-open {
+    transform: translateY(0);
+  }
+
+  .navbar__container {
+    width: min(
+      calc(100% - 32px),
+      var(--container-xl, 1280px)
+    );
+
+    min-height: 76px;
+    margin-inline: auto;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+  }
+
+  .navbar__brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 11px;
+    min-width: 0;
+    flex-shrink: 0;
+    color: var(--color-text);
+    text-decoration: none;
+  }
+
+  .navbar__brand-mark {
+    width: 42px;
+    height: 42px;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+  }
+
+  .navbar__brand-mark img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .navbar__brand-copy {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    line-height: 1;
+  }
+
+  .navbar__brand-name {
+    color: var(--color-primary-dark);
+    font-size: 1.06rem;
+    font-weight: 900;
+    letter-spacing: 0.055em;
+  }
+
+  .navbar__brand-tagline {
+    margin-top: 5px;
+    color: var(--color-secondary);
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+  }
+
+  .navbar__desktop {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex: 1;
+    min-width: 0;
+    gap: 26px;
+  }
+
+  .navbar__links {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-inline: auto;
+  }
+
+  .navbar__link {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+
+    min-height: 42px;
+    padding: 0 13px;
+
+    border: 0;
+    border-radius: 10px;
+
+    color: var(--color-secondary);
+    background: transparent;
+
+    font: inherit;
+    font-size: 0.9rem;
+    font-weight: 700;
+
+    text-decoration: none;
+    white-space: nowrap;
+
+    cursor: pointer;
+
+    transition:
+      color 160ms ease,
+      background-color 160ms ease;
+  }
+
+  .navbar__link:hover {
+    color: var(--color-primary-dark);
+    background: var(--color-primary-light);
+  }
+
+  .navbar__link:focus-visible,
+  .navbar__report-button:focus-visible,
+  .navbar__menu-toggle:focus-visible,
+  .navbar__mobile-report:focus-visible,
+  .navbar__dropdown-item:focus-visible,
+  .navbar__mobile-link:focus-visible,
+  .navbar__mobile-report-button:focus-visible {
+    outline: 3px solid
+      color-mix(
+        in srgb,
+        var(--color-primary) 26%,
+        transparent
+      );
+    outline-offset: 2px;
+  }
+
+  .navbar__link--active {
+    color: var(--color-primary-dark);
+    background: var(--color-primary-light);
+  }
+
+  .navbar__link--active::after {
+    content: "";
+    position: absolute;
+    left: 13px;
+    right: 13px;
+    bottom: -1px;
+
+    height: 2px;
+    border-radius: 999px;
+
+    background: var(--color-primary);
+  }
+
+  .navbar__dropdown {
+    position: relative;
+  }
+
+  .navbar__dropdown-trigger {
+    padding-inline: 12px;
+  }
+
+  .navbar__dropdown-icon {
+    flex-shrink: 0;
+    transition: transform 180ms ease;
+  }
+
+  .navbar__dropdown--open
+    .navbar__dropdown-icon {
+    transform: rotate(180deg);
+  }
+
+  .navbar__dropdown-menu {
+    position: absolute;
+    top: calc(100% + 10px);
+    left: 50%;
+    width: 330px;
+
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+
+    transform: translate(-50%, -8px);
+
+    border: 1px solid var(--color-border);
+    border-radius: 16px;
+
+    background: var(--color-surface);
+
+    box-shadow: var(--shadow-lg);
+
+    transition:
+      opacity 160ms ease,
+      visibility 160ms ease,
+      transform 160ms ease;
+  }
+
+  .navbar__dropdown-menu::before {
+    content: "";
+    position: absolute;
+    top: -6px;
+    left: 50%;
+
+    width: 11px;
+    height: 11px;
+
+    border-top: 1px solid var(--color-border);
+    border-left: 1px solid var(--color-border);
+
+    background: var(--color-surface);
+
+    transform: translateX(-50%) rotate(45deg);
+  }
+
+  .navbar__dropdown--open
+    .navbar__dropdown-menu {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: translate(-50%, 0);
+  }
+
+  .navbar__dropdown-inner {
+    position: relative;
+    z-index: 1;
+
+    display: grid;
+    gap: 4px;
+
+    padding: 8px;
+  }
+
+  .navbar__dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    padding: 11px 12px;
+
+    border-radius: 11px;
+
+    color: var(--color-text);
+    text-decoration: none;
+
+    transition:
+      background-color 160ms ease,
+      color 160ms ease;
+  }
+
+  .navbar__dropdown-item:hover {
+    background: var(--color-primary-light);
+    color: var(--color-primary-dark);
+  }
+
+  .navbar__dropdown-item--active {
+    background: var(--color-primary-light);
+    color: var(--color-primary-dark);
+  }
+
+  .navbar__dropdown-item-icon {
+    width: 36px;
+    height: 36px;
+
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+
+    border-radius: 9px;
+
+    color: var(--color-primary-dark);
+    background: var(--color-primary-light);
+  }
+
+  .navbar__dropdown-item-copy {
+    min-width: 0;
+
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .navbar__dropdown-item-copy strong {
+    font-size: 0.82rem;
+    font-weight: 800;
+    line-height: 1.25;
+  }
+
+  .navbar__dropdown-item-copy small {
+    color: var(--color-secondary);
+
+    font-size: 0.7rem;
+    font-weight: 500;
+    line-height: 1.4;
+  }
+
+  .navbar__actions {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+  }
+
+  .navbar__report-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+
+    min-height: 42px;
+    padding: 0 16px;
+
+    border-radius: 10px;
+    border: 1px solid var(--color-primary);
+
+    color: #ffffff;
+    background: var(--color-primary);
+
+    font-size: 0.86rem;
+    font-weight: 800;
+
+    text-decoration: none;
+
+    box-shadow: 0 1px 1px
+      rgba(15, 23, 42, 0.06);
+
+    transition:
+      background-color 160ms ease,
+      border-color 160ms ease,
+      transform 160ms ease,
+      box-shadow 160ms ease;
+  }
+
+  .navbar__report-button:hover {
+    background: var(--color-primary-dark);
+    border-color: var(--color-primary-dark);
+
+    transform: translateY(-1px);
+
+    box-shadow: var(--shadow-sm);
+  }
+
+  .navbar__mobile-actions,
+  .navbar__mobile-menu {
+    display: none;
+  }
+
+  @media (max-width: 1100px) {
+    .navbar__desktop {
+      gap: 10px;
+    }
+
+    .navbar__links {
+      gap: 0;
+    }
+
+    .navbar__link {
+      padding-inline: 10px;
+      font-size: 0.84rem;
+    }
+
+    .navbar__report-button {
+      padding-inline: 13px;
+      font-size: 0.82rem;
+    }
+  }
+
+  @media (max-width: 900px) {
+    .navbar__desktop {
+      display: none;
+    }
+
+    .navbar__mobile-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .navbar__mobile-report {
+      width: 42px;
+      height: 42px;
+
+      display: grid;
+      place-items: center;
+
+      border: 1px solid var(--color-border);
+      border-radius: 10px;
+
+      color: var(--color-primary-dark);
+      background: var(--color-surface);
+
+      text-decoration: none;
+
+      transition:
+        color 160ms ease,
+        background-color 160ms ease,
+        border-color 160ms ease;
+    }
+
+    .navbar__mobile-report:hover {
+      border-color: var(--color-primary);
+      color: var(--color-primary-dark);
+      background: var(--color-primary-light);
+    }
+
+    .navbar__menu-toggle {
+      width: 42px;
+      height: 42px;
+
+      display: grid;
+      place-items: center;
+
+      border: 1px solid var(--color-border);
+      border-radius: 10px;
+
+      color: var(--color-text);
+      background: var(--color-surface);
+
+      cursor: pointer;
+
+      transition:
+        color 160ms ease,
+        background-color 160ms ease,
+        border-color 160ms ease;
+    }
+
+    .navbar__menu-toggle:hover {
+      border-color: var(--color-primary);
+      color: var(--color-primary-dark);
+      background: var(--color-primary-light);
+    }
+
+    .navbar__menu-icon {
+      grid-area: 1 / 1;
+      transition:
+        opacity 160ms ease,
+        transform 160ms ease;
+    }
+
+    .navbar__menu-icon--close {
+      opacity: 0;
+      transform: rotate(-45deg) scale(0.7);
+    }
+
+    .navbar--mobile-open
+      .navbar__menu-icon--open {
+      opacity: 0;
+      transform: rotate(45deg) scale(0.7);
+    }
+
+    .navbar--mobile-open
+      .navbar__menu-icon--close {
+      opacity: 1;
+      transform: rotate(0) scale(1);
+    }
+
+    .navbar__mobile-menu {
+      position: fixed;
+      top: 76px;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 899;
+
+      display: block;
+
+      overflow-y: auto;
+
+      background:
+        linear-gradient(
+          to bottom,
+          rgba(248, 250, 252, 0.99),
+          rgba(248, 250, 252, 0.98)
+        );
+
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+
+      transform: translateY(-8px);
+
+      transition:
+        opacity 180ms ease,
+        visibility 180ms ease,
+        transform 180ms ease;
+    }
+
+    .navbar--mobile-open
+      .navbar__mobile-menu {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+      transform: translateY(0);
+    }
+
+    .navbar__mobile-inner {
+      width: min(
+        calc(100% - 32px),
+        680px
+      );
+
+      margin-inline: auto;
+
+      padding: 18px 0 36px;
+    }
+
+    .navbar__mobile-primary,
+    .navbar__mobile-explore {
+      display: grid;
+      gap: 4px;
+    }
+
+    .navbar__mobile-link {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+
+      min-height: 52px;
+      padding: 0 13px;
+
+      border: 1px solid transparent;
+      border-radius: 12px;
+
+      color: var(--color-text);
+      background: transparent;
+
+      text-decoration: none;
+
+      font-size: 0.92rem;
+      font-weight: 750;
+
+      transition:
+        color 160ms ease,
+        background-color 160ms ease,
+        border-color 160ms ease;
+    }
+
+    .navbar__mobile-link:hover {
+      background: var(--color-primary-light);
+    }
+
+    .navbar__mobile-link--active {
+      color: var(--color-primary-dark);
+      background: var(--color-primary-light);
+      border-color: rgba(
+        22,
+        101,
+        52,
+        0.08
+      );
+    }
+
+    .navbar__mobile-link-icon {
+      width: 38px;
+      height: 38px;
+
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+
+      border-radius: 10px;
+
+      color: var(--color-primary-dark);
+      background: rgba(
+        220,
+        252,
+        231,
+        0.75
+      );
+    }
+
+    .navbar__mobile-section {
+      margin-top: 22px;
+      padding-top: 20px;
+
+      border-top: 1px solid var(--color-border);
+    }
+
+    .navbar__mobile-label {
+      margin: 0 0 8px;
+      padding-inline: 13px;
+
+      color: var(--color-secondary);
+
+      font-size: 0.68rem;
+      font-weight: 850;
+      line-height: 1;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .navbar__mobile-cta {
+      margin-top: 22px;
+      padding-top: 20px;
+
+      border-top: 1px solid var(--color-border);
+    }
+
+    .navbar__mobile-report-button {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+
+      padding: 14px;
+
+      border-radius: 13px;
+
+      color: #ffffff;
+      background: var(--color-primary);
+
+      text-decoration: none;
+
+      box-shadow: var(--shadow-sm);
+
+      transition:
+        background-color 160ms ease,
+        transform 160ms ease;
+    }
+
+    .navbar__mobile-report-button:hover {
+      background: var(--color-primary-dark);
+      transform: translateY(-1px);
+    }
+
+    .navbar__mobile-report-icon {
+      width: 40px;
+      height: 40px;
+
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+
+      border-radius: 10px;
+
+      background: rgba(255, 255, 255, 0.14);
+    }
+
+    .navbar__mobile-report-button > span:last-child {
+      min-width: 0;
+
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .navbar__mobile-report-button strong {
+      font-size: 0.84rem;
+      font-weight: 850;
+      line-height: 1.25;
+    }
+
+    .navbar__mobile-report-button small {
+      color: rgba(255, 255, 255, 0.8);
+
+      font-size: 0.7rem;
+      line-height: 1.4;
+    }
+
+    .navbar__mobile-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+
+      margin-top: 30px;
+      padding: 16px 4px 0;
+
+      border-top: 1px solid var(--color-border);
+
+      color: var(--color-secondary);
+
+      font-size: 0.66rem;
+      font-weight: 650;
+    }
+
+    .navbar__mobile-footer span:first-child {
+      color: var(--color-primary-dark);
+      font-weight: 900;
+      letter-spacing: 0.08em;
+    }
+  }
+
+  @media (max-width: 560px) {
+    .navbar__container {
+      width: min(
+        calc(100% - 24px),
+        680px
+      );
+
+      min-height: 70px;
+    }
+
+    .navbar__brand-mark {
+      width: 38px;
+      height: 38px;
+    }
+
+    .navbar__brand-name {
+      font-size: 0.96rem;
+    }
+
+    .navbar__brand-tagline {
+      font-size: 0.56rem;
+    }
+
+    .navbar__mobile-report,
+    .navbar__menu-toggle {
+      width: 40px;
+      height: 40px;
+    }
+
+    .navbar__mobile-menu {
+      top: 70px;
+    }
+
+    .navbar__mobile-inner {
+      width: min(
+        calc(100% - 24px),
+        680px
+      );
+
+      padding-bottom: 28px;
+    }
+
+    .navbar__mobile-footer {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .navbar,
+    .navbar *,
+    .navbar::before,
+    .navbar::after {
+      scroll-behavior: auto !important;
+      transition-duration: 0.01ms !important;
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+    }
+  }
+
+  :global(html.navbar-scroll-locked),
+  :global(body.navbar-scroll-locked) {
+    overflow: hidden;
+  }
+</style>

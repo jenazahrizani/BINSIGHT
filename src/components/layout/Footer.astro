@@ -1,0 +1,1163 @@
+---
+/**
+ * BINSIGHT — FOOTER
+ * --------------------------------------------------------------------------
+ * Global public footer for the BINSIGHT platform.
+ *
+ * Responsibilities:
+ * - Brand identity
+ * - Platform navigation
+ * - Public resources
+ * - Organization access
+ * - Contact / location information
+ * - Legal / platform status
+ * - Responsive layout
+ *
+ * Architecture:
+ * - Framework-free
+ * - No external data dependency
+ * - Safe to render from PublicLayout
+ * - Uses global BINSIGHT design tokens
+ * --------------------------------------------------------------------------
+ */
+
+import {
+  ArrowUpRight,
+  Building2,
+  FileWarning,
+  Github,
+  Instagram,
+  Linkedin,
+  Mail,
+  MapPin,
+  Map,
+  Recycle,
+  BarChart3,
+  ShieldCheck,
+} from "@lucide/astro";
+
+interface FooterLink {
+  label: string;
+  href: string;
+  external?: boolean;
+}
+
+const exploreLinks: FooterLink[] = [
+  {
+    label: "Peta Persampahan",
+    href: "/map",
+  },
+  {
+    label: "Dashboard Data",
+    href: "/dashboard",
+  },
+  {
+    label: "Organisasi",
+    href: "/organizations",
+  },
+  {
+    label: "Jenis Sampah",
+    href: "/waste",
+  },
+];
+
+const communityLinks: FooterLink[] = [
+  {
+    label: "Buat Laporan",
+    href: "/reports/create",
+  },
+  {
+    label: "Laporan Masyarakat",
+    href: "/reports",
+  },
+  {
+    label: "Tentang BINSIGHT",
+    href: "/company",
+  },
+];
+
+const organizationLinks: FooterLink[] = [
+  {
+    label: "Area Organisasi",
+    href: "/organization",
+  },
+  {
+    label: "Profil Organisasi",
+    href: "/organization/profile",
+  },
+  {
+    label: "Sampah yang Dikelola",
+    href: "/organization/waste",
+  },
+  {
+    label: "Proses Pengelolaan",
+    href: "/organization/process",
+  },
+];
+
+const currentYear = new Date().getFullYear();
+---
+
+<footer class="footer">
+  <div class="footer__main">
+    <div class="footer__container">
+      <div class="footer__top">
+        <div class="footer__identity">
+          <a
+            href="/"
+            class="footer__brand"
+            aria-label="BINSIGHT — Badung Waste Intelligence"
+          >
+            <span class="footer__brand-mark" aria-hidden="true">
+              <img
+                src="/images/logo.svg"
+                alt=""
+                width="44"
+                height="44"
+                loading="lazy"
+                decoding="async"
+              />
+            </span>
+
+            <span class="footer__brand-copy">
+              <span class="footer__brand-name">
+                BINSIGHT
+              </span>
+
+              <span class="footer__brand-tagline">
+                Badung Waste Intelligence
+              </span>
+            </span>
+          </a>
+
+          <p class="footer__description">
+            Platform informasi, data, pemetaan, dan pelaporan
+            persampahan untuk membangun ekosistem pengelolaan
+            sampah yang lebih terhubung di Kabupaten Badung.
+          </p>
+
+          <div class="footer__location">
+            <MapPin
+              size={16}
+              strokeWidth={1.9}
+              aria-hidden="true"
+            />
+
+            <span>Kabupaten Badung, Bali, Indonesia</span>
+          </div>
+
+          <div class="footer__socials" aria-label="Tautan media sosial">
+            <a
+              href="#"
+              class="footer__social"
+              aria-label="BINSIGHT di Instagram"
+              title="Instagram"
+            >
+              <Instagram
+                size={17}
+                strokeWidth={1.9}
+                aria-hidden="true"
+              />
+            </a>
+
+            <a
+              href="#"
+              class="footer__social"
+              aria-label="BINSIGHT di LinkedIn"
+              title="LinkedIn"
+            >
+              <Linkedin
+                size={17}
+                strokeWidth={1.9}
+                aria-hidden="true"
+              />
+            </a>
+
+            <a
+              href="#"
+              class="footer__social"
+              aria-label="BINSIGHT di GitHub"
+              title="GitHub"
+            >
+              <Github
+                size={17}
+                strokeWidth={1.9}
+                aria-hidden="true"
+              />
+            </a>
+          </div>
+        </div>
+
+        <div class="footer__columns">
+          <div class="footer__column">
+            <h2 class="footer__heading">
+              Eksplorasi
+            </h2>
+
+            <nav
+              class="footer__links"
+              aria-label="Navigasi eksplorasi"
+            >
+              {
+                exploreLinks.map((link) => (
+                  <a
+                    href={link.href}
+                    class="footer__link"
+                  >
+                    <span>{link.label}</span>
+
+                    <ArrowUpRight
+                      size={14}
+                      strokeWidth={1.8}
+                      aria-hidden="true"
+                    />
+                  </a>
+                ))
+              }
+            </nav>
+          </div>
+
+          <div class="footer__column">
+            <h2 class="footer__heading">
+              Masyarakat
+            </h2>
+
+            <nav
+              class="footer__links"
+              aria-label="Navigasi masyarakat"
+            >
+              {
+                communityLinks.map((link) => (
+                  <a
+                    href={link.href}
+                    class="footer__link"
+                  >
+                    <span>{link.label}</span>
+
+                    <ArrowUpRight
+                      size={14}
+                      strokeWidth={1.8}
+                      aria-hidden="true"
+                    />
+                  </a>
+                ))
+              }
+            </nav>
+          </div>
+
+          <div class="footer__column">
+            <h2 class="footer__heading">
+              Organisasi
+            </h2>
+
+            <nav
+              class="footer__links"
+              aria-label="Navigasi organisasi"
+            >
+              {
+                organizationLinks.map((link) => (
+                  <a
+                    href={link.href}
+                    class="footer__link"
+                  >
+                    <span>{link.label}</span>
+
+                    <ArrowUpRight
+                      size={14}
+                      strokeWidth={1.8}
+                      aria-hidden="true"
+                    />
+                  </a>
+                ))
+              }
+            </nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer__platform">
+        <div class="footer__platform-header">
+          <div>
+            <p class="footer__eyebrow">
+              BINSIGHT PLATFORM
+            </p>
+
+            <h2 class="footer__platform-title">
+              Data yang lebih terhubung,
+              pengelolaan yang lebih terlihat.
+            </h2>
+          </div>
+
+          <a
+            href="/map"
+            class="footer__platform-link"
+          >
+            <span>Jelajahi peta</span>
+
+            <ArrowUpRight
+              size={16}
+              strokeWidth={2}
+              aria-hidden="true"
+            />
+          </a>
+        </div>
+
+        <div class="footer__feature-grid">
+          <a
+            href="/map"
+            class="footer__feature"
+          >
+            <span class="footer__feature-icon">
+              <Map
+                size={19}
+                strokeWidth={1.9}
+                aria-hidden="true"
+              />
+            </span>
+
+            <span class="footer__feature-content">
+              <strong>Pemetaan</strong>
+              <small>
+                Temukan organisasi dan informasi
+                persampahan berdasarkan wilayah.
+              </small>
+            </span>
+          </a>
+
+          <a
+            href="/dashboard"
+            class="footer__feature"
+          >
+            <span class="footer__feature-icon">
+              <BarChart3
+                size={19}
+                strokeWidth={1.9}
+                aria-hidden="true"
+              />
+            </span>
+
+            <span class="footer__feature-content">
+              <strong>Data</strong>
+              <small>
+                Pahami kondisi ekosistem melalui
+                data yang tersedia.
+              </small>
+            </span>
+          </a>
+
+          <a
+            href="/waste"
+            class="footer__feature"
+          >
+            <span class="footer__feature-icon">
+              <Recycle
+                size={19}
+                strokeWidth={1.9}
+                aria-hidden="true"
+              />
+            </span>
+
+            <span class="footer__feature-content">
+              <strong>Edukasi</strong>
+              <small>
+                Pelajari kategori dan pengelolaan
+                berbagai jenis sampah.
+              </small>
+            </span>
+          </a>
+
+          <a
+            href="/reports/create"
+            class="footer__feature"
+          >
+            <span class="footer__feature-icon">
+              <FileWarning
+                size={19}
+                strokeWidth={1.9}
+                aria-hidden="true"
+              />
+            </span>
+
+            <span class="footer__feature-content">
+              <strong>Pelaporan</strong>
+              <small>
+                Sampaikan persoalan persampahan
+                untuk ditindaklanjuti.
+              </small>
+            </span>
+          </a>
+        </div>
+      </div>
+
+      <div class="footer__contact">
+        <div class="footer__contact-item">
+          <span class="footer__contact-icon">
+            <Mail
+              size={17}
+              strokeWidth={1.9}
+              aria-hidden="true"
+            />
+          </span>
+
+          <span class="footer__contact-copy">
+            <span class="footer__contact-label">
+              Email
+            </span>
+
+            <a href="mailto:info@binsight.id">
+              info@binsight.id
+            </a>
+          </span>
+        </div>
+
+        <div class="footer__contact-item">
+          <span class="footer__contact-icon">
+            <Building2
+              size={17}
+              strokeWidth={1.9}
+              aria-hidden="true"
+            />
+          </span>
+
+          <span class="footer__contact-copy">
+            <span class="footer__contact-label">
+              Platform
+            </span>
+
+            <span>
+              Informasi & data persampahan Badung
+            </span>
+          </span>
+        </div>
+
+        <div class="footer__contact-item">
+          <span class="footer__contact-icon">
+            <ShieldCheck
+              size={17}
+              strokeWidth={1.9}
+              aria-hidden="true"
+            />
+          </span>
+
+          <span class="footer__contact-copy">
+            <span class="footer__contact-label">
+              Status
+            </span>
+
+            <span>
+              Informasi publik & terverifikasi
+            </span>
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer__bottom">
+    <div class="footer__container footer__bottom-inner">
+      <p class="footer__copyright">
+        © {currentYear}
+        <strong>BINSIGHT</strong>.
+        Badung Waste Intelligence.
+      </p>
+
+      <div class="footer__bottom-links">
+        <a href="/company">
+          Tentang
+        </a>
+
+        <span
+          class="footer__bottom-separator"
+          aria-hidden="true"
+        >
+          /
+        </span>
+
+        <a href="/company">
+          Informasi Platform
+        </a>
+      </div>
+
+      <p class="footer__version">
+        BINSIGHT Platform
+      </p>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    position: relative;
+    margin-top: 72px;
+
+    color: #e2e8f0;
+    background:
+      radial-gradient(
+        circle at 15% 10%,
+        rgba(132, 204, 22, 0.08),
+        transparent 28%
+      ),
+      radial-gradient(
+        circle at 86% 20%,
+        rgba(22, 101, 52, 0.2),
+        transparent 30%
+      ),
+      #0b1710;
+  }
+
+  .footer__main {
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .footer__container {
+    width: min(
+      calc(100% - 40px),
+      var(--container-xl, 1280px)
+    );
+
+    margin-inline: auto;
+  }
+
+  .footer__top {
+    display: grid;
+    grid-template-columns:
+      minmax(260px, 1.25fr)
+      minmax(500px, 1fr);
+
+    gap: 80px;
+
+    padding: 64px 0 52px;
+  }
+
+  .footer__identity {
+    min-width: 0;
+  }
+
+  .footer__brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 13px;
+
+    color: #ffffff;
+    text-decoration: none;
+  }
+
+  .footer__brand-mark {
+    width: 46px;
+    height: 46px;
+
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+  }
+
+  .footer__brand-mark img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .footer__brand-copy {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .footer__brand-name {
+    color: #ffffff;
+
+    font-size: 1.15rem;
+    font-weight: 950;
+    line-height: 1;
+
+    letter-spacing: 0.06em;
+  }
+
+  .footer__brand-tagline {
+    margin-top: 6px;
+
+    color: #a7b5aa;
+
+    font-size: 0.65rem;
+    font-weight: 650;
+    line-height: 1.2;
+
+    letter-spacing: 0.04em;
+  }
+
+  .footer__description {
+    max-width: 490px;
+
+    margin: 22px 0 18px;
+
+    color: #aebdb2;
+
+    font-size: 0.88rem;
+    line-height: 1.75;
+  }
+
+  .footer__location {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+
+    color: #d5dfd8;
+
+    font-size: 0.78rem;
+    font-weight: 650;
+  }
+
+  .footer__location svg {
+    flex-shrink: 0;
+    color: var(--color-accent, #84cc16);
+  }
+
+  .footer__socials {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    margin-top: 22px;
+  }
+
+  .footer__social {
+    width: 36px;
+    height: 36px;
+
+    display: grid;
+    place-items: center;
+
+    border: 1px solid rgba(255, 255, 255, 0.11);
+    border-radius: 9px;
+
+    color: #b9c7bd;
+    background: rgba(255, 255, 255, 0.035);
+
+    text-decoration: none;
+
+    transition:
+      color 160ms ease,
+      background-color 160ms ease,
+      border-color 160ms ease,
+      transform 160ms ease;
+  }
+
+  .footer__social:hover {
+    color: #ffffff;
+    background: rgba(132, 204, 22, 0.1);
+    border-color: rgba(132, 204, 22, 0.3);
+
+    transform: translateY(-1px);
+  }
+
+  .footer__columns {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 34px;
+  }
+
+  .footer__heading {
+    margin: 5px 0 17px;
+
+    color: #ffffff;
+
+    font-size: 0.75rem;
+    font-weight: 850;
+    line-height: 1.2;
+
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .footer__links {
+    display: grid;
+    gap: 8px;
+  }
+
+  .footer__link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+
+    width: fit-content;
+    max-width: 100%;
+
+    padding: 4px 0;
+
+    color: #9eada3;
+
+    font-size: 0.79rem;
+    font-weight: 600;
+    line-height: 1.45;
+
+    text-decoration: none;
+
+    transition:
+      color 160ms ease,
+      transform 160ms ease;
+  }
+
+  .footer__link svg {
+    flex-shrink: 0;
+    opacity: 0;
+
+    transform: translate(-3px, 3px);
+
+    transition:
+      opacity 160ms ease,
+      transform 160ms ease;
+  }
+
+  .footer__link:hover {
+    color: #ffffff;
+    transform: translateX(2px);
+  }
+
+  .footer__link:hover svg {
+    opacity: 1;
+    transform: translate(0, 0);
+  }
+
+  .footer__platform {
+    padding: 32px 0;
+
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .footer__platform-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 30px;
+  }
+
+  .footer__eyebrow {
+    margin: 0 0 8px;
+
+    color: #84cc16;
+
+    font-size: 0.65rem;
+    font-weight: 850;
+    line-height: 1;
+
+    letter-spacing: 0.12em;
+  }
+
+  .footer__platform-title {
+    max-width: 600px;
+
+    margin: 0;
+
+    color: #f8fafc;
+
+    font-size: clamp(
+      1.05rem,
+      1.7vw,
+      1.45rem
+    );
+
+    font-weight: 800;
+    line-height: 1.35;
+
+    letter-spacing: -0.015em;
+  }
+
+  .footer__platform-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+
+    flex-shrink: 0;
+
+    min-height: 40px;
+    padding: 0 14px;
+
+    border: 1px solid rgba(132, 204, 22, 0.3);
+    border-radius: 9px;
+
+    color: #d7efb9;
+    background: rgba(132, 204, 22, 0.07);
+
+    font-size: 0.76rem;
+    font-weight: 750;
+
+    text-decoration: none;
+
+    transition:
+      color 160ms ease,
+      background-color 160ms ease,
+      border-color 160ms ease;
+  }
+
+  .footer__platform-link:hover {
+    color: #ffffff;
+    background: rgba(132, 204, 22, 0.13);
+    border-color: rgba(132, 204, 22, 0.5);
+  }
+
+  .footer__feature-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+
+    gap: 12px;
+
+    margin-top: 24px;
+  }
+
+  .footer__feature {
+    display: flex;
+    align-items: flex-start;
+    gap: 11px;
+
+    min-width: 0;
+
+    padding: 14px;
+
+    border: 1px solid rgba(255, 255, 255, 0.075);
+    border-radius: 11px;
+
+    color: inherit;
+    background: rgba(255, 255, 255, 0.025);
+
+    text-decoration: none;
+
+    transition:
+      background-color 160ms ease,
+      border-color 160ms ease,
+      transform 160ms ease;
+  }
+
+  .footer__feature:hover {
+    background: rgba(255, 255, 255, 0.055);
+    border-color: rgba(132, 204, 22, 0.2);
+    transform: translateY(-1px);
+  }
+
+  .footer__feature-icon {
+    width: 36px;
+    height: 36px;
+
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+
+    border-radius: 9px;
+
+    color: #bce98a;
+    background: rgba(132, 204, 22, 0.09);
+  }
+
+  .footer__feature-content {
+    min-width: 0;
+
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .footer__feature-content strong {
+    color: #eef5f0;
+
+    font-size: 0.78rem;
+    font-weight: 800;
+    line-height: 1.2;
+  }
+
+  .footer__feature-content small {
+    color: #8f9f94;
+
+    font-size: 0.68rem;
+    font-weight: 500;
+    line-height: 1.55;
+  }
+
+  .footer__contact {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+
+    gap: 16px;
+
+    padding: 26px 0;
+  }
+
+  .footer__contact-item {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+  }
+
+  .footer__contact-icon {
+    width: 34px;
+    height: 34px;
+
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+
+    color: #9fca79;
+    background: rgba(255, 255, 255, 0.025);
+  }
+
+  .footer__contact-copy {
+    min-width: 0;
+
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .footer__contact-label {
+    color: #76867b;
+
+    font-size: 0.62rem;
+    font-weight: 800;
+    line-height: 1;
+
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .footer__contact-copy > a,
+  .footer__contact-copy > span:last-child {
+    overflow: hidden;
+
+    color: #c5d0c9;
+
+    font-size: 0.72rem;
+    font-weight: 600;
+    line-height: 1.4;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .footer__contact-copy > a {
+    text-decoration: none;
+    transition: color 160ms ease;
+  }
+
+  .footer__contact-copy > a:hover {
+    color: #ffffff;
+  }
+
+  .footer__bottom {
+    border-top: 1px solid rgba(255, 255, 255, 0.065);
+
+    background: rgba(0, 0, 0, 0.12);
+  }
+
+  .footer__bottom-inner {
+    min-height: 62px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+  }
+
+  .footer__copyright,
+  .footer__version {
+    margin: 0;
+
+    color: #718077;
+
+    font-size: 0.66rem;
+    font-weight: 550;
+    line-height: 1.5;
+  }
+
+  .footer__copyright strong {
+    color: #aab7ae;
+    font-weight: 800;
+  }
+
+  .footer__bottom-links {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+  }
+
+  .footer__bottom-links a {
+    color: #829087;
+
+    font-size: 0.66rem;
+    font-weight: 650;
+
+    text-decoration: none;
+
+    transition: color 160ms ease;
+  }
+
+  .footer__bottom-links a:hover {
+    color: #ffffff;
+  }
+
+  .footer__bottom-separator {
+    color: #415047;
+    font-size: 0.65rem;
+  }
+
+  .footer__version {
+    color: #57655d;
+  }
+
+  @media (max-width: 1100px) {
+    .footer__top {
+      grid-template-columns:
+        minmax(240px, 1fr)
+        minmax(420px, 1.1fr);
+
+      gap: 50px;
+    }
+
+    .footer__feature-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 900px) {
+    .footer {
+      margin-top: 56px;
+    }
+
+    .footer__container {
+      width: min(
+        calc(100% - 32px),
+        var(--container-xl, 1280px)
+      );
+    }
+
+    .footer__top {
+      grid-template-columns: 1fr;
+      gap: 42px;
+    }
+
+    .footer__identity {
+      max-width: 650px;
+    }
+
+    .footer__columns {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .footer__contact {
+      grid-template-columns: 1fr;
+      gap: 14px;
+    }
+
+    .footer__bottom-inner {
+      padding-block: 15px;
+
+      align-items: flex-start;
+      flex-wrap: wrap;
+    }
+
+    .footer__copyright {
+      order: 1;
+    }
+
+    .footer__bottom-links {
+      order: 3;
+      width: 100%;
+    }
+
+    .footer__version {
+      order: 2;
+      margin-left: auto;
+    }
+  }
+
+  @media (max-width: 620px) {
+    .footer__container {
+      width: min(
+        calc(100% - 24px),
+        var(--container-xl, 1280px)
+      );
+    }
+
+    .footer__top {
+      padding: 46px 0 38px;
+    }
+
+    .footer__columns {
+      grid-template-columns: 1fr 1fr;
+      gap: 32px 24px;
+    }
+
+    .footer__columns
+      .footer__column:last-child {
+      grid-column: 1 / -1;
+    }
+
+    .footer__platform {
+      padding: 26px 0;
+    }
+
+    .footer__platform-header {
+      align-items: flex-start;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .footer__platform-link {
+      width: 100%;
+      justify-content: center;
+    }
+
+    .footer__feature-grid {
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+
+    .footer__contact {
+      padding: 22px 0;
+    }
+
+    .footer__bottom-inner {
+      min-height: 0;
+      padding-block: 18px;
+    }
+
+    .footer__copyright,
+    .footer__version,
+    .footer__bottom-links {
+      font-size: 0.64rem;
+    }
+  }
+
+  @media (max-width: 420px) {
+    .footer__columns {
+      grid-template-columns: 1fr;
+    }
+
+    .footer__columns
+      .footer__column:last-child {
+      grid-column: auto;
+    }
+
+    .footer__bottom-inner {
+      display: grid;
+      gap: 10px;
+    }
+
+    .footer__version {
+      margin-left: 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .footer,
+    .footer * {
+      scroll-behavior: auto !important;
+      transition-duration: 0.01ms !important;
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+    }
+  }
+</style>

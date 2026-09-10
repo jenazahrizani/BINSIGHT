@@ -1,0 +1,770 @@
+---
+/**
+ * BINSIGHT — PAGE HEADER
+ * --------------------------------------------------------------------------
+ * Reusable page header for internal/public platform pages.
+ *
+ * Responsibilities:
+ * - Breadcrumbs
+ * - Eyebrow / section label
+ * - Page title
+ * - Description
+ * - Optional icon
+ * - Optional action area
+ * - Optional background decoration
+ *
+ * Designed for:
+ * - Public pages
+ * - Data/dashboard pages
+ * - Map pages
+ * - Organization pages
+ * - Waste pages
+ * - Report pages
+ *
+ * No external runtime dependency.
+ * --------------------------------------------------------------------------
+ */
+
+import {
+  ChevronRight,
+  Map,
+  BarChart3,
+  Building2,
+  Recycle,
+  FileWarning,
+  Info,
+  Layers3,
+  type Icon,
+} from "@lucide/astro";
+
+type HeaderIcon =
+  | "map"
+  | "data"
+  | "organization"
+  | "waste"
+  | "report"
+  | "company"
+  | "layers"
+  | "none";
+
+interface Breadcrumb {
+  label: string;
+  href?: string;
+}
+
+interface Props {
+  title: string;
+  description?: string;
+  eyebrow?: string;
+  icon?: HeaderIcon;
+  breadcrumbs?: Breadcrumb[];
+  align?: "left" | "center";
+  tone?: "default" | "green" | "dark" | "blue";
+  compact?: boolean;
+}
+
+const {
+  title,
+  description,
+  eyebrow,
+  icon = "none",
+  breadcrumbs = [],
+  align = "left",
+  tone = "default",
+  compact = false,
+} = Astro.props;
+
+const iconMap: Record<
+  Exclude<HeaderIcon, "none">,
+  typeof Icon
+> = {
+  map: Map,
+  data: BarChart3,
+  organization: Building2,
+  waste: Recycle,
+  report: FileWarning,
+  company: Info,
+  layers: Layers3,
+};
+
+const HeaderIconComponent =
+  icon !== "none"
+    ? iconMap[icon as Exclude<HeaderIcon, "none">]
+    : null;
+
+const hasBreadcrumbs = breadcrumbs.length > 0;
+const hasMeta = Boolean(eyebrow || HeaderIconComponent);
+---
+
+<section
+  class:list={[
+    "page-header",
+    `page-header--${tone}`,
+    `page-header--align-${align}`,
+    {
+      "page-header--compact": compact,
+    },
+  ]}
+  aria-labelledby="page-header-title"
+>
+  <div class="page-header__glow page-header__glow--one" aria-hidden="true"></div>
+  <div class="page-header__glow page-header__glow--two" aria-hidden="true"></div>
+
+  <div class="page-header__container">
+    {
+      hasBreadcrumbs && (
+        <nav
+          class="page-header__breadcrumbs"
+          aria-label="Breadcrumb"
+        >
+          <ol class="page-header__breadcrumb-list">
+            {breadcrumbs.map((item, index) => {
+              const isLast = index === breadcrumbs.length - 1;
+
+              return (
+                <li class="page-header__breadcrumb-item">
+                  {
+                    item.href && !isLast ? (
+                      <a
+                        href={item.href}
+                        class="page-header__breadcrumb-link"
+                      >
+                        {item.label}
+                      </a>
+                    ) : (
+                      <span
+                        class:list={[
+                          "page-header__breadcrumb-current",
+                          {
+                            "page-header__breadcrumb-current--last":
+                              isLast,
+                          },
+                        ]}
+                        aria-current={
+                          isLast ? "page" : undefined
+                        }
+                      >
+                        {item.label}
+                      </span>
+                    )
+                  }
+
+                  {
+                    !isLast && (
+                      <ChevronRight
+                        class="page-header__breadcrumb-separator"
+                        size={14}
+                        strokeWidth={1.8}
+                        aria-hidden="true"
+                      />
+                    )
+                  }
+                </li>
+              );
+            })}
+          </ol>
+        </nav>
+      )
+    }
+
+    <div class="page-header__content">
+      <div class="page-header__heading">
+        {
+          hasMeta && (
+            <div class="page-header__meta">
+              {
+                HeaderIconComponent && (
+                  <span
+                    class="page-header__icon"
+                    aria-hidden="true"
+                  >
+                    <HeaderIconComponent
+                      size={22}
+                      strokeWidth={1.9}
+                    />
+                  </span>
+                )
+              }
+
+              {
+                eyebrow && (
+                  <span class="page-header__eyebrow">
+                    {eyebrow}
+                  </span>
+                )
+              }
+            </div>
+          )
+        }
+
+        <h1
+          id="page-header-title"
+          class="page-header__title"
+        >
+          {title}
+        </h1>
+
+        {
+          description && (
+            <p class="page-header__description">
+              {description}
+            </p>
+          )
+        }
+      </div>
+
+      <div class="page-header__actions">
+        <slot name="actions" />
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .page-header {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+
+    width: 100%;
+
+    border-bottom: 1px solid var(--color-border);
+
+    background:
+      linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.98),
+        rgba(248, 250, 252, 0.98)
+      );
+  }
+
+  .page-header__container {
+    position: relative;
+    z-index: 2;
+
+    width: min(
+      calc(100% - 40px),
+      var(--container-xl, 1280px)
+    );
+
+    margin-inline: auto;
+
+    padding: 30px 0 34px;
+  }
+
+  .page-header--compact
+    .page-header__container {
+    padding-block: 22px 25px;
+  }
+
+  .page-header__glow {
+    position: absolute;
+    z-index: 0;
+
+    pointer-events: none;
+
+    border-radius: 999px;
+
+    filter: blur(1px);
+
+    opacity: 0.75;
+  }
+
+  .page-header__glow--one {
+    top: -130px;
+    right: 4%;
+
+    width: 330px;
+    height: 330px;
+
+    background:
+      radial-gradient(
+        circle,
+        rgba(132, 204, 22, 0.13) 0%,
+        rgba(132, 204, 22, 0.04) 48%,
+        transparent 72%
+      );
+  }
+
+  .page-header__glow--two {
+    bottom: -180px;
+    left: 8%;
+
+    width: 320px;
+    height: 320px;
+
+    background:
+      radial-gradient(
+        circle,
+        rgba(22, 101, 52, 0.08) 0%,
+        rgba(22, 101, 52, 0.025) 48%,
+        transparent 73%
+      );
+  }
+
+  .page-header__breadcrumbs {
+    margin-bottom: 22px;
+  }
+
+  .page-header__breadcrumb-list {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 3px;
+
+    margin: 0;
+    padding: 0;
+
+    list-style: none;
+  }
+
+  .page-header__breadcrumb-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+
+    min-width: 0;
+  }
+
+  .page-header__breadcrumb-link,
+  .page-header__breadcrumb-current {
+    max-width: 260px;
+
+    overflow: hidden;
+
+    color: var(--color-secondary);
+
+    font-size: 0.7rem;
+    font-weight: 650;
+    line-height: 1.4;
+
+    text-decoration: none;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    transition: color 160ms ease;
+  }
+
+  .page-header__breadcrumb-link:hover {
+    color: var(--color-primary-dark);
+  }
+
+  .page-header__breadcrumb-current {
+    color: var(--color-secondary);
+  }
+
+  .page-header__breadcrumb-current--last {
+    color: var(--color-text);
+    font-weight: 750;
+  }
+
+  .page-header__breadcrumb-separator {
+    flex-shrink: 0;
+
+    color: #94a3b8;
+  }
+
+  .page-header__content {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+
+    gap: 32px;
+  }
+
+  .page-header__heading {
+    min-width: 0;
+    max-width: 820px;
+  }
+
+  .page-header__meta {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+
+    margin-bottom: 11px;
+  }
+
+  .page-header__icon {
+    width: 38px;
+    height: 38px;
+
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+
+    border: 1px solid
+      color-mix(
+        in srgb,
+        var(--color-primary) 12%,
+        var(--color-border)
+      );
+
+    border-radius: 10px;
+
+    color: var(--color-primary-dark);
+
+    background:
+      linear-gradient(
+        145deg,
+        rgba(220, 252, 231, 0.92),
+        rgba(240, 253, 244, 0.9)
+      );
+  }
+
+  .page-header__eyebrow {
+    display: inline-flex;
+    align-items: center;
+
+    min-height: 24px;
+    padding: 0 9px;
+
+    border-radius: 999px;
+
+    color: var(--color-primary-dark);
+    background: var(--color-primary-light);
+
+    font-size: 0.66rem;
+    font-weight: 850;
+    line-height: 1;
+
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .page-header__title {
+    margin: 0;
+
+    color: var(--color-text);
+
+    font-size: clamp(
+      1.7rem,
+      3.2vw,
+      2.65rem
+    );
+
+    font-weight: 900;
+    line-height: 1.08;
+
+    letter-spacing: -0.035em;
+  }
+
+  .page-header__description {
+    max-width: 760px;
+
+    margin: 13px 0 0;
+
+    color: var(--color-secondary);
+
+    font-size: 0.92rem;
+    font-weight: 500;
+    line-height: 1.7;
+  }
+
+  .page-header__actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 9px;
+
+    flex-shrink: 0;
+  }
+
+  .page-header--align-center
+    .page-header__content {
+    align-items: center;
+    justify-content: center;
+
+    text-align: center;
+  }
+
+  .page-header--align-center
+    .page-header__heading {
+    margin-inline: auto;
+  }
+
+  .page-header--align-center
+    .page-header__description {
+    margin-inline: auto;
+  }
+
+  .page-header--align-center
+    .page-header__meta {
+    justify-content: center;
+  }
+
+  .page-header--align-center
+    .page-header__actions {
+    justify-content: center;
+  }
+
+  .page-header--green {
+    border-bottom-color: rgba(
+      22,
+      101,
+      52,
+      0.12
+    );
+
+    background:
+      linear-gradient(
+        135deg,
+        #f0fdf4 0%,
+        #f7fee7 46%,
+        #ffffff 100%
+      );
+  }
+
+  .page-header--green
+    .page-header__glow--one {
+    background:
+      radial-gradient(
+        circle,
+        rgba(132, 204, 22, 0.17) 0%,
+        rgba(132, 204, 22, 0.05) 45%,
+        transparent 73%
+      );
+  }
+
+  .page-header--green
+    .page-header__glow--two {
+    background:
+      radial-gradient(
+        circle,
+        rgba(22, 101, 52, 0.11) 0%,
+        rgba(22, 101, 52, 0.03) 46%,
+        transparent 73%
+      );
+  }
+
+  .page-header--dark {
+    border-bottom-color: rgba(
+      255,
+      255,
+      255,
+      0.08
+    );
+
+    color: #ffffff;
+
+    background:
+      radial-gradient(
+        circle at 80% 20%,
+        rgba(132, 204, 22, 0.11),
+        transparent 30%
+      ),
+      linear-gradient(
+        135deg,
+        #0b1710,
+        #102317
+      );
+  }
+
+  .page-header--dark .page-header__title {
+    color: #ffffff;
+  }
+
+  .page-header--dark
+    .page-header__description {
+    color: #aebdb2;
+  }
+
+  .page-header--dark
+    .page-header__breadcrumb-link,
+  .page-header--dark
+    .page-header__breadcrumb-current {
+    color: #8fa197;
+  }
+
+  .page-header--dark
+    .page-header__breadcrumb-link:hover {
+    color: #d8f1bf;
+  }
+
+  .page-header--dark
+    .page-header__breadcrumb-current--last {
+    color: #dce9e0;
+  }
+
+  .page-header--dark
+    .page-header__breadcrumb-separator {
+    color: #5c6e62;
+  }
+
+  .page-header--dark
+    .page-header__icon {
+    border-color: rgba(
+      132,
+      204,
+      22,
+      0.18
+    );
+
+    color: #bce98a;
+
+    background: rgba(
+      132,
+      204,
+      22,
+      0.08
+    );
+  }
+
+  .page-header--dark
+    .page-header__eyebrow {
+    color: #d7efb9;
+    background: rgba(
+      132,
+      204,
+      22,
+      0.11
+    );
+  }
+
+  .page-header--blue {
+    border-bottom-color: rgba(
+      37,
+      99,
+      235,
+      0.12
+    );
+
+    background:
+      linear-gradient(
+        135deg,
+        #eff6ff 0%,
+        #f8fafc 55%,
+        #ffffff 100%
+      );
+  }
+
+  .page-header--blue
+    .page-header__icon {
+    color: var(--color-info);
+
+    border-color: rgba(
+      37,
+      99,
+      235,
+      0.13
+    );
+
+    background: rgba(
+      219,
+      234,
+      254,
+      0.7
+    );
+  }
+
+  .page-header--blue
+    .page-header__eyebrow {
+    color: #1d4ed8;
+    background: #dbeafe;
+  }
+
+  @media (max-width: 900px) {
+    .page-header__container {
+      width: min(
+        calc(100% - 32px),
+        var(--container-xl, 1280px)
+      );
+
+      padding-block: 26px 30px;
+    }
+
+    .page-header__content {
+      align-items: flex-start;
+      flex-direction: column;
+      gap: 22px;
+    }
+
+    .page-header__actions {
+      justify-content: flex-start;
+      width: 100%;
+    }
+
+    .page-header__heading {
+      max-width: 100%;
+    }
+  }
+
+  @media (max-width: 620px) {
+    .page-header__container {
+      width: min(
+        calc(100% - 24px),
+        var(--container-xl, 1280px)
+      );
+
+      padding-block: 22px 26px;
+    }
+
+    .page-header--compact
+      .page-header__container {
+      padding-block: 18px 21px;
+    }
+
+    .page-header__breadcrumbs {
+      margin-bottom: 17px;
+    }
+
+    .page-header__breadcrumb-link,
+    .page-header__breadcrumb-current {
+      max-width: 180px;
+      font-size: 0.66rem;
+    }
+
+    .page-header__title {
+      font-size: clamp(
+        1.5rem,
+        8vw,
+        2rem
+      );
+
+      letter-spacing: -0.028em;
+    }
+
+    .page-header__description {
+      margin-top: 10px;
+      font-size: 0.83rem;
+      line-height: 1.65;
+    }
+
+    .page-header__meta {
+      margin-bottom: 9px;
+    }
+
+    .page-header__icon {
+      width: 34px;
+      height: 34px;
+    }
+
+    .page-header__eyebrow {
+      min-height: 22px;
+      padding-inline: 8px;
+      font-size: 0.6rem;
+    }
+
+    .page-header__actions {
+      flex-wrap: wrap;
+    }
+
+    .page-header__glow--one {
+      right: -100px;
+    }
+
+    .page-header__glow--two {
+      left: -120px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .page-header,
+    .page-header * {
+      scroll-behavior: auto !important;
+      transition-duration: 0.01ms !important;
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+    }
+  }
+</style>
