@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="none">
+  <!-- BINSIGHT Organization Default -->
+  <!-- Transparent background; solid brand colors only. -->
+
+  <!-- Main organization structure -->
+  <path
+    fill="#2563EB"
+    d="M128 28 42 76v22h172V76l-86-48Z"
+  />
+
+  <!-- Roof / insight accent -->
+  <path
+    fill="#0EA5E9"
+    d="m128 28 32 18v30h-32V28Z"
+  />
+
+  <!-- Columns -->
+  <rect x="50" y="110" width="28" height="82" rx="6" fill="#2563EB"/>
+  <rect x="94" y="110" width="28" height="82" rx="6" fill="#2563EB"/>
+  <rect x="138" y="110" width="28" height="82" rx="6" fill="#2563EB"/>
+  <rect x="178" y="110" width="28" height="82" rx="6" fill="#0EA5E9"/>
+
+  <!-- Base -->
+  <rect x="36" y="198" width="184" height="30" rx="8" fill="#2563EB"/>
+
+  <!-- Central connection / data motif -->
+  <circle cx="128" cy="150" r="11" fill="#FFFFFF"/>
+  <path
+    stroke="#FFFFFF"
+    stroke-width="7"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    d="M128 150 153 129M128 150l-25-21M128 150v29"
+  />
+
+  <!-- Outer architectural line for definition -->
+  <path
+    stroke="#0EA5E9"
+    stroke-width="7"
+    stroke-linecap="round"
+    d="M36 76h184"
+  />
+</svg>
