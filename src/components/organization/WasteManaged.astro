@@ -1,0 +1,794 @@
+---
+import {
+  ArrowRight,
+  Boxes,
+  CheckCircle,
+  Cpu,
+  Leaf,
+  Package,
+  Recycle,
+  TriangleAlert,
+} from "@lucide/astro";
+
+import {
+  WASTE_CATEGORY,
+  type WasteCategory,
+} from "@lib/constants/waste";
+
+import type { WasteItem } from "@lib/data/waste";
+import type { Organization } from "@lib/data/organizations";
+
+interface Props {
+  organization?: Organization;
+  waste?: WasteItem[];
+  title?: string;
+  subtitle?: string;
+  compact?: boolean;
+  showDescription?: boolean;
+  showCategory?: boolean;
+  showLink?: boolean;
+  hrefBase?: string;
+  emptyMessage?: string;
+  limit?: number;
+  class?: string;
+}
+
+const {
+  organization,
+  waste = [],
+  title = "Sampah yang Dikelola",
+  subtitle =
+    "Kategori sampah yang tercatat dikelola oleh organisasi ini.",
+  compact = false,
+  showDescription = true,
+  showCategory = true,
+  showLink = true,
+  hrefBase = "/waste",
+  emptyMessage =
+    "Belum ada kategori sampah yang tercatat.",
+  limit,
+  class: className = "",
+} = Astro.props;
+
+/* -------------------------------------------------------------------------- */
+/* Resolve waste data                                                         */
+/* -------------------------------------------------------------------------- */
+
+/*
+ * The organization model stores waste IDs/slugs in `wasteManaged`.
+ * The component therefore accepts a resolved `waste` array as the safest
+ * rendering source. When an organization is provided without resolved
+ * waste items, the component gracefully renders an empty state instead of
+ * guessing or manufacturing waste records.
+ */
+const organizationWasteIds =
+  organization?.wasteManaged ?? [];
+
+const hasResolvedWaste =
+  waste.length > 0;
+
+const sourceWaste =
+  hasResolvedWaste
+    ? waste
+    : organizationWasteIds.length > 0
+      ? []
+      : [];
+
+const visibleWaste =
+  typeof limit === "number"
+    ? sourceWaste.slice(
+        0,
+        Math.max(
+          0,
+          Math.trunc(limit),
+        ),
+      )
+    : sourceWaste;
+
+const categoryMeta: Record<
+  WasteCategory,
+  {
+    label: string;
+    icon:
+      | "organic"
+      | "inorganic"
+      | "hazardous"
+      | "electronic"
+      | "residual";
+    description: string;
+  }
+> = {
+  [WASTE_CATEGORY.ORGANIC]: {
+    label: "Organik",
+    icon: "organic",
+    description:
+      "Material sampah yang berasal dari bahan hayati.",
+  },
+
+  [WASTE_CATEGORY.INORGANIC]: {
+    label: "Anorganik",
+    icon: "inorganic",
+    description:
+      "Material non-organik yang dapat dipilah dan dimanfaatkan.",
+  },
+
+  [WASTE_CATEGORY.HAZARDOUS]: {
+    label: "B3",
+    icon: "hazardous",
+    description:
+      "Material yang memerlukan penanganan khusus.",
+  },
+
+  [WASTE_CATEGORY.ELECTRONIC]: {
+    label: "Elektronik",
+    icon: "electronic",
+    description:
+      "Perangkat elektronik yang membutuhkan jalur pengelolaan yang sesuai.",
+  },
+
+  [WASTE_CATEGORY.RESIDUAL]: {
+    label: "Residu",
+    icon: "residual",
+    description:
+      "Material yang tersisa setelah proses pemilahan.",
+  },
+};
+
+function getMeta(
+  category: WasteCategory,
+) {
+  return (
+    categoryMeta[category] ?? {
+      label: "Kategori lainnya",
+      icon: "residual" as const,
+      description:
+        "Kategori sampah BINSIGHT.",
+    }
+  );
+}
+---
+
+<section
+  class:list={[
+    "waste-managed",
+    {
+      "waste-managed--compact":
+        compact,
+    },
+    className,
+  ]}
+  aria-labelledby="waste-managed-title"
+  data-waste-managed
+>
+  <header class="waste-managed__header">
+    <div class="waste-managed__title-wrap">
+      <span
+        class="waste-managed__title-icon"
+        aria-hidden="true"
+      >
+        <Recycle
+          size={18}
+          stroke-width={2}
+        />
+      </span>
+
+      <div>
+        <h2
+          id="waste-managed-title"
+          class="waste-managed__title"
+        >
+          {title}
+        </h2>
+
+        {
+          subtitle && (
+            <p class="waste-managed__subtitle">
+              {subtitle}
+            </p>
+          )
+        }
+      </div>
+    </div>
+
+    {
+      visibleWaste.length > 0 && (
+        <span class="waste-managed__count">
+          {visibleWaste.length} kategori
+        </span>
+      )
+    }
+  </header>
+
+  {
+    visibleWaste.length > 0 ? (
+      <div
+        class="waste-managed__grid"
+        role="list"
+        aria-label="Kategori sampah yang dikelola"
+      >
+        {visibleWaste.map((item) => {
+          const meta =
+            getMeta(item.category);
+
+          const href =
+            `${hrefBase}/${encodeURIComponent(
+              item.slug,
+            )}`;
+
+          return (
+            <article
+              class="waste-managed__item"
+              role="listitem"
+              data-waste-id={item.id}
+              data-waste-category={
+                item.category
+              }
+            >
+              <div class="waste-managed__item-top">
+                <span
+                  class:list={[
+                    "waste-managed__icon",
+                    `waste-managed__icon--${meta.icon}`,
+                  ]}
+                  aria-hidden="true"
+                >
+                  {
+                    meta.icon ===
+                      "organic" && (
+                      <Leaf
+                        size={19}
+                        stroke-width={1.9}
+                      />
+                    )
+                  }
+
+                  {
+                    meta.icon ===
+                      "inorganic" && (
+                      <Recycle
+                        size={19}
+                        stroke-width={1.9}
+                      />
+                    )
+                  }
+
+                  {
+                    meta.icon ===
+                      "hazardous" && (
+                      <TriangleAlert
+                        size={19}
+                        stroke-width={1.9}
+                      />
+                    )
+                  }
+
+                  {
+                    meta.icon ===
+                      "electronic" && (
+                      <Cpu
+                        size={19}
+                        stroke-width={1.9}
+                      />
+                    )
+                  }
+
+                  {
+                    meta.icon ===
+                      "residual" && (
+                      <Package
+                        size={19}
+                        stroke-width={1.9}
+                      />
+                    )
+                  }
+                </span>
+
+                <span
+                  class="waste-managed__check"
+                  aria-label="Kategori tercatat"
+                  title="Kategori tercatat"
+                >
+                  <CheckCircle
+                    size={14}
+                    stroke-width={2}
+                    aria-hidden="true"
+                  />
+                </span>
+              </div>
+
+              <div class="waste-managed__content">
+                <div class="waste-managed__name-row">
+                  <h3 class="waste-managed__name">
+                    {item.name}
+                  </h3>
+
+                  {
+                    showCategory && (
+                      <span class="waste-managed__category">
+                        {meta.label}
+                      </span>
+                    )
+                  }
+                </div>
+
+                {
+                  showDescription && (
+                    <p class="waste-managed__description">
+                      {
+                        item.shortDescription ||
+                        meta.description
+                      }
+                    </p>
+                  )
+                }
+              </div>
+
+              {
+                showLink && (
+                  <a
+                    class="waste-managed__link"
+                    href={href}
+                    aria-label={`Lihat informasi ${item.name}`}
+                  >
+                    <span>
+                      Lihat detail
+                    </span>
+
+                    <ArrowRight
+                      size={14}
+                      stroke-width={1.9}
+                      aria-hidden="true"
+                    />
+                  </a>
+                )
+              }
+            </article>
+          );
+        })}
+      </div>
+    ) : (
+      <div
+        class="waste-managed__empty"
+        role="status"
+      >
+        <span
+          class="waste-managed__empty-icon"
+          aria-hidden="true"
+        >
+          <Boxes
+            size={22}
+            stroke-width={1.8}
+          />
+        </span>
+
+        <div>
+          <strong>
+            Belum ada data sampah
+          </strong>
+
+          <p>
+            {emptyMessage}
+          </p>
+
+          {
+            organizationWasteIds.length > 0 &&
+              !hasResolvedWaste && (
+                <span class="waste-managed__empty-note">
+                  Data kategori tersedia pada profil,
+                  tetapi belum di-resolve menjadi
+                  detail sampah.
+                </span>
+              )
+          }
+        </div>
+      </div>
+    )
+  }
+
+  {
+    visibleWaste.length > 0 &&
+    limit !== undefined &&
+    sourceWaste.length > visibleWaste.length && (
+      <footer class="waste-managed__footer">
+        <span>
+          Menampilkan{" "}
+          {visibleWaste.length} dari{" "}
+          {sourceWaste.length} kategori.
+        </span>
+
+        <a
+          href={hrefBase}
+          class="waste-managed__view-all"
+        >
+          Lihat semua
+          <ArrowRight
+            size={14}
+            stroke-width={1.9}
+            aria-hidden="true"
+          />
+        </a>
+      </footer>
+    )
+  }
+</section>
+
+<style>
+  .waste-managed {
+    min-width: 0;
+    overflow: hidden;
+    border: 1px solid
+      var(--color-border, #e2e8f0);
+    border-radius: 1rem;
+    background: var(
+      --color-surface,
+      #ffffff
+    );
+    color: var(
+      --color-text,
+      #0f172a
+    );
+    box-shadow:
+      0 1px 2px
+        rgb(15 23 42 / 0.03),
+      0 8px 24px
+        rgb(15 23 42 / 0.04);
+  }
+
+  .waste-managed__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1.15rem 1.25rem;
+    border-bottom: 1px solid
+      var(--color-border, #e2e8f0);
+  }
+
+  .waste-managed__title-wrap {
+    min-width: 0;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.7rem;
+  }
+
+  .waste-managed__title-icon {
+    width: 2.15rem;
+    height: 2.15rem;
+    flex: 0 0 2.15rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.65rem;
+    background: var(
+      --color-primary-light,
+      #dcfce7
+    );
+    color: var(
+      --color-primary,
+      #166534
+    );
+  }
+
+  .waste-managed__title {
+    margin: 0;
+    color: #0f172a;
+    font-size: 0.95rem;
+    font-weight: 750;
+    line-height: 1.35;
+  }
+
+  .waste-managed__subtitle {
+    max-width: 44rem;
+    margin: 0.2rem 0 0;
+    color: #64748b;
+    font-size: 0.7rem;
+    line-height: 1.5;
+  }
+
+  .waste-managed__count {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    min-height: 1.75rem;
+    padding: 0.25rem
+      0.6rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 999px;
+    background: #f8fafc;
+    color: #64748b;
+    font-size: 0.65rem;
+    font-weight: 700;
+  }
+
+  .waste-managed__grid {
+    display: grid;
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+    padding: 1rem 1.25rem 1.25rem;
+  }
+
+  .waste-managed__item {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    padding: 0.95rem;
+    border: 1px solid
+      #e2e8f0;
+    border-radius: 0.85rem;
+    background: #ffffff;
+    transition:
+      border-color 160ms ease,
+      box-shadow 160ms ease,
+      transform 160ms ease;
+  }
+
+  .waste-managed__item:hover {
+    border-color: #bbf7d0;
+    box-shadow:
+      0 5px 16px
+        rgb(15 23 42 / 0.06);
+    transform: translateY(
+      -1px
+    );
+  }
+
+  .waste-managed__item-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+
+  .waste-managed__icon {
+    width: 2.4rem;
+    height: 2.4rem;
+    flex: 0 0 2.4rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.7rem;
+  }
+
+  .waste-managed__icon--organic {
+    background: #f0fdf4;
+    color: #166534;
+  }
+
+  .waste-managed__icon--inorganic {
+    background: #ecfdf5;
+    color: #15803d;
+  }
+
+  .waste-managed__icon--hazardous {
+    background: #fffbeb;
+    color: #b45309;
+  }
+
+  .waste-managed__icon--electronic {
+    background: #eff6ff;
+    color: #2563eb;
+  }
+
+  .waste-managed__icon--residual {
+    background: #f8fafc;
+    color: #64748b;
+  }
+
+  .waste-managed__check {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #15803d;
+  }
+
+  .waste-managed__content {
+    min-width: 0;
+    margin-top: 0.8rem;
+  }
+
+  .waste-managed__name-row {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+
+  .waste-managed__name {
+    min-width: 0;
+    width: 100%;
+    margin: 0;
+    overflow: hidden;
+    color: #0f172a;
+    font-size: 0.82rem;
+    font-weight: 750;
+    line-height: 1.35;
+    letter-spacing: -0.01em;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .waste-managed__category {
+    display: inline-flex;
+    align-items: center;
+    min-height: 1.4rem;
+    padding: 0.18rem 0.45rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 999px;
+    background: #f8fafc;
+    color: #64748b;
+    font-size: 0.58rem;
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  .waste-managed__description {
+    display: -webkit-box;
+    overflow: hidden;
+    margin: 0.5rem 0 0;
+    color: #64748b;
+    font-size: 0.68rem;
+    line-height: 1.5;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  .waste-managed__link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.4rem;
+    margin-top: 0.8rem;
+    padding-top: 0.7rem;
+    border-top: 1px solid #f1f5f9;
+    color: #166534;
+    font-size: 0.67rem;
+    font-weight: 750;
+    line-height: 1.3;
+    text-decoration: none;
+  }
+
+  .waste-managed__link:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .waste-managed__link:focus-visible {
+    outline: 3px solid
+      rgb(37 99 235 / 0.18);
+    outline-offset: 3px;
+    border-radius: 0.25rem;
+  }
+
+  .waste-managed__empty {
+    min-height: 12rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    padding: 2rem 1.25rem;
+    color: #64748b;
+  }
+
+  .waste-managed__empty-icon {
+    width: 2.75rem;
+    height: 2.75rem;
+    flex: 0 0 2.75rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.75rem;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    color: #94a3b8;
+  }
+
+  .waste-managed__empty strong {
+    display: block;
+    color: #334155;
+    font-size: 0.82rem;
+  }
+
+  .waste-managed__empty p {
+    margin: 0.2rem 0 0;
+    font-size: 0.7rem;
+    line-height: 1.5;
+  }
+
+  .waste-managed__empty-note {
+    display: block;
+    margin-top: 0.35rem;
+    color: #94a3b8;
+    font-size: 0.62rem;
+    line-height: 1.45;
+  }
+
+  .waste-managed__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.8rem 1.25rem;
+    border-top: 1px solid
+      var(--color-border, #e2e8f0);
+    color: #64748b;
+    font-size: 0.65rem;
+  }
+
+  .waste-managed__view-all {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    color: #166534;
+    font-size: 0.67rem;
+    font-weight: 750;
+    text-decoration: none;
+  }
+
+  .waste-managed__view-all:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .waste-managed__view-all:focus-visible {
+    outline: 3px solid
+      rgb(37 99 235 / 0.18);
+    outline-offset: 3px;
+    border-radius: 0.25rem;
+  }
+
+  .waste-managed--compact
+    .waste-managed__header {
+    padding: 0.9rem 1rem;
+  }
+
+  .waste-managed--compact
+    .waste-managed__grid {
+    grid-template-columns: 1fr;
+    padding: 0.8rem 1rem 1rem;
+  }
+
+  .waste-managed--compact
+    .waste-managed__item {
+    padding: 0.8rem;
+  }
+
+  .waste-managed--compact
+    .waste-managed__description {
+    display: none;
+  }
+
+  .waste-managed--compact
+    .waste-managed__link {
+    margin-top: 0.6rem;
+    padding-top: 0.55rem;
+  }
+
+  @media (max-width: 760px) {
+    .waste-managed__grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .waste-managed__header {
+      padding: 1rem;
+    }
+
+    .waste-managed__grid {
+      padding-inline: 1rem;
+    }
+
+    .waste-managed__footer {
+      padding-inline: 1rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .waste-managed__item {
+      transition: none;
+    }
+  }
+</style>

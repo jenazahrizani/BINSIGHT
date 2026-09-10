@@ -1,0 +1,361 @@
+---
+import {
+  Building2,
+  Check,
+  MapPin,
+} from "@lucide/astro";
+
+import type {
+  Organization,
+  OrganizationType,
+} from "@lib/data/organizations";
+
+interface Props {
+  organization: Organization;
+}
+
+const { organization } = Astro.props;
+
+const getOrganizationTypeLabel = (
+  type: OrganizationType,
+): string => {
+  switch (type) {
+    case "government":
+      return "Pemerintah";
+    case "community":
+      return "Komunitas";
+    case "private":
+      return "Swasta";
+    case "social-enterprise":
+      return "Social Enterprise";
+    case "cooperative":
+      return "Koperasi";
+    case "educational":
+      return "Pendidikan";
+    case "nonprofit":
+      return "Nirlaba";
+    case "other":
+    default:
+      return "Lainnya";
+  }
+};
+
+const organizationTypeLabel =
+  getOrganizationTypeLabel(organization.type);
+
+const isVerified =
+  organization.verified &&
+  organization.status === "verified";
+---
+
+<header class="organization-header">
+  <div class="organization-header__cover">
+    {organization.coverImage ? (
+      <img
+        src={organization.coverImage}
+        alt=""
+        aria-hidden="true"
+      />
+    ) : (
+      <div
+        class="organization-header__cover-placeholder"
+        aria-hidden="true"
+      ></div>
+    )}
+  </div>
+
+  <div class="organization-header__content">
+    <div class="organization-header__identity">
+      <div class="organization-header__logo">
+        {organization.logo ? (
+          <img
+            src={organization.logo}
+            alt={`Logo ${organization.name}`}
+          />
+        ) : (
+          <Building2
+            size={34}
+            stroke-width="1.8"
+            aria-hidden="true"
+          />
+        )}
+      </div>
+
+      <div class="organization-header__main">
+        <div class="organization-header__badges">
+          <span class="organization-header__type">
+            {organizationTypeLabel}
+          </span>
+
+          {isVerified && (
+            <span class="organization-header__status">
+              <Check
+                size={13}
+                stroke-width="2.2"
+                aria-hidden="true"
+              />
+              Terverifikasi
+            </span>
+          )}
+        </div>
+
+        <h1>{organization.name}</h1>
+
+        {organization.shortName && (
+          <p class="organization-header__short-name">
+            {organization.shortName}
+          </p>
+        )}
+
+        <p class="organization-header__description">
+          {organization.shortDescription ??
+            organization.description}
+        </p>
+
+        <div class="organization-header__meta">
+          <span>
+            <MapPin
+              size={16}
+              stroke-width="1.8"
+              aria-hidden="true"
+            />
+            {organization.location.area}
+          </span>
+
+          {organization.establishedYear && (
+            <span>
+              Berdiri sejak {organization.establishedYear}
+            </span>
+          )}
+        </div>
+      </div>
+    </div>
+
+    {organization.tags.length > 0 && (
+      <div class="organization-header__tags">
+        {organization.tags.map((tag) => (
+          <span>{tag}</span>
+        ))}
+      </div>
+    )}
+  </div>
+</header>
+
+<style>
+  .organization-header {
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    background: var(--color-surface);
+  }
+
+  .organization-header__cover {
+    position: relative;
+    height: 13rem;
+    overflow: hidden;
+    background:
+      radial-gradient(
+        circle at 85% 20%,
+        rgba(132, 204, 22, 0.22),
+        transparent 32%
+      ),
+      linear-gradient(
+        135deg,
+        var(--color-primary-dark),
+        var(--color-primary)
+      );
+  }
+
+  .organization-header__cover::after {
+    position: absolute;
+    inset: 0;
+    content: "";
+    background: linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0) 25%,
+      rgba(0, 0, 0, 0.16) 100%
+    );
+  }
+
+  .organization-header__cover img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .organization-header__cover-placeholder {
+    width: 100%;
+    height: 100%;
+    opacity: 0.85;
+    background-image:
+      linear-gradient(
+        45deg,
+        rgba(255, 255, 255, 0.05) 25%,
+        transparent 25%,
+        transparent 50%,
+        rgba(255, 255, 255, 0.05) 50%,
+        rgba(255, 255, 255, 0.05) 75%,
+        transparent 75%
+      );
+    background-size: 2rem 2rem;
+  }
+
+  .organization-header__content {
+    padding: 0 1.5rem 1.5rem;
+  }
+
+  .organization-header__identity {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .organization-header__logo {
+    display: grid;
+    width: 6rem;
+    height: 6rem;
+    flex: 0 0 6rem;
+    z-index: 2;
+    margin-top: -3rem;
+    place-items: center;
+    overflow: hidden;
+    border: 4px solid var(--color-surface);
+    border-radius: 1.15rem;
+    background: var(--color-surface);
+    color: var(--color-primary);
+    box-shadow: var(--shadow-md);
+  }
+
+  .organization-header__logo img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    padding: 0.7rem;
+    object-fit: contain;
+  }
+
+  .organization-header__main {
+    min-width: 0;
+    flex: 1;
+    padding-top: 1.1rem;
+  }
+
+  .organization-header__badges {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.45rem;
+  }
+
+  .organization-header__type,
+  .organization-header__status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.35rem 0.6rem;
+    border-radius: 999px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  .organization-header__type {
+    border: 1px solid var(--color-border);
+    background: var(--color-background);
+    color: var(--color-text-secondary);
+  }
+
+  .organization-header__status {
+    border: 1px solid var(--color-primary-light);
+    background: var(--color-primary-light);
+    color: var(--color-primary-dark);
+  }
+
+  .organization-header__main h1 {
+    margin: 0.7rem 0 0;
+    color: var(--color-text);
+    font-size: clamp(1.45rem, 3vw, 2rem);
+    font-weight: 800;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+  }
+
+  .organization-header__short-name {
+    margin: 0.25rem 0 0;
+    color: var(--color-text-secondary);
+    font-size: 0.82rem;
+    font-weight: 650;
+  }
+
+  .organization-header__description {
+    max-width: 800px;
+    margin: 0.75rem 0 0;
+    color: var(--color-text-secondary);
+    font-size: 0.92rem;
+    line-height: 1.65;
+  }
+
+  .organization-header__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.85rem 1.25rem;
+    margin-top: 0.9rem;
+  }
+
+  .organization-header__meta span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--color-text-secondary);
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+
+  .organization-header__meta svg {
+    color: var(--color-primary);
+  }
+
+  .organization-header__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+    margin-top: 1.35rem;
+    padding-top: 1.15rem;
+    border-top: 1px solid var(--color-border);
+  }
+
+  .organization-header__tags span {
+    padding: 0.35rem 0.6rem;
+    border-radius: 0.45rem;
+    background: var(--color-background);
+    color: var(--color-text-secondary);
+    font-size: 0.72rem;
+    font-weight: 600;
+  }
+
+  @media (max-width: 760px) {
+    .organization-header__cover {
+      height: 10rem;
+    }
+
+    .organization-header__content {
+      padding: 0 1rem 1.1rem;
+    }
+
+    .organization-header__identity {
+      flex-wrap: wrap;
+    }
+
+    .organization-header__logo {
+      width: 5.25rem;
+      height: 5.25rem;
+      flex-basis: 5.25rem;
+      margin-top: -2.65rem;
+    }
+
+    .organization-header__main {
+      padding-top: 0.8rem;
+    }
+  }
+</style>

@@ -1,0 +1,460 @@
+---
+import {
+  ExternalLink,
+  Globe,
+  Mail,
+  MapPin,
+  MessageCircle,
+  Phone,
+} from "@lucide/astro";
+
+import type {
+  Organization,
+} from "@lib/data/organizations";
+
+interface Props {
+  organization: Organization;
+  showContact?: boolean;
+  showLocation?: boolean;
+}
+
+const {
+  organization,
+  showContact = true,
+  showLocation = true,
+} = Astro.props;
+
+const contact = organization.contact;
+
+const hasContact =
+  Boolean(contact?.phone) ||
+  Boolean(contact?.email) ||
+  Boolean(contact?.website) ||
+  Boolean(contact?.instagram) ||
+  Boolean(contact?.facebook) ||
+  Boolean(contact?.whatsapp);
+
+const hasCoordinates =
+  typeof organization.location.latitude === "number" &&
+  typeof organization.location.longitude === "number";
+
+const mapsUrl =
+  hasCoordinates
+    ? `https://www.google.com/maps/search/?api=1&query=${organization.location.latitude},${organization.location.longitude}`
+    : organization.location.address
+      ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+          organization.location.address,
+        )}`
+      : "";
+---
+
+<section
+  class="organization-info"
+  aria-labelledby="organization-info-title"
+>
+  <div class="organization-info__heading">
+    <span class="organization-info__eyebrow">
+      Informasi organisasi
+    </span>
+
+    <h2 id="organization-info-title">
+      Profil & kontak
+    </h2>
+  </div>
+
+  <div class="organization-info__grid">
+    {showLocation && (
+      <div class="organization-info__block">
+        <div class="organization-info__block-heading">
+          <span class="organization-info__icon">
+            <MapPin
+              size={18}
+              stroke-width="1.8"
+              aria-hidden="true"
+            />
+          </span>
+
+          <div>
+            <h3>Lokasi</h3>
+            <p>
+              Wilayah organisasi yang tercatat di BINSIGHT.
+            </p>
+          </div>
+        </div>
+
+        <div class="organization-info__location">
+          <strong>
+            {organization.location.area}
+          </strong>
+
+          {organization.location.address && (
+            <p>
+              {organization.location.address}
+            </p>
+          )}
+
+          {mapsUrl && (
+            <a
+              href={mapsUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="organization-info__map-link"
+            >
+              <ExternalLink
+                size={15}
+                stroke-width="1.8"
+                aria-hidden="true"
+              />
+              Lihat di peta
+            </a>
+          )}
+
+          {hasCoordinates && (
+            <div class="organization-info__coordinates">
+              {organization.location.latitude?.toFixed(6)},
+              {organization.location.longitude?.toFixed(6)}
+            </div>
+          )}
+        </div>
+      </div>
+    )}
+
+    {showContact && (
+      <div class="organization-info__block">
+        <div class="organization-info__block-heading">
+          <span class="organization-info__icon">
+            <Mail
+              size={18}
+              stroke-width="1.8"
+              aria-hidden="true"
+            />
+          </span>
+
+          <div>
+            <h3>Kontak</h3>
+            <p>
+              Informasi kontak publik organisasi.
+            </p>
+          </div>
+        </div>
+
+        {hasContact ? (
+          <div class="organization-info__contacts">
+            {contact?.phone && (
+              <a
+                href={`tel:${contact.phone}`}
+                class="organization-info__contact"
+              >
+                <Phone
+                  size={16}
+                  stroke-width="1.8"
+                  aria-hidden="true"
+                />
+                <span>{contact.phone}</span>
+              </a>
+            )}
+
+            {contact?.whatsapp && (
+              <a
+                href={`https://wa.me/${contact.whatsapp.replace(/[^\d]/g, "")}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="organization-info__contact"
+              >
+                <MessageCircle
+                  size={16}
+                  stroke-width="1.8"
+                  aria-hidden="true"
+                />
+                <span>WhatsApp</span>
+              </a>
+            )}
+
+            {contact?.email && (
+              <a
+                href={`mailto:${contact.email}`}
+                class="organization-info__contact"
+              >
+                <Mail
+                  size={16}
+                  stroke-width="1.8"
+                  aria-hidden="true"
+                />
+                <span>{contact.email}</span>
+              </a>
+            )}
+
+            {contact?.website && (
+              <a
+                href={contact.website}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="organization-info__contact"
+              >
+                <Globe
+                  size={16}
+                  stroke-width="1.8"
+                  aria-hidden="true"
+                />
+                <span>Website</span>
+                <ExternalLink
+                  size={13}
+                  stroke-width="1.8"
+                  aria-hidden="true"
+                />
+              </a>
+            )}
+
+            {contact?.instagram && (
+              <a
+                href={contact.instagram}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="organization-info__contact"
+              >
+                <span class="organization-info__social-icon">
+                  ◎
+                </span>
+                <span>Instagram</span>
+                <ExternalLink
+                  size={13}
+                  stroke-width="1.8"
+                  aria-hidden="true"
+                />
+              </a>
+            )}
+
+            {contact?.facebook && (
+              <a
+                href={contact.facebook}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="organization-info__contact"
+              >
+                <span class="organization-info__social-icon">
+                  f
+                </span>
+                <span>Facebook</span>
+                <ExternalLink
+                  size={13}
+                  stroke-width="1.8"
+                  aria-hidden="true"
+                />
+              </a>
+            )}
+          </div>
+        ) : (
+          <div class="organization-info__empty">
+            Informasi kontak publik belum tersedia.
+          </div>
+        )}
+      </div>
+    )}
+  </div>
+</section>
+
+<style>
+  .organization-info {
+    width: 100%;
+    padding: 1.5rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    background: var(--color-surface);
+  }
+
+  .organization-info__heading {
+    margin-bottom: 1.35rem;
+  }
+
+  .organization-info__eyebrow {
+    display: block;
+    margin-bottom: 0.25rem;
+    color: var(--color-primary);
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .organization-info__heading h2 {
+    margin: 0;
+    color: var(--color-text);
+    font-size: 1.2rem;
+    font-weight: 750;
+    line-height: 1.3;
+  }
+
+  .organization-info__grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+  }
+
+  .organization-info__block {
+    min-width: 0;
+    padding: 1rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background: var(--color-background);
+  }
+
+  .organization-info__block-heading {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .organization-info__icon {
+    display: grid;
+    width: 2.4rem;
+    height: 2.4rem;
+    flex: 0 0 2.4rem;
+    place-items: center;
+    border-radius: 0.7rem;
+    background: var(--color-primary-light);
+    color: var(--color-primary-dark);
+  }
+
+  .organization-info__block-heading h3 {
+    margin: 0;
+    color: var(--color-text);
+    font-size: 0.92rem;
+    font-weight: 700;
+  }
+
+  .organization-info__block-heading p {
+    margin: 0.2rem 0 0;
+    color: var(--color-text-secondary);
+    font-size: 0.76rem;
+    line-height: 1.5;
+  }
+
+  .organization-info__location {
+    margin-top: 1rem;
+    padding-top: 0.9rem;
+    border-top: 1px solid var(--color-border);
+  }
+
+  .organization-info__location strong {
+    display: block;
+    color: var(--color-text);
+    font-size: 0.88rem;
+  }
+
+  .organization-info__location p {
+    margin: 0.3rem 0 0;
+    color: var(--color-text-secondary);
+    font-size: 0.8rem;
+    line-height: 1.55;
+  }
+
+  .organization-info__map-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-top: 0.75rem;
+    color: var(--color-primary);
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  .organization-info__map-link:hover {
+    text-decoration: underline;
+  }
+
+  .organization-info__coordinates {
+    margin-top: 0.5rem;
+    color: var(--color-text-secondary);
+    font-family:
+      ui-monospace,
+      SFMono-Regular,
+      Menlo,
+      Consolas,
+      monospace;
+    font-size: 0.68rem;
+  }
+
+  .organization-info__contacts {
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+    margin-top: 1rem;
+    padding-top: 0.9rem;
+    border-top: 1px solid var(--color-border);
+  }
+
+  .organization-info__contact {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    gap: 0.55rem;
+    padding: 0.65rem 0.7rem;
+    border: 1px solid var(--color-border);
+    border-radius: 0.6rem;
+    background: var(--color-surface);
+    color: var(--color-text);
+    font-size: 0.78rem;
+    font-weight: 650;
+    text-decoration: none;
+    transition:
+      border-color 160ms ease,
+      color 160ms ease,
+      background 160ms ease;
+  }
+
+  .organization-info__contact svg {
+    flex: 0 0 auto;
+    color: var(--color-primary);
+  }
+
+  .organization-info__contact span:nth-child(2) {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .organization-info__contact svg:last-child {
+    margin-left: auto;
+  }
+
+  .organization-info__social-icon {
+    display: grid;
+    width: 1rem;
+    height: 1rem;
+    flex: 0 0 1rem;
+    place-items: center;
+    border-radius: 0.25rem;
+    background: var(--color-primary-light);
+    color: var(--color-primary-dark);
+    font-size: 0.7rem;
+    font-weight: 800;
+    line-height: 1;
+  }
+
+  .organization-info__contact:hover {
+    border-color: var(--color-primary-light);
+    background: var(--color-primary-light);
+    color: var(--color-primary-dark);
+  }
+
+  .organization-info__empty {
+    margin-top: 1rem;
+    padding-top: 0.9rem;
+    border-top: 1px solid var(--color-border);
+    color: var(--color-text-secondary);
+    font-size: 0.8rem;
+    line-height: 1.5;
+  }
+
+  @media (max-width: 760px) {
+    .organization-info {
+      padding: 1.15rem;
+    }
+
+    .organization-info__grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

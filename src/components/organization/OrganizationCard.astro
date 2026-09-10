@@ -1,0 +1,456 @@
+---
+import {
+  Building2,
+  ChevronRight,
+  ExternalLink,
+  MapPin,
+  Recycle,
+} from "@lucide/astro";
+
+import type {
+  Organization,
+  OrganizationType,
+} from "@lib/data/organizations";
+
+interface Props {
+  organization: Organization;
+  href?: string;
+  featured?: boolean;
+}
+
+const {
+  organization,
+  href = `/organizations/${organization.slug}`,
+  featured = false,
+} = Astro.props;
+
+const getOrganizationTypeLabel = (
+  type: OrganizationType,
+): string => {
+  switch (type) {
+    case "government":
+      return "Pemerintah";
+    case "community":
+      return "Komunitas";
+    case "private":
+      return "Swasta";
+    case "social-enterprise":
+      return "Social Enterprise";
+    case "cooperative":
+      return "Koperasi";
+    case "educational":
+      return "Pendidikan";
+    case "nonprofit":
+      return "Nirlaba";
+    case "other":
+    default:
+      return "Lainnya";
+  }
+};
+
+const organizationTypeLabel =
+  getOrganizationTypeLabel(organization.type);
+
+const visibleWaste = organization.wasteManaged.slice(0, 3);
+
+const remainingWaste =
+  Math.max(
+    0,
+    organization.wasteManaged.length -
+      visibleWaste.length,
+  );
+---
+
+<article
+  class:list={[
+    "organization-card",
+    featured && "organization-card--featured",
+  ]}
+>
+  <a
+    href={href}
+    class="organization-card__link"
+    aria-label={`Lihat profil ${organization.name}`}
+  >
+    <div class="organization-card__media">
+      <div class="organization-card__logo">
+        {organization.logo ? (
+          <img
+            src={organization.logo}
+            alt={`Logo ${organization.name}`}
+            loading="lazy"
+          />
+        ) : (
+          <Building2
+            size={30}
+            stroke-width="1.8"
+            aria-hidden="true"
+          />
+        )}
+      </div>
+
+      <span class="organization-card__type">
+        {organizationTypeLabel}
+      </span>
+
+      {featured && (
+        <span class="organization-card__featured">
+          Unggulan
+        </span>
+      )}
+    </div>
+
+    <div class="organization-card__body">
+      <div class="organization-card__heading">
+        <div class="organization-card__name">
+          <h3>{organization.name}</h3>
+
+          {organization.shortName && (
+            <span>{organization.shortName}</span>
+          )}
+        </div>
+
+        {organization.verified && (
+          <span class="organization-card__verified">
+            Terverifikasi
+          </span>
+        )}
+      </div>
+
+      <p class="organization-card__description">
+        {organization.shortDescription ??
+          organization.description}
+      </p>
+
+      <div class="organization-card__location">
+        <MapPin
+          size={16}
+          stroke-width="1.8"
+          aria-hidden="true"
+        />
+        <span>{organization.location.area}</span>
+      </div>
+
+      {organization.location.address && (
+        <p class="organization-card__address">
+          {organization.location.address}
+        </p>
+      )}
+
+      {visibleWaste.length > 0 && (
+        <div class="organization-card__waste">
+          <div class="organization-card__waste-title">
+            <Recycle
+              size={15}
+              stroke-width="1.8"
+              aria-hidden="true"
+            />
+            <span>Sampah yang dikelola</span>
+          </div>
+
+          <div class="organization-card__tags">
+            {visibleWaste.map((category) => (
+              <span class="organization-card__tag">
+                {category}
+              </span>
+            ))}
+
+            {remainingWaste > 0 && (
+              <span class="organization-card__tag organization-card__tag--muted">
+                +{remainingWaste}
+              </span>
+            )}
+          </div>
+        </div>
+      )}
+
+      <div class="organization-card__footer">
+        <span>Lihat profil organisasi</span>
+
+        <ChevronRight
+          size={17}
+          stroke-width="1.8"
+          aria-hidden="true"
+        />
+      </div>
+    </div>
+  </a>
+
+  <a
+    href={href}
+    class="organization-card__external"
+    aria-label={`Buka halaman ${organization.name}`}
+  >
+    <ExternalLink
+      size={15}
+      stroke-width="1.8"
+      aria-hidden="true"
+    />
+  </a>
+</article>
+
+<style>
+  .organization-card {
+    position: relative;
+    height: 100%;
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    background: var(--color-surface);
+    transition:
+      border-color 160ms ease,
+      box-shadow 160ms ease,
+      transform 160ms ease;
+  }
+
+  .organization-card:hover {
+    border-color: var(--color-primary-light);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+  }
+
+  .organization-card--featured {
+    border-color: var(--color-primary-light);
+  }
+
+  .organization-card__link {
+    display: block;
+    height: 100%;
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .organization-card__media {
+    position: relative;
+    display: grid;
+    min-height: 11rem;
+    place-items: center;
+    padding: 1.5rem;
+    background:
+      radial-gradient(
+        circle at top right,
+        rgba(132, 204, 22, 0.16),
+        transparent 42%
+      ),
+      var(--color-background);
+  }
+
+  .organization-card__logo {
+    display: grid;
+    width: 5.5rem;
+    height: 5.5rem;
+    place-items: center;
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+    border-radius: 1rem;
+    background: var(--color-surface);
+    color: var(--color-primary);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .organization-card__logo img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    padding: 0.75rem;
+    object-fit: contain;
+  }
+
+  .organization-card__type,
+  .organization-card__featured {
+    position: absolute;
+    top: 1rem;
+    padding: 0.35rem 0.65rem;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 700;
+  }
+
+  .organization-card__type {
+    left: 1rem;
+    border: 1px solid var(--color-border);
+    background: rgba(255, 255, 255, 0.92);
+    color: var(--color-text-secondary);
+  }
+
+  .organization-card__featured {
+    right: 1rem;
+    background: var(--color-primary);
+    color: #fff;
+  }
+
+  .organization-card__body {
+    display: flex;
+    min-height: 0;
+    height: calc(100% - 11rem);
+    flex-direction: column;
+    padding: 1.25rem;
+  }
+
+  .organization-card__heading {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+
+  .organization-card__name {
+    min-width: 0;
+  }
+
+  .organization-card__name h3 {
+    margin: 0;
+    color: var(--color-text);
+    font-size: 1.05rem;
+    font-weight: 750;
+    line-height: 1.4;
+  }
+
+  .organization-card__name span {
+    display: block;
+    margin-top: 0.2rem;
+    color: var(--color-text-secondary);
+    font-size: 0.76rem;
+    font-weight: 600;
+  }
+
+  .organization-card__verified {
+    flex: 0 0 auto;
+    padding: 0.32rem 0.52rem;
+    border: 1px solid var(--color-primary-light);
+    border-radius: 999px;
+    background: var(--color-primary-light);
+    color: var(--color-primary-dark);
+    font-size: 0.68rem;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .organization-card__description {
+    display: -webkit-box;
+    overflow: hidden;
+    margin: 0.8rem 0 0;
+    color: var(--color-text-secondary);
+    font-size: 0.88rem;
+    line-height: 1.6;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+  }
+
+  .organization-card__location {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    margin-top: 1rem;
+    color: var(--color-text);
+    font-size: 0.82rem;
+    font-weight: 650;
+  }
+
+  .organization-card__location svg {
+    flex: 0 0 auto;
+    color: var(--color-primary);
+  }
+
+  .organization-card__address {
+    margin: 0.3rem 0 0;
+    color: var(--color-text-secondary);
+    font-size: 0.76rem;
+    line-height: 1.5;
+  }
+
+  .organization-card__waste {
+    margin-top: 1rem;
+  }
+
+  .organization-card__waste-title {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-bottom: 0.5rem;
+    color: var(--color-text-secondary);
+    font-size: 0.74rem;
+    font-weight: 700;
+  }
+
+  .organization-card__waste-title svg {
+    color: var(--color-primary);
+  }
+
+  .organization-card__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .organization-card__tag {
+    padding: 0.35rem 0.55rem;
+    border-radius: 0.45rem;
+    background: var(--color-background);
+    color: var(--color-text);
+    font-size: 0.72rem;
+    font-weight: 600;
+  }
+
+  .organization-card__tag--muted {
+    color: var(--color-text-secondary);
+  }
+
+  .organization-card__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-top: auto;
+    padding-top: 1.1rem;
+    color: var(--color-primary);
+    font-size: 0.8rem;
+    font-weight: 700;
+  }
+
+  .organization-card__external {
+    position: absolute;
+    right: 1rem;
+    bottom: 1rem;
+    z-index: 2;
+    display: grid;
+    width: 2rem;
+    height: 2rem;
+    place-items: center;
+    border: 1px solid var(--color-border);
+    border-radius: 0.55rem;
+    background: var(--color-surface);
+    color: var(--color-text-secondary);
+    opacity: 0;
+    transition:
+      opacity 160ms ease,
+      color 160ms ease;
+  }
+
+  .organization-card:hover .organization-card__external {
+    opacity: 1;
+  }
+
+  .organization-card__external:hover {
+    color: var(--color-primary);
+  }
+
+  @media (max-width: 640px) {
+    .organization-card__media {
+      min-height: 9.5rem;
+    }
+
+    .organization-card__body {
+      height: calc(100% - 9.5rem);
+    }
+
+    .organization-card__logo {
+      width: 4.75rem;
+      height: 4.75rem;
+    }
+
+    .organization-card__heading {
+      flex-direction: column;
+    }
+  }
+</style>
