@@ -1,0 +1,1720 @@
+---
+import {
+  ArrowRight,
+  Building2,
+  Map,
+  MapPin,
+  Recycle,
+  Search,
+  SlidersHorizontal,
+  TriangleAlert,
+} from "@lucide/astro";
+
+import PageHeader from "@components/layout/PageHeader.astro";
+import PublicLayout from "@layouts/PublicLayout.astro";
+
+import MapFilter from "@components/map/MapFilter.astro";
+import WasteMap from "@components/map/WasteMap.astro";
+
+import {
+  getAreas,
+  type Area,
+  type WasteLocation,
+} from "@lib/data/locations";
+
+import {
+  getPublicOrganizations,
+  type Organization,
+} from "@lib/data/organizations";
+
+import * as locationModule from "@lib/data/locations";
+
+/* -------------------------------------------------------------------------- */
+/* Types                                                                       */
+/* -------------------------------------------------------------------------- */
+
+type LocationDataModule = {
+  getLocations?: () => WasteLocation[];
+  getPublicLocations?: () => WasteLocation[];
+  getActiveLocations?: () => WasteLocation[];
+
+  locations?: readonly WasteLocation[];
+  wasteLocations?: readonly WasteLocation[];
+  WASTE_LOCATIONS?: readonly WasteLocation[];
+  LOCATIONS?: readonly WasteLocation[];
+};
+
+/* -------------------------------------------------------------------------- */
+/* Areas                                                                       */
+/* -------------------------------------------------------------------------- */
+
+const areas: Area[] = getAreas();
+
+const activeAreas: Area[] = areas.filter(
+  (area: Area) => area.status === "active",
+);
+
+/* -------------------------------------------------------------------------- */
+/* Locations                                                                   */
+/* -------------------------------------------------------------------------- */
+/**
+ * locations.ts pada project saat ini tidak memiliki export bernama
+ * getWasteLocations(). Kita gunakan compatibility resolver agar halaman
+ * tidak mengasumsikan nama export yang belum tersedia.
+ */
+
+const resolvedLocationModule =
+  locationModule as unknown as LocationDataModule;
+
+function resolveLocations(): WasteLocation[] {
+  const getters: Array<
+    (() => WasteLocation[]) | undefined
+  > = [
+    resolvedLocationModule.getLocations,
+    resolvedLocationModule.getPublicLocations,
+    resolvedLocationModule.getActiveLocations,
+  ];
+
+  for (const getter of getters) {
+    if (typeof getter !== "function") {
+      continue;
+    }
+
+    const result = getter();
+
+    if (Array.isArray(result)) {
+      return result;
+    }
+  }
+
+  const collections: Array<
+    readonly WasteLocation[] | undefined
+  > = [
+    resolvedLocationModule.locations,
+    resolvedLocationModule.wasteLocations,
+    resolvedLocationModule.WASTE_LOCATIONS,
+    resolvedLocationModule.LOCATIONS,
+  ];
+
+  for (const collection of collections) {
+    if (Array.isArray(collection)) {
+      return [...collection];
+    }
+  }
+
+  return [];
+}
+
+const allLocations: WasteLocation[] =
+  resolveLocations();
+
+const activeLocations: WasteLocation[] =
+  allLocations.filter(
+    (location: WasteLocation) =>
+      location.status === "active",
+  );
+
+/* -------------------------------------------------------------------------- */
+/* Organizations                                                               */
+/* -------------------------------------------------------------------------- */
+
+const organizations: Organization[] =
+  getPublicOrganizations();
+
+/* -------------------------------------------------------------------------- */
+/* Location grouping                                                           */
+/* -------------------------------------------------------------------------- */
+
+const locationsByArea: Record<string, number> = {};
+
+for (const location of activeLocations) {
+  locationsByArea[location.areaId] =
+    (locationsByArea[location.areaId] ?? 0) + 1;
+}
+
+const areaSummaries: Array<{
+  area: Area;
+  count: number;
+}> = activeAreas
+  .map((area: Area) => ({
+    area,
+    count: locationsByArea[area.id] ?? 0,
+  }))
+  .sort(
+    (first, second) =>
+      second.count - first.count,
+  );
+
+/* -------------------------------------------------------------------------- */
+/* Location type grouping                                                      */
+/* -------------------------------------------------------------------------- */
+
+const locationTypeLabels: Record<string, string> = {
+  "collection-point": "Titik Pengumpulan",
+  "recycling-center": "Pusat Daur Ulang",
+  "waste-bank": "Bank Sampah",
+  "processing-facility": "Fasilitas Pengolahan",
+  "drop-point": "Drop Point",
+  other: "Lokasi Lainnya",
+};
+
+const locationTypeCounts: Record<string, number> =
+  {};
+
+for (const location of activeLocations) {
+  locationTypeCounts[location.type] =
+    (locationTypeCounts[location.type] ?? 0) + 1;
+}
+
+const locationTypeSummary: Array<{
+  type: string;
+  label: string;
+  count: number;
+}> = Object.entries(locationTypeCounts)
+  .map(([type, count]: [string, number]) => ({
+    type,
+    label: locationTypeLabels[type] ?? type,
+    count,
+  }))
+  .sort(
+    (first, second) =>
+      second.count - first.count,
+  );
+
+/* -------------------------------------------------------------------------- */
+/* Basic metrics                                                               */
+/* -------------------------------------------------------------------------- */
+
+const organizationCount =
+  organizations.length;
+
+const areaCount = activeAreas.length;
+const locationCount = activeLocations.length;
+const locationTypeCount =
+  locationTypeSummary.length;
+
+/* -------------------------------------------------------------------------- */
+/* Page metadata                                                               */
+/* -------------------------------------------------------------------------- */
+
+const breadcrumbs = [
+  {
+    label: "Beranda",
+    href: "/",
+  },
+  {
+    label: "Peta",
+  },
+];
+
+const pageTitle =
+  "Peta Persampahan Kabupaten Badung";
+
+const pageDescription =
+  "Eksplorasi lokasi pengelolaan sampah, area, dan organisasi terverifikasi di Kabupaten Badung.";
+---
+
+<PublicLayout
+  title={pageTitle}
+  description={pageDescription}
+>
+  <PageHeader
+    title={pageTitle}
+    description={pageDescription}
+    breadcrumbs={breadcrumbs}
+    icon="map"
+    eyebrow="BINSIGHT · MAP"
+    tone="green"
+  />
+
+  <main class="map-page">
+    <section class="map-intro">
+      <div class="map-intro__content">
+        <div class="map-intro__eyebrow">
+          <Map
+            size={16}
+            stroke-width={2}
+            aria-hidden="true"
+          />
+          <span>Badung Waste Intelligence</span>
+        </div>
+
+        <h1>
+          Temukan ekosistem pengelolaan sampah
+          di Kabupaten Badung
+        </h1>
+
+        <p>
+          Gunakan peta untuk menemukan titik
+          pengelolaan sampah dan memahami hubungan
+          antara lokasi, area, serta organisasi yang
+          mengelolanya.
+        </p>
+
+        <div class="map-intro__actions">
+          <a
+            href="#explore-map"
+            class="primary-action"
+          >
+            <MapPin
+              size={18}
+              stroke-width={2}
+              aria-hidden="true"
+            />
+            <span>Eksplorasi peta</span>
+            <ArrowRight
+              size={17}
+              stroke-width={2}
+              aria-hidden="true"
+            />
+          </a>
+
+          <a
+            href="/reports/create"
+            class="secondary-action"
+          >
+            <TriangleAlert
+              size={17}
+              stroke-width={2}
+              aria-hidden="true"
+            />
+            <span>Buat laporan</span>
+          </a>
+        </div>
+      </div>
+
+      <div
+        class="map-intro__metrics"
+        aria-label="Ringkasan data peta"
+      >
+        <div class="intro-metric">
+          <span class="intro-metric__icon">
+            <MapPin
+              size={19}
+              stroke-width={2}
+              aria-hidden="true"
+            />
+          </span>
+
+          <strong>{locationCount}</strong>
+          <span>Lokasi aktif</span>
+        </div>
+
+        <div class="intro-metric">
+          <span class="intro-metric__icon">
+            <Building2
+              size={19}
+              stroke-width={2}
+              aria-hidden="true"
+            />
+          </span>
+
+          <strong>{organizationCount}</strong>
+          <span>Organisasi</span>
+        </div>
+
+        <div class="intro-metric">
+          <span class="intro-metric__icon">
+            <Map
+              size={19}
+              stroke-width={2}
+              aria-hidden="true"
+            />
+          </span>
+
+          <strong>{areaCount}</strong>
+          <span>Area aktif</span>
+        </div>
+      </div>
+    </section>
+
+    <section
+      id="explore-map"
+      class="explorer-section"
+      aria-labelledby="explorer-title"
+    >
+      <div class="section-heading">
+        <div>
+          <span class="section-eyebrow">
+            Eksplorasi
+          </span>
+
+          <h2 id="explorer-title">
+            Peta lokasi pengelolaan
+          </h2>
+
+          <p>
+            Cari dan jelajahi lokasi pengelolaan
+            sampah yang tersedia di Kabupaten Badung.
+          </p>
+        </div>
+
+        <div class="result-count">
+          <strong>{locationCount}</strong>
+          <span>lokasi aktif</span>
+        </div>
+      </div>
+
+      <div class="map-search">
+        <label
+          class="search-field"
+          for="map-search-input"
+        >
+          <Search
+            size={18}
+            stroke-width={2}
+            aria-hidden="true"
+          />
+
+          <input
+            id="map-search-input"
+            type="search"
+            placeholder="Cari lokasi, alamat, atau area..."
+            autocomplete="off"
+          />
+        </label>
+
+        <button
+          type="button"
+          class="filter-toggle"
+          id="map-filter-toggle"
+          aria-expanded="false"
+          aria-controls="map-filter-panel"
+        >
+          <SlidersHorizontal
+            size={17}
+            stroke-width={2}
+            aria-hidden="true"
+          />
+          <span>Filter area</span>
+        </button>
+      </div>
+
+      <div
+        id="map-filter-panel"
+        class="map-filter-panel"
+      >
+        <div class="map-filter-panel__header">
+          <div>
+            <span class="section-eyebrow">
+              Wilayah
+            </span>
+
+            <h3>
+              Pilih kecamatan / area
+            </h3>
+          </div>
+
+          <span class="map-filter-panel__hint">
+            {areaCount} area aktif
+          </span>
+        </div>
+
+        <MapFilter areas={activeAreas} />
+      </div>
+
+      <div class="map-layout">
+        <aside class="map-sidebar">
+          <div class="sidebar-card sidebar-card--stats">
+            <div class="sidebar-card__heading">
+              <div>
+                <span>
+                  Cakupan peta
+                </span>
+
+                <strong>
+                  Kabupaten Badung
+                </strong>
+              </div>
+
+              <Map
+                size={20}
+                stroke-width={1.9}
+                aria-hidden="true"
+              />
+            </div>
+
+            <div class="sidebar-stat-list">
+              <div class="sidebar-stat">
+                <span>Lokasi aktif</span>
+                <strong>{locationCount}</strong>
+              </div>
+
+              <div class="sidebar-stat">
+                <span>Area aktif</span>
+                <strong>{areaCount}</strong>
+              </div>
+
+              <div class="sidebar-stat">
+                <span>Jenis lokasi</span>
+                <strong>{locationTypeCount}</strong>
+              </div>
+            </div>
+          </div>
+
+          <div class="sidebar-card">
+            <div class="sidebar-card__topline">
+              <SlidersHorizontal
+                size={18}
+                stroke-width={2}
+                aria-hidden="true"
+              />
+
+              <span>
+                Cara menggunakan peta
+              </span>
+            </div>
+
+            <ol class="usage-list">
+              <li>
+                <span>1</span>
+                <p>
+                  Pilih area untuk mempersempit
+                  lokasi.
+                </p>
+              </li>
+
+              <li>
+                <span>2</span>
+                <p>
+                  Gunakan pencarian untuk menemukan
+                  lokasi tertentu.
+                </p>
+              </li>
+
+              <li>
+                <span>3</span>
+                <p>
+                  Buka detail lokasi untuk memahami
+                  pengelolaan dan organisasi terkait.
+                </p>
+              </li>
+            </ol>
+          </div>
+
+          <a
+            href="/reports/create"
+            class="report-sidebar-card"
+          >
+            <span class="report-sidebar-card__icon">
+              <TriangleAlert
+                size={19}
+                stroke-width={2}
+                aria-hidden="true"
+              />
+            </span>
+
+            <span class="report-sidebar-card__body">
+              <strong>
+                Temukan masalah di lapangan?
+              </strong>
+
+              <small>
+                Kirim laporan agar dapat ditinjau.
+              </small>
+            </span>
+
+            <ArrowRight
+              size={17}
+              stroke-width={2}
+              aria-hidden="true"
+            />
+          </a>
+        </aside>
+
+        <div class="map-frame">
+          {
+            activeLocations.length > 0 ? (
+              <WasteMap
+                locations={activeLocations}
+              />
+            ) : (
+              <div class="map-empty">
+                <div class="map-empty__icon">
+                  <MapPin
+                    size={30}
+                    stroke-width={1.8}
+                    aria-hidden="true"
+                  />
+                </div>
+
+                <h3>
+                  Data lokasi belum tersedia
+                </h3>
+
+                <p>
+                  Belum ada lokasi pengelolaan sampah
+                  aktif yang dapat ditampilkan pada peta.
+                </p>
+
+                <a href="/reports/create">
+                  Tambahkan informasi
+                </a>
+              </div>
+            )
+          }
+        </div>
+      </div>
+    </section>
+
+    <section
+      class="areas-section"
+      aria-labelledby="areas-title"
+    >
+      <div class="section-heading">
+        <div>
+          <span class="section-eyebrow">
+            Area
+          </span>
+
+          <h2 id="areas-title">
+            Jelajahi berdasarkan wilayah
+          </h2>
+
+          <p>
+            Pilih area untuk melihat lokasi
+            pengelolaan yang tersedia di dalamnya.
+          </p>
+        </div>
+
+        <a
+          href="/map"
+          class="section-link"
+        >
+          Lihat peta utama
+          <ArrowRight
+            size={16}
+            stroke-width={2}
+            aria-hidden="true"
+          />
+        </a>
+      </div>
+
+      {
+        areaSummaries.length > 0 ? (
+          <div class="area-grid">
+            {areaSummaries.map(
+              ({
+                area,
+                count,
+              }: {
+                area: Area;
+                count: number;
+              }) => (
+                <a
+                  class="area-card"
+                  href={`/map/${area.slug}`}
+                >
+                  <div class="area-card__icon">
+                    <MapPin
+                      size={19}
+                      stroke-width={2}
+                      aria-hidden="true"
+                    />
+                  </div>
+
+                  <div class="area-card__body">
+                    <strong>
+                      {area.name}
+                    </strong>
+
+                    <span>
+                      {count} lokasi aktif
+                    </span>
+                  </div>
+
+                  <ArrowRight
+                    class="area-card__arrow"
+                    size={17}
+                    stroke-width={2}
+                    aria-hidden="true"
+                  />
+                </a>
+              ),
+            )}
+          </div>
+        ) : (
+          <div class="empty-panel">
+            <Map
+              size={26}
+              stroke-width={1.8}
+              aria-hidden="true"
+            />
+
+            <h3>
+              Belum ada area aktif
+            </h3>
+
+            <p>
+              Belum terdapat area aktif yang dapat
+              ditampilkan pada peta.
+            </p>
+          </div>
+        )
+      }
+    </section>
+
+    {
+      locationTypeSummary.length > 0 && (
+        <section
+          class="types-section"
+          aria-labelledby="types-title"
+        >
+          <div class="section-heading section-heading--compact">
+            <div>
+              <span class="section-eyebrow">
+                Jenis lokasi
+              </span>
+
+              <h2 id="types-title">
+                Distribusi titik pengelolaan
+              </h2>
+
+              <p>
+                Ringkasan tipe lokasi yang saat ini
+                tercatat aktif.
+              </p>
+            </div>
+          </div>
+
+          <div class="type-grid">
+            {locationTypeSummary.map(
+              ({
+                label,
+                count,
+              }: {
+                type: string;
+                label: string;
+                count: number;
+              }) => {
+                const percentage =
+                  locationCount > 0
+                    ? Math.round(
+                        (count / locationCount) *
+                          100,
+                      )
+                    : 0;
+
+                return (
+                  <article class="type-card">
+                    <div class="type-card__header">
+                      <span class="type-card__icon">
+                        <Recycle
+                          size={19}
+                          stroke-width={2}
+                          aria-hidden="true"
+                        />
+                      </span>
+
+                      <div>
+                        <strong>
+                          {label}
+                        </strong>
+
+                        <span>
+                          {count} lokasi
+                        </span>
+                      </div>
+                    </div>
+
+                    <div
+                      class="type-card__bar"
+                      aria-hidden="true"
+                    >
+                      <span
+                        style={`width:${Math.max(
+                          percentage,
+                          count > 0 ? 7 : 0,
+                        )}%`}
+                      ></span>
+                    </div>
+
+                    <small>
+                      {percentage}% dari lokasi aktif
+                    </small>
+                  </article>
+                );
+              },
+            )}
+          </div>
+        </section>
+      )
+    }
+
+    <section class="map-cta">
+      <div class="map-cta__icon">
+        <TriangleAlert
+          size={23}
+          stroke-width={2}
+          aria-hidden="true"
+        />
+      </div>
+
+      <div class="map-cta__content">
+        <span>
+          Kontribusi masyarakat
+        </span>
+
+        <h2>
+          Tidak menemukan informasi yang kamu cari?
+        </h2>
+
+        <p>
+          Bantu BINSIGHT memperkaya data persampahan
+          dengan memberikan informasi atau membuat
+          laporan dari lapangan.
+        </p>
+      </div>
+
+      <a
+        href="/reports/create"
+        class="map-cta__button"
+      >
+        Buat laporan
+        <ArrowRight
+          size={17}
+          stroke-width={2}
+          aria-hidden="true"
+        />
+      </a>
+    </section>
+  </main>
+</PublicLayout>
+
+<script>
+  const searchInput =
+    document.querySelector<HTMLInputElement>(
+      "#map-search-input",
+    );
+
+  if (searchInput) {
+    searchInput.addEventListener(
+      "input",
+      () => {
+        const query =
+          searchInput.value.trim().toLowerCase();
+
+        const locationCards =
+          document.querySelectorAll<HTMLElement>(
+            "[data-map-location], [data-location-card]",
+          );
+
+        locationCards.forEach(
+          (card: HTMLElement) => {
+            const text =
+              card.textContent?.toLowerCase() ?? "";
+
+            card.hidden =
+              query.length > 0 &&
+              !text.includes(query);
+          },
+        );
+      },
+    );
+  }
+
+  const filterToggle =
+    document.querySelector<HTMLButtonElement>(
+      "#map-filter-toggle",
+    );
+
+  const filterPanel =
+    document.querySelector<HTMLElement>(
+      "#map-filter-panel",
+    );
+
+  if (filterToggle && filterPanel) {
+    filterToggle.addEventListener(
+      "click",
+      () => {
+        const expanded =
+          filterToggle.getAttribute(
+            "aria-expanded",
+          ) === "true";
+
+        filterToggle.setAttribute(
+          "aria-expanded",
+          String(!expanded),
+        );
+
+        filterPanel.toggleAttribute(
+          "data-open",
+          !expanded,
+        );
+      },
+    );
+  }
+</script>
+
+<style>
+  .map-page {
+    width: min(100% - 32px, 1440px);
+    margin-inline: auto;
+    padding-bottom: 84px;
+  }
+
+  .map-intro {
+    display: grid;
+    grid-template-columns: minmax(0, 1.35fr) minmax(
+        300px,
+        0.65fr
+      );
+    gap: 32px;
+    margin-top: 32px;
+    padding: 40px;
+    overflow: hidden;
+    border: 1px solid #dbe7df;
+    border-radius: 28px;
+    background:
+      radial-gradient(
+        circle at 84% 16%,
+        rgba(132, 204, 22, 0.14),
+        transparent 30%
+      ),
+      linear-gradient(
+        135deg,
+        #ffffff 0%,
+        #f0fdf4 100%
+      );
+  }
+
+  .map-intro__content {
+    min-width: 0;
+  }
+
+  .map-intro__eyebrow,
+  .section-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    color: #166534;
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .map-intro h1 {
+    max-width: 850px;
+    margin: 12px 0 0;
+    color: #0f172a;
+    font-size: clamp(
+      2.15rem,
+      4vw,
+      3.65rem
+    );
+    line-height: 1.04;
+    letter-spacing: -0.045em;
+  }
+
+  .map-intro__content > p {
+    max-width: 760px;
+    margin: 19px 0 0;
+    color: #64748b;
+    font-size: 1rem;
+    line-height: 1.75;
+  }
+
+  .map-intro__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 11px;
+    margin-top: 28px;
+  }
+
+  .primary-action,
+  .secondary-action,
+  .section-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 44px;
+    padding-inline: 15px;
+    border-radius: 12px;
+    text-decoration: none;
+    font-size: 0.86rem;
+    font-weight: 750;
+  }
+
+  .primary-action {
+    background: #166534;
+    color: #ffffff;
+  }
+
+  .primary-action:hover {
+    background: #14532d;
+  }
+
+  .secondary-action {
+    border: 1px solid #dbe7df;
+    background: #ffffff;
+    color: #166534;
+  }
+
+  .secondary-action:hover {
+    background: #f0fdf4;
+  }
+
+  .map-intro__metrics {
+    display: grid;
+    align-content: center;
+    gap: 11px;
+  }
+
+  .intro-metric {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    gap: 10px;
+    padding: 14px;
+    border: 1px solid #dbe7df;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.84);
+  }
+
+  .intro-metric__icon {
+    display: grid;
+    width: 42px;
+    height: 42px;
+    place-items: center;
+    border-radius: 13px;
+    background: #dcfce7;
+    color: #166534;
+  }
+
+  .intro-metric strong {
+    color: #0f172a;
+    font-size: 1.2rem;
+  }
+
+  .intro-metric > span:last-child {
+    grid-column: 2;
+    margin-top: -5px;
+    color: #64748b;
+    font-size: 0.76rem;
+  }
+
+  .explorer-section,
+  .areas-section,
+  .types-section {
+    margin-top: 58px;
+  }
+
+  .section-heading {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 22px;
+  }
+
+  .section-heading--compact {
+    align-items: flex-start;
+  }
+
+  .section-heading h2 {
+    margin: 7px 0 0;
+    color: #0f172a;
+    font-size: clamp(
+      1.55rem,
+      2.6vw,
+      2.1rem
+    );
+    line-height: 1.1;
+    letter-spacing: -0.035em;
+  }
+
+  .section-heading p {
+    max-width: 720px;
+    margin: 8px 0 0;
+    color: #64748b;
+    line-height: 1.65;
+  }
+
+  .result-count {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 6px;
+    color: #64748b;
+    font-size: 0.84rem;
+    white-space: nowrap;
+  }
+
+  .result-count strong {
+    color: #0f172a;
+    font-size: 1rem;
+  }
+
+  .section-link {
+    min-height: auto;
+    padding: 7px 0;
+    color: #166534;
+  }
+
+  .map-search {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    margin-bottom: 12px;
+  }
+
+  .search-field {
+    display: flex;
+    align-items: center;
+    width: min(100%, 650px);
+    height: 48px;
+    gap: 10px;
+    padding-inline: 15px;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    background: #ffffff;
+    color: #64748b;
+  }
+
+  .search-field:focus-within {
+    border-color: #166534;
+    box-shadow:
+      0 0 0 3px
+      rgba(22, 101, 52, 0.08);
+  }
+
+  .search-field input {
+    width: 100%;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: #0f172a;
+    font: inherit;
+  }
+
+  .search-field input::placeholder {
+    color: #94a3b8;
+  }
+
+  .filter-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 48px;
+    padding-inline: 14px;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    background: #ffffff;
+    color: #334155;
+    font: inherit;
+    font-size: 0.84rem;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .filter-toggle:hover {
+    border-color: #bbf7d0;
+    background: #f8fffa;
+    color: #166534;
+  }
+
+  .filter-toggle[aria-expanded="true"] {
+    border-color: #166534;
+    color: #166534;
+    background: #f0fdf4;
+  }
+
+  .map-filter-panel {
+    display: none;
+    margin-bottom: 13px;
+    padding: 18px;
+    border: 1px solid #e2e8f0;
+    border-radius: 18px;
+    background: #ffffff;
+  }
+
+  .map-filter-panel[data-open] {
+    display: block;
+  }
+
+  .map-filter-panel__header {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: 15px;
+    margin-bottom: 14px;
+  }
+
+  .map-filter-panel__header h3 {
+    margin: 7px 0 0;
+    color: #0f172a;
+    font-size: 1rem;
+  }
+
+  .map-filter-panel__hint {
+    color: #64748b;
+    font-size: 0.78rem;
+  }
+
+  .map-layout {
+    display: grid;
+    grid-template-columns: 290px minmax(0, 1fr);
+    gap: 16px;
+  }
+
+  .map-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .sidebar-card {
+    padding: 17px;
+    border: 1px solid #e2e8f0;
+    border-radius: 17px;
+    background: #ffffff;
+  }
+
+  .sidebar-card__heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    color: #166534;
+  }
+
+  .sidebar-card__heading span {
+    display: block;
+    color: #64748b;
+    font-size: 0.74rem;
+  }
+
+  .sidebar-card__heading strong {
+    display: block;
+    margin-top: 2px;
+    color: #0f172a;
+    font-size: 0.94rem;
+  }
+
+  .sidebar-stat-list {
+    display: grid;
+    gap: 0;
+    margin-top: 14px;
+    border-top: 1px solid #eef2f7;
+  }
+
+  .sidebar-stat {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 11px 0;
+    border-bottom: 1px solid #eef2f7;
+  }
+
+  .sidebar-stat span {
+    color: #64748b;
+    font-size: 0.8rem;
+  }
+
+  .sidebar-stat strong {
+    color: #0f172a;
+    font-size: 0.9rem;
+  }
+
+  .sidebar-card__topline {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #166534;
+    font-size: 0.85rem;
+    font-weight: 750;
+  }
+
+  .usage-list {
+    display: grid;
+    gap: 12px;
+    margin: 15px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .usage-list li {
+    display: grid;
+    grid-template-columns: 25px minmax(0, 1fr);
+    align-items: start;
+    gap: 8px;
+  }
+
+  .usage-list li > span {
+    display: grid;
+    width: 25px;
+    height: 25px;
+    place-items: center;
+    border-radius: 8px;
+    background: #f0fdf4;
+    color: #166534;
+    font-size: 0.72rem;
+    font-weight: 800;
+  }
+
+  .usage-list p {
+    margin: 2px 0 0;
+    color: #64748b;
+    font-size: 0.79rem;
+    line-height: 1.55;
+  }
+
+  .report-sidebar-card {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 15px;
+    border: 1px solid #fecaca;
+    border-radius: 17px;
+    background: #fffafa;
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .report-sidebar-card:hover {
+    background: #fef2f2;
+  }
+
+  .report-sidebar-card__icon {
+    display: grid;
+    width: 40px;
+    height: 40px;
+    place-items: center;
+    flex: 0 0 40px;
+    border-radius: 12px;
+    background: #fee2e2;
+    color: #dc2626;
+  }
+
+  .report-sidebar-card__body {
+    min-width: 0;
+    display: grid;
+    gap: 3px;
+  }
+
+  .report-sidebar-card__body strong {
+    color: #0f172a;
+    font-size: 0.82rem;
+  }
+
+  .report-sidebar-card__body small {
+    color: #64748b;
+    font-size: 0.73rem;
+    line-height: 1.45;
+  }
+
+  .report-sidebar-card > svg {
+    margin-left: auto;
+    color: #94a3b8;
+  }
+
+  .map-frame {
+    min-width: 0;
+    min-height: 650px;
+    overflow: hidden;
+    border: 1px solid #e2e8f0;
+    border-radius: 20px;
+    background: #e2e8f0;
+  }
+
+  .map-empty {
+    display: flex;
+    min-height: 650px;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    padding: 32px;
+    text-align: center;
+    background: #f8fafc;
+  }
+
+  .map-empty__icon {
+    display: grid;
+    width: 68px;
+    height: 68px;
+    place-items: center;
+    margin-bottom: 15px;
+    border-radius: 20px;
+    background: #dcfce7;
+    color: #166534;
+  }
+
+  .map-empty h3 {
+    margin: 0;
+    color: #0f172a;
+    font-size: 1.08rem;
+  }
+
+  .map-empty p {
+    max-width: 480px;
+    margin: 8px 0 18px;
+    color: #64748b;
+    line-height: 1.65;
+  }
+
+  .map-empty a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 42px;
+    padding-inline: 15px;
+    border-radius: 11px;
+    background: #166534;
+    color: #ffffff;
+    font-size: 0.84rem;
+    font-weight: 750;
+    text-decoration: none;
+  }
+
+  .area-grid {
+    display: grid;
+    grid-template-columns: repeat(
+      3,
+      minmax(0, 1fr)
+    );
+    gap: 14px;
+  }
+
+  .area-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    background: #ffffff;
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .area-card:hover {
+    border-color: #bbf7d0;
+    background: #f8fffa;
+  }
+
+  .area-card__icon {
+    display: grid;
+    width: 42px;
+    height: 42px;
+    place-items: center;
+    flex: 0 0 42px;
+    border-radius: 12px;
+    background: #f0fdf4;
+    color: #166534;
+  }
+
+  .area-card__body {
+    min-width: 0;
+    display: grid;
+    gap: 3px;
+  }
+
+  .area-card__body strong {
+    overflow: hidden;
+    color: #0f172a;
+    font-size: 0.9rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .area-card__body span {
+    color: #64748b;
+    font-size: 0.75rem;
+  }
+
+  .area-card__arrow {
+    margin-left: auto;
+    flex: 0 0 auto;
+    color: #94a3b8;
+  }
+
+  .type-grid {
+    display: grid;
+    grid-template-columns: repeat(
+      2,
+      minmax(0, 1fr)
+    );
+    gap: 14px;
+  }
+
+  .type-card {
+    padding: 17px;
+    border: 1px solid #e2e8f0;
+    border-radius: 17px;
+    background: #ffffff;
+  }
+
+  .type-card__header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .type-card__icon {
+    display: grid;
+    width: 42px;
+    height: 42px;
+    place-items: center;
+    flex: 0 0 42px;
+    border-radius: 12px;
+    background: #ecfccb;
+    color: #3f6212;
+  }
+
+  .type-card__header div {
+    min-width: 0;
+    display: grid;
+    gap: 2px;
+  }
+
+  .type-card__header strong {
+    color: #0f172a;
+    font-size: 0.89rem;
+  }
+
+  .type-card__header span {
+    color: #64748b;
+    font-size: 0.74rem;
+  }
+
+  .type-card__bar {
+    height: 6px;
+    margin-top: 15px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: #f1f5f9;
+  }
+
+  .type-card__bar span {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: #84cc16;
+  }
+
+  .type-card small {
+    display: block;
+    margin-top: 7px;
+    color: #94a3b8;
+    font-size: 0.7rem;
+  }
+
+  .empty-panel {
+    display: grid;
+    place-items: center;
+    padding: 50px 24px;
+    border: 1px dashed #e2e8f0;
+    border-radius: 18px;
+    background: #f8fafc;
+    color: #94a3b8;
+    text-align: center;
+  }
+
+  .empty-panel h3 {
+    margin: 12px 0 0;
+    color: #334155;
+    font-size: 1rem;
+  }
+
+  .empty-panel p {
+    max-width: 520px;
+    margin: 7px 0 0;
+    color: #64748b;
+    line-height: 1.6;
+  }
+
+  .map-cta {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 18px;
+    margin-top: 58px;
+    padding: 24px;
+    border: 1px solid #bbf7d0;
+    border-radius: 20px;
+    background:
+      linear-gradient(
+        135deg,
+        #f0fdf4 0%,
+        #ffffff 100%
+      );
+  }
+
+  .map-cta__icon {
+    display: grid;
+    width: 48px;
+    height: 48px;
+    place-items: center;
+    border-radius: 14px;
+    background: #dcfce7;
+    color: #166534;
+  }
+
+  .map-cta__content > span {
+    display: block;
+    margin-bottom: 4px;
+    color: #166534;
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .map-cta__content h2 {
+    margin: 0;
+    color: #0f172a;
+    font-size: 1.18rem;
+    letter-spacing: -0.02em;
+  }
+
+  .map-cta__content p {
+    margin: 5px 0 0;
+    color: #64748b;
+    line-height: 1.6;
+  }
+
+  .map-cta__button {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    padding-inline: 16px;
+    border-radius: 12px;
+    background: #166534;
+    color: #ffffff;
+    font-size: 0.86rem;
+    font-weight: 750;
+    text-decoration: none;
+  }
+
+  .map-cta__button:hover {
+    background: #14532d;
+  }
+
+  @media (max-width: 1100px) {
+    .map-intro {
+      grid-template-columns: 1fr;
+    }
+
+    .map-intro__metrics {
+      grid-template-columns: repeat(
+        3,
+        minmax(0, 1fr)
+      );
+      align-content: start;
+    }
+
+    .map-layout {
+      grid-template-columns: 250px minmax(
+          0,
+          1fr
+        );
+    }
+
+    .area-grid {
+      grid-template-columns: repeat(
+        2,
+        minmax(0, 1fr)
+      );
+    }
+  }
+
+  @media (max-width: 900px) {
+    .map-layout {
+      grid-template-columns: 1fr;
+    }
+
+    .map-sidebar {
+      display: grid;
+      grid-template-columns: repeat(
+        2,
+        minmax(0, 1fr)
+      );
+    }
+
+    .report-sidebar-card {
+      grid-column: 1 / -1;
+    }
+
+    .map-frame,
+    .map-empty {
+      min-height: 560px;
+    }
+  }
+
+  @media (max-width: 720px) {
+    .map-page {
+      width: min(100% - 20px, 1440px);
+      padding-bottom: 52px;
+    }
+
+    .map-intro {
+      margin-top: 20px;
+      padding: 24px;
+      border-radius: 20px;
+    }
+
+    .map-intro h1 {
+      font-size: 2rem;
+    }
+
+    .map-intro__metrics {
+      grid-template-columns: 1fr;
+    }
+
+    .section-heading {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+
+    .result-count {
+      white-space: normal;
+    }
+
+    .map-search {
+      align-items: stretch;
+      flex-direction: column;
+    }
+
+    .search-field {
+      width: 100%;
+    }
+
+    .filter-toggle {
+      width: 100%;
+      justify-content: center;
+    }
+
+    .map-sidebar {
+      display: flex;
+    }
+
+    .area-grid,
+    .type-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .map-cta {
+      grid-template-columns: auto minmax(
+        0,
+        1fr
+      );
+    }
+
+    .map-cta__button {
+      grid-column: 1 / -1;
+      justify-content: center;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .map-intro__actions {
+      flex-direction: column;
+    }
+
+    .primary-action,
+    .secondary-action {
+      width: 100%;
+    }
+  }
+</style>

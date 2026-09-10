@@ -1,0 +1,1604 @@
+---
+import {
+  ArrowLeft,
+  Building2,
+  MapPin,
+  Recycle,
+  Route,
+  Search,
+  TriangleAlert,
+} from "@lucide/astro";
+
+import MapFilter from "@components/map/MapFilter.astro";
+import WasteMap from "@components/map/WasteMap.astro";
+import PageHeader from "@components/layout/PageHeader.astro";
+import PublicLayout from "@layouts/PublicLayout.astro";
+
+import {
+  getAreas,
+  type Area,
+  type WasteLocation,
+} from "@lib/data/locations";
+
+import {
+  getPublicOrganizations,
+  type Organization,
+} from "@lib/data/organizations";
+
+import {
+  getReports,
+  type Report,
+} from "@lib/data/reports";
+
+import * as locationData from "@lib/data/locations";
+
+const { area: areaSlug } = Astro.params;
+
+/* -------------------------------------------------------------------------- */
+/* Area                                                                        */
+/* -------------------------------------------------------------------------- */
+
+const areas: Area[] = getAreas();
+
+const activeAreas = areas.filter(
+  (item) => item.status === "active",
+);
+
+const area = activeAreas.find(
+  (item) => item.slug === areaSlug,
+);
+
+if (!area) {
+  return Astro.redirect("/map");
+}
+
+/* -------------------------------------------------------------------------- */
+/* Compatibility layer                                                        */
+/* -------------------------------------------------------------------------- */
+/**
+ * The current locations module exposes Area/WasteLocation types and getAreas(),
+ * but does not expose getWasteLocations().
+ *
+ * Instead of inventing an API name, inspect the module at runtime and accept
+ * the common array/getter shapes when available.
+ *
+ * This keeps this page type-safe against the real module surface and avoids
+ * coupling the page to a guessed export.
+ */
+
+type LocationModuleCompatibility = {
+  getLocations?: () => WasteLocation[];
+  getPublicLocations?: () => WasteLocation[];
+  getActiveLocations?: () => WasteLocation[];
+  locations?: readonly WasteLocation[];
+  wasteLocations?: readonly WasteLocation[];
+  WASTE_LOCATIONS?: readonly WasteLocation[];
+  LOCATIONS?: readonly WasteLocation[];
+};
+
+const compatibleLocationModule =
+  locationData as unknown as LocationModuleCompatibility;
+
+const getLocationCandidates = (): WasteLocation[] => {
+  const getterCandidates = [
+    compatibleLocationModule.getLocations,
+    compatibleLocationModule.getPublicLocations,
+    compatibleLocationModule.getActiveLocations,
+  ];
+
+  for (const getter of getterCandidates) {
+    if (typeof getter === "function") {
+      const value = getter();
+
+      if (Array.isArray(value)) {
+        return value;
+      }
+    }
+  }
+
+  const arrayCandidates = [
+    compatibleLocationModule.locations,
+    compatibleLocationModule.wasteLocations,
+    compatibleLocationModule.WASTE_LOCATIONS,
+    compatibleLocationModule.LOCATIONS,
+  ];
+
+  for (const value of arrayCandidates) {
+    if (Array.isArray(value)) {
+      return [...value];
+    }
+  }
+
+  return [];
+};
+
+const allLocations = getLocationCandidates();
+
+/* -------------------------------------------------------------------------- */
+/* Organizations                                                               */
+/* -------------------------------------------------------------------------- */
+
+const organizations: Organization[] =
+  getPublicOrganizations();
+
+const areaOrganizations = organizations.filter(
+  (organization) => {
+    if (!organization.isPublic) {
+      return false;
+    }
+
+    if (organization.status !== "verified") {
+      return false;
+    }
+
+    return (
+      organization.location?.area === area.name
+    );
+  },
+);
+
+/* -------------------------------------------------------------------------- */
+/* Locations                                                                   */
+/* -------------------------------------------------------------------------- */
+
+const areaLocations: WasteLocation[] =
+  allLocations.filter(
+    (location) =>
+      location.status === "active" &&
+      location.areaId === area.id,
+  );
+
+/* -------------------------------------------------------------------------- */
+/* Reports                                                                     */
+/* -------------------------------------------------------------------------- */
+
+const reports: Report[] = getReports();
+
+const areaReports = reports.filter(
+  (report) =>
+    report.location.areaId === area.id &&
+    report.status !== "rejected",
+);
+
+/* -------------------------------------------------------------------------- */
+/* Location statistics                                                        */
+/* -------------------------------------------------------------------------- */
+
+const locationTypeLabels: Record<string, string> = {
+  "collection-point": "Titik Pengumpulan",
+  "recycling-center": "Pusat Daur Ulang",
+  "waste-bank": "Bank Sampah",
+  "processing-facility": "Fasilitas Pengolahan",
+  "drop-point": "Drop Point",
+  other: "Lokasi Lainnya",
+};
+
+const locationTypeCounts: Record<string, number> = {};
+
+for (const location of areaLocations) {
+  locationTypeCounts[location.type] =
+    (locationTypeCounts[location.type] ?? 0) + 1;
+}
+
+const topLocationTypes = Object.entries(
+  locationTypeCounts,
+)
+  .sort(
+    (firstEntry, secondEntry) =>
+      secondEntry[1] - firstEntry[1],
+  )
+  .slice(0, 5);
+
+/* -------------------------------------------------------------------------- */
+/* Page metadata                                                               */
+/* -------------------------------------------------------------------------- */
+
+const breadcrumbItems = [
+  {
+    label: "Beranda",
+    href: "/",
+  },
+  {
+    label: "Peta",
+    href: "/map",
+  },
+  {
+    label: area.name,
+  },
+];
+
+const pageTitle =
+  `Peta Pengelolaan Sampah ${area.name}`;
+
+const pageDescription =
+  area.description ||
+  `Jelajahi lokasi pengelolaan sampah dan informasi lingkungan di ${area.name}, Kabupaten Badung.`;
+---
+
+<PublicLayout
+  title={pageTitle}
+  description={pageDescription}
+>
+  <PageHeader
+    title={pageTitle}
+    description={pageDescription}
+    breadcrumbs={breadcrumbItems}
+    icon="map"
+    eyebrow="Eksplorasi area"
+    tone="green"
+  />
+
+  <main class="area-page">
+    <section class="area-hero">
+      <div class="area-hero__content">
+        <a
+          href="/map"
+          class="back-link"
+        >
+          <ArrowLeft
+            size={17}
+            stroke-width={2}
+            aria-hidden="true"
+          />
+          <span>Kembali ke Peta Badung</span>
+        </a>
+
+        <div class="area-label">
+          <MapPin
+            size={16}
+            stroke-width={2}
+            aria-hidden="true"
+          />
+          <span>Kecamatan / Area</span>
+        </div>
+
+        <h1>{area.name}</h1>
+
+        <p class="area-hero__description">
+          {area.description ||
+            `Jelajahi ekosistem pengelolaan sampah yang tercatat di ${area.name}.`}
+        </p>
+
+        <div class="area-stats">
+          <div class="area-stat">
+            <span class="area-stat__icon">
+              <MapPin
+                size={18}
+                stroke-width={2}
+                aria-hidden="true"
+              />
+            </span>
+
+            <span class="area-stat__content">
+              <strong>{areaLocations.length}</strong>
+              <small>Lokasi aktif</small>
+            </span>
+          </div>
+
+          <div class="area-stat">
+            <span class="area-stat__icon">
+              <Building2
+                size={18}
+                stroke-width={2}
+                aria-hidden="true"
+              />
+            </span>
+
+            <span class="area-stat__content">
+              <strong>{areaOrganizations.length}</strong>
+              <small>Organisasi</small>
+            </span>
+          </div>
+
+          <div class="area-stat">
+            <span class="area-stat__icon">
+              <TriangleAlert
+                size={18}
+                stroke-width={2}
+                aria-hidden="true"
+              />
+            </span>
+
+            <span class="area-stat__content">
+              <strong>{areaReports.length}</strong>
+              <small>Laporan</small>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div
+        class="area-hero__visual"
+        aria-hidden="true"
+      >
+        <div class="visual-ring visual-ring--outer"></div>
+        <div class="visual-ring visual-ring--inner"></div>
+
+        <div class="visual-marker">
+          <MapPin
+            size={32}
+            stroke-width={1.7}
+          />
+        </div>
+
+        <div class="visual-dot visual-dot--one"></div>
+        <div class="visual-dot visual-dot--two"></div>
+        <div class="visual-dot visual-dot--three"></div>
+      </div>
+    </section>
+
+    <section
+      class="map-section"
+      aria-labelledby="map-section-title"
+    >
+      <div class="section-heading">
+        <div>
+          <span class="section-eyebrow">
+            Peta area
+          </span>
+
+          <h2 id="map-section-title">
+            Eksplorasi {area.name}
+          </h2>
+
+          <p>
+            Lihat titik pengelolaan sampah aktif yang
+            tersedia di area ini.
+          </p>
+        </div>
+
+        <a
+          href={`/reports/create?area=${encodeURIComponent(area.slug)}`}
+          class="section-action"
+        >
+          <TriangleAlert
+            size={17}
+            stroke-width={2}
+            aria-hidden="true"
+          />
+          <span>Laporkan masalah</span>
+        </a>
+      </div>
+
+      <div class="map-toolbar">
+        <label
+          class="search-box"
+          for="area-location-search"
+        >
+          <Search
+            size={18}
+            stroke-width={2}
+            aria-hidden="true"
+          />
+
+          <input
+            id="area-location-search"
+            type="search"
+            placeholder={`Cari lokasi di ${area.name}...`}
+            autocomplete="off"
+          />
+        </label>
+
+        <div class="map-count">
+          <strong>{areaLocations.length}</strong>
+          <span>lokasi aktif</span>
+        </div>
+      </div>
+
+      <div class="map-layout">
+        <aside class="map-sidebar">
+          <div class="filter-card">
+            <MapFilter areas={activeAreas} />
+          </div>
+
+          <div class="sidebar-note">
+            <div class="sidebar-note__icon">
+              <Route
+                size={18}
+                stroke-width={2}
+                aria-hidden="true"
+              />
+            </div>
+
+            <div>
+              <strong>
+                Jelajahi area lain
+              </strong>
+
+              <p>
+                Bandingkan data lokasi antar area di
+                Kabupaten Badung.
+              </p>
+            </div>
+
+            <a href="/map">
+              Lihat semua area
+              <ArrowLeft
+                size={15}
+                stroke-width={2}
+                aria-hidden="true"
+              />
+            </a>
+          </div>
+        </aside>
+
+        <div class="map-container">
+          {
+            areaLocations.length > 0 ? (
+              <WasteMap locations={areaLocations} />
+            ) : (
+              <div class="map-empty">
+                <div class="map-empty__icon">
+                  <MapPin
+                    size={28}
+                    stroke-width={1.8}
+                    aria-hidden="true"
+                  />
+                </div>
+
+                <h3>
+                  Belum ada lokasi di area ini
+                </h3>
+
+                <p>
+                  Belum terdapat lokasi pengelolaan
+                  sampah aktif yang tersedia untuk
+                  ditampilkan pada area {area.name}.
+                </p>
+
+                <a href="/reports/create">
+                  Laporkan informasi
+                </a>
+              </div>
+            )
+          }
+        </div>
+      </div>
+    </section>
+
+    <section
+      class="overview-section"
+      aria-labelledby="overview-title"
+    >
+      <div class="section-heading section-heading--compact">
+        <div>
+          <span class="section-eyebrow">
+            Ringkasan
+          </span>
+
+          <h2 id="overview-title">
+            Data {area.name}
+          </h2>
+
+          <p>
+            Ikhtisar informasi yang tercatat pada
+            BINSIGHT untuk area ini.
+          </p>
+        </div>
+      </div>
+
+      <div class="overview-grid">
+        <article class="overview-card">
+          <div class="overview-card__icon overview-card__icon--green">
+            <MapPin
+              size={20}
+              stroke-width={2}
+              aria-hidden="true"
+            />
+          </div>
+
+          <span class="overview-card__label">
+            Lokasi aktif
+          </span>
+
+          <strong>{areaLocations.length}</strong>
+
+          <p>
+            Titik pengelolaan sampah yang saat ini
+            tercatat aktif.
+          </p>
+        </article>
+
+        <article class="overview-card">
+          <div class="overview-card__icon overview-card__icon--lime">
+            <Building2
+              size={20}
+              stroke-width={2}
+              aria-hidden="true"
+            />
+          </div>
+
+          <span class="overview-card__label">
+            Organisasi
+          </span>
+
+          <strong>{areaOrganizations.length}</strong>
+
+          <p>
+            Organisasi terverifikasi yang tersedia
+            pada area ini.
+          </p>
+        </article>
+
+        <article class="overview-card">
+          <div class="overview-card__icon overview-card__icon--blue">
+            <Recycle
+              size={20}
+              stroke-width={2}
+              aria-hidden="true"
+            />
+          </div>
+
+          <span class="overview-card__label">
+            Tipe lokasi
+          </span>
+
+          <strong>{topLocationTypes.length}</strong>
+
+          <p>
+            Kategori lokasi pengelolaan yang tersedia.
+          </p>
+        </article>
+      </div>
+    </section>
+
+    {
+      topLocationTypes.length > 0 && (
+        <section
+          class="distribution-section"
+          aria-labelledby="distribution-title"
+        >
+          <div class="section-heading section-heading--compact">
+            <div>
+              <span class="section-eyebrow">
+                Distribusi
+              </span>
+
+              <h2 id="distribution-title">
+                Jenis lokasi pengelolaan
+              </h2>
+
+              <p>
+                Distribusi berdasarkan tipe lokasi yang
+                tercatat di area ini.
+              </p>
+            </div>
+          </div>
+
+          <div class="distribution-grid">
+            {topLocationTypes.map(
+              ([type, count]) => {
+                const percentage =
+                  areaLocations.length > 0
+                    ? Math.round(
+                        (count /
+                          areaLocations.length) *
+                          100,
+                      )
+                    : 0;
+
+                return (
+                  <article class="distribution-card">
+                    <div class="distribution-card__top">
+                      <div class="distribution-card__icon">
+                        <Recycle
+                          size={19}
+                          stroke-width={2}
+                          aria-hidden="true"
+                        />
+                      </div>
+
+                      <div class="distribution-card__text">
+                        <span>
+                          {locationTypeLabels[type] ??
+                            type}
+                        </span>
+
+                        <strong>
+                          {count}
+                        </strong>
+                      </div>
+                    </div>
+
+                    <div
+                      class="distribution-bar"
+                      aria-hidden="true"
+                    >
+                      <span
+                        style={`width: ${Math.max(
+                          percentage,
+                          count > 0 ? 8 : 0,
+                        )}%`}
+                      ></span>
+                    </div>
+
+                    <small>
+                      {percentage}% dari seluruh lokasi
+                    </small>
+                  </article>
+                );
+              },
+            )}
+          </div>
+        </section>
+      )
+    }
+
+    <section
+      class="organizations-section"
+      aria-labelledby="organizations-title"
+    >
+      <div class="section-heading">
+        <div>
+          <span class="section-eyebrow">
+            Organisasi
+          </span>
+
+          <h2 id="organizations-title">
+            Organisasi terverifikasi
+          </h2>
+
+          <p>
+            Organisasi yang tercatat berada di
+            {` ${area.name}`}.
+          </p>
+        </div>
+
+        <a
+          href="/organizations"
+          class="section-action section-action--secondary"
+        >
+          <span>Lihat semua</span>
+
+          <ArrowLeft
+            size={16}
+            stroke-width={2}
+            aria-hidden="true"
+          />
+        </a>
+      </div>
+
+      {
+        areaOrganizations.length > 0 ? (
+          <div class="organization-grid">
+            {areaOrganizations
+              .slice(0, 6)
+              .map((organization) => (
+                <a
+                  class="organization-card"
+                  href={`/organizations/${organization.slug}`}
+                >
+                  <div class="organization-card__icon">
+                    <Building2
+                      size={20}
+                      stroke-width={2}
+                      aria-hidden="true"
+                    />
+                  </div>
+
+                  <div class="organization-card__body">
+                    <strong>
+                      {organization.name}
+                    </strong>
+
+                    <span>
+                      {organization.location?.address ||
+                        organization.location?.area ||
+                        area.name}
+                    </span>
+                  </div>
+
+                  <ArrowLeft
+                    class="organization-card__arrow"
+                    size={17}
+                    stroke-width={2}
+                    aria-hidden="true"
+                  />
+                </a>
+              ))}
+          </div>
+        ) : (
+          <div class="empty-panel">
+            <Building2
+              size={26}
+              stroke-width={1.8}
+              aria-hidden="true"
+            />
+
+            <h3>
+              Belum ada organisasi terverifikasi
+            </h3>
+
+            <p>
+              Belum ada organisasi terverifikasi yang
+              tercatat untuk area ini.
+            </p>
+          </div>
+        )
+      }
+    </section>
+
+    <section class="area-cta">
+      <div class="area-cta__icon">
+        <TriangleAlert
+          size={23}
+          stroke-width={2}
+          aria-hidden="true"
+        />
+      </div>
+
+      <div class="area-cta__content">
+        <span>Kontribusi masyarakat</span>
+
+        <h2>
+          Punya informasi tentang area ini?
+        </h2>
+
+        <p>
+          Bantu memperkaya BINSIGHT dengan melaporkan
+          lokasi atau masalah persampahan yang kamu
+          temukan.
+        </p>
+      </div>
+
+      <a
+        href={`/reports/create?area=${encodeURIComponent(area.slug)}`}
+        class="area-cta__button"
+      >
+        Buat laporan
+
+        <ArrowLeft
+          size={17}
+          stroke-width={2}
+          aria-hidden="true"
+        />
+      </a>
+    </section>
+  </main>
+</PublicLayout>
+
+<script>
+  const searchInput =
+    document.querySelector<HTMLInputElement>(
+      "#area-location-search",
+    );
+
+  if (searchInput) {
+    searchInput.addEventListener(
+      "input",
+      () => {
+        const query =
+          searchInput.value.trim().toLowerCase();
+
+        const locationElements =
+          document.querySelectorAll<HTMLElement>(
+            "[data-map-location], [data-location-card]",
+          );
+
+        locationElements.forEach((element) => {
+          const text =
+            element.textContent?.toLowerCase() ?? "";
+
+          element.hidden =
+            query.length > 0 &&
+            !text.includes(query);
+        });
+      },
+    );
+  }
+</script>
+
+<style>
+  .area-page {
+    width: min(100% - 32px, 1440px);
+    margin-inline: auto;
+    padding-bottom: 80px;
+  }
+
+  .area-hero {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1.3fr) minmax(280px, 0.7fr);
+    gap: 32px;
+    overflow: hidden;
+    margin-top: 32px;
+    padding: 40px;
+    border: 1px solid var(--color-border, #e2e8f0);
+    border-radius: 28px;
+    background:
+      radial-gradient(
+        circle at 84% 18%,
+        rgba(132, 204, 22, 0.14),
+        transparent 32%
+      ),
+      linear-gradient(
+        135deg,
+        #ffffff 0%,
+        #f0fdf4 100%
+      );
+  }
+
+  .area-hero__content {
+    position: relative;
+    z-index: 2;
+  }
+
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 25px;
+    color: #166534;
+    font-size: 0.9rem;
+    font-weight: 750;
+    text-decoration: none;
+  }
+
+  .back-link:hover {
+    text-decoration: underline;
+  }
+
+  .area-label,
+  .section-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    color: #166534;
+    font-size: 0.76rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .area-hero h1 {
+    max-width: 820px;
+    margin: 10px 0 0;
+    color: #0f172a;
+    font-size: clamp(2.2rem, 4vw, 3.8rem);
+    line-height: 1.04;
+    letter-spacing: -0.045em;
+  }
+
+  .area-hero__description {
+    max-width: 760px;
+    margin: 19px 0 0;
+    color: #64748b;
+    font-size: 1.02rem;
+    line-height: 1.75;
+  }
+
+  .area-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 28px;
+  }
+
+  .area-stat {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 154px;
+    padding: 11px 13px;
+    border: 1px solid #e2e8f0;
+    border-radius: 15px;
+    background: rgba(255, 255, 255, 0.86);
+  }
+
+  .area-stat__icon {
+    display: grid;
+    width: 38px;
+    height: 38px;
+    place-items: center;
+    flex: 0 0 38px;
+    border-radius: 12px;
+    background: #dcfce7;
+    color: #166534;
+  }
+
+  .area-stat__content {
+    display: grid;
+    gap: 1px;
+  }
+
+  .area-stat__content strong {
+    color: #0f172a;
+    font-size: 1.08rem;
+    line-height: 1.1;
+  }
+
+  .area-stat__content small {
+    color: #64748b;
+    font-size: 0.75rem;
+  }
+
+  .area-hero__visual {
+    position: relative;
+    min-height: 300px;
+  }
+
+  .visual-ring {
+    position: absolute;
+    border: 1px solid rgba(22, 101, 52, 0.13);
+    border-radius: 999px;
+  }
+
+  .visual-ring--outer {
+    inset: 6%;
+  }
+
+  .visual-ring--inner {
+    inset: 22%;
+  }
+
+  .visual-marker {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    display: grid;
+    width: 88px;
+    height: 88px;
+    place-items: center;
+    transform: translate(-50%, -50%);
+    border: 1px solid rgba(22, 101, 52, 0.18);
+    border-radius: 27px;
+    background: rgba(255, 255, 255, 0.96);
+    box-shadow:
+      0 20px 50px rgba(15, 23, 42, 0.1);
+    color: #166534;
+  }
+
+  .visual-dot {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #84cc16;
+    box-shadow: 0 0 0 7px rgba(132, 204, 22, 0.12);
+  }
+
+  .visual-dot--one {
+    top: 20%;
+    left: 24%;
+  }
+
+  .visual-dot--two {
+    top: 28%;
+    right: 17%;
+  }
+
+  .visual-dot--three {
+    right: 25%;
+    bottom: 17%;
+  }
+
+  .map-section,
+  .overview-section,
+  .distribution-section,
+  .organizations-section {
+    margin-top: 56px;
+  }
+
+  .section-heading {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: 24px;
+    margin-bottom: 22px;
+  }
+
+  .section-heading--compact {
+    align-items: start;
+  }
+
+  .section-heading h2 {
+    margin: 7px 0 0;
+    color: #0f172a;
+    font-size: clamp(1.5rem, 2.5vw, 2.1rem);
+    line-height: 1.1;
+    letter-spacing: -0.035em;
+  }
+
+  .section-heading p {
+    max-width: 720px;
+    margin: 8px 0 0;
+    color: #64748b;
+    line-height: 1.65;
+  }
+
+  .section-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 44px;
+    flex: 0 0 auto;
+    padding: 0 15px;
+    border: 1px solid #166534;
+    border-radius: 12px;
+    background: #166534;
+    color: #fff;
+    font-size: 0.86rem;
+    font-weight: 750;
+    text-decoration: none;
+  }
+
+  .section-action:hover {
+    background: #14532d;
+    border-color: #14532d;
+  }
+
+  .section-action--secondary {
+    background: #fff;
+    color: #166534;
+  }
+
+  .section-action--secondary:hover {
+    background: #f0fdf4;
+  }
+
+  .map-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 14px;
+  }
+
+  .search-box {
+    display: flex;
+    align-items: center;
+    width: min(100%, 520px);
+    height: 48px;
+    gap: 10px;
+    padding-inline: 15px;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    background: #fff;
+    color: #64748b;
+  }
+
+  .search-box:focus-within {
+    border-color: #166534;
+    box-shadow:
+      0 0 0 3px rgba(22, 101, 52, 0.08);
+  }
+
+  .search-box input {
+    width: 100%;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: #0f172a;
+    font: inherit;
+  }
+
+  .search-box input::placeholder {
+    color: #94a3b8;
+  }
+
+  .map-count {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 6px;
+    color: #64748b;
+    font-size: 0.84rem;
+  }
+
+  .map-count strong {
+    color: #0f172a;
+    font-size: 1rem;
+  }
+
+  .map-layout {
+    display: grid;
+    grid-template-columns: 290px minmax(0, 1fr);
+    gap: 16px;
+  }
+
+  .map-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .filter-card {
+    padding: 16px;
+    border: 1px solid #e2e8f0;
+    border-radius: 17px;
+    background: #fff;
+  }
+
+  .sidebar-note {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 11px;
+    padding: 16px;
+    border: 1px solid #e2e8f0;
+    border-radius: 17px;
+    background: #fff;
+  }
+
+  .sidebar-note__icon {
+    display: grid;
+    width: 38px;
+    height: 38px;
+    place-items: center;
+    border-radius: 11px;
+    background: #f0fdf4;
+    color: #166534;
+  }
+
+  .sidebar-note strong {
+    display: block;
+    color: #0f172a;
+    font-size: 0.9rem;
+  }
+
+  .sidebar-note p {
+    margin: 4px 0 0;
+    color: #64748b;
+    font-size: 0.79rem;
+    line-height: 1.55;
+  }
+
+  .sidebar-note a {
+    grid-column: 1 / -1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-top: 3px;
+    padding-top: 11px;
+    border-top: 1px solid #e2e8f0;
+    color: #166534;
+    font-size: 0.81rem;
+    font-weight: 750;
+    text-decoration: none;
+  }
+
+  .sidebar-note a svg {
+    transform: rotate(180deg);
+  }
+
+  .map-container {
+    min-width: 0;
+    min-height: 650px;
+    overflow: hidden;
+    border: 1px solid #e2e8f0;
+    border-radius: 20px;
+    background: #e2e8f0;
+  }
+
+  .map-empty {
+    display: flex;
+    min-height: 650px;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    padding: 32px;
+    background: #f8fafc;
+    text-align: center;
+  }
+
+  .map-empty__icon {
+    display: grid;
+    width: 64px;
+    height: 64px;
+    place-items: center;
+    margin-bottom: 15px;
+    border-radius: 18px;
+    background: #dcfce7;
+    color: #166534;
+  }
+
+  .map-empty h3 {
+    margin: 0;
+    color: #0f172a;
+    font-size: 1.08rem;
+  }
+
+  .map-empty p {
+    max-width: 480px;
+    margin: 8px 0 18px;
+    color: #64748b;
+    line-height: 1.65;
+  }
+
+  .map-empty a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 42px;
+    padding-inline: 15px;
+    border-radius: 11px;
+    background: #166534;
+    color: #fff;
+    font-size: 0.85rem;
+    font-weight: 750;
+    text-decoration: none;
+  }
+
+  .overview-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 15px;
+  }
+
+  .overview-card {
+    padding: 20px;
+    border: 1px solid #e2e8f0;
+    border-radius: 18px;
+    background: #fff;
+  }
+
+  .overview-card__icon {
+    display: grid;
+    width: 44px;
+    height: 44px;
+    place-items: center;
+    margin-bottom: 14px;
+    border-radius: 13px;
+  }
+
+  .overview-card__icon--green {
+    background: #dcfce7;
+    color: #166534;
+  }
+
+  .overview-card__icon--lime {
+    background: #ecfccb;
+    color: #3f6212;
+  }
+
+  .overview-card__icon--blue {
+    background: #dbeafe;
+    color: #2563eb;
+  }
+
+  .overview-card__label {
+    display: block;
+    color: #64748b;
+    font-size: 0.78rem;
+    font-weight: 650;
+  }
+
+  .overview-card > strong {
+    display: block;
+    margin-top: 2px;
+    color: #0f172a;
+    font-size: 1.45rem;
+  }
+
+  .overview-card p {
+    margin: 12px 0 0;
+    color: #64748b;
+    font-size: 0.88rem;
+    line-height: 1.65;
+  }
+
+  .distribution-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+  }
+
+  .distribution-card {
+    padding: 17px;
+    border: 1px solid #e2e8f0;
+    border-radius: 17px;
+    background: #fff;
+  }
+
+  .distribution-card__top {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .distribution-card__icon {
+    display: grid;
+    width: 42px;
+    height: 42px;
+    place-items: center;
+    flex: 0 0 42px;
+    border-radius: 12px;
+    background: #f0fdf4;
+    color: #166534;
+  }
+
+  .distribution-card__text {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .distribution-card__text span {
+    color: #0f172a;
+    font-size: 0.89rem;
+    font-weight: 700;
+  }
+
+  .distribution-card__text strong {
+    color: #166534;
+    font-size: 1.04rem;
+  }
+
+  .distribution-bar {
+    height: 6px;
+    margin-top: 15px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: #f1f5f9;
+  }
+
+  .distribution-bar span {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: #84cc16;
+  }
+
+  .distribution-card small {
+    display: block;
+    margin-top: 7px;
+    color: #94a3b8;
+    font-size: 0.72rem;
+  }
+
+  .organization-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+  }
+
+  .organization-card {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    padding: 16px;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    background: #fff;
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .organization-card:hover {
+    border-color: #bbf7d0;
+    background: #f8fffa;
+  }
+
+  .organization-card__icon {
+    display: grid;
+    width: 44px;
+    height: 44px;
+    place-items: center;
+    flex: 0 0 44px;
+    border-radius: 13px;
+    background: #dcfce7;
+    color: #166534;
+  }
+
+  .organization-card__body {
+    min-width: 0;
+    display: grid;
+    gap: 4px;
+  }
+
+  .organization-card__body strong {
+    overflow: hidden;
+    color: #0f172a;
+    font-size: 0.91rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .organization-card__body span {
+    overflow: hidden;
+    color: #64748b;
+    font-size: 0.77rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .organization-card__arrow {
+    margin-left: auto;
+    flex: 0 0 auto;
+    transform: rotate(180deg);
+    color: #94a3b8;
+  }
+
+  .empty-panel {
+    display: grid;
+    place-items: center;
+    padding: 50px 24px;
+    border: 1px dashed #e2e8f0;
+    border-radius: 18px;
+    background: #f8fafc;
+    color: #94a3b8;
+    text-align: center;
+  }
+
+  .empty-panel h3 {
+    margin: 12px 0 0;
+    color: #334155;
+    font-size: 1rem;
+  }
+
+  .empty-panel p {
+    max-width: 520px;
+    margin: 7px 0 0;
+    color: #64748b;
+    line-height: 1.6;
+  }
+
+  .area-cta {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 18px;
+    margin-top: 56px;
+    padding: 24px;
+    border: 1px solid #bbf7d0;
+    border-radius: 20px;
+    background:
+      linear-gradient(
+        135deg,
+        #f0fdf4 0%,
+        #ffffff 100%
+      );
+  }
+
+  .area-cta__icon {
+    display: grid;
+    width: 48px;
+    height: 48px;
+    place-items: center;
+    border-radius: 14px;
+    background: #dcfce7;
+    color: #166534;
+  }
+
+  .area-cta__content > span {
+    display: block;
+    margin-bottom: 4px;
+    color: #166534;
+    font-size: 0.76rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .area-cta__content h2 {
+    margin: 0;
+    color: #0f172a;
+    font-size: 1.2rem;
+    letter-spacing: -0.02em;
+  }
+
+  .area-cta__content p {
+    margin: 5px 0 0;
+    color: #64748b;
+    line-height: 1.6;
+  }
+
+  .area-cta__button {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    padding-inline: 16px;
+    border-radius: 12px;
+    background: #166534;
+    color: #fff;
+    font-size: 0.86rem;
+    font-weight: 750;
+    text-decoration: none;
+  }
+
+  .area-cta__button:hover {
+    background: #14532d;
+  }
+
+  .area-cta__button svg {
+    transform: rotate(180deg);
+  }
+
+  @media (max-width: 1100px) {
+    .area-hero {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .area-hero__visual {
+      display: none;
+    }
+
+    .map-layout {
+      grid-template-columns: 250px minmax(0, 1fr);
+    }
+  }
+
+  @media (max-width: 900px) {
+    .map-layout {
+      grid-template-columns: 1fr;
+    }
+
+    .overview-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .organization-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 720px) {
+    .area-page {
+      width: min(100% - 20px, 1440px);
+      padding-bottom: 52px;
+    }
+
+    .area-hero {
+      margin-top: 20px;
+      padding: 24px;
+      border-radius: 20px;
+    }
+
+    .area-hero h1 {
+      font-size: 2rem;
+    }
+
+    .area-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .area-stat {
+      min-width: 0;
+    }
+
+    .section-heading {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+
+    .section-action {
+      width: 100%;
+    }
+
+    .map-toolbar {
+      align-items: stretch;
+      flex-direction: column;
+    }
+
+    .search-box {
+      width: 100%;
+    }
+
+    .distribution-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .map-container,
+    .map-empty {
+      min-height: 520px;
+    }
+
+    .area-cta {
+      grid-template-columns: auto minmax(0, 1fr);
+    }
+
+    .area-cta__button {
+      grid-column: 1 / -1;
+      justify-content: center;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .area-stats {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
