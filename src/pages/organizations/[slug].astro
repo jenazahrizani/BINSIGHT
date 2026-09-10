@@ -1,0 +1,1580 @@
+---
+
+/**
+
+* ============================================================================
+* BINSIGHT — ORGANIZATION DETAIL
+* ============================================================================
+* Public organization profile.
+*
+* Route:
+* /organizations/[slug]
+*
+* Responsibilities:
+* * Generate public organization pages from verified/public organizations
+* * Present identity and location information
+* * Present optional profile metadata without assuming unavailable fields
+* * Provide map/report/discovery actions
+* * Generate accessible breadcrumbs and structured data
+* * Keep rendering safe when optional organization data is absent
+*
+* Data source:
+* src/lib/data/organizations.ts
+* ============================================================================
+  */
+
+import {
+ArrowLeft,
+ArrowUpRight,
+Building2,
+Check,
+CircleCheck,
+ExternalLink,
+Globe,
+Mail,
+Map,
+MapPin,
+Phone,
+Recycle,
+ShieldCheck,
+} from "@lucide/astro";
+
+import PublicLayout from "@layouts/PublicLayout.astro";
+import PageHeader from "@components/layout/PageHeader.astro";
+
+import {
+getPublicOrganizations,
+type Organization,
+} from "@lib/data/organizations";
+
+export async function getStaticPaths() {
+const organizations = await getPublicOrganizations();
+
+return organizations
+.filter(
+(organization: Organization) =>
+organization.isPublic === true &&
+organization.status === "verified" &&
+Boolean(organization.slug),
+)
+.map((organization: Organization) => ({
+params: {
+slug: organization.slug,
+},
+props: {
+organization,
+},
+}));
+}
+
+interface Props {
+organization: Organization;
+}
+
+const { organization } = Astro.props as Props;
+
+/**
+
+* Optional fields are read through a narrow record view.
+*
+* This intentionally keeps this page compatible with the proven Organization
+* contract while still allowing richer Firestore records to populate the UI.
+  */
+  const organizationRecord =
+  organization as Organization &
+  Record<string, unknown>;
+
+const readString = (
+key: string,
+): string | undefined => {
+const value = organizationRecord[key];
+
+return typeof value === "string" && value.trim().length > 0
+? value.trim()
+: undefined;
+};
+
+const readStringArray = (
+key: string,
+): string[] => {
+const value = organizationRecord[key];
+
+return Array.isArray(value)
+? value.filter(
+(item): item is string =>
+typeof item === "string" &&
+item.trim().length > 0,
+)
+: [];
+};
+
+const organizationName = organization.name.trim();
+
+const organizationDescription =
+readString("description") ??
+readString("about") ??
+`Profil ${organizationName} dalam ekosistem pengelolaan persampahan Kabupaten Badung.`;
+
+const organizationType =
+readString("typeLabel") ??
+readString("organizationTypeLabel") ??
+readString("type");
+
+const website =
+readString("website") ??
+readString("websiteUrl");
+
+const email =
+readString("email") ??
+readString("contactEmail");
+
+const phone =
+readString("phone") ??
+readString("phoneNumber") ??
+readString("contactPhone");
+
+const logo =
+readString("logo") ??
+readString("logoUrl") ??
+readString("image") ??
+readString("imageUrl");
+
+const address =
+organization.location.address?.trim() ||
+undefined;
+
+const area =
+organization.location.area?.trim() ||
+"Kabupaten Badung";
+
+const latitude =
+typeof organization.location.latitude === "number" &&
+Number.isFinite(organization.location.latitude)
+? organization.location.latitude
+: undefined;
+
+const longitude =
+typeof organization.location.longitude === "number" &&
+Number.isFinite(organization.location.longitude)
+? organization.location.longitude
+: undefined;
+
+const wasteIds = readStringArray("wasteIds");
+const wasteNames = readStringArray("wasteNames");
+
+const processNames =
+readStringArray("processNames");
+
+const hasCoordinates =
+latitude !== undefined &&
+longitude !== undefined;
+
+const locationLabel = [
+address,
+area,
+"Kabupaten Badung",
+].filter(Boolean).join(", ");
+
+const contactItems = [
+{
+enabled: Boolean(phone),
+href: phone
+? `tel:${phone.replace(/[^\d+]/g, "")}`
+: undefined,
+label: "Telepon",
+value: phone,
+icon: Phone,
+},
+{
+enabled: Boolean(email),
+href: email
+? `mailto:${email}`
+: undefined,
+label: "Email",
+value: email,
+icon: Mail,
+},
+{
+enabled: Boolean(website),
+href: website,
+label: "Website",
+value: website,
+icon: Globe,
+},
+].filter(
+(
+item,
+): item is {
+enabled: true;
+href: string;
+label: string;
+value: string;
+icon: typeof Phone;
+} => Boolean(item.enabled && item.href && item.value),
+);
+
+const breadcrumbItems = [
+{
+label: "Beranda",
+href: "/",
+},
+{
+label: "Organisasi",
+href: "/organizations",
+},
+{
+label: organizationName,
+},
+];
+
+const canonicalPath =
+`/organizations/${encodeURIComponent(organization.slug)}`;
+
+const canonicalUrl =
+new URL(
+canonicalPath,
+Astro.site ?? Astro.url.origin,
+).toString();
+
+const schema = {
+"@context": "https://schema.org",
+"@type": "Organization",
+name: organizationName,
+description: organizationDescription,
+url: canonicalUrl,
+...(logo
+? {
+logo: new URL(
+logo,
+Astro.site ?? Astro.url.origin,
+).toString(),
+}
+: {}),
+...(website
+? {
+sameAs: [website],
+}
+: {}),
+...(address || area
+? {
+address: {
+"@type": "PostalAddress",
+...(address
+? {
+streetAddress: address,
+}
+: {}),
+addressLocality: area,
+addressRegion: "Bali",
+addressCountry: "ID",
+},
+}
+: {}),
+...(hasCoordinates
+? {
+location: {
+"@type": "Place",
+name: organizationName,
+geo: {
+"@type": "GeoCoordinates",
+latitude,
+longitude,
+},
+},
+}
+: {}),
+};
+
+const mapQuery =
+hasCoordinates
+? `${latitude},${longitude}`
+: encodeURIComponent(locationLabel);
+
+const statusLabel =
+organization.status === "verified"
+? "Terverifikasi"
+: "Belum terverifikasi";
+
+---
+
+<PublicLayout
+title={`${organizationName} — Organisasi | BINSIGHT`}
+description={organizationDescription}
+
+>
+
+  <script
+    type="application/ld+json"
+    is:inline
+    set:html={JSON.stringify(schema)}
+  ></script>
+
+<PageHeader
+ eyebrow="Organisasi"
+ title={organizationName}
+ description="Profil organisasi dalam ekosistem pengelolaan persampahan Kabupaten Badung."
+ icon="organization"
+ tone="green"
+ breadcrumbs={breadcrumbItems}
+/>
+
+  <main class="organization-page">
+    <section class="organization-page__container">
+
+```
+  <div class="organization-hero">
+    <div class="organization-hero__identity">
+
+      <div class="organization-hero__logo">
+        {
+          logo ? (
+            <img
+              src={logo}
+              alt={`Logo ${organizationName}`}
+              width="112"
+              height="112"
+              loading="eager"
+              decoding="async"
+            />
+          ) : (
+            <Building2
+              size={48}
+              stroke-width={1.7}
+              aria-hidden="true"
+            />
+          )
+        }
+      </div>
+
+      <div class="organization-hero__content">
+
+        <div class="organization-hero__badges">
+          <span class="organization-badge organization-badge--verified">
+            <CircleCheck
+              size={15}
+              stroke-width={2}
+              aria-hidden="true"
+            />
+            {statusLabel}
+          </span>
+
+          {
+            organizationType && (
+              <span class="organization-badge">
+                <Building2
+                  size={15}
+                  stroke-width={1.8}
+                  aria-hidden="true"
+                />
+                {organizationType}
+              </span>
+            )
+          }
+        </div>
+
+        <h1 class="organization-hero__title">
+          {organizationName}
+        </h1>
+
+        <div class="organization-hero__location">
+          <MapPin
+            size={18}
+            stroke-width={1.8}
+            aria-hidden="true"
+          />
+
+          <span>
+            {locationLabel}
+          </span>
+        </div>
+
+        <p class="organization-hero__description">
+          {organizationDescription}
+        </p>
+
+        <div class="organization-hero__actions">
+          <a
+            href="#informasi"
+            class="organization-button organization-button--primary"
+          >
+            Lihat informasi
+            <ArrowUpRight
+              size={17}
+              stroke-width={1.9}
+              aria-hidden="true"
+            />
+          </a>
+
+          <a
+            href="/map"
+            class="organization-button organization-button--secondary"
+          >
+            <Map
+              size={17}
+              stroke-width={1.9}
+              aria-hidden="true"
+            />
+            Lihat peta
+          </a>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="organization-grid">
+
+    <div class="organization-main">
+
+      <section
+        id="informasi"
+        class="organization-card"
+      >
+        <div class="organization-card__header">
+          <div>
+            <span class="organization-card__eyebrow">
+              Profil
+            </span>
+
+            <h2 class="organization-card__title">
+              Tentang organisasi
+            </h2>
+          </div>
+
+          <span class="organization-card__icon">
+            <Building2
+              size={21}
+              stroke-width={1.8}
+              aria-hidden="true"
+            />
+          </span>
+        </div>
+
+        <div class="organization-card__body">
+          <p class="organization-card__text">
+            {organizationDescription}
+          </p>
+        </div>
+      </section>
+
+      <section class="organization-card">
+        <div class="organization-card__header">
+          <div>
+            <span class="organization-card__eyebrow">
+              Pengelolaan
+            </span>
+
+            <h2 class="organization-card__title">
+              Aktivitas persampahan
+            </h2>
+          </div>
+
+          <span class="organization-card__icon">
+            <Recycle
+              size={21}
+              stroke-width={1.8}
+              aria-hidden="true"
+            />
+          </span>
+        </div>
+
+        <div class="organization-card__body">
+
+          {
+            wasteNames.length > 0 ? (
+              <div class="organization-section">
+                <h3 class="organization-section__title">
+                  Jenis sampah yang dikelola
+                </h3>
+
+                <div class="organization-tags">
+                  {
+                    wasteNames.map((name: string) => (
+                      <span class="organization-tag">
+                        <Recycle
+                          size={14}
+                          stroke-width={1.8}
+                          aria-hidden="true"
+                        />
+                        {name}
+                      </span>
+                    ))
+                  }
+                </div>
+              </div>
+            ) : wasteIds.length > 0 ? (
+              <div class="organization-section">
+                <h3 class="organization-section__title">
+                  Data sampah terhubung
+                </h3>
+
+                <p class="organization-card__muted">
+                  Organisasi memiliki {wasteIds.length} data
+                  sampah terhubung pada sistem BINSIGHT.
+                </p>
+              </div>
+            ) : (
+              <div class="organization-empty">
+                <Recycle
+                  size={24}
+                  stroke-width={1.7}
+                  aria-hidden="true"
+                />
+
+                <div>
+                  <h3>
+                    Belum ada data pengelolaan
+                  </h3>
+
+                  <p>
+                    Informasi jenis sampah yang dikelola
+                    organisasi belum tersedia secara publik.
+                  </p>
+                </div>
+              </div>
+            )
+          }
+
+          {
+            processNames.length > 0 && (
+              <div class="organization-section">
+                <h3 class="organization-section__title">
+                  Proses pengelolaan
+                </h3>
+
+                <div class="organization-process-list">
+                  {
+                    processNames.map((process: string, index: number) => (
+                      <div class="organization-process">
+                        <span class="organization-process__number">
+                          {index + 1}
+                        </span>
+
+                        <span class="organization-process__name">
+                          {process}
+                        </span>
+
+                        <Check
+                          size={16}
+                          stroke-width={2}
+                          aria-hidden="true"
+                        />
+                      </div>
+                    ))
+                  }
+                </div>
+              </div>
+            )
+          }
+
+        </div>
+      </section>
+
+      <section class="organization-card">
+        <div class="organization-card__header">
+          <div>
+            <span class="organization-card__eyebrow">
+              Lokasi
+            </span>
+
+            <h2 class="organization-card__title">
+              Lokasi organisasi
+            </h2>
+          </div>
+
+          <span class="organization-card__icon">
+            <MapPin
+              size={21}
+              stroke-width={1.8}
+              aria-hidden="true"
+            />
+          </span>
+        </div>
+
+        <div class="organization-card__body">
+
+          <div class="organization-location">
+            <div class="organization-location__icon">
+              <MapPin
+                size={20}
+                stroke-width={1.8}
+                aria-hidden="true"
+              />
+            </div>
+
+            <div class="organization-location__content">
+              <strong>
+                {area}
+              </strong>
+
+              {
+                address && (
+                  <span>
+                    {address}
+                  </span>
+                )
+              }
+
+              {
+                !address && (
+                  <span>
+                    Kabupaten Badung, Bali
+                  </span>
+                )
+              }
+            </div>
+          </div>
+
+          {
+            hasCoordinates ? (
+              <div class="organization-coordinates">
+                <div>
+                  <span class="organization-coordinates__label">
+                    Latitude
+                  </span>
+
+                  <strong>
+                    {latitude?.toFixed(6)}
+                  </strong>
+                </div>
+
+                <div>
+                  <span class="organization-coordinates__label">
+                    Longitude
+                  </span>
+
+                  <strong>
+                    {longitude?.toFixed(6)}
+                  </strong>
+                </div>
+              </div>
+            ) : (
+              <div class="organization-card__muted">
+                Koordinat lokasi belum tersedia pada data publik.
+              </div>
+            )
+          }
+
+          <a
+            href={`https://www.google.com/maps/search/?api=1&query=${mapQuery}`}
+            class="organization-map-link"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Buka lokasi di peta
+            <ExternalLink
+              size={16}
+              stroke-width={1.8}
+              aria-hidden="true"
+            />
+          </a>
+
+        </div>
+      </section>
+
+    </div>
+
+    <aside class="organization-sidebar">
+
+      <section class="organization-side-card">
+        <div class="organization-side-card__header">
+          <ShieldCheck
+            size={21}
+            stroke-width={1.8}
+            aria-hidden="true"
+          />
+
+          <h2>
+            Status organisasi
+          </h2>
+        </div>
+
+        <div class="organization-status">
+          <span class="organization-status__icon">
+            <CircleCheck
+              size={21}
+              stroke-width={2}
+              aria-hidden="true"
+            />
+          </span>
+
+          <div>
+            <strong>
+              {statusLabel}
+            </strong>
+
+            <p>
+              Informasi organisasi telah ditandai
+              sebagai data publik oleh sistem BINSIGHT.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {
+        contactItems.length > 0 && (
+          <section class="organization-side-card">
+            <div class="organization-side-card__header">
+              <Globe
+                size={21}
+                stroke-width={1.8}
+                aria-hidden="true"
+              />
+
+              <h2>
+                Kontak
+              </h2>
+            </div>
+
+            <div class="organization-contact-list">
+              {
+                contactItems.map((item) => {
+                  const ContactIcon = item.icon;
+
+                  return (
+                    <a
+                      href={item.href}
+                      class="organization-contact"
+                      target={
+                        item.label === "Website"
+                          ? "_blank"
+                          : undefined
+                      }
+                      rel={
+                        item.label === "Website"
+                          ? "noopener noreferrer"
+                          : undefined
+                      }
+                    >
+                      <span class="organization-contact__icon">
+                        <ContactIcon
+                          size={17}
+                          stroke-width={1.8}
+                          aria-hidden="true"
+                        />
+                      </span>
+
+                      <span class="organization-contact__copy">
+                        <span class="organization-contact__label">
+                          {item.label}
+                        </span>
+
+                        <span class="organization-contact__value">
+                          {item.value}
+                        </span>
+                      </span>
+
+                      <ArrowUpRight
+                        size={15}
+                        stroke-width={1.8}
+                        aria-hidden="true"
+                      />
+                    </a>
+                  );
+                })
+              }
+            </div>
+          </section>
+        )
+      }
+
+      <section class="organization-side-card organization-side-card--green">
+        <div class="organization-side-card__header">
+          <Recycle
+            size={21}
+            stroke-width={1.8}
+            aria-hidden="true"
+          />
+
+          <h2>
+            Jelajahi ekosistem
+          </h2>
+        </div>
+
+        <p>
+          Temukan organisasi lain, lokasi pengelolaan,
+          jenis sampah, dan data persampahan di Kabupaten Badung.
+        </p>
+
+        <div class="organization-side-links">
+
+          <a href="/organizations">
+            <span>
+              Semua organisasi
+            </span>
+
+            <ArrowUpRight
+              size={16}
+              stroke-width={1.8}
+              aria-hidden="true"
+            />
+          </a>
+
+          <a href="/waste">
+            <span>
+              Jenis sampah
+            </span>
+
+            <ArrowUpRight
+              size={16}
+              stroke-width={1.8}
+              aria-hidden="true"
+            />
+          </a>
+
+          <a href="/map">
+            <span>
+              Peta persampahan
+            </span>
+
+            <ArrowUpRight
+              size={16}
+              stroke-width={1.8}
+              aria-hidden="true"
+            />
+          </a>
+
+        </div>
+      </section>
+
+      <a
+        href="/organizations"
+        class="organization-back-link"
+      >
+        <ArrowLeft
+          size={16}
+          stroke-width={1.9}
+          aria-hidden="true"
+        />
+
+        Kembali ke daftar organisasi
+      </a>
+
+    </aside>
+
+  </div>
+
+</section>
+```
+
+  </main>
+
+  <style>
+    .organization-page {
+      background: var(--color-background, #f8fafc);
+      padding: 0 0 80px;
+    }
+
+    .organization-page__container {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+    }
+
+    .organization-hero {
+      margin-top: -18px;
+      position: relative;
+      z-index: 2;
+      background: var(--color-surface, #ffffff);
+      border: 1px solid var(--color-border, #e2e8f0);
+      border-radius: 24px;
+      padding: 30px;
+      box-shadow:
+        0 18px 50px rgba(15, 23, 42, 0.07),
+        0 2px 8px rgba(15, 23, 42, 0.03);
+    }
+
+    .organization-hero__identity {
+      display: flex;
+      gap: 24px;
+      align-items: flex-start;
+    }
+
+    .organization-hero__logo {
+      width: 112px;
+      height: 112px;
+      flex: 0 0 112px;
+      border-radius: 22px;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      background: #ecfdf5;
+      color: #166534;
+      border: 1px solid #bbf7d0;
+    }
+
+    .organization-hero__logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .organization-hero__content {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .organization-hero__badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .organization-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      min-height: 30px;
+      padding: 5px 10px;
+      border-radius: 999px;
+      background: #f1f5f9;
+      color: #475569;
+      border: 1px solid #e2e8f0;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .organization-badge--verified {
+      background: #ecfdf5;
+      border-color: #bbf7d0;
+      color: #166534;
+    }
+
+    .organization-hero__title {
+      margin: 0;
+      color: #0f172a;
+      font-size: clamp(1.8rem, 4vw, 2.7rem);
+      line-height: 1.12;
+      letter-spacing: -0.035em;
+      font-weight: 800;
+    }
+
+    .organization-hero__location {
+      margin-top: 11px;
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      color: #475569;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .organization-hero__location svg {
+      flex: 0 0 auto;
+      margin-top: 1px;
+      color: #166534;
+    }
+
+    .organization-hero__description {
+      max-width: 760px;
+      margin: 16px 0 0;
+      color: #64748b;
+      font-size: 15px;
+      line-height: 1.75;
+    }
+
+    .organization-hero__actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 22px;
+    }
+
+    .organization-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 42px;
+      padding: 0 16px;
+      border-radius: 11px;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 750;
+      transition:
+        transform 160ms ease,
+        box-shadow 160ms ease,
+        border-color 160ms ease,
+        background-color 160ms ease;
+    }
+
+    .organization-button:hover {
+      transform: translateY(-1px);
+    }
+
+    .organization-button--primary {
+      background: #166534;
+      color: #ffffff;
+      box-shadow: 0 8px 20px rgba(22, 101, 52, 0.18);
+    }
+
+    .organization-button--primary:hover {
+      background: #14532d;
+    }
+
+    .organization-button--secondary {
+      background: #ffffff;
+      color: #166534;
+      border: 1px solid #bbf7d0;
+    }
+
+    .organization-button--secondary:hover {
+      background: #f0fdf4;
+      border-color: #86efac;
+    }
+
+    .organization-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 340px;
+      gap: 22px;
+      align-items: start;
+      margin-top: 22px;
+    }
+
+    .organization-main,
+    .organization-sidebar {
+      display: grid;
+      gap: 22px;
+    }
+
+    .organization-card,
+    .organization-side-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 18px;
+      overflow: hidden;
+    }
+
+    .organization-card__header {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: flex-start;
+      padding: 22px 22px 18px;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .organization-card__eyebrow {
+      display: block;
+      margin-bottom: 4px;
+      color: #16a34a;
+      font-size: 11px;
+      line-height: 1.3;
+      font-weight: 800;
+      letter-spacing: 0.11em;
+      text-transform: uppercase;
+    }
+
+    .organization-card__title {
+      margin: 0;
+      color: #0f172a;
+      font-size: 19px;
+      line-height: 1.3;
+      font-weight: 800;
+      letter-spacing: -0.015em;
+    }
+
+    .organization-card__icon {
+      width: 40px;
+      height: 40px;
+      flex: 0 0 40px;
+      display: grid;
+      place-items: center;
+      border-radius: 12px;
+      background: #f0fdf4;
+      color: #166534;
+      border: 1px solid #dcfce7;
+    }
+
+    .organization-card__body {
+      padding: 22px;
+    }
+
+    .organization-card__text {
+      margin: 0;
+      color: #475569;
+      font-size: 15px;
+      line-height: 1.8;
+    }
+
+    .organization-card__muted {
+      color: #64748b;
+      font-size: 13px;
+      line-height: 1.65;
+    }
+
+    .organization-section + .organization-section {
+      margin-top: 25px;
+      padding-top: 24px;
+      border-top: 1px solid #f1f5f9;
+    }
+
+    .organization-section__title {
+      margin: 0 0 13px;
+      color: #0f172a;
+      font-size: 14px;
+      font-weight: 750;
+    }
+
+    .organization-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .organization-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      min-height: 34px;
+      padding: 7px 11px;
+      border-radius: 10px;
+      background: #f0fdf4;
+      border: 1px solid #dcfce7;
+      color: #166534;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .organization-empty {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 16px;
+      border-radius: 13px;
+      background: #f8fafc;
+      border: 1px dashed #cbd5e1;
+      color: #64748b;
+    }
+
+    .organization-empty svg {
+      flex: 0 0 auto;
+      color: #94a3b8;
+      margin-top: 2px;
+    }
+
+    .organization-empty h3 {
+      margin: 0;
+      color: #334155;
+      font-size: 14px;
+      font-weight: 750;
+    }
+
+    .organization-empty p {
+      margin: 5px 0 0;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .organization-process-list {
+      display: grid;
+      gap: 9px;
+    }
+
+    .organization-process {
+      display: grid;
+      grid-template-columns: 30px minmax(0, 1fr) auto;
+      gap: 10px;
+      align-items: center;
+      min-height: 46px;
+      padding: 8px 11px;
+      border-radius: 11px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+    }
+
+    .organization-process__number {
+      width: 28px;
+      height: 28px;
+      display: grid;
+      place-items: center;
+      border-radius: 8px;
+      background: #dcfce7;
+      color: #166534;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .organization-process__name {
+      color: #334155;
+      font-size: 13px;
+      font-weight: 650;
+    }
+
+    .organization-process > svg {
+      color: #16a34a;
+    }
+
+    .organization-location {
+      display: flex;
+      gap: 13px;
+      align-items: flex-start;
+      padding: 14px;
+      border: 1px solid #e2e8f0;
+      background: #f8fafc;
+      border-radius: 13px;
+    }
+
+    .organization-location__icon {
+      width: 38px;
+      height: 38px;
+      flex: 0 0 38px;
+      display: grid;
+      place-items: center;
+      border-radius: 10px;
+      background: #ecfdf5;
+      color: #166534;
+    }
+
+    .organization-location__content {
+      min-width: 0;
+      display: grid;
+      gap: 4px;
+    }
+
+    .organization-location__content strong {
+      color: #0f172a;
+      font-size: 14px;
+      font-weight: 750;
+    }
+
+    .organization-location__content span {
+      color: #64748b;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .organization-coordinates {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .organization-coordinates > div {
+      padding: 12px;
+      border: 1px solid #e2e8f0;
+      border-radius: 11px;
+      background: #ffffff;
+    }
+
+    .organization-coordinates__label {
+      display: block;
+      margin-bottom: 4px;
+      color: #94a3b8;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+    }
+
+    .organization-coordinates strong {
+      display: block;
+      color: #334155;
+      font-size: 13px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .organization-map-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      min-height: 42px;
+      margin-top: 12px;
+      padding: 0 14px;
+      border-radius: 10px;
+      background: #166534;
+      color: #ffffff;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 750;
+      transition:
+        background-color 160ms ease,
+        transform 160ms ease;
+    }
+
+    .organization-map-link:hover {
+      background: #14532d;
+      transform: translateY(-1px);
+    }
+
+    .organization-side-card {
+      padding: 20px;
+    }
+
+    .organization-side-card__header {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      color: #166534;
+    }
+
+    .organization-side-card__header h2 {
+      margin: 0;
+      color: #0f172a;
+      font-size: 16px;
+      line-height: 1.4;
+      font-weight: 800;
+    }
+
+    .organization-status {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-top: 17px;
+      padding: 13px;
+      border-radius: 12px;
+      background: #f0fdf4;
+      border: 1px solid #dcfce7;
+    }
+
+    .organization-status__icon {
+      width: 36px;
+      height: 36px;
+      display: grid;
+      place-items: center;
+      flex: 0 0 36px;
+      border-radius: 10px;
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .organization-status strong {
+      display: block;
+      color: #166534;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .organization-status p {
+      margin: 4px 0 0;
+      color: #64748b;
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    .organization-contact-list {
+      display: grid;
+      gap: 7px;
+      margin-top: 15px;
+    }
+
+    .organization-contact {
+      display: grid;
+      grid-template-columns: 34px minmax(0, 1fr) auto;
+      gap: 9px;
+      align-items: center;
+      padding: 9px;
+      border-radius: 10px;
+      text-decoration: none;
+      transition: background-color 160ms ease;
+    }
+
+    .organization-contact:hover {
+      background: #f8fafc;
+    }
+
+    .organization-contact__icon {
+      width: 34px;
+      height: 34px;
+      display: grid;
+      place-items: center;
+      border-radius: 9px;
+      background: #f0fdf4;
+      color: #166534;
+    }
+
+    .organization-contact__copy {
+      min-width: 0;
+      display: grid;
+      gap: 2px;
+    }
+
+    .organization-contact__label {
+      color: #94a3b8;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+    }
+
+    .organization-contact__value {
+      overflow: hidden;
+      color: #334155;
+      font-size: 12px;
+      font-weight: 650;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .organization-contact > svg {
+      color: #94a3b8;
+    }
+
+    .organization-side-card--green {
+      background:
+        linear-gradient(
+          145deg,
+          #166534 0%,
+          #14532d 100%
+        );
+      border-color: #14532d;
+      color: #ffffff;
+    }
+
+    .organization-side-card--green
+      .organization-side-card__header {
+      color: #bbf7d0;
+    }
+
+    .organization-side-card--green
+      .organization-side-card__header
+      h2 {
+      color: #ffffff;
+    }
+
+    .organization-side-card--green > p {
+      margin: 13px 0 0;
+      color: #dcfce7;
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+    .organization-side-links {
+      display: grid;
+      gap: 5px;
+      margin-top: 15px;
+    }
+
+    .organization-side-links a {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      min-height: 38px;
+      padding: 0 10px;
+      border-radius: 9px;
+      color: #ffffff;
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 700;
+      transition: background-color 160ms ease;
+    }
+
+    .organization-side-links a:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .organization-side-links a svg {
+      color: #bbf7d0;
+    }
+
+    .organization-back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: #64748b;
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 700;
+      transition: color 160ms ease;
+    }
+
+    .organization-back-link:hover {
+      color: #166534;
+    }
+
+    @media (max-width: 900px) {
+      .organization-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .organization-sidebar {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        align-items: start;
+      }
+
+      .organization-side-card--green,
+      .organization-back-link {
+        grid-column: 1 / -1;
+      }
+    }
+
+    @media (max-width: 680px) {
+      .organization-page {
+        padding-bottom: 48px;
+      }
+
+      .organization-page__container {
+        width: min(100% - 20px, 1180px);
+      }
+
+      .organization-hero {
+        margin-top: -10px;
+        padding: 20px;
+        border-radius: 18px;
+      }
+
+      .organization-hero__identity {
+        flex-direction: column;
+      }
+
+      .organization-hero__logo {
+        width: 82px;
+        height: 82px;
+        flex-basis: 82px;
+        border-radius: 16px;
+      }
+
+      .organization-grid {
+        gap: 14px;
+        margin-top: 14px;
+      }
+
+      .organization-main,
+      .organization-sidebar {
+        gap: 14px;
+      }
+
+      .organization-sidebar {
+        grid-template-columns: 1fr;
+      }
+
+      .organization-side-card--green,
+      .organization-back-link {
+        grid-column: auto;
+      }
+
+      .organization-card__header,
+      .organization-card__body,
+      .organization-side-card {
+        padding: 17px;
+      }
+
+      .organization-coordinates {
+        grid-template-columns: 1fr;
+      }
+
+      .organization-hero__actions {
+        display: grid;
+        grid-template-columns: 1fr;
+      }
+
+      .organization-button {
+        width: 100%;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .organization-button,
+      .organization-map-link,
+      .organization-side-links a,
+      .organization-contact {
+        transition: none;
+      }
+    }
+  </style>
+
+</PublicLayout>
