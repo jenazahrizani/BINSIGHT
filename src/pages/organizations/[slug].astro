@@ -1,307 +1,399 @@
 ---
-
 /**
-
-* ============================================================================
-* BINSIGHT â€” ORGANIZATION DETAIL
-* ============================================================================
-* Public organization profile.
-*
-* Route:
-* /organizations/[slug]
-*
-* Responsibilities:
-* * Generate public organization pages from verified/public organizations
-* * Present identity and location information
-* * Present optional profile metadata without assuming unavailable fields
-* * Provide map/report/discovery actions
-* * Generate accessible breadcrumbs and structured data
-* * Keep rendering safe when optional organization data is absent
-*
-* Data source:
-* src/lib/data/organizations.ts
-* ============================================================================
-  */
+ * ============================================================================
+ * BINSIGHT — ORGANIZATION DETAIL
+ * ============================================================================
+ * Public organization profile.
+ *
+ * Route:
+ * /organizations/[slug]
+ *
+ * Data source:
+ * src/lib/data/organizations.ts
+ *
+ * Prinsip:
+ * - Hanya organisasi publik + terverifikasi yang memiliki halaman.
+ * - Optional metadata tidak diasumsikan tersedia.
+ * - Tidak membuat data operasional baru.
+ * - Tidak menggunakan PageHeader agar visual konsisten dengan
+ *   dashboard, organizations directory, dan waste directory.
+ * ============================================================================
+ */
 
 import {
-ArrowLeft,
-ArrowUpRight,
-Building2,
-Check,
-CircleCheck,
-ExternalLink,
-Globe,
-Mail,
-Map,
-MapPin,
-Phone,
-Recycle,
-ShieldCheck,
+  ArrowLeft,
+  ArrowRight,
+  ArrowUpRight,
+  Building2,
+  Check,
+  CircleCheck,
+  ExternalLink,
+  Globe,
+  Mail,
+  Map,
+  MapPin,
+  Phone,
+  Recycle,
+  ShieldCheck,
 } from "@lucide/astro";
 
 import PublicLayout from "@layouts/PublicLayout.astro";
-import PageHeader from "@components/layout/PageHeader.astro";
 
 import {
-getPublicOrganizations,
-type Organization,
+  getPublicOrganizations,
 } from "@lib/data/organizations";
 
-export async function getStaticPaths() {
-const organizations = getPublicOrganizations();
+import type {
+  Organization,
+} from "@lib/data/organizations";
 
-return organizations
-.filter(
-(organization: Organization) =>
-organization.isPublic === true &&
-organization.status === "verified" &&
-Boolean(organization.slug),
-)
-.map((organization: Organization) => ({
-params: {
-slug: organization.slug,
-},
-props: {
-organization,
-},
-}));
+/* ============================================================================
+   STATIC PATHS
+   ========================================================================== */
+
+export async function getStaticPaths() {
+  const organizations =
+    getPublicOrganizations();
+
+  return organizations
+    .filter(
+      (organization: Organization) =>
+        organization.isPublic === true &&
+        organization.status === "verified" &&
+        Boolean(
+          organization.slug?.trim(),
+        ),
+    )
+    .map(
+      (organization: Organization) => ({
+        params: {
+          slug: organization.slug,
+        },
+        props: {
+          organization,
+        },
+      }),
+    );
 }
+
+/* ============================================================================
+   PROPS
+   ========================================================================== */
 
 interface Props {
-organization: Organization;
+  organization: Organization;
 }
 
-const { organization } = Astro.props as Props;
+const {
+  organization,
+} = Astro.props as Props;
 
-/**
+/* ============================================================================
+   OPTIONAL RECORD DATA
+   ========================================================================== */
 
-* Optional fields are read through a narrow record view.
-*
-* This intentionally keeps this page compatible with the proven Organization
-* contract while still allowing richer Firestore records to populate the UI.
-  */
-  const organizationRecord =
+const organizationRecord =
   organization as Organization &
-  Record<string, unknown>;
+    Record<string, unknown>;
 
 const readString = (
-key: string,
+  key: string,
 ): string | undefined => {
-const value = organizationRecord[key];
+  const value =
+    organizationRecord[key];
 
-return typeof value === "string" && value.trim().length > 0
-? value.trim()
-: undefined;
+  return typeof value === "string" &&
+    value.trim().length > 0
+    ? value.trim()
+    : undefined;
 };
 
 const readStringArray = (
-key: string,
+  key: string,
 ): string[] => {
-const value = organizationRecord[key];
+  const value =
+    organizationRecord[key];
 
-return Array.isArray(value)
-? value.filter(
-(item): item is string =>
-typeof item === "string" &&
-item.trim().length > 0,
-)
-: [];
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value.filter(
+    (item): item is string =>
+      typeof item === "string" &&
+      item.trim().length > 0,
+  );
 };
 
-const organizationName = organization.name.trim();
+/* ============================================================================
+   CORE FIELDS
+   ========================================================================== */
+
+const organizationName =
+  organization.name.trim();
 
 const organizationDescription =
-readString("description") ??
-readString("about") ??
-`Profil ${organizationName} dalam ekosistem pengelolaan persampahan Kabupaten Badung.`;
+  readString("description") ??
+  readString("about") ??
+  `Profil ${organizationName} dalam ekosistem pengelolaan persampahan Kabupaten Badung.`;
 
 const organizationType =
-readString("typeLabel") ??
-readString("organizationTypeLabel") ??
-readString("type");
+  readString("typeLabel") ??
+  readString("organizationTypeLabel") ??
+  readString("type");
 
 const website =
-readString("website") ??
-readString("websiteUrl");
+  readString("website") ??
+  readString("websiteUrl");
 
 const email =
-readString("email") ??
-readString("contactEmail");
+  readString("email") ??
+  readString("contactEmail");
 
 const phone =
-readString("phone") ??
-readString("phoneNumber") ??
-readString("contactPhone");
+  readString("phone") ??
+  readString("phoneNumber") ??
+  readString("contactPhone");
 
 const logo =
-readString("logo") ??
-readString("logoUrl") ??
-readString("image") ??
-readString("imageUrl");
+  readString("logo") ??
+  readString("logoUrl") ??
+  readString("image") ??
+  readString("imageUrl");
 
 const address =
-organization.location.address?.trim() ||
-undefined;
+  organization.location?.address?.trim() ||
+  undefined;
 
 const area =
-organization.location.area?.trim() ||
-"Kabupaten Badung";
+  organization.location?.area?.trim() ||
+  "Kabupaten Badung";
+
+const rawLatitude =
+  organization.location?.latitude;
+
+const rawLongitude =
+  organization.location?.longitude;
 
 const latitude =
-typeof organization.location.latitude === "number" &&
-Number.isFinite(organization.location.latitude)
-? organization.location.latitude
-: undefined;
+  typeof rawLatitude === "number" &&
+  Number.isFinite(rawLatitude)
+    ? rawLatitude
+    : undefined;
 
 const longitude =
-typeof organization.location.longitude === "number" &&
-Number.isFinite(organization.location.longitude)
-? organization.location.longitude
-: undefined;
+  typeof rawLongitude === "number" &&
+  Number.isFinite(rawLongitude)
+    ? rawLongitude
+    : undefined;
 
-const wasteIds = readStringArray("wasteIds");
-const wasteNames = readStringArray("wasteNames");
+/* ============================================================================
+   OPTIONAL WASTE / PROCESS DATA
+   ========================================================================== */
+
+const wasteIds =
+  readStringArray("wasteIds");
+
+const wasteNames =
+  readStringArray("wasteNames");
 
 const processNames =
-readStringArray("processNames");
+  readStringArray("processNames");
+
+/* ============================================================================
+   LOCATION
+   ========================================================================== */
 
 const hasCoordinates =
-latitude !== undefined &&
-longitude !== undefined;
+  latitude !== undefined &&
+  longitude !== undefined;
 
-const locationLabel = [
-address,
-area,
-"Kabupaten Badung",
-].filter(Boolean).join(", ");
-
-const contactItems = [
-{
-enabled: Boolean(phone),
-href: phone
-? `tel:${phone.replace(/[^\d+]/g, "")}`
-: undefined,
-label: "Telepon",
-value: phone,
-icon: Phone,
-},
-{
-enabled: Boolean(email),
-href: email
-? `mailto:${email}`
-: undefined,
-label: "Email",
-value: email,
-icon: Mail,
-},
-{
-enabled: Boolean(website),
-href: website,
-label: "Website",
-value: website,
-icon: Globe,
-},
+const locationParts = [
+  address,
+  area,
+  "Bali",
 ].filter(
-(
-item,
-): item is {
-enabled: true;
-href: string;
-label: string;
-value: string;
-icon: typeof Phone;
-} => Boolean(item.enabled && item.href && item.value),
+  (
+    value,
+  ): value is string =>
+    Boolean(value),
 );
 
-const breadcrumbItems = [
-{
-label: "Beranda",
-href: "/",
-},
-{
-label: "Organisasi",
-href: "/organizations",
-},
-{
-label: organizationName,
-},
-];
+const locationLabel =
+  Array.from(
+    new Set(locationParts),
+  ).join(", ");
 
-const canonicalPath =
-`/organizations/${encodeURIComponent(organization.slug)}`;
+const googleMapsQuery =
+  hasCoordinates
+    ? `${latitude},${longitude}`
+    : locationLabel;
 
-const canonicalUrl =
-new URL(
-canonicalPath,
-Astro.site ?? Astro.url.origin,
-).toString();
+const googleMapsUrl =
+  `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+    googleMapsQuery,
+  )}`;
 
-const schema = {
-"@context": "https://schema.org",
-"@type": "Organization",
-name: organizationName,
-description: organizationDescription,
-url: canonicalUrl,
-...(logo
-? {
-logo: new URL(
-logo,
-Astro.site ?? Astro.url.origin,
-).toString(),
-}
-: {}),
-...(website
-? {
-sameAs: [website],
-}
-: {}),
-...(address || area
-? {
-address: {
-"@type": "PostalAddress",
-...(address
-? {
-streetAddress: address,
-}
-: {}),
-addressLocality: area,
-addressRegion: "Bali",
-addressCountry: "ID",
-},
-}
-: {}),
-...(hasCoordinates
-? {
-location: {
-"@type": "Place",
-name: organizationName,
-geo: {
-"@type": "GeoCoordinates",
-latitude,
-longitude,
-},
-},
-}
-: {}),
+/* ============================================================================
+   CONTACT
+   ========================================================================== */
+
+type ContactItem = {
+  label: string;
+  value: string;
+  href: string;
+  external?: boolean;
+  icon:
+    | typeof Phone
+    | typeof Mail
+    | typeof Globe;
 };
 
-const mapQuery =
-hasCoordinates
-? `${latitude},${longitude}`
-: encodeURIComponent(locationLabel);
+const contactItems: ContactItem[] = [];
+
+if (phone) {
+  contactItems.push({
+    label: "Telepon",
+    value: phone,
+    href: `tel:${phone.replace(
+      /[^\d+]/g,
+      "",
+    )}`,
+    icon: Phone,
+  });
+}
+
+if (email) {
+  contactItems.push({
+    label: "Email",
+    value: email,
+    href: `mailto:${email}`,
+    icon: Mail,
+  });
+}
+
+if (website) {
+  contactItems.push({
+    label: "Website",
+    value: website,
+    href: website,
+    external: true,
+    icon: Globe,
+  });
+}
+
+/* ============================================================================
+   STATUS
+   ========================================================================== */
 
 const statusLabel =
-organization.status === "verified"
-? "Terverifikasi"
-: "Belum terverifikasi";
+  organization.status === "verified"
+    ? "Terverifikasi"
+    : "Belum terverifikasi";
 
+/* ============================================================================
+   CANONICAL / STRUCTURED DATA
+   ========================================================================== */
+
+const canonicalPath =
+  `/organizations/${encodeURIComponent(
+    organization.slug,
+  )}`;
+
+const canonicalUrl =
+  new URL(
+    canonicalPath,
+    Astro.url.origin,
+  ).toString();
+
+let absoluteLogoUrl:
+  | string
+  | undefined;
+
+if (logo) {
+  try {
+    absoluteLogoUrl =
+      new URL(
+        logo,
+        Astro.url.origin,
+      ).toString();
+  } catch {
+    absoluteLogoUrl =
+      undefined;
+  }
+}
+
+const schema = {
+  "@context":
+    "https://schema.org",
+  "@type": "Organization",
+  name: organizationName,
+  description:
+    organizationDescription,
+  url: canonicalUrl,
+
+  ...(absoluteLogoUrl
+    ? {
+        logo: absoluteLogoUrl,
+      }
+    : {}),
+
+  ...(website
+    ? {
+        sameAs: [website],
+      }
+    : {}),
+
+  ...(address || area
+    ? {
+        address: {
+          "@type":
+            "PostalAddress",
+
+          ...(address
+            ? {
+                streetAddress:
+                  address,
+              }
+            : {}),
+
+          addressLocality:
+            area,
+
+          addressRegion:
+            "Bali",
+
+          addressCountry:
+            "ID",
+        },
+      }
+    : {}),
+
+  ...(hasCoordinates
+    ? {
+        location: {
+          "@type": "Place",
+          name:
+            organizationName,
+          geo: {
+            "@type":
+              "GeoCoordinates",
+            latitude,
+            longitude,
+          },
+        },
+      }
+    : {}),
+};
 ---
 
 <PublicLayout
-title={`${organizationName} â€” Organisasi | BINSIGHT`}
-description={organizationDescription}
-
+  title={`${organizationName} — Organisasi | BINSIGHT`}
+  description={organizationDescription}
 >
+  <!-- ====================================================================== -->
+  <!-- STRUCTURED DATA                                                       -->
+  <!-- ====================================================================== -->
 
   <script
     type="application/ld+json"
@@ -309,1272 +401,1751 @@ description={organizationDescription}
     set:html={JSON.stringify(schema)}
   ></script>
 
-<PageHeader
- eyebrow="Organisasi"
- title={organizationName}
- description="Profil organisasi dalam ekosistem pengelolaan persampahan Kabupaten Badung."
- icon="organization"
- tone="green"
- breadcrumbs={breadcrumbItems}
-/>
+  <main
+    class="organization-page"
+    data-organization-detail
+  >
+    <!-- ================================================================== -->
+    <!-- HERO                                                               -->
+    <!-- ================================================================== -->
 
-  <main class="organization-page">
-    <section class="organization-page__container">
+    <section class="organization-hero">
+      <div class="organization-container">
+        <div class="organization-hero__grid">
+          <div class="organization-hero__main">
+            <div class="organization-kicker">
+              <span
+                class="organization-kicker__dot"
+                aria-hidden="true"
+              ></span>
 
-```
-  <div class="organization-hero">
-    <div class="organization-hero__identity">
+              BINSIGHT / ORGANISASI
+            </div>
 
-      <div class="organization-hero__logo">
-        {
-          logo ? (
-            <img
-              src={logo}
-              alt={`Logo ${organizationName}`}
-              width="112"
-              height="112"
-              loading="eager"
-              decoding="async"
-            />
-          ) : (
-            <Building2
-              size={48}
-              stroke-width={1.7}
-              aria-hidden="true"
-            />
-          )
-        }
-      </div>
+            <div class="organization-hero__identity">
+              <div class="organization-hero__logo">
+                {
+                  logo ? (
+                    <img
+                      src={logo}
+                      alt={`Logo ${organizationName}`}
+                      width="112"
+                      height="112"
+                      loading="eager"
+                      decoding="async"
+                    />
+                  ) : (
+                    <Building2
+                      size={48}
+                      stroke-width={1.7}
+                      aria-hidden="true"
+                    />
+                  )
+                }
+              </div>
 
-      <div class="organization-hero__content">
+              <div class="organization-hero__content">
+                <div class="organization-hero__badges">
+                  <span class="organization-badge organization-badge--verified">
+                    <CircleCheck
+                      size={14}
+                      stroke-width={2.1}
+                      aria-hidden="true"
+                    />
 
-        <div class="organization-hero__badges">
-          <span class="organization-badge organization-badge--verified">
-            <CircleCheck
-              size={15}
-              stroke-width={2}
-              aria-hidden="true"
-            />
-            {statusLabel}
-          </span>
+                    {statusLabel}
+                  </span>
 
-          {
-            organizationType && (
-              <span class="organization-badge">
-                <Building2
-                  size={15}
-                  stroke-width={1.8}
-                  aria-hidden="true"
-                />
-                {organizationType}
-              </span>
-            )
-          }
-        </div>
-
-        <h1 class="organization-hero__title">
-          {organizationName}
-        </h1>
-
-        <div class="organization-hero__location">
-          <MapPin
-            size={18}
-            stroke-width={1.8}
-            aria-hidden="true"
-          />
-
-          <span>
-            {locationLabel}
-          </span>
-        </div>
-
-        <p class="organization-hero__description">
-          {organizationDescription}
-        </p>
-
-        <div class="organization-hero__actions">
-          <a
-            href="#informasi"
-            class="organization-button organization-button--primary"
-          >
-            Lihat informasi
-            <ArrowUpRight
-              size={17}
-              stroke-width={1.9}
-              aria-hidden="true"
-            />
-          </a>
-
-          <a
-            href="/map"
-            class="organization-button organization-button--secondary"
-          >
-            <Map
-              size={17}
-              stroke-width={1.9}
-              aria-hidden="true"
-            />
-            Lihat peta
-          </a>
-        </div>
-
-      </div>
-    </div>
-  </div>
-
-  <div class="organization-grid">
-
-    <div class="organization-main">
-
-      <section
-        id="informasi"
-        class="organization-card"
-      >
-        <div class="organization-card__header">
-          <div>
-            <span class="organization-card__eyebrow">
-              Profil
-            </span>
-
-            <h2 class="organization-card__title">
-              Tentang organisasi
-            </h2>
-          </div>
-
-          <span class="organization-card__icon">
-            <Building2
-              size={21}
-              stroke-width={1.8}
-              aria-hidden="true"
-            />
-          </span>
-        </div>
-
-        <div class="organization-card__body">
-          <p class="organization-card__text">
-            {organizationDescription}
-          </p>
-        </div>
-      </section>
-
-      <section class="organization-card">
-        <div class="organization-card__header">
-          <div>
-            <span class="organization-card__eyebrow">
-              Pengelolaan
-            </span>
-
-            <h2 class="organization-card__title">
-              Aktivitas persampahan
-            </h2>
-          </div>
-
-          <span class="organization-card__icon">
-            <Recycle
-              size={21}
-              stroke-width={1.8}
-              aria-hidden="true"
-            />
-          </span>
-        </div>
-
-        <div class="organization-card__body">
-
-          {
-            wasteNames.length > 0 ? (
-              <div class="organization-section">
-                <h3 class="organization-section__title">
-                  Jenis sampah yang dikelola
-                </h3>
-
-                <div class="organization-tags">
                   {
-                    wasteNames.map((name: string) => (
-                      <span class="organization-tag">
-                        <Recycle
+                    organizationType && (
+                      <span class="organization-badge">
+                        <Building2
                           size={14}
                           stroke-width={1.8}
                           aria-hidden="true"
                         />
-                        {name}
+
+                        {organizationType}
                       </span>
-                    ))
+                    )
                   }
                 </div>
-              </div>
-            ) : wasteIds.length > 0 ? (
-              <div class="organization-section">
-                <h3 class="organization-section__title">
-                  Data sampah terhubung
-                </h3>
 
-                <p class="organization-card__muted">
-                  Organisasi memiliki {wasteIds.length} data
-                  sampah terhubung pada sistem BINSIGHT.
-                </p>
+                <h1>
+                  {organizationName}
+                </h1>
+
+                <div class="organization-hero__location">
+                  <MapPin
+                    size={17}
+                    stroke-width={1.9}
+                    aria-hidden="true"
+                  />
+
+                  <span>
+                    {locationLabel}
+                  </span>
+                </div>
               </div>
-            ) : (
-              <div class="organization-empty">
-                <Recycle
-                  size={24}
-                  stroke-width={1.7}
+            </div>
+
+            <p class="organization-hero__description">
+              {organizationDescription}
+            </p>
+
+            <div class="organization-hero__actions">
+              <a
+                href="#informasi"
+                class="organization-button organization-button--primary"
+              >
+                <span>
+                  Lihat informasi
+                </span>
+
+                <ArrowRight
+                  size={16}
+                  stroke-width={2}
+                  aria-hidden="true"
+                />
+              </a>
+
+              <a
+                href="/map"
+                class="organization-button organization-button--secondary"
+              >
+                <Map
+                  size={16}
+                  stroke-width={2}
                   aria-hidden="true"
                 />
 
-                <div>
-                  <h3>
-                    Belum ada data pengelolaan
-                  </h3>
-
-                  <p>
-                    Informasi jenis sampah yang dikelola
-                    organisasi belum tersedia secara publik.
-                  </p>
-                </div>
-              </div>
-            )
-          }
-
-          {
-            processNames.length > 0 && (
-              <div class="organization-section">
-                <h3 class="organization-section__title">
-                  Proses pengelolaan
-                </h3>
-
-                <div class="organization-process-list">
-                  {
-                    processNames.map((process: string, index: number) => (
-                      <div class="organization-process">
-                        <span class="organization-process__number">
-                          {index + 1}
-                        </span>
-
-                        <span class="organization-process__name">
-                          {process}
-                        </span>
-
-                        <Check
-                          size={16}
-                          stroke-width={2}
-                          aria-hidden="true"
-                        />
-                      </div>
-                    ))
-                  }
-                </div>
-              </div>
-            )
-          }
-
-        </div>
-      </section>
-
-      <section class="organization-card">
-        <div class="organization-card__header">
-          <div>
-            <span class="organization-card__eyebrow">
-              Lokasi
-            </span>
-
-            <h2 class="organization-card__title">
-              Lokasi organisasi
-            </h2>
+                <span>
+                  Lihat peta
+                </span>
+              </a>
+            </div>
           </div>
 
-          <span class="organization-card__icon">
-            <MapPin
-              size={21}
-              stroke-width={1.8}
-              aria-hidden="true"
-            />
-          </span>
-        </div>
+          <aside class="organization-hero__aside">
+            <div class="organization-hero__aside-top">
+              <span>
+                PROFILE STATUS
+              </span>
 
-        <div class="organization-card__body">
-
-          <div class="organization-location">
-            <div class="organization-location__icon">
-              <MapPin
-                size={20}
-                stroke-width={1.8}
+              <ShieldCheck
+                size={21}
+                stroke-width={2}
                 aria-hidden="true"
               />
             </div>
 
-            <div class="organization-location__content">
-              <strong>
-                {area}
-              </strong>
-
-              {
-                address && (
-                  <span>
-                    {address}
-                  </span>
-                )
-              }
-
-              {
-                !address && (
-                  <span>
-                    Kabupaten Badung, Bali
-                  </span>
-                )
-              }
-            </div>
-          </div>
-
-          {
-            hasCoordinates ? (
-              <div class="organization-coordinates">
-                <div>
-                  <span class="organization-coordinates__label">
-                    Latitude
-                  </span>
-
-                  <strong>
-                    {latitude?.toFixed(6)}
-                  </strong>
-                </div>
-
-                <div>
-                  <span class="organization-coordinates__label">
-                    Longitude
-                  </span>
-
-                  <strong>
-                    {longitude?.toFixed(6)}
-                  </strong>
-                </div>
-              </div>
-            ) : (
-              <div class="organization-card__muted">
-                Koordinat lokasi belum tersedia pada data publik.
-              </div>
-            )
-          }
-
-          <a
-            href={`https://www.google.com/maps/search/?api=1&query=${mapQuery}`}
-            class="organization-map-link"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Buka lokasi di peta
-            <ExternalLink
-              size={16}
-              stroke-width={1.8}
-              aria-hidden="true"
-            />
-          </a>
-
-        </div>
-      </section>
-
-    </div>
-
-    <aside class="organization-sidebar">
-
-      <section class="organization-side-card">
-        <div class="organization-side-card__header">
-          <ShieldCheck
-            size={21}
-            stroke-width={1.8}
-            aria-hidden="true"
-          />
-
-          <h2>
-            Status organisasi
-          </h2>
-        </div>
-
-        <div class="organization-status">
-          <span class="organization-status__icon">
-            <CircleCheck
-              size={21}
-              stroke-width={2}
-              aria-hidden="true"
-            />
-          </span>
-
-          <div>
             <strong>
-              {statusLabel}
+              Data publik
+              terverifikasi.
             </strong>
 
             <p>
-              Informasi organisasi telah ditandai
-              sebagai data publik oleh sistem BINSIGHT.
+              Profil ini berasal dari organisasi yang
+              berstatus publik dan terverifikasi dalam
+              data BINSIGHT.
             </p>
-          </div>
-        </div>
-      </section>
 
-      {
-        contactItems.length > 0 && (
-          <section class="organization-side-card">
-            <div class="organization-side-card__header">
-              <Globe
-                size={21}
-                stroke-width={1.8}
-                aria-hidden="true"
-              />
+            <div class="organization-hero__aside-code">
+              <span>ENTITY</span>
 
-              <h2>
-                Kontak
-              </h2>
+              <strong>
+                VERIFIED
+              </strong>
             </div>
+          </aside>
+        </div>
+      </div>
+    </section>
 
-            <div class="organization-contact-list">
-              {
-                contactItems.map((item) => {
-                  const ContactIcon = item.icon;
+    <!-- ================================================================== -->
+    <!-- CONTENT                                                            -->
+    <!-- ================================================================== -->
 
-                  return (
-                    <a
-                      href={item.href}
-                      class="organization-contact"
-                      target={
-                        item.label === "Website"
-                          ? "_blank"
-                          : undefined
+    <section class="organization-content">
+      <div class="organization-container">
+        <div class="organization-grid">
+          <!-- ============================================================ -->
+          <!-- MAIN                                                           -->
+          <!-- ============================================================ -->
+
+          <div class="organization-main">
+            <!-- PROFILE -->
+            <section
+              id="informasi"
+              class="organization-card"
+            >
+              <header class="organization-card__header">
+                <div>
+                  <span class="organization-card__eyebrow">
+                    01 / PROFIL
+                  </span>
+
+                  <h2>
+                    Tentang organisasi.
+                  </h2>
+                </div>
+
+                <div class="organization-card__icon">
+                  <Building2
+                    size={21}
+                    stroke-width={1.9}
+                    aria-hidden="true"
+                  />
+                </div>
+              </header>
+
+              <div class="organization-card__body">
+                <p class="organization-card__text">
+                  {organizationDescription}
+                </p>
+              </div>
+            </section>
+
+            <!-- WASTE -->
+            <section class="organization-card">
+              <header class="organization-card__header">
+                <div>
+                  <span class="organization-card__eyebrow">
+                    02 / PENGELOLAAN
+                  </span>
+
+                  <h2>
+                    Aktivitas persampahan.
+                  </h2>
+                </div>
+
+                <div class="organization-card__icon">
+                  <Recycle
+                    size={21}
+                    stroke-width={1.9}
+                    aria-hidden="true"
+                  />
+                </div>
+              </header>
+
+              <div class="organization-card__body">
+                {
+                  wasteNames.length >
+                  0 ? (
+                    <div class="organization-section">
+                      <h3>
+                        Jenis sampah
+                        yang dikelola
+                      </h3>
+
+                      <div class="organization-tags">
+                        {wasteNames.map(
+                          (
+                            name: string,
+                          ) => (
+                            <span class="organization-tag">
+                              <Recycle
+                                size={13}
+                                stroke-width={1.9}
+                                aria-hidden="true"
+                              />
+
+                              {name}
+                            </span>
+                          ),
+                        )}
+                      </div>
+                    </div>
+                  ) : wasteIds.length >
+                    0 ? (
+                    <div class="organization-empty">
+                      <Recycle
+                        size={23}
+                        stroke-width={1.7}
+                        aria-hidden="true"
+                      />
+
+                      <div>
+                        <strong>
+                          Data sampah
+                          terhubung
+                        </strong>
+
+                        <p>
+                          Organisasi memiliki{" "}
+                          {wasteIds.length}{" "}
+                          data sampah
+                          terhubung pada
+                          sistem BINSIGHT.
+                        </p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div class="organization-empty">
+                      <Recycle
+                        size={23}
+                        stroke-width={1.7}
+                        aria-hidden="true"
+                      />
+
+                      <div>
+                        <strong>
+                          Belum ada data
+                          pengelolaan
+                        </strong>
+
+                        <p>
+                          Informasi jenis
+                          sampah yang
+                          dikelola organisasi
+                          belum tersedia
+                          secara publik.
+                        </p>
+                      </div>
+                    </div>
+                  )
+                }
+
+                {
+                  processNames.length >
+                    0 && (
+                    <div class="organization-section">
+                      <h3>
+                        Proses pengelolaan
+                      </h3>
+
+                      <div class="organization-process-list">
+                        {processNames.map(
+                          (
+                            process: string,
+                            index: number,
+                          ) => (
+                            <div class="organization-process">
+                              <span class="organization-process__number">
+                                {String(
+                                  index + 1,
+                                ).padStart(
+                                  2,
+                                  "0",
+                                )}
+                              </span>
+
+                              <span class="organization-process__name">
+                                {process}
+                              </span>
+
+                              <Check
+                                size={15}
+                                stroke-width={2}
+                                aria-hidden="true"
+                              />
+                            </div>
+                          ),
+                        )}
+                      </div>
+                    </div>
+                  )
+                }
+              </div>
+            </section>
+
+            <!-- LOCATION -->
+            <section class="organization-card">
+              <header class="organization-card__header">
+                <div>
+                  <span class="organization-card__eyebrow">
+                    03 / LOKASI
+                  </span>
+
+                  <h2>
+                    Lokasi organisasi.
+                  </h2>
+                </div>
+
+                <div class="organization-card__icon">
+                  <MapPin
+                    size={21}
+                    stroke-width={1.9}
+                    aria-hidden="true"
+                  />
+                </div>
+              </header>
+
+              <div class="organization-card__body">
+                <div class="organization-location">
+                  <div class="organization-location__icon">
+                    <MapPin
+                      size={19}
+                      stroke-width={1.8}
+                      aria-hidden="true"
+                    />
+                  </div>
+
+                  <div>
+                    <strong>
+                      {area}
+                    </strong>
+
+                    <span>
+                      {
+                        address ??
+                        "Kabupaten Badung, Bali"
                       }
-                      rel={
-                        item.label === "Website"
-                          ? "noopener noreferrer"
-                          : undefined
-                      }
-                    >
-                      <span class="organization-contact__icon">
-                        <ContactIcon
-                          size={17}
-                          stroke-width={1.8}
-                          aria-hidden="true"
-                        />
-                      </span>
+                    </span>
+                  </div>
+                </div>
 
-                      <span class="organization-contact__copy">
-                        <span class="organization-contact__label">
-                          {item.label}
+                {
+                  hasCoordinates ? (
+                    <div class="organization-coordinates">
+                      <div>
+                        <span>
+                          LATITUDE
                         </span>
 
-                        <span class="organization-contact__value">
-                          {item.value}
-                        </span>
-                      </span>
+                        <strong>
+                          {latitude?.toFixed(
+                            6,
+                          )}
+                        </strong>
+                      </div>
 
-                      <ArrowUpRight
+                      <div>
+                        <span>
+                          LONGITUDE
+                        </span>
+
+                        <strong>
+                          {longitude?.toFixed(
+                            6,
+                          )}
+                        </strong>
+                      </div>
+                    </div>
+                  ) : (
+                    <div class="organization-note">
+                      <MapPin
                         size={15}
                         stroke-width={1.8}
                         aria-hidden="true"
                       />
-                    </a>
-                  );
-                })
-              }
-            </div>
-          </section>
-        )
-      }
 
-      <section class="organization-side-card organization-side-card--green">
-        <div class="organization-side-card__header">
-          <Recycle
-            size={21}
-            stroke-width={1.8}
-            aria-hidden="true"
-          />
+                      Koordinat lokasi belum
+                      tersedia pada data publik.
+                    </div>
+                  )
+                }
 
-          <h2>
-            Jelajahi ekosistem
-          </h2>
+                <a
+                  href={googleMapsUrl}
+                  class="organization-map-link"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <Map
+                    size={16}
+                    stroke-width={1.9}
+                    aria-hidden="true"
+                  />
+
+                  Buka lokasi di peta
+
+                  <ExternalLink
+                    size={14}
+                    stroke-width={1.8}
+                    aria-hidden="true"
+                  />
+                </a>
+              </div>
+            </section>
+          </div>
+
+          <!-- ============================================================ -->
+          <!-- SIDEBAR                                                        -->
+          <!-- ============================================================ -->
+
+          <aside class="organization-sidebar">
+            <!-- STATUS -->
+            <section class="organization-side-card">
+              <header class="organization-side-card__header">
+                <ShieldCheck
+                  size={20}
+                  stroke-width={1.9}
+                  aria-hidden="true"
+                />
+
+                <h2>
+                  Status organisasi
+                </h2>
+              </header>
+
+              <div class="organization-status">
+                <div class="organization-status__icon">
+                  <CircleCheck
+                    size={19}
+                    stroke-width={2}
+                    aria-hidden="true"
+                  />
+                </div>
+
+                <div>
+                  <strong>
+                    {statusLabel}
+                  </strong>
+
+                  <p>
+                    Informasi organisasi ditandai sebagai
+                    data publik oleh sistem BINSIGHT.
+                  </p>
+                </div>
+              </div>
+            </section>
+
+            <!-- CONTACT -->
+            {
+              contactItems.length >
+                0 && (
+                <section class="organization-side-card">
+                  <header class="organization-side-card__header">
+                    <Globe
+                      size={20}
+                      stroke-width={1.9}
+                      aria-hidden="true"
+                    />
+
+                    <h2>
+                      Kontak
+                    </h2>
+                  </header>
+
+                  <div class="organization-contact-list">
+                    {contactItems.map(
+                      (
+                        item,
+                      ) => {
+                        const ContactIcon =
+                          item.icon;
+
+                        return (
+                          <a
+                            href={
+                              item.href
+                            }
+                            class="organization-contact"
+                            target={
+                              item.external
+                                ? "_blank"
+                                : undefined
+                            }
+                            rel={
+                              item.external
+                                ? "noopener noreferrer"
+                                : undefined
+                            }
+                          >
+                            <span class="organization-contact__icon">
+                              <ContactIcon
+                                size={16}
+                                stroke-width={1.9}
+                                aria-hidden="true"
+                              />
+                            </span>
+
+                            <span class="organization-contact__copy">
+                              <span>
+                                {item.label}
+                              </span>
+
+                              <strong>
+                                {
+                                  item.value
+                                }
+                              </strong>
+                            </span>
+
+                            <ArrowUpRight
+                              size={14}
+                              stroke-width={1.9}
+                              aria-hidden="true"
+                            />
+                          </a>
+                        );
+                      },
+                    )}
+                  </div>
+                </section>
+              )
+            }
+
+            <!-- ECOSYSTEM -->
+            <section class="organization-side-card organization-side-card--dark">
+              <header class="organization-side-card__header">
+                <Recycle
+                  size={20}
+                  stroke-width={1.9}
+                  aria-hidden="true"
+                />
+
+                <h2>
+                  Jelajahi ekosistem
+                </h2>
+              </header>
+
+              <p>
+                Temukan organisasi lain, jenis sampah,
+                lokasi pengelolaan, dan data persampahan
+                dalam konteks Kabupaten Badung.
+              </p>
+
+              <div class="organization-side-links">
+                <a href="/organizations">
+                  <span>
+                    Semua organisasi
+                  </span>
+
+                  <ArrowRight
+                    size={15}
+                    stroke-width={1.9}
+                    aria-hidden="true"
+                  />
+                </a>
+
+                <a href="/waste">
+                  <span>
+                    Jenis sampah
+                  </span>
+
+                  <ArrowRight
+                    size={15}
+                    stroke-width={1.9}
+                    aria-hidden="true"
+                  />
+                </a>
+
+                <a href="/map">
+                  <span>
+                    Peta persampahan
+                  </span>
+
+                  <ArrowRight
+                    size={15}
+                    stroke-width={1.9}
+                    aria-hidden="true"
+                  />
+                </a>
+              </div>
+            </section>
+
+            <!-- BACK -->
+            <a
+              href="/organizations"
+              class="organization-back-link"
+            >
+              <ArrowLeft
+                size={15}
+                stroke-width={2}
+                aria-hidden="true"
+              />
+
+              Kembali ke organisasi
+            </a>
+          </aside>
         </div>
-
-        <p>
-          Temukan organisasi lain, lokasi pengelolaan,
-          jenis sampah, dan data persampahan di Kabupaten Badung.
-        </p>
-
-        <div class="organization-side-links">
-
-          <a href="/organizations">
-            <span>
-              Semua organisasi
-            </span>
-
-            <ArrowUpRight
-              size={16}
-              stroke-width={1.8}
-              aria-hidden="true"
-            />
-          </a>
-
-          <a href="/waste">
-            <span>
-              Jenis sampah
-            </span>
-
-            <ArrowUpRight
-              size={16}
-              stroke-width={1.8}
-              aria-hidden="true"
-            />
-          </a>
-
-          <a href="/map">
-            <span>
-              Peta persampahan
-            </span>
-
-            <ArrowUpRight
-              size={16}
-              stroke-width={1.8}
-              aria-hidden="true"
-            />
-          </a>
-
-        </div>
-      </section>
-
-      <a
-        href="/organizations"
-        class="organization-back-link"
-      >
-        <ArrowLeft
-          size={16}
-          stroke-width={1.9}
-          aria-hidden="true"
-        />
-
-        Kembali ke daftar organisasi
-      </a>
-
-    </aside>
-
-  </div>
-
-</section>
-```
-
+      </div>
+    </section>
   </main>
+</PublicLayout>
 
-  <style>
-    .organization-page {
-      background: var(--color-background, #f8fafc);
-      padding: 0 0 80px;
-    }
+<style>
+  /* ==========================================================================
+     TOKENS
+     ========================================================================== */
 
-    .organization-page__container {
-      width: min(1180px, calc(100% - 32px));
-      margin: 0 auto;
-    }
+  .organization-page {
+    --acid: #dfff00;
+    --acid-soft: #efff70;
 
-    .organization-hero {
-      margin-top: -18px;
-      position: relative;
-      z-index: 2;
-      background: var(--color-surface, #ffffff);
-      border: 1px solid var(--color-border, #e2e8f0);
-      border-radius: 24px;
-      padding: 30px;
-      box-shadow:
-        0 18px 50px rgba(15, 23, 42, 0.07),
-        0 2px 8px rgba(15, 23, 42, 0.03);
-    }
+    --ink: #090a08;
+    --ink-2: #11130f;
+    --ink-3: #1b1f18;
 
-    .organization-hero__identity {
-      display: flex;
-      gap: 24px;
-      align-items: flex-start;
-    }
+    --paper: #f2f0e6;
+    --paper-2: #e4e1d4;
+    --paper-3: #cfcabd;
 
-    .organization-hero__logo {
-      width: 112px;
-      height: 112px;
-      flex: 0 0 112px;
-      border-radius: 22px;
-      display: grid;
-      place-items: center;
-      overflow: hidden;
-      background: #ecfdf5;
-      color: #166534;
-      border: 1px solid #bbf7d0;
-    }
+    --white: #fffef8;
+    --muted: #6c7068;
+    --warning: #ff6a00;
 
-    .organization-hero__logo img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
+    --line: rgba(9, 10, 8, 0.18);
+    --line-dark: rgba(255, 254, 248, 0.18);
 
-    .organization-hero__content {
-      min-width: 0;
-      flex: 1;
-    }
+    --container: 1320px;
 
-    .organization-hero__badges {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-bottom: 10px;
-    }
+    width: 100%;
+    overflow: clip;
+    background: var(--paper);
+    color: var(--ink);
+  }
 
-    .organization-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 7px;
-      min-height: 30px;
-      padding: 5px 10px;
-      border-radius: 999px;
-      background: #f1f5f9;
-      color: #475569;
-      border: 1px solid #e2e8f0;
-      font-size: 12px;
-      font-weight: 700;
-    }
+  .organization-container {
+    width: min(
+      var(--container),
+      calc(100% - 40px)
+    );
+    margin-inline: auto;
+  }
 
-    .organization-badge--verified {
-      background: #ecfdf5;
-      border-color: #bbf7d0;
-      color: #166534;
-    }
+  .organization-page a {
+    -webkit-tap-highlight-color: transparent;
+  }
 
-    .organization-hero__title {
-      margin: 0;
-      color: #0f172a;
-      font-size: clamp(1.8rem, 4vw, 2.7rem);
-      line-height: 1.12;
-      letter-spacing: -0.035em;
-      font-weight: 800;
-    }
+  .organization-page a:focus-visible {
+    outline: 3px solid var(--warning);
+    outline-offset: 4px;
+  }
 
-    .organization-hero__location {
-      margin-top: 11px;
-      display: flex;
-      align-items: flex-start;
-      gap: 8px;
-      color: #475569;
-      font-size: 14px;
-      line-height: 1.5;
-    }
+  /* ==========================================================================
+     HERO
+     ========================================================================== */
 
-    .organization-hero__location svg {
-      flex: 0 0 auto;
-      margin-top: 1px;
-      color: #166534;
-    }
+  .organization-hero {
+    position: relative;
+    overflow: hidden;
+    border-bottom: 4px solid var(--ink);
+    background:
+      linear-gradient(
+        115deg,
+        var(--paper) 0%,
+        var(--paper) 68%,
+        var(--acid-soft) 68%,
+        var(--acid-soft) 100%
+      );
+  }
 
-    .organization-hero__description {
-      max-width: 760px;
-      margin: 16px 0 0;
-      color: #64748b;
-      font-size: 15px;
-      line-height: 1.75;
-    }
+  .organization-hero::before {
+    position: absolute;
+    top: 0;
+    right: 16%;
+    width: 1px;
+    height: 100%;
+    background: rgba(9, 10, 8, 0.08);
+    content: "";
+  }
 
-    .organization-hero__actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 22px;
-    }
+  .organization-hero::after {
+    position: absolute;
+    right: -8rem;
+    bottom: -13rem;
+    width: 31rem;
+    height: 31rem;
+    border: 3px solid rgba(9, 10, 8, 0.08);
+    border-radius: 50%;
+    content: "";
+    pointer-events: none;
+  }
 
-    .organization-button {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      min-height: 42px;
-      padding: 0 16px;
-      border-radius: 11px;
-      text-decoration: none;
-      font-size: 13px;
-      font-weight: 750;
-      transition:
-        transform 160ms ease,
-        box-shadow 160ms ease,
-        border-color 160ms ease,
-        background-color 160ms ease;
-    }
+  .organization-hero__grid {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns:
+      minmax(0, 1fr)
+      320px;
+    gap: 4rem;
+    align-items: end;
+    min-height: 545px;
+    padding-top: 5rem;
+    padding-bottom: 4rem;
+  }
 
-    .organization-button:hover {
-      transform: translateY(-1px);
-    }
+  .organization-hero__main {
+    min-width: 0;
+    max-width: 900px;
+  }
 
-    .organization-button--primary {
-      background: #166534;
-      color: #ffffff;
-      box-shadow: 0 8px 20px rgba(22, 101, 52, 0.18);
-    }
+  .organization-kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: fit-content;
+    margin-bottom: 1.5rem;
+    padding: 0.48rem 0.7rem;
+    border: 2px solid var(--ink);
+    background: var(--ink);
+    color: var(--acid);
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+    font-size: 0.61rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+  }
 
-    .organization-button--primary:hover {
-      background: #14532d;
-    }
+  .organization-kicker__dot {
+    width: 0.42rem;
+    height: 0.42rem;
+    background: var(--acid);
+  }
 
-    .organization-button--secondary {
-      background: #ffffff;
-      color: #166534;
-      border: 1px solid #bbf7d0;
-    }
+  .organization-hero__identity {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 1.1rem;
+    align-items: start;
+  }
 
-    .organization-button--secondary:hover {
-      background: #f0fdf4;
-      border-color: #86efac;
+  .organization-hero__logo {
+    display: grid;
+    width: 6.2rem;
+    height: 6.2rem;
+    place-items: center;
+    overflow: hidden;
+    border: 3px solid var(--ink);
+    background: var(--white);
+    color: var(--ink);
+  }
+
+  .organization-hero__logo img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    padding: 0.45rem;
+  }
+
+  .organization-hero__content {
+    min-width: 0;
+  }
+
+  .organization-hero__badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+    margin-bottom: 0.7rem;
+  }
+
+  .organization-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    min-height: 1.75rem;
+    padding: 0.25rem 0.45rem;
+    border: 1px solid var(--ink);
+    background: var(--white);
+    color: var(--ink);
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+    font-size: 0.47rem;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+
+  .organization-badge--verified {
+    background: var(--acid);
+  }
+
+  .organization-hero h1 {
+    max-width: 760px;
+    margin: 0;
+    color: var(--ink);
+    font-family:
+      "Sora",
+      "Inter",
+      system-ui,
+      sans-serif;
+    font-size: clamp(
+      2.3rem,
+      5vw,
+      5.3rem
+    );
+    font-weight: 900;
+    line-height: 0.9;
+    letter-spacing: -0.065em;
+    text-transform: uppercase;
+  }
+
+  .organization-hero__location {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.4rem;
+    margin-top: 0.8rem;
+    color: rgba(9, 10, 8, 0.62);
+    font-size: 0.72rem;
+    line-height: 1.5;
+  }
+
+  .organization-hero__location svg {
+    flex: 0 0 auto;
+    margin-top: 0.05rem;
+  }
+
+  .organization-hero__description {
+    max-width: 720px;
+    margin: 1.6rem 0 0;
+    color: rgba(9, 10, 8, 0.68);
+    font-size: 0.82rem;
+    line-height: 1.75;
+  }
+
+  .organization-hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.7rem;
+    margin-top: 1.6rem;
+  }
+
+  .organization-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    min-height: 3rem;
+    padding: 0.75rem 0.9rem;
+    border: 2px solid var(--ink);
+    border-radius: 0;
+    font-family:
+      "Sora",
+      "Inter",
+      system-ui,
+      sans-serif;
+    font-size: 0.66rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition:
+      transform 140ms ease,
+      box-shadow 140ms ease,
+      background 140ms ease;
+  }
+
+  .organization-button:hover {
+    transform: translate(-3px, -3px);
+    box-shadow: 5px 5px 0 var(--ink);
+  }
+
+  .organization-button--primary {
+    background: var(--ink);
+    color: var(--acid);
+  }
+
+  .organization-button--secondary {
+    background: var(--white);
+    color: var(--ink);
+  }
+
+  .organization-button--secondary:hover {
+    background: var(--acid);
+  }
+
+  .organization-hero__aside {
+    padding: 1.2rem;
+    border: 3px solid var(--ink);
+    background: var(--ink);
+    color: var(--white);
+    box-shadow: 8px 8px 0 var(--warning);
+  }
+
+  .organization-hero__aside-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: var(--acid);
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+    font-size: 0.54rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+  }
+
+  .organization-hero__aside > strong {
+    display: block;
+    max-width: 230px;
+    margin-top: 2rem;
+    font-family:
+      "Sora",
+      "Inter",
+      system-ui,
+      sans-serif;
+    font-size: 1.2rem;
+    font-weight: 900;
+    line-height: 1.03;
+    text-transform: uppercase;
+  }
+
+  .organization-hero__aside > p {
+    margin: 0.85rem 0 0;
+    color: rgba(255, 254, 248, 0.6);
+    font-size: 0.67rem;
+    line-height: 1.65;
+  }
+
+  .organization-hero__aside-code {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-top: 1.25rem;
+    padding-top: 0.8rem;
+    border-top: 1px solid var(--line-dark);
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+    font-size: 0.49rem;
+    letter-spacing: 0.06em;
+  }
+
+  .organization-hero__aside-code span {
+    color: rgba(255, 254, 248, 0.38);
+  }
+
+  .organization-hero__aside-code strong {
+    color: var(--acid);
+  }
+
+  /* ==========================================================================
+     CONTENT
+     ========================================================================== */
+
+  .organization-content {
+    padding: 4rem 0 5rem;
+    background: var(--paper);
+  }
+
+  .organization-grid {
+    display: grid;
+    grid-template-columns:
+      minmax(0, 1fr)
+      320px;
+    gap: 1rem;
+    align-items: start;
+  }
+
+  .organization-main,
+  .organization-sidebar {
+    display: grid;
+    gap: 1rem;
+    min-width: 0;
+  }
+
+  /* ==========================================================================
+     MAIN CARDS
+     ========================================================================== */
+
+  .organization-card {
+    min-width: 0;
+    border: 3px solid var(--ink);
+    background: var(--white);
+    box-shadow: 5px 5px 0 var(--ink);
+  }
+
+  .organization-card__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .organization-card__header > div:first-child {
+    min-width: 0;
+  }
+
+  .organization-card__eyebrow {
+    display: block;
+    margin-bottom: 0.4rem;
+    color: var(--muted);
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+    font-size: 0.53rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+  }
+
+  .organization-card__header h2 {
+    margin: 0;
+    color: var(--ink);
+    font-family:
+      "Sora",
+      "Inter",
+      system-ui,
+      sans-serif;
+    font-size: 1.15rem;
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: -0.035em;
+    text-transform: uppercase;
+  }
+
+  .organization-card__icon {
+    display: grid;
+    width: 2.65rem;
+    height: 2.65rem;
+    flex: 0 0 2.65rem;
+    place-items: center;
+    border: 2px solid var(--ink);
+    background: var(--acid);
+    color: var(--ink);
+  }
+
+  .organization-card__body {
+    padding: 1rem;
+  }
+
+  .organization-card__text {
+    margin: 0;
+    color: rgba(9, 10, 8, 0.7);
+    font-size: 0.72rem;
+    line-height: 1.75;
+  }
+
+  .organization-card__muted {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.45rem;
+    color: var(--muted);
+    font-size: 0.62rem;
+    line-height: 1.65;
+  }
+
+  /* ==========================================================================
+     WASTE
+     ========================================================================== */
+
+  .organization-section + .organization-section {
+    margin-top: 1.15rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--line);
+  }
+
+  .organization-section h3 {
+    margin: 0 0 0.65rem;
+    color: var(--ink);
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+    font-size: 0.54rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .organization-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .organization-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.32rem;
+    min-height: 2rem;
+    padding: 0.35rem 0.5rem;
+    border: 1px solid var(--ink);
+    background: var(--paper);
+    color: var(--ink);
+    font-size: 0.58rem;
+    font-weight: 700;
+  }
+
+  .organization-empty {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.7rem;
+    padding: 0.8rem;
+    border: 1px dashed var(--line);
+    background: var(--paper);
+    color: var(--muted);
+  }
+
+  .organization-empty svg {
+    flex: 0 0 auto;
+    margin-top: 0.1rem;
+  }
+
+  .organization-empty strong {
+    display: block;
+    color: var(--ink);
+    font-family:
+      "Sora",
+      "Inter",
+      system-ui,
+      sans-serif;
+    font-size: 0.68rem;
+    font-weight: 800;
+    text-transform: uppercase;
+  }
+
+  .organization-empty p {
+    margin: 0.3rem 0 0;
+    font-size: 0.6rem;
+    line-height: 1.6;
+  }
+
+  .organization-process-list {
+    display: grid;
+    gap: 0.45rem;
+  }
+
+  .organization-process {
+    display: grid;
+    grid-template-columns:
+      2rem
+      minmax(0, 1fr)
+      auto;
+    gap: 0.6rem;
+    align-items: center;
+    min-height: 2.65rem;
+    padding: 0.4rem 0.5rem;
+    border: 1px solid var(--line);
+    background: var(--paper);
+  }
+
+  .organization-process__number {
+    display: grid;
+    width: 2rem;
+    height: 2rem;
+    place-items: center;
+    background: var(--ink);
+    color: var(--acid);
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+    font-size: 0.53rem;
+    font-weight: 700;
+  }
+
+  .organization-process__name {
+    color: var(--ink);
+    font-size: 0.62rem;
+    font-weight: 700;
+  }
+
+  .organization-process svg {
+    color: var(--ink);
+  }
+
+  /* ==========================================================================
+     LOCATION
+     ========================================================================== */
+
+  .organization-location {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.7rem;
+    padding: 0.8rem;
+    border: 1px solid var(--line);
+    background: var(--paper);
+  }
+
+  .organization-location__icon {
+    display: grid;
+    width: 2.5rem;
+    height: 2.5rem;
+    flex: 0 0 2.5rem;
+    place-items: center;
+    border: 2px solid var(--ink);
+    background: var(--acid);
+  }
+
+  .organization-location > div:last-child {
+    min-width: 0;
+  }
+
+  .organization-location strong {
+    display: block;
+    color: var(--ink);
+    font-family:
+      "Sora",
+      "Inter",
+      system-ui,
+      sans-serif;
+    font-size: 0.72rem;
+    font-weight: 900;
+    text-transform: uppercase;
+  }
+
+  .organization-location span {
+    display: block;
+    margin-top: 0.25rem;
+    color: var(--muted);
+    font-size: 0.62rem;
+    line-height: 1.6;
+  }
+
+  .organization-coordinates {
+    display: grid;
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+    gap: 0.5rem;
+    margin-top: 0.65rem;
+  }
+
+  .organization-coordinates > div {
+    padding: 0.65rem;
+    border: 1px solid var(--line);
+    background: var(--white);
+  }
+
+  .organization-coordinates span {
+    display: block;
+    color: var(--muted);
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+    font-size: 0.45rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+  }
+
+  .organization-coordinates strong {
+    display: block;
+    margin-top: 0.2rem;
+    color: var(--ink);
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+    font-size: 0.58rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .organization-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.4rem;
+    margin-top: 0.65rem;
+    color: var(--muted);
+    font-size: 0.58rem;
+    line-height: 1.6;
+  }
+
+  .organization-map-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    min-height: 2.7rem;
+    margin-top: 0.7rem;
+    padding: 0 0.75rem;
+    border: 2px solid var(--ink);
+    background: var(--ink);
+    color: var(--acid);
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+    font-size: 0.53rem;
+    font-weight: 700;
+    text-decoration: none;
+    text-transform: uppercase;
+  }
+
+  .organization-map-link:hover {
+    background: var(--warning);
+    color: var(--white);
+  }
+
+  /* ==========================================================================
+     SIDEBAR
+     ========================================================================== */
+
+  .organization-side-card {
+    min-width: 0;
+    padding: 1rem;
+    border: 3px solid var(--ink);
+    background: var(--white);
+    box-shadow: 5px 5px 0 var(--ink);
+  }
+
+  .organization-side-card__header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .organization-side-card__header svg {
+    color: var(--ink);
+  }
+
+  .organization-side-card__header h2 {
+    margin: 0;
+    color: var(--ink);
+    font-family:
+      "Sora",
+      "Inter",
+      system-ui,
+      sans-serif;
+    font-size: 0.77rem;
+    font-weight: 900;
+    text-transform: uppercase;
+  }
+
+  .organization-status {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    margin-top: 0.8rem;
+  }
+
+  .organization-status__icon {
+    display: grid;
+    width: 2.5rem;
+    height: 2.5rem;
+    flex: 0 0 2.5rem;
+    place-items: center;
+    border: 2px solid var(--ink);
+    background: var(--acid);
+    color: var(--ink);
+  }
+
+  .organization-status strong {
+    display: block;
+    color: var(--ink);
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+    font-size: 0.56rem;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+
+  .organization-status p {
+    margin: 0.3rem 0 0;
+    color: var(--muted);
+    font-size: 0.59rem;
+    line-height: 1.6;
+  }
+
+  /* CONTACT */
+
+  .organization-contact-list {
+    display: grid;
+    gap: 0.35rem;
+    margin-top: 0.7rem;
+  }
+
+  .organization-contact {
+    display: grid;
+    grid-template-columns:
+      2.2rem
+      minmax(0, 1fr)
+      auto;
+    gap: 0.55rem;
+    align-items: center;
+    padding: 0.4rem;
+    border: 1px solid transparent;
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .organization-contact:hover {
+    border-color: var(--line);
+    background: var(--paper);
+  }
+
+  .organization-contact__icon {
+    display: grid;
+    width: 2.2rem;
+    height: 2.2rem;
+    place-items: center;
+    border: 1px solid var(--ink);
+    background: var(--acid);
+  }
+
+  .organization-contact__copy {
+    display: block;
+    min-width: 0;
+  }
+
+  .organization-contact__copy > span {
+    display: block;
+    color: var(--muted);
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+    font-size: 0.44rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .organization-contact__copy > strong {
+    display: block;
+    overflow: hidden;
+    margin-top: 0.16rem;
+    color: var(--ink);
+    font-size: 0.57rem;
+    font-weight: 700;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .organization-contact > svg {
+    color: var(--muted);
+  }
+
+  /* ECOSYSTEM CARD */
+
+  .organization-side-card--dark {
+    background: var(--ink);
+    color: var(--white);
+    box-shadow: 5px 5px 0 var(--warning);
+  }
+
+  .organization-side-card--dark
+    .organization-side-card__header {
+    border-color: var(--line-dark);
+  }
+
+  .organization-side-card--dark
+    .organization-side-card__header
+    svg {
+    color: var(--acid);
+  }
+
+  .organization-side-card--dark
+    .organization-side-card__header
+    h2 {
+    color: var(--white);
+  }
+
+  .organization-side-card--dark > p {
+    margin: 0.75rem 0 0;
+    color: rgba(255, 254, 248, 0.58);
+    font-size: 0.62rem;
+    line-height: 1.65;
+  }
+
+  .organization-side-links {
+    display: grid;
+    gap: 0.25rem;
+    margin-top: 0.8rem;
+  }
+
+  .organization-side-links a {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.6rem;
+    min-height: 2.35rem;
+    padding: 0 0.55rem;
+    border: 1px solid rgba(255, 254, 248, 0.08);
+    color: var(--white);
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+    font-size: 0.52rem;
+    font-weight: 700;
+    text-decoration: none;
+    text-transform: uppercase;
+  }
+
+  .organization-side-links a:hover {
+    background: var(--acid);
+    color: var(--ink);
+  }
+
+  .organization-side-links svg {
+    color: var(--acid);
+  }
+
+  .organization-side-links a:hover svg {
+    color: var(--ink);
+  }
+
+  .organization-back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    width: fit-content;
+    color: var(--muted);
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+    font-size: 0.52rem;
+    font-weight: 700;
+    text-decoration: none;
+    text-transform: uppercase;
+  }
+
+  .organization-back-link:hover {
+    color: var(--warning);
+  }
+
+  /* ==========================================================================
+     RESPONSIVE
+     ========================================================================== */
+
+  @media (max-width: 1080px) {
+    .organization-hero__grid {
+      grid-template-columns:
+        minmax(0, 1fr)
+        285px;
+      gap: 2.5rem;
     }
 
     .organization-grid {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) 340px;
-      gap: 22px;
-      align-items: start;
-      margin-top: 22px;
+      grid-template-columns:
+        minmax(0, 1fr)
+        285px;
+    }
+  }
+
+  @media (max-width: 900px) {
+    .organization-hero__grid {
+      grid-template-columns: 1fr;
+      min-height: auto;
+      padding-top: 4rem;
+      padding-bottom: 3.5rem;
     }
 
-    .organization-main,
+    .organization-hero__aside {
+      width: min(100%, 500px);
+    }
+
+    .organization-grid {
+      grid-template-columns: 1fr;
+    }
+
     .organization-sidebar {
-      display: grid;
-      gap: 22px;
+      grid-template-columns:
+        repeat(2, minmax(0, 1fr));
     }
 
-    .organization-card,
+    .organization-side-card--dark,
+    .organization-back-link {
+      grid-column: 1 / -1;
+    }
+  }
+
+  @media (max-width: 700px) {
+    .organization-container {
+      width: min(
+        var(--container),
+        calc(100% - 24px)
+      );
+    }
+
+    .organization-hero__identity {
+      grid-template-columns: 1fr;
+    }
+
+    .organization-hero__logo {
+      width: 5rem;
+      height: 5rem;
+    }
+
+    .organization-hero h1 {
+      font-size: clamp(
+        2.25rem,
+        11vw,
+        4rem
+      );
+    }
+
+    .organization-hero__description {
+      font-size: 0.76rem;
+    }
+
+    .organization-hero__actions {
+      flex-direction: column;
+      max-width: 480px;
+    }
+
+    .organization-button {
+      width: 100%;
+    }
+
+    .organization-sidebar {
+      grid-template-columns: 1fr;
+    }
+
+    .organization-side-card--dark,
+    .organization-back-link {
+      grid-column: auto;
+    }
+  }
+
+  @media (max-width: 520px) {
+    .organization-container {
+      width: calc(100% - 20px);
+    }
+
+    .organization-hero__grid {
+      padding-top: 3.2rem;
+      padding-bottom: 3rem;
+    }
+
+    .organization-hero__aside {
+      padding: 1rem;
+    }
+
+    .organization-content {
+      padding-top: 3rem;
+    }
+
+    .organization-card__header,
+    .organization-card__body,
     .organization-side-card {
-      background: #ffffff;
-      border: 1px solid #e2e8f0;
-      border-radius: 18px;
-      overflow: hidden;
+      padding: 0.9rem;
     }
 
-    .organization-card__header {
-      display: flex;
-      justify-content: space-between;
-      gap: 16px;
-      align-items: flex-start;
-      padding: 22px 22px 18px;
-      border-bottom: 1px solid #f1f5f9;
-    }
-
-    .organization-card__eyebrow {
-      display: block;
-      margin-bottom: 4px;
-      color: #16a34a;
-      font-size: 11px;
-      line-height: 1.3;
-      font-weight: 800;
-      letter-spacing: 0.11em;
-      text-transform: uppercase;
-    }
-
-    .organization-card__title {
-      margin: 0;
-      color: #0f172a;
-      font-size: 19px;
-      line-height: 1.3;
-      font-weight: 800;
-      letter-spacing: -0.015em;
-    }
-
-    .organization-card__icon {
-      width: 40px;
-      height: 40px;
-      flex: 0 0 40px;
-      display: grid;
-      place-items: center;
-      border-radius: 12px;
-      background: #f0fdf4;
-      color: #166534;
-      border: 1px solid #dcfce7;
-    }
-
-    .organization-card__body {
-      padding: 22px;
-    }
-
-    .organization-card__text {
-      margin: 0;
-      color: #475569;
-      font-size: 15px;
-      line-height: 1.8;
-    }
-
-    .organization-card__muted {
-      color: #64748b;
-      font-size: 13px;
-      line-height: 1.65;
-    }
-
-    .organization-section + .organization-section {
-      margin-top: 25px;
-      padding-top: 24px;
-      border-top: 1px solid #f1f5f9;
-    }
-
-    .organization-section__title {
-      margin: 0 0 13px;
-      color: #0f172a;
-      font-size: 14px;
-      font-weight: 750;
-    }
-
-    .organization-tags {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-
-    .organization-tag {
-      display: inline-flex;
-      align-items: center;
-      gap: 7px;
-      min-height: 34px;
-      padding: 7px 11px;
-      border-radius: 10px;
-      background: #f0fdf4;
-      border: 1px solid #dcfce7;
-      color: #166534;
-      font-size: 12px;
-      font-weight: 700;
-    }
-
-    .organization-empty {
-      display: flex;
-      align-items: flex-start;
-      gap: 14px;
-      padding: 16px;
-      border-radius: 13px;
-      background: #f8fafc;
-      border: 1px dashed #cbd5e1;
-      color: #64748b;
-    }
-
-    .organization-empty svg {
-      flex: 0 0 auto;
-      color: #94a3b8;
-      margin-top: 2px;
-    }
-
-    .organization-empty h3 {
-      margin: 0;
-      color: #334155;
-      font-size: 14px;
-      font-weight: 750;
-    }
-
-    .organization-empty p {
-      margin: 5px 0 0;
-      font-size: 13px;
-      line-height: 1.6;
-    }
-
-    .organization-process-list {
-      display: grid;
-      gap: 9px;
-    }
-
-    .organization-process {
-      display: grid;
-      grid-template-columns: 30px minmax(0, 1fr) auto;
-      gap: 10px;
-      align-items: center;
-      min-height: 46px;
-      padding: 8px 11px;
-      border-radius: 11px;
-      background: #f8fafc;
-      border: 1px solid #e2e8f0;
-    }
-
-    .organization-process__number {
-      width: 28px;
-      height: 28px;
-      display: grid;
-      place-items: center;
-      border-radius: 8px;
-      background: #dcfce7;
-      color: #166534;
-      font-size: 12px;
-      font-weight: 800;
-    }
-
-    .organization-process__name {
-      color: #334155;
-      font-size: 13px;
-      font-weight: 650;
-    }
-
-    .organization-process > svg {
-      color: #16a34a;
-    }
-
-    .organization-location {
-      display: flex;
-      gap: 13px;
-      align-items: flex-start;
-      padding: 14px;
-      border: 1px solid #e2e8f0;
-      background: #f8fafc;
-      border-radius: 13px;
-    }
-
-    .organization-location__icon {
-      width: 38px;
-      height: 38px;
-      flex: 0 0 38px;
-      display: grid;
-      place-items: center;
-      border-radius: 10px;
-      background: #ecfdf5;
-      color: #166534;
-    }
-
-    .organization-location__content {
-      min-width: 0;
-      display: grid;
-      gap: 4px;
-    }
-
-    .organization-location__content strong {
-      color: #0f172a;
-      font-size: 14px;
-      font-weight: 750;
-    }
-
-    .organization-location__content span {
-      color: #64748b;
-      font-size: 13px;
-      line-height: 1.6;
+    .organization-card__header h2 {
+      font-size: 1rem;
     }
 
     .organization-coordinates {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 10px;
-      margin-top: 12px;
+      grid-template-columns: 1fr;
     }
 
-    .organization-coordinates > div {
-      padding: 12px;
-      border: 1px solid #e2e8f0;
-      border-radius: 11px;
-      background: #ffffff;
+    .organization-tags {
+      gap: 0.3rem;
     }
 
-    .organization-coordinates__label {
-      display: block;
-      margin-bottom: 4px;
-      color: #94a3b8;
-      font-size: 10px;
-      font-weight: 800;
-      letter-spacing: 0.09em;
-      text-transform: uppercase;
+    .organization-tag {
+      font-size: 0.54rem;
     }
+  }
 
-    .organization-coordinates strong {
-      display: block;
-      color: #334155;
-      font-size: 13px;
-      font-variant-numeric: tabular-nums;
-    }
-
-    .organization-map-link {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      width: 100%;
-      min-height: 42px;
-      margin-top: 12px;
-      padding: 0 14px;
-      border-radius: 10px;
-      background: #166534;
-      color: #ffffff;
-      text-decoration: none;
-      font-size: 13px;
-      font-weight: 750;
-      transition:
-        background-color 160ms ease,
-        transform 160ms ease;
-    }
-
-    .organization-map-link:hover {
-      background: #14532d;
-      transform: translateY(-1px);
-    }
-
-    .organization-side-card {
-      padding: 20px;
-    }
-
-    .organization-side-card__header {
-      display: flex;
-      align-items: center;
-      gap: 9px;
-      color: #166534;
-    }
-
-    .organization-side-card__header h2 {
-      margin: 0;
-      color: #0f172a;
-      font-size: 16px;
-      line-height: 1.4;
-      font-weight: 800;
-    }
-
-    .organization-status {
-      display: flex;
-      align-items: flex-start;
-      gap: 12px;
-      margin-top: 17px;
-      padding: 13px;
-      border-radius: 12px;
-      background: #f0fdf4;
-      border: 1px solid #dcfce7;
-    }
-
-    .organization-status__icon {
-      width: 36px;
-      height: 36px;
-      display: grid;
-      place-items: center;
-      flex: 0 0 36px;
-      border-radius: 10px;
-      background: #dcfce7;
-      color: #166534;
-    }
-
-    .organization-status strong {
-      display: block;
-      color: #166534;
-      font-size: 13px;
-      font-weight: 800;
-    }
-
-    .organization-status p {
-      margin: 4px 0 0;
-      color: #64748b;
-      font-size: 12px;
-      line-height: 1.6;
-    }
-
-    .organization-contact-list {
-      display: grid;
-      gap: 7px;
-      margin-top: 15px;
-    }
-
+  @media (prefers-reduced-motion: reduce) {
+    .organization-button,
     .organization-contact {
-      display: grid;
-      grid-template-columns: 34px minmax(0, 1fr) auto;
-      gap: 9px;
-      align-items: center;
-      padding: 9px;
-      border-radius: 10px;
-      text-decoration: none;
-      transition: background-color 160ms ease;
+      transition: none;
     }
-
-    .organization-contact:hover {
-      background: #f8fafc;
-    }
-
-    .organization-contact__icon {
-      width: 34px;
-      height: 34px;
-      display: grid;
-      place-items: center;
-      border-radius: 9px;
-      background: #f0fdf4;
-      color: #166534;
-    }
-
-    .organization-contact__copy {
-      min-width: 0;
-      display: grid;
-      gap: 2px;
-    }
-
-    .organization-contact__label {
-      color: #94a3b8;
-      font-size: 10px;
-      font-weight: 800;
-      letter-spacing: 0.07em;
-      text-transform: uppercase;
-    }
-
-    .organization-contact__value {
-      overflow: hidden;
-      color: #334155;
-      font-size: 12px;
-      font-weight: 650;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .organization-contact > svg {
-      color: #94a3b8;
-    }
-
-    .organization-side-card--green {
-      background:
-        linear-gradient(
-          145deg,
-          #166534 0%,
-          #14532d 100%
-        );
-      border-color: #14532d;
-      color: #ffffff;
-    }
-
-    .organization-side-card--green
-      .organization-side-card__header {
-      color: #bbf7d0;
-    }
-
-    .organization-side-card--green
-      .organization-side-card__header
-      h2 {
-      color: #ffffff;
-    }
-
-    .organization-side-card--green > p {
-      margin: 13px 0 0;
-      color: #dcfce7;
-      font-size: 13px;
-      line-height: 1.7;
-    }
-
-    .organization-side-links {
-      display: grid;
-      gap: 5px;
-      margin-top: 15px;
-    }
-
-    .organization-side-links a {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      min-height: 38px;
-      padding: 0 10px;
-      border-radius: 9px;
-      color: #ffffff;
-      text-decoration: none;
-      font-size: 12px;
-      font-weight: 700;
-      transition: background-color 160ms ease;
-    }
-
-    .organization-side-links a:hover {
-      background: rgba(255, 255, 255, 0.1);
-    }
-
-    .organization-side-links a svg {
-      color: #bbf7d0;
-    }
-
-    .organization-back-link {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      color: #64748b;
-      text-decoration: none;
-      font-size: 12px;
-      font-weight: 700;
-      transition: color 160ms ease;
-    }
-
-    .organization-back-link:hover {
-      color: #166534;
-    }
-
-    @media (max-width: 900px) {
-      .organization-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .organization-sidebar {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        align-items: start;
-      }
-
-      .organization-side-card--green,
-      .organization-back-link {
-        grid-column: 1 / -1;
-      }
-    }
-
-    @media (max-width: 680px) {
-      .organization-page {
-        padding-bottom: 48px;
-      }
-
-      .organization-page__container {
-        width: min(100% - 20px, 1180px);
-      }
-
-      .organization-hero {
-        margin-top: -10px;
-        padding: 20px;
-        border-radius: 18px;
-      }
-
-      .organization-hero__identity {
-        flex-direction: column;
-      }
-
-      .organization-hero__logo {
-        width: 82px;
-        height: 82px;
-        flex-basis: 82px;
-        border-radius: 16px;
-      }
-
-      .organization-grid {
-        gap: 14px;
-        margin-top: 14px;
-      }
-
-      .organization-main,
-      .organization-sidebar {
-        gap: 14px;
-      }
-
-      .organization-sidebar {
-        grid-template-columns: 1fr;
-      }
-
-      .organization-side-card--green,
-      .organization-back-link {
-        grid-column: auto;
-      }
-
-      .organization-card__header,
-      .organization-card__body,
-      .organization-side-card {
-        padding: 17px;
-      }
-
-      .organization-coordinates {
-        grid-template-columns: 1fr;
-      }
-
-      .organization-hero__actions {
-        display: grid;
-        grid-template-columns: 1fr;
-      }
-
-      .organization-button {
-        width: 100%;
-      }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      .organization-button,
-      .organization-map-link,
-      .organization-side-links a,
-      .organization-contact {
-        transition: none;
-      }
-    }
-  </style>
-
-</PublicLayout>
+  }
+</style>

@@ -1,6 +1,7 @@
 ---
 import {
   ArrowRight,
+  Check,
   CircleCheck,
   Clock3,
   FileText,
@@ -13,7 +14,6 @@ import {
 } from "@lucide/astro";
 
 import PublicLayout from "../../layouts/PublicLayout.astro";
-import PageHeader from "../../components/layout/PageHeader.astro";
 import { getReports } from "../../lib/data/reports";
 
 const reports = getReports();
@@ -23,7 +23,10 @@ type ReportItem =
     ? T
     : never;
 
-const statusLabels: Record<ReportItem["status"], string> = {
+const statusLabels: Record<
+  ReportItem["status"],
+  string
+> = {
   pending: "Menunggu verifikasi",
   verified: "Terverifikasi",
   "in-progress": "Sedang ditangani",
@@ -31,13 +34,19 @@ const statusLabels: Record<ReportItem["status"], string> = {
   rejected: "Ditolak",
 };
 
-const priorityLabels: Record<ReportItem["priority"], string> = {
+const priorityLabels: Record<
+  ReportItem["priority"],
+  string
+> = {
   low: "Rendah",
   medium: "Sedang",
   high: "Tinggi",
 };
 
-const typeLabels: Record<ReportItem["type"], string> = {
+const typeLabels: Record<
+  ReportItem["type"],
+  string
+> = {
   "illegal-dumping": "Pembuangan ilegal",
   "overflowing-waste": "Sampah meluber",
   "burning-waste": "Pembakaran sampah",
@@ -54,48 +63,88 @@ const reportStatusOrder: ReportItem["status"][] = [
   "rejected",
 ];
 
-const statusCounts = reportStatusOrder.reduce(
-  (accumulator, status) => {
-    accumulator[status] = reports.filter(
-      (report) => report.status === status,
-    ).length;
+const statusCounts =
+  reportStatusOrder.reduce(
+    (
+      accumulator,
+      status,
+    ) => {
+      accumulator[status] =
+        reports.filter(
+          (report) =>
+            report.status ===
+            status,
+        ).length;
 
-    return accumulator;
-  },
-  {} as Record<ReportItem["status"], number>,
-);
+      return accumulator;
+    },
+    {} as Record<
+      ReportItem["status"],
+      number
+    >,
+  );
 
 const activeCount =
   statusCounts.pending +
   statusCounts.verified +
   statusCounts["in-progress"];
 
-const resolvedCount = statusCounts.resolved;
+const resolvedCount =
+  statusCounts.resolved;
 
-const highPriorityCount = reports.filter(
-  (report) => report.priority === "high",
-).length;
+const highPriorityCount =
+  reports.filter(
+    (report) =>
+      report.priority ===
+      "high",
+  ).length;
 
-function getDateValue(value: unknown): Date | null {
-  if (value instanceof Date) {
-    return Number.isNaN(value.getTime()) ? null : value;
-  }
-
-  if (typeof value === "string" || typeof value === "number") {
-    const date = new Date(value);
-
-    return Number.isNaN(date.getTime()) ? null : date;
+function getDateValue(
+  value: unknown,
+): Date | null {
+  if (
+    value instanceof Date
+  ) {
+    return Number.isNaN(
+      value.getTime(),
+    )
+      ? null
+      : value;
   }
 
   if (
-    typeof value === "object" &&
+    typeof value ===
+      "string" ||
+    typeof value ===
+      "number"
+  ) {
+    const date = new Date(
+      value,
+    );
+
+    return Number.isNaN(
+      date.getTime(),
+    )
+      ? null
+      : date;
+  }
+
+  if (
+    typeof value ===
+      "object" &&
     value !== null &&
     "toDate" in value &&
-    typeof value.toDate === "function"
+    typeof value.toDate ===
+      "function"
   ) {
-    const date = value.toDate();
+    const date =
+      value.toDate();
 
-    return date instanceof Date && !Number.isNaN(date.getTime())
+    return date instanceof
+        Date &&
+      !Number.isNaN(
+        date.getTime(),
+      )
       ? date
       : null;
   }
@@ -103,70 +152,32 @@ function getDateValue(value: unknown): Date | null {
   return null;
 }
 
-function formatDate(value: unknown): string {
-  const date = getDateValue(value);
+function formatDate(
+  value: unknown,
+): string {
+  const date =
+    getDateValue(value);
 
   if (!date) {
     return "Tanggal tidak tersedia";
   }
 
-  return new Intl.DateTimeFormat("id-ID", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  }).format(date);
+  return new Intl.DateTimeFormat(
+    "id-ID",
+    {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    },
+  ).format(date);
 }
 
-function getReportTimestamp(report: ReportItem): unknown {
-  return report.createdAt;
-}
-
-function getStatusClass(status: ReportItem["status"]): string {
-  switch (status) {
-    case "pending":
-      return "status-badge status-badge--pending";
-
-    case "verified":
-      return "status-badge status-badge--verified";
-
-    case "in-progress":
-      return "status-badge status-badge--progress";
-
-    case "resolved":
-      return "status-badge status-badge--resolved";
-
-    case "rejected":
-      return "status-badge status-badge--rejected";
-
-    default:
-      return "status-badge";
-  }
-}
-
-function getPriorityClass(priority: ReportItem["priority"]): string {
-  switch (priority) {
-    case "high":
-      return "priority-badge priority-badge--high";
-
-    case "medium":
-      return "priority-badge priority-badge--medium";
-
-    case "low":
-      return "priority-badge priority-badge--low";
-
-    default:
-      return "priority-badge";
-  }
-}
-
-function getReportTypeIcon(type: ReportItem["type"]): string {
+function getReportTypeIcon(
+  type: ReportItem["type"],
+): "warning" | "hazardous" | "environmental" | "other" {
   switch (type) {
     case "illegal-dumping":
-      return "warning";
-
     case "overflowing-waste":
-      return "warning";
-
     case "burning-waste":
       return "warning";
 
@@ -176,10 +187,29 @@ function getReportTypeIcon(type: ReportItem["type"]): string {
     case "environmental-pollution":
       return "environmental";
 
-    case "other":
     default:
       return "other";
   }
+}
+
+function getStatusClass(
+  status: ReportItem["status"],
+): string {
+  return `report-status report-status--${status}`;
+}
+
+function getPriorityClass(
+  priority: ReportItem["priority"],
+): string {
+  return `report-priority report-priority--${priority}`;
+}
+
+function getTypeClass(
+  type: ReportItem["type"],
+): string {
+  return `report-card__type report-card__type--${getReportTypeIcon(
+    type,
+  )}`;
 }
 
 const jsonLd = {
@@ -204,193 +234,285 @@ const jsonLd = {
   <script
     type="application/ld+json"
     is:inline
-    set:html={JSON.stringify(jsonLd)}
+    set:html={JSON.stringify(
+      jsonLd,
+    )}
   />
 
-  <main class="reports-page">
-    <PageHeader
-      eyebrow="LAPORAN MASYARAKAT"
-      title="Pantau kondisi persampahan dari laporan lapangan"
-      description="BINSIGHT menghubungkan laporan masyarakat dengan data, lokasi, dan proses tindak lanjut agar kondisi persampahan di Badung dapat dipantau secara lebih terbuka."
-      icon="report"
-      tone="green"
-      breadcrumbs={[
-        {
-          label: "Beranda",
-          href: "/",
-        },
-        {
-          label: "Laporan Masyarakat",
-          href: "/reports",
-        },
-      ]}
-    />
+  <main
+    class="reports-page"
+    data-reports-page
+  >
 
-    <section class="reports-page__intro">
-      <div class="reports-page__container">
-        <div class="reports-page__intro-card">
-          <div class="reports-page__intro-content">
-            <div class="reports-page__eyebrow">
-              <ShieldCheck
-                size={16}
-                stroke-width={2}
-                aria-hidden="true"
-              />
-              <span>DATA LAPANGAN</span>
-            </div>
+    <!-- =====================================================================
+         HERO
+         ================================================================== -->
 
-            <h2 class="reports-page__intro-title">
-              Suara masyarakat menjadi data lapangan.
+    <section
+      class="reports-hero"
+      aria-labelledby="reports-title"
+    >
+      <div class="reports-hero__main">
+
+        <div class="reports-kicker">
+          <ShieldCheck
+            size={15}
+            stroke-width={2}
+            aria-hidden="true"
+          />
+
+          <span>
+            BINSIGHT · LAPORAN MASYARAKAT
+          </span>
+        </div>
+
+        <div class="reports-breadcrumbs">
+          <a href="/">
+            Beranda
+          </a>
+
+          <span aria-hidden="true">
+            /
+          </span>
+
+          <span>
+            Laporan masyarakat
+          </span>
+        </div>
+
+        <h1 id="reports-title">
+          Kondisi lapangan,
+          dilaporkan masyarakat.
+        </h1>
+
+        <p class="reports-hero__description">
+          Pantau laporan persampahan yang tercatat di Kabupaten Badung,
+          lihat status penanganannya, dan temukan informasi lapangan
+          yang relevan.
+        </p>
+
+      </div>
+
+      <div class="reports-hero__side">
+
+        <div class="reports-hero__side-mark">
+          <FileText
+            size={22}
+            stroke-width={2}
+            aria-hidden="true"
+          />
+        </div>
+
+        <span class="reports-hero__side-label">
+          DATA PUBLIK
+        </span>
+
+        <strong>
+          {reports.length}
+        </strong>
+
+        <span class="reports-hero__side-caption">
+          laporan tercatat
+        </span>
+
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         INTRO
+         ================================================================== -->
+
+    <section
+      class="reports-intro"
+      aria-label="Tentang laporan masyarakat"
+    >
+      <div class="reports-container">
+
+        <div class="reports-intro__grid">
+
+          <div class="reports-intro__copy">
+
+            <span class="reports-section-label">
+              <span>01</span>
+              KONTEKS LAPANGAN
+            </span>
+
+            <h2>
+              Suara masyarakat
+              menjadi data.
             </h2>
 
-            <p class="reports-page__intro-description">
-              Temukan laporan yang masuk, lihat status penanganannya, dan
-              bantu memperkaya pemahaman bersama tentang kondisi persampahan
-              di Kabupaten Badung.
+            <p>
+              Laporan publik membantu membangun gambaran kondisi
+              persampahan dari tingkat lokasi. Setiap laporan dapat
+              dibaca bersama dengan informasi area, kategori, prioritas,
+              dan status penanganannya.
             </p>
+
           </div>
 
           <a
-            class="reports-page__create-button"
+            class="reports-create"
             href="/reports/create"
           >
-            <Plus
-              size={18}
-              stroke-width={2.2}
-              aria-hidden="true"
-            />
-            <span>Buat Laporan</span>
+            <span class="reports-create__icon">
+              <Plus
+                size={20}
+                stroke-width={2.3}
+                aria-hidden="true"
+              />
+            </span>
+
+            <span class="reports-create__copy">
+              <small>
+                KONTRIBUSI PUBLIK
+              </small>
+
+              <strong>
+                Buat laporan
+              </strong>
+            </span>
+
             <ArrowRight
-              size={17}
+              size={19}
               stroke-width={2}
               aria-hidden="true"
             />
           </a>
+
         </div>
+
       </div>
     </section>
 
+    <!-- =====================================================================
+         STATS
+         ================================================================== -->
+
     <section
-      class="reports-page__stats"
+      class="reports-stats"
       aria-label="Ringkasan laporan"
     >
-      <div class="reports-page__container">
-        <div class="reports-stat-grid">
-          <article class="reports-stat-card">
-            <div
-              class="reports-stat-card__icon reports-stat-card__icon--all"
-            >
-              <FileText
-                size={20}
-                stroke-width={2}
-                aria-hidden="true"
-              />
+      <div class="reports-container">
+
+        <div class="reports-stats__grid">
+
+          <article class="report-stat report-stat--dark">
+
+            <div class="report-stat__number">
+              {reports.length}
             </div>
 
-            <div class="reports-stat-card__content">
-              <span class="reports-stat-card__label">
-                Total laporan
+            <div class="report-stat__copy">
+              <span>
+                TOTAL
               </span>
 
-              <strong class="reports-stat-card__value">
-                {reports.length}
+              <strong>
+                Semua laporan
               </strong>
-
-              <span class="reports-stat-card__meta">
-                Seluruh laporan yang tercatat
-              </span>
             </div>
+
           </article>
 
-          <article class="reports-stat-card">
-            <div
-              class="reports-stat-card__icon reports-stat-card__icon--active"
-            >
+          <article class="report-stat">
+
+            <div class="report-stat__icon">
               <Clock3
-                size={20}
+                size={19}
                 stroke-width={2}
                 aria-hidden="true"
               />
             </div>
 
-            <div class="reports-stat-card__content">
-              <span class="reports-stat-card__label">
-                Aktif
+            <div class="report-stat__copy">
+              <span>
+                AKTIF
               </span>
 
-              <strong class="reports-stat-card__value">
+              <strong>
                 {activeCount}
               </strong>
 
-              <span class="reports-stat-card__meta">
-                Masih dalam proses
-              </span>
+              <small>
+                masih dalam proses
+              </small>
             </div>
+
           </article>
 
-          <article class="reports-stat-card">
-            <div
-              class="reports-stat-card__icon reports-stat-card__icon--resolved"
-            >
+          <article class="report-stat">
+
+            <div class="report-stat__icon report-stat__icon--success">
               <CircleCheck
-                size={20}
+                size={19}
                 stroke-width={2}
                 aria-hidden="true"
               />
             </div>
 
-            <div class="reports-stat-card__content">
-              <span class="reports-stat-card__label">
-                Selesai
+            <div class="report-stat__copy">
+              <span>
+                SELESAI
               </span>
 
-              <strong class="reports-stat-card__value">
+              <strong>
                 {resolvedCount}
               </strong>
 
-              <span class="reports-stat-card__meta">
-                Laporan terselesaikan
-              </span>
+              <small>
+                laporan terselesaikan
+              </small>
             </div>
+
           </article>
 
-          <article class="reports-stat-card">
-            <div
-              class="reports-stat-card__icon reports-stat-card__icon--priority"
-            >
+          <article class="report-stat">
+
+            <div class="report-stat__icon report-stat__icon--warning">
               <TriangleAlert
-                size={20}
+                size={19}
                 stroke-width={2}
                 aria-hidden="true"
               />
             </div>
 
-            <div class="reports-stat-card__content">
-              <span class="reports-stat-card__label">
-                Prioritas tinggi
+            <div class="report-stat__copy">
+              <span>
+                PRIORITAS
               </span>
 
-              <strong class="reports-stat-card__value">
+              <strong>
                 {highPriorityCount}
               </strong>
 
-              <span class="reports-stat-card__meta">
-                Perlu perhatian lebih
-              </span>
+              <small>
+                perlu perhatian lebih
+              </small>
             </div>
+
           </article>
+
         </div>
+
       </div>
     </section>
 
-    <section class="reports-page__content">
-      <div class="reports-page__container">
-        <div
-          class="reports-toolbar"
-          data-report-filters
-        >
-          <div class="reports-toolbar__heading">
-            <div class="reports-toolbar__heading-icon">
+    <!-- =====================================================================
+         REPORTS
+         ================================================================== -->
+
+    <section
+      class="reports-content"
+      aria-labelledby="reports-list-title"
+    >
+      <div class="reports-container">
+
+        <div class="reports-toolbar">
+
+          <div class="reports-toolbar__title-wrap">
+
+            <div class="reports-toolbar__icon">
               <ListFilter
                 size={18}
                 stroke-width={2}
@@ -399,198 +521,257 @@ const jsonLd = {
             </div>
 
             <div>
-              <h2 class="reports-toolbar__title">
+              <span class="reports-section-label">
+                <span>02</span>
+                DATABASE LAPORAN
+              </span>
+
+              <h2
+                id="reports-list-title"
+                class="reports-toolbar__title"
+              >
                 Laporan masyarakat
               </h2>
-
-              <p class="reports-toolbar__description">
-                Gunakan filter untuk menemukan laporan yang relevan.
-              </p>
             </div>
+
           </div>
 
-          <div class="reports-toolbar__controls">
-            <label class="reports-filter">
-              <span class="reports-filter__label">
-                <span class="sr-only">Cari laporan</span>
-              </span>
+          <div class="reports-toolbar__result">
+            <strong
+              data-report-result-count
+            >
+              {reports.length}
+            </strong>
 
-              <span class="reports-filter__field">
-                <Search
-                  size={17}
-                  stroke-width={2}
-                  aria-hidden="true"
-                />
+            <span>
+              laporan
+            </span>
+          </div>
 
-                <input
-                  type="search"
-                  class="reports-filter__input"
-                  placeholder="Cari laporan..."
-                  autocomplete="off"
-                  data-report-search
-                />
-              </span>
+        </div>
+
+        <div
+          class="reports-filters"
+          data-report-filters
+        >
+
+          <div class="reports-filter reports-filter--search">
+
+            <label
+              class="reports-filter__label"
+              for="report-search"
+            >
+              Cari
             </label>
 
-            <label class="reports-filter">
-              <span class="reports-filter__label">
-                Status
-              </span>
+            <div class="reports-filter__search">
+              <Search
+                size={17}
+                stroke-width={2}
+                aria-hidden="true"
+              />
 
-              <select
-                class="reports-filter__select"
-                data-report-status
-              >
-                <option value="all">
-                  Semua status
-                </option>
+              <input
+                id="report-search"
+                type="search"
+                class="reports-filter__input"
+                placeholder="Cari judul, alamat, area..."
+                autocomplete="off"
+                data-report-search
+              />
 
-                {
-                  reportStatusOrder.map((status) => (
+            </div>
+
+          </div>
+
+          <div class="reports-filter">
+
+            <label
+              class="reports-filter__label"
+              for="report-status"
+            >
+              Status
+            </label>
+
+            <select
+              id="report-status"
+              class="reports-filter__select"
+              data-report-status
+            >
+              <option value="all">
+                Semua status
+              </option>
+
+              {
+                reportStatusOrder.map(
+                  (status) => (
                     <option value={status}>
                       {statusLabels[status]}
                     </option>
-                  ))
-                }
-              </select>
-            </label>
+                  ),
+                )
+              }
+            </select>
 
-            <label class="reports-filter">
-              <span class="reports-filter__label">
-                Prioritas
-              </span>
-
-              <select
-                class="reports-filter__select"
-                data-report-priority
-              >
-                <option value="all">
-                  Semua prioritas
-                </option>
-
-                <option value="high">Tinggi</option>
-                <option value="medium">Sedang</option>
-                <option value="low">Rendah</option>
-              </select>
-            </label>
-
-            <label class="reports-filter">
-              <span class="reports-filter__label">
-                Jenis
-              </span>
-
-              <select
-                class="reports-filter__select"
-                data-report-type
-              >
-                <option value="all">
-                  Semua jenis
-                </option>
-
-                <option value="illegal-dumping">
-                  Pembuangan ilegal
-                </option>
-
-                <option value="overflowing-waste">
-                  Sampah meluber
-                </option>
-
-                <option value="burning-waste">
-                  Pembakaran sampah
-                </option>
-
-                <option value="hazardous-waste">
-                  Sampah berbahaya
-                </option>
-
-                <option value="environmental-pollution">
-                  Pencemaran lingkungan
-                </option>
-
-                <option value="other">
-                  Lainnya
-                </option>
-              </select>
-            </label>
           </div>
+
+          <div class="reports-filter">
+
+            <label
+              class="reports-filter__label"
+              for="report-priority"
+            >
+              Prioritas
+            </label>
+
+            <select
+              id="report-priority"
+              class="reports-filter__select"
+              data-report-priority
+            >
+              <option value="all">
+                Semua prioritas
+              </option>
+
+              <option value="high">
+                Tinggi
+              </option>
+
+              <option value="medium">
+                Sedang
+              </option>
+
+              <option value="low">
+                Rendah
+              </option>
+            </select>
+
+          </div>
+
+          <div class="reports-filter">
+
+            <label
+              class="reports-filter__label"
+              for="report-type"
+            >
+              Jenis
+            </label>
+
+            <select
+              id="report-type"
+              class="reports-filter__select"
+              data-report-type
+            >
+              <option value="all">
+                Semua jenis
+              </option>
+
+              {
+                Object.entries(
+                  typeLabels,
+                ).map(
+                  ([value, label]) => (
+                    <option value={value}>
+                      {label}
+                    </option>
+                  ),
+                )
+              }
+            </select>
+
+          </div>
+
+          <button
+            type="button"
+            class="reports-filter__reset"
+            data-report-reset
+            hidden
+          >
+            <span>
+              Reset
+            </span>
+
+            <span aria-hidden="true">
+              ×
+            </span>
+          </button>
+
         </div>
 
         <div
           class="reports-list"
           data-report-list
-          aria-live="polite"
         >
           {
             reports.length > 0 ? (
               reports.map((report) => {
-                const dateValue = getDateValue(
-                  getReportTimestamp(report),
-                );
-
-                const dateIso = dateValue
-                  ? dateValue.toISOString()
-                  : undefined;
-
-                const statusLabel =
-                  statusLabels[report.status];
-
-                const priorityLabel =
-                  priorityLabels[report.priority];
-
-                const typeLabel =
-                  typeLabels[report.type];
-
                 const typeIcon =
-                  getReportTypeIcon(report.type);
+                  getReportTypeIcon(
+                    report.type,
+                  );
 
                 const searchableText = [
                   report.title,
                   report.description,
                   report.location.address,
                   report.location.areaName,
-                  typeLabel,
-                  statusLabel,
-                  priorityLabel,
+                  typeLabels[
+                    report.type
+                  ],
+                  statusLabels[
+                    report.status
+                  ],
+                  priorityLabels[
+                    report.priority
+                  ],
                 ]
                   .filter(Boolean)
                   .join(" ")
                   .toLowerCase();
 
+                const date =
+                  getDateValue(
+                    report.createdAt,
+                  );
+
+                const isoDate =
+                  date?.toISOString();
+
                 return (
                   <article
-                    class="report-list-card"
+                    class="report-card"
                     data-report-card
-                    data-report-status-value={report.status}
-                    data-report-priority-value={
+                    data-report-status={report.status}
+                    data-report-priority={
                       report.priority
                     }
-                    data-report-type-value={report.type}
-                    data-report-search-value={
-                      searchableText
-                    }
+                    data-report-type={report.type}
+                    data-report-search={searchableText}
                   >
-                    <div class="report-list-card__main">
-                      <div class="report-list-card__top">
+
+                    <div class="report-card__accent"></div>
+
+                    <div class="report-card__body">
+
+                      <div class="report-card__header">
+
                         <div
-                          class:list={[
-                            "report-list-card__type-icon",
-                            `report-list-card__type-icon--${typeIcon}`,
-                          ]}
+                          class={getTypeClass(
+                            report.type,
+                          )}
                         >
-                          {typeIcon === "hazardous" ? (
-                            <TriangleAlert
-                              size={19}
-                              stroke-width={2}
-                              aria-hidden="true"
-                            />
-                          ) : typeIcon === "warning" ? (
-                            <TriangleAlert
-                              size={19}
-                              stroke-width={2}
-                              aria-hidden="true"
-                            />
-                          ) : typeIcon === "environmental" ? (
+                          {typeIcon ===
+                          "environmental" ? (
                             <MapPin
+                              size={19}
+                              stroke-width={2}
+                              aria-hidden="true"
+                            />
+                          ) : typeIcon ===
+                            "hazardous" ||
+                            typeIcon ===
+                              "warning" ? (
+                            <TriangleAlert
                               size={19}
                               stroke-width={2}
                               aria-hidden="true"
@@ -604,13 +785,16 @@ const jsonLd = {
                           )}
                         </div>
 
-                        <div class="report-list-card__badges">
+                        <div class="report-card__badges">
+
                           <span
                             class={getStatusClass(
                               report.status,
                             )}
                           >
-                            {statusLabel}
+                            {statusLabels[
+                              report.status
+                            ]}
                           </span>
 
                           <span
@@ -618,75 +802,92 @@ const jsonLd = {
                               report.priority,
                             )}
                           >
-                            {priorityLabel}
+                            {priorityLabels[
+                              report.priority
+                            ]}
                           </span>
+
                         </div>
+
                       </div>
 
                       <a
-                        class="report-list-card__title"
+                        class="report-card__title"
                         href={`/reports/${report.id}`}
                       >
                         {report.title}
                       </a>
 
-                      <p class="report-list-card__description">
+                      <p class="report-card__description">
                         {report.description}
                       </p>
 
-                      <div class="report-list-card__meta">
-                        <span class="report-list-card__meta-item">
+                      <div class="report-card__meta">
+
+                        <span>
                           <MapPin
-                            size={15}
+                            size={14}
                             stroke-width={2}
                             aria-hidden="true"
                           />
 
-                          <span>
+                          <strong>
                             {report.location.areaName}
-                          </span>
+                          </strong>
                         </span>
 
-                        <span
-                          class="report-list-card__meta-item"
-                          title={dateIso}
-                        >
+                        <span>
                           <Clock3
-                            size={15}
+                            size={14}
                             stroke-width={2}
                             aria-hidden="true"
                           />
 
-                          <time datetime={dateIso}>
+                          <time datetime={isoDate}>
                             {formatDate(
-                              getReportTimestamp(
-                                report,
-                              ),
+                              report.createdAt,
                             )}
                           </time>
                         </span>
 
-                        <span class="report-list-card__meta-item">
+                        <span>
                           <FileText
-                            size={15}
+                            size={14}
                             stroke-width={2}
                             aria-hidden="true"
                           />
 
-                          <span>
-                            {typeLabel}
-                          </span>
+                          {typeLabels[
+                            report.type
+                          ]}
                         </span>
+
                       </div>
+
                     </div>
 
-                    <div class="report-list-card__action">
+                    <div class="report-card__footer">
+
+                      <span class="report-card__id">
+                        REPORT
+                        <strong>
+                          {String(
+                            report.id,
+                          ).slice(
+                            0,
+                            8,
+                          ).toUpperCase()}
+                        </strong>
+                      </span>
+
                       <a
-                        class="report-list-card__link"
+                        class="report-card__detail"
                         href={`/reports/${report.id}`}
                         aria-label={`Lihat detail laporan ${report.title}`}
                       >
-                        <span>Lihat detail</span>
+                        <span>
+                          Detail
+                        </span>
 
                         <ArrowRight
                           size={17}
@@ -694,12 +895,15 @@ const jsonLd = {
                           aria-hidden="true"
                         />
                       </a>
+
                     </div>
+
                   </article>
                 );
               })
             ) : (
               <div class="reports-empty">
+
                 <div class="reports-empty__icon">
                   <FileText
                     size={28}
@@ -708,19 +912,21 @@ const jsonLd = {
                   />
                 </div>
 
-                <h3 class="reports-empty__title">
+                <span class="reports-empty__label">
+                  DATABASE KOSONG
+                </span>
+
+                <h3>
                   Belum ada laporan
                 </h3>
 
-                <p class="reports-empty__description">
+                <p>
                   Belum ada laporan masyarakat yang tersedia.
-                  Anda dapat menjadi bagian pertama dengan
-                  mengirimkan laporan.
                 </p>
 
                 <a
-                  class="reports-empty__button"
                   href="/reports/create"
+                  class="reports-empty__button"
                 >
                   <Plus
                     size={17}
@@ -732,17 +938,18 @@ const jsonLd = {
                     Buat laporan
                   </span>
                 </a>
+
               </div>
             )
           }
         </div>
 
         <div
-          class="reports-filter-empty"
-          data-report-filter-empty
+          class="reports-no-results"
+          data-report-no-results
           hidden
         >
-          <div class="reports-filter-empty__icon">
+          <div class="reports-no-results__icon">
             <Search
               size={25}
               stroke-width={1.8}
@@ -750,1027 +957,2611 @@ const jsonLd = {
             />
           </div>
 
-          <h3 class="reports-filter-empty__title">
-            Laporan tidak ditemukan
+          <span>
+            FILTER
+          </span>
+
+          <h3>
+            Tidak ada laporan yang cocok
           </h3>
 
-          <p class="reports-filter-empty__description">
-            Tidak ada laporan yang sesuai dengan filter
-            yang dipilih. Coba ubah kata kunci atau filter
-            Anda.
+          <p>
+            Ubah kata kunci atau filter untuk melihat laporan lainnya.
           </p>
 
           <button
             type="button"
-            class="reports-filter-empty__button"
-            data-report-reset
+            data-report-reset-empty
           >
             Reset filter
           </button>
         </div>
+
       </div>
     </section>
 
-    <section class="reports-page__guidance">
-      <div class="reports-page__container">
-        <div class="reports-guidance-card">
-          <div class="reports-guidance-card__icon">
+    <!-- =====================================================================
+         GUIDANCE
+         ================================================================== -->
+
+    <section class="reports-guidance">
+
+      <div class="reports-container">
+
+        <div class="reports-guidance__inner">
+
+          <div class="reports-guidance__icon">
             <ShieldCheck
-              size={22}
+              size={21}
               stroke-width={2}
               aria-hidden="true"
             />
           </div>
 
-          <div class="reports-guidance-card__content">
-            <h2 class="reports-guidance-card__title">
-              Laporkan kondisi yang Anda temukan
+          <div class="reports-guidance__copy">
+
+            <span>
+              03 · KONTRIBUSI
+            </span>
+
+            <h2>
+              Temukan kondisi lapangan?
             </h2>
 
-            <p class="reports-guidance-card__description">
-              Sampaikan lokasi dan kondisi persampahan
-              dengan informasi yang jelas agar laporan
-              dapat diverifikasi dan ditindaklanjuti.
+            <p>
+              Sampaikan lokasi dan kondisi secara jelas agar
+              laporan dapat dipahami dan diverifikasi.
             </p>
+
           </div>
 
           <a
-            class="reports-guidance-card__link"
             href="/reports/create"
+            class="reports-guidance__link"
           >
-            <span>Buat laporan</span>
+            <span>
+              Buat laporan
+            </span>
 
             <ArrowRight
-              size={17}
+              size={18}
               stroke-width={2}
               aria-hidden="true"
             />
           </a>
+
         </div>
+
       </div>
+
     </section>
+
   </main>
 </PublicLayout>
 
 <style>
+  /* ==========================================================================
+     PAGE
+     ========================================================================== */
+
+  .reports-page,
+  .reports-page *,
+  .reports-page *::before,
+  .reports-page *::after {
+    box-sizing: border-box;
+  }
+
   .reports-page {
-    --reports-container: min(
+    --acid: #dfff00;
+    --acid-soft: #efff70;
+
+    --ink: #090a08;
+    --ink-2: #11130f;
+    --ink-3: #1b1f18;
+
+    --paper: #f2f0e6;
+    --paper-2: #e4e1d4;
+    --paper-3: #cfcabd;
+
+    --white: #fffef8;
+    --muted: #6c7068;
+
+    --warning: #ff6a00;
+
+    min-height: 100vh;
+
+    color: var(--ink);
+
+    background:
+      repeating-linear-gradient(
+        135deg,
+        rgba(9, 10, 8, 0.025) 0 1px,
+        transparent 1px 9px
+      ),
+      var(--paper);
+
+    font-family:
+      Inter,
+      ui-sans-serif,
+      system-ui,
+      -apple-system,
+      BlinkMacSystemFont,
+      "Segoe UI",
+      sans-serif;
+
+    -webkit-font-smoothing: antialiased;
+    text-rendering: geometricPrecision;
+  }
+
+  .reports-page a {
+    color: inherit;
+  }
+
+  .reports-page button,
+  .reports-page input,
+  .reports-page select {
+    font: inherit;
+  }
+
+  .reports-page svg {
+    flex: 0 0 auto;
+  }
+
+  .reports-page h1,
+  .reports-page h2,
+  .reports-page h3,
+  .reports-page p {
+    overflow-wrap: anywhere;
+  }
+
+  .reports-container {
+    width: min(
       1180px,
       calc(100% - 40px)
     );
 
-    min-height: 100vh;
-    background: var(--color-background);
-  }
-
-  .reports-page__container {
-    width: var(--reports-container);
     margin-inline: auto;
   }
 
-  .reports-page__intro {
-    padding: var(--space-8) 0 var(--space-5);
+  /* ==========================================================================
+     HERO
+     ========================================================================== */
+
+  .reports-hero {
+    display: grid;
+
+    grid-template-columns:
+      minmax(0, 1fr)
+      270px;
+
+    width: min(
+      1320px,
+      calc(100% - 40px)
+    );
+
+    margin:
+      24px
+      auto
+      0;
+
+    color: var(--white);
+
+    background: var(--ink);
+
+    border: 4px solid var(--ink);
+
+    box-shadow:
+      14px 14px 0
+      var(--warning);
+
+    overflow: hidden;
   }
 
-  .reports-page__intro-card {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--space-8);
-    padding: var(--space-7);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-xl);
-    background:
-      linear-gradient(
-        135deg,
-        var(--color-primary-soft),
-        var(--color-surface)
-      );
-    box-shadow: var(--shadow-sm);
-  }
-
-  .reports-page__intro-content {
+  .reports-hero__main {
     min-width: 0;
+
+    padding:
+      clamp(
+        40px,
+        5vw,
+        68px
+      );
+  }
+
+  .reports-kicker {
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    width: fit-content;
+
+    min-height: 30px;
+
+    padding: 7px 10px;
+
+    color: var(--ink);
+
+    background: var(--acid);
+
+    border: 3px solid var(--ink);
+
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+
+    font-size: 8px;
+
+    font-weight: 900;
+
+    line-height: 1;
+
+    letter-spacing: 0.08em;
+
+    text-transform: uppercase;
+  }
+
+  .reports-kicker svg {
+    color: var(--ink);
+    stroke: var(--ink);
+  }
+
+  .reports-breadcrumbs {
+    display: flex;
+
+    align-items: center;
+
+    flex-wrap: wrap;
+
+    gap: 7px;
+
+    margin-top: 25px;
+
+    color: #9ba198;
+
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+
+    font-size: 7px;
+
+    font-weight: 700;
+
+    line-height: 1.5;
+
+    letter-spacing: 0.05em;
+
+    text-transform: uppercase;
+  }
+
+  .reports-breadcrumbs a {
+    color: #c5c9c0;
+
+    text-decoration: none;
+  }
+
+  .reports-breadcrumbs a:hover {
+    color: var(--acid);
+  }
+
+  .reports-hero h1 {
+    max-width: 900px;
+
+    margin: 30px 0 0;
+
+    color: var(--white);
+
+    font-family:
+      Sora,
+      Inter,
+      sans-serif;
+
+    font-size:
+      clamp(
+        47px,
+        6vw,
+        80px
+      );
+
+    font-weight: 900;
+
+    line-height: 0.87;
+
+    letter-spacing: -0.085em;
+
+    text-transform: uppercase;
+  }
+
+  .reports-hero__description {
+    max-width: 680px;
+
+    margin: 33px 0 0;
+
+    padding:
+      5px
+      0
+      5px
+      16px;
+
+    color: #d3d8ce;
+
+    border-left:
+      7px solid
+      var(--acid);
+
+    font-size: 12px;
+
+    line-height: 1.8;
+  }
+
+  .reports-hero__side {
+    display: flex;
+
+    flex-direction: column;
+
+    justify-content: flex-end;
+
+    min-width: 0;
+
+    padding: 28px;
+
+    color: var(--ink);
+
+    background: var(--acid);
+
+    border-left:
+      4px solid
+      var(--ink);
+  }
+
+  .reports-hero__side-mark {
+    display: grid;
+
+    width: 57px;
+    height: 57px;
+
+    place-items: center;
+
+    margin-bottom: auto;
+
+    color: var(--acid);
+
+    background: var(--ink);
+
+    border: 3px solid var(--ink);
+
+    box-shadow:
+      7px 7px 0
+      var(--warning);
+  }
+
+  .reports-hero__side-mark svg {
+    color: var(--acid);
+    stroke: var(--acid);
+  }
+
+  .reports-hero__side-label {
+    margin-bottom: 6px;
+
+    color: #4b5147;
+
+    font-family:
+      "DM Mono",
+      monospace;
+
+    font-size: 7px;
+
+    font-weight: 900;
+
+    line-height: 1;
+
+    letter-spacing: 0.08em;
+
+    text-transform: uppercase;
+  }
+
+  .reports-hero__side strong {
+    display: block;
+
+    font-family:
+      Sora,
+      Inter,
+      sans-serif;
+
+    font-size:
+      clamp(
+        54px,
+        7vw,
+        88px
+      );
+
+    font-weight: 900;
+
+    line-height: 0.8;
+
+    letter-spacing: -0.09em;
+  }
+
+  .reports-hero__side-caption {
+    margin-top: 8px;
+
+    color: #4b5147;
+
+    font-family:
+      "DM Mono",
+      monospace;
+
+    font-size: 7px;
+
+    font-weight: 800;
+
+    line-height: 1.3;
+
+    letter-spacing: 0.06em;
+
+    text-transform: uppercase;
+  }
+
+  /* ==========================================================================
+     INTRO
+     ========================================================================== */
+
+  .reports-intro {
+    padding:
+      92px
+      0
+      34px;
+  }
+
+  .reports-intro__grid {
+    display: grid;
+
+    grid-template-columns:
+      minmax(0, 1fr)
+      300px;
+
+    gap: 30px;
+
+    align-items: stretch;
+  }
+
+  .reports-intro__copy {
+    min-width: 0;
+
+    padding:
+      4px
+      0
+      6px;
+  }
+
+  .reports-section-label {
+    display: flex;
+
+    align-items: center;
+
+    gap: 9px;
+
+    color: #71786e;
+
+    font-family:
+      "DM Mono",
+      monospace;
+
+    font-size: 7px;
+
+    font-weight: 900;
+
+    line-height: 1;
+
+    letter-spacing: 0.08em;
+
+    text-transform: uppercase;
+  }
+
+  .reports-section-label > span {
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    min-width: 29px;
+
+    min-height: 21px;
+
+    padding: 0 5px;
+
+    color: var(--acid);
+
+    background: var(--ink);
+
+    border:
+      2px solid
+      var(--ink);
+  }
+
+  .reports-intro__copy h2 {
+    max-width: 650px;
+
+    margin: 17px 0 0;
+
+    color: var(--ink);
+
+    font-family:
+      Sora,
+      Inter,
+      sans-serif;
+
+    font-size:
+      clamp(
+        30px,
+        4vw,
+        53px
+      );
+
+    font-weight: 900;
+
+    line-height: 0.93;
+
+    letter-spacing: -0.075em;
+
+    text-transform: uppercase;
+  }
+
+  .reports-intro__copy p {
+    max-width: 680px;
+
+    margin: 19px 0 0;
+
+    color: var(--muted);
+
+    font-size: 11px;
+
+    line-height: 1.8;
+  }
+
+  .reports-create {
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+
+    min-width: 0;
+
+    padding: 15px;
+
+    color: var(--ink);
+
+    background: var(--acid);
+
+    border:
+      3px solid
+      var(--ink);
+
+    box-shadow:
+      7px 7px 0
+      var(--warning);
+
+    text-decoration: none;
+
+    transition:
+      transform 120ms steps(2, end),
+      box-shadow 120ms steps(2, end);
+  }
+
+  .reports-create:hover {
+    transform:
+      translate(
+        -2px,
+        -2px
+      );
+
+    box-shadow:
+      9px 9px 0
+      var(--ink);
+  }
+
+  .reports-create__icon {
+    display: grid;
+
+    width: 45px;
+    height: 45px;
+
+    flex: 0 0 45px;
+
+    place-items: center;
+
+    color: var(--acid);
+
+    background: var(--ink);
+
+    border:
+      2px solid
+      var(--ink);
+  }
+
+  .reports-create__icon svg {
+    color: var(--acid);
+    stroke: var(--acid);
+  }
+
+  .reports-create__copy {
+    display: grid;
+
+    min-width: 0;
+
     flex: 1;
   }
 
-  .reports-page__eyebrow {
-    display: inline-flex;
+  .reports-create__copy small {
+    color: #566052;
+
+    font-family:
+      "DM Mono",
+      monospace;
+
+    font-size: 6px;
+
+    font-weight: 900;
+
+    line-height: 1;
+
+    letter-spacing: 0.07em;
+  }
+
+  .reports-create__copy strong {
+    margin-top: 5px;
+
+    font-family:
+      Sora,
+      Inter,
+      sans-serif;
+
+    font-size: 15px;
+
+    font-weight: 900;
+
+    line-height: 1;
+
+    text-transform: uppercase;
+  }
+
+  .reports-create > svg {
+    color: var(--ink);
+    stroke: var(--ink);
+  }
+
+  /* ==========================================================================
+     STATS
+     ========================================================================== */
+
+  .reports-stats {
+    padding:
+      18px
+      0
+      35px;
+  }
+
+  .reports-stats__grid {
+    display: grid;
+
+    grid-template-columns:
+      repeat(
+        4,
+        minmax(0, 1fr)
+      );
+
+    gap: 12px;
+  }
+
+  .report-stat {
+    display: flex;
+
     align-items: center;
-    gap: var(--space-2);
-    margin-bottom: var(--space-3);
-    color: var(--color-primary-dark);
-    font-size: var(--font-size-xs);
-    font-weight: 800;
+
+    gap: 12px;
+
+    min-width: 0;
+
+    min-height: 104px;
+
+    padding: 15px;
+
+    background: var(--white);
+
+    border:
+      3px solid
+      var(--ink);
+
+    box-shadow:
+      5px 5px 0
+      var(--ink);
+  }
+
+  .report-stat--dark {
+    color: var(--white);
+
+    background: var(--ink);
+
+    box-shadow:
+      5px 5px 0
+      var(--acid);
+  }
+
+  .report-stat__number {
+    color: var(--acid);
+
+    font-family:
+      Sora,
+      Inter,
+      sans-serif;
+
+    font-size:
+      clamp(
+        34px,
+        4vw,
+        46px
+      );
+
+    font-weight: 900;
+
+    line-height: 0.85;
+
+    letter-spacing: -0.075em;
+  }
+
+  .report-stat__copy {
+    display: grid;
+
+    min-width: 0;
+  }
+
+  .report-stat__copy span {
+    color: #71786e;
+
+    font-family:
+      "DM Mono",
+      monospace;
+
+    font-size: 6px;
+
+    font-weight: 900;
+
+    line-height: 1;
+
     letter-spacing: 0.08em;
   }
 
-  .reports-page__intro-title {
-    margin: 0 0 var(--space-3);
-    max-width: 760px;
-    color: var(--color-text-strong);
-    font-size: clamp(
-      1.45rem,
-      3vw,
-      2rem
-    );
-    line-height: 1.18;
-    letter-spacing: -0.025em;
+  .report-stat--dark
+    .report-stat__copy
+    span {
+    color: #a2aaa0;
   }
 
-  .reports-page__intro-description {
-    max-width: 760px;
-    margin: 0;
-    color: var(--color-text-muted);
-    font-size: var(--font-size-base);
-    line-height: 1.75;
+  .report-stat__copy strong {
+    margin-top: 6px;
+
+    color: var(--ink);
+
+    font-family:
+      Sora,
+      Inter,
+      sans-serif;
+
+    font-size: 14px;
+
+    font-weight: 900;
+
+    line-height: 1.05;
+
+    text-transform: uppercase;
   }
 
-  .reports-page__create-button {
-    display: inline-flex;
-    flex: 0 0 auto;
-    align-items: center;
-    gap: var(--space-2);
-    min-height: 46px;
-    padding: 0 var(--space-4);
-    border: 1px solid var(--color-primary);
-    border-radius: var(--radius-md);
-    background: var(--color-primary);
-    color: var(--color-white);
-    font-size: var(--font-size-sm);
-    font-weight: 750;
-    text-decoration: none;
-    box-shadow: var(--shadow-sm);
-    transition:
-      transform 160ms ease,
-      box-shadow 160ms ease,
-      background 160ms ease;
+  .report-stat--dark
+    .report-stat__copy
+    strong {
+    color: var(--white);
   }
 
-  .reports-page__create-button:hover {
-    transform: translateY(-1px);
-    background: var(--color-primary-dark);
-    box-shadow: var(--shadow-md);
-  }
+  .report-stat__copy small {
+    margin-top: 6px;
 
-  .reports-page__create-button:focus-visible,
-  .report-list-card__link:focus-visible,
-  .report-list-card__title:focus-visible,
-  .reports-guidance-card__link:focus-visible,
-  .reports-empty__button:focus-visible {
-    outline: 3px solid var(--color-primary-ring);
-    outline-offset: 3px;
-  }
+    color: #7a8177;
 
-  .reports-page__stats {
-    padding: var(--space-3) 0 var(--space-6);
-  }
+    font-size: 8px;
 
-  .reports-stat-grid {
-    display: grid;
-    grid-template-columns: repeat(
-      4,
-      minmax(0, 1fr)
-    );
-    gap: var(--space-4);
-  }
-
-  .reports-stat-card {
-    display: flex;
-    align-items: flex-start;
-    gap: var(--space-3);
-    min-width: 0;
-    padding: var(--space-5);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-lg);
-    background: var(--color-surface);
-    box-shadow: var(--shadow-xs);
-  }
-
-  .reports-stat-card__icon {
-    display: inline-flex;
-    flex: 0 0 auto;
-    align-items: center;
-    justify-content: center;
-    width: 42px;
-    height: 42px;
-    border-radius: var(--radius-md);
-  }
-
-  .reports-stat-card__icon--all {
-    background: var(--color-info-soft);
-    color: var(--color-info);
-  }
-
-  .reports-stat-card__icon--active {
-    background: var(--color-warning-soft);
-    color: var(--color-warning-text);
-  }
-
-  .reports-stat-card__icon--resolved {
-    background: var(--color-success-soft);
-    color: var(--color-success-text);
-  }
-
-  .reports-stat-card__icon--priority {
-    background: var(--color-danger-soft);
-    color: var(--color-danger-text);
-  }
-
-  .reports-stat-card__content {
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-  }
-
-  .reports-stat-card__label {
-    color: var(--color-text-muted);
-    font-size: var(--font-size-sm);
     line-height: 1.3;
   }
 
-  .reports-stat-card__value {
-    margin-top: 4px;
-    color: var(--color-text-strong);
-    font-size: 1.7rem;
-    line-height: 1;
-    letter-spacing: -0.035em;
+  .report-stat__icon {
+    display: grid;
+
+    width: 41px;
+    height: 41px;
+
+    flex: 0 0 41px;
+
+    place-items: center;
+
+    color: var(--ink);
+
+    background: var(--paper-2);
+
+    border:
+      2px solid
+      var(--ink);
   }
 
-  .reports-stat-card__meta {
-    margin-top: var(--space-2);
-    color: var(--color-text-faint);
-    font-size: var(--font-size-xs);
-    line-height: 1.4;
+  .report-stat__icon svg {
+    color: var(--ink);
+    stroke: var(--ink);
   }
 
-  .reports-page__content {
-    padding: var(--space-2) 0 var(--space-10);
+  .report-stat__icon--success {
+    background: var(--acid);
+  }
+
+  .report-stat__icon--warning {
+    background: var(--warning);
+  }
+
+  /* ==========================================================================
+     REPORTS CONTENT
+     ========================================================================== */
+
+  .reports-content {
+    padding:
+      8px
+      0
+      105px;
   }
 
   .reports-toolbar {
     display: flex;
+
     align-items: flex-end;
+
     justify-content: space-between;
-    gap: var(--space-6);
-    margin-bottom: var(--space-5);
-    padding: var(--space-5);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-lg);
-    background: var(--color-surface);
-    box-shadow: var(--shadow-xs);
+
+    gap: 20px;
+
+    padding-bottom: 15px;
+
+    border-bottom:
+      3px solid
+      var(--ink);
   }
 
-  .reports-toolbar__heading {
+  .reports-toolbar__title-wrap {
     display: flex;
-    align-items: flex-start;
-    gap: var(--space-3);
-    min-width: 220px;
+
+    align-items: center;
+
+    gap: 12px;
+
+    min-width: 0;
   }
 
-  .reports-toolbar__heading-icon {
-    display: inline-flex;
-    flex: 0 0 auto;
-    align-items: center;
-    justify-content: center;
-    width: 40px;
-    height: 40px;
-    border-radius: var(--radius-md);
-    background: var(--color-primary-soft);
-    color: var(--color-primary);
+  .reports-toolbar__icon {
+    display: grid;
+
+    width: 43px;
+    height: 43px;
+
+    flex: 0 0 43px;
+
+    place-items: center;
+
+    color: var(--acid);
+
+    background: var(--ink);
+
+    border:
+      2px solid
+      var(--ink);
+  }
+
+  .reports-toolbar__icon svg {
+    color: var(--acid);
+    stroke: var(--acid);
   }
 
   .reports-toolbar__title {
-    margin: 0;
-    color: var(--color-text-strong);
-    font-size: var(--font-size-base);
-    font-weight: 750;
+    margin: 7px 0 0;
+
+    color: var(--ink);
+
+    font-family:
+      Sora,
+      Inter,
+      sans-serif;
+
+    font-size: 23px;
+
+    font-weight: 900;
+
+    line-height: 0.95;
+
+    letter-spacing: -0.055em;
+
+    text-transform: uppercase;
   }
 
-  .reports-toolbar__description {
-    margin: 4px 0 0;
-    color: var(--color-text-faint);
-    font-size: var(--font-size-xs);
-    line-height: 1.5;
+  .reports-toolbar__result {
+    display: flex;
+
+    align-items: baseline;
+
+    gap: 5px;
+
+    color: #71786e;
+
+    font-family:
+      "DM Mono",
+      monospace;
+
+    font-size: 7px;
+
+    font-weight: 900;
+
+    line-height: 1;
+
+    letter-spacing: 0.05em;
+
+    text-transform: uppercase;
   }
 
-  .reports-toolbar__controls {
+  .reports-toolbar__result strong {
+    color: var(--ink);
+
+    font-family:
+      Sora,
+      Inter,
+      sans-serif;
+
+    font-size: 28px;
+
+    letter-spacing: -0.06em;
+  }
+
+  /* ==========================================================================
+     FILTERS
+     ========================================================================== */
+
+  .reports-filters {
     display: grid;
+
     grid-template-columns:
-      minmax(220px, 1.5fr)
+      minmax(270px, 1.6fr)
       repeat(
         3,
         minmax(145px, 1fr)
       );
-    align-items: end;
-    gap: var(--space-3);
-    width: min(100%, 820px);
+
+    gap: 10px;
+
+    margin:
+      18px
+      0
+      22px;
   }
 
   .reports-filter {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-2);
     min-width: 0;
   }
 
   .reports-filter__label {
-    min-height: 16px;
-    color: var(--color-text-muted);
-    font-size: var(--font-size-xs);
-    font-weight: 700;
+    display: block;
+
+    margin-bottom: 6px;
+
+    color: #6f766c;
+
+    font-family:
+      "DM Mono",
+      monospace;
+
+    font-size: 6px;
+
+    font-weight: 900;
+
+    line-height: 1;
+
+    letter-spacing: 0.08em;
+
+    text-transform: uppercase;
   }
 
-  .reports-filter__field {
+  .reports-filter__search {
     position: relative;
-    display: flex;
-    align-items: center;
   }
 
-  .reports-filter__field svg {
+  .reports-filter__search svg {
     position: absolute;
-    left: 12px;
-    color: var(--color-text-faint);
+
+    top: 50%;
+    left: 11px;
+
+    color: #727a70;
+
+    transform:
+      translateY(-50%);
+
     pointer-events: none;
   }
 
   .reports-filter__input,
   .reports-filter__select {
+    display: block;
+
     width: 100%;
-    min-height: 42px;
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    background: var(--color-surface);
-    color: var(--color-text-strong);
-    font: inherit;
-    font-size: var(--font-size-sm);
-    transition:
-      border-color 160ms ease,
-      box-shadow 160ms ease;
+
+    min-height: 43px;
+
+    padding:
+      0
+      11px;
+
+    color: var(--ink);
+
+    background: var(--white);
+
+    border:
+      2px solid
+      var(--ink);
+
+    border-radius: 0;
+
+    outline: none;
+
+    font-size: 10px;
+
+    line-height: 1.4;
   }
 
   .reports-filter__input {
-    padding: 0 12px 0 38px;
-  }
-
-  .reports-filter__select {
-    padding: 0 12px;
+    padding-left: 37px;
   }
 
   .reports-filter__input::placeholder {
-    color: var(--color-text-faint);
+    color: #8a9187;
   }
 
   .reports-filter__input:focus,
   .reports-filter__select:focus {
-    border-color: var(--color-primary);
-    outline: none;
     box-shadow:
-      0 0 0 3px var(--color-primary-ring);
+      4px 4px 0
+      var(--acid);
   }
+
+  .reports-filter__reset {
+    display: inline-flex;
+
+    align-self: end;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 5px;
+
+    min-height: 43px;
+
+    padding: 0 11px;
+
+    color: var(--white);
+
+    background: var(--ink);
+
+    border:
+      2px solid
+      var(--ink);
+
+    border-radius: 0;
+
+    cursor: pointer;
+
+    font-family:
+      "DM Mono",
+      monospace;
+
+    font-size: 7px;
+
+    font-weight: 900;
+
+    letter-spacing: 0.06em;
+
+    text-transform: uppercase;
+  }
+
+  .reports-filter__reset:hover {
+    color: var(--ink);
+
+    background: var(--acid);
+  }
+
+  .reports-filter__reset[hidden] {
+    display: none;
+  }
+
+  /* ==========================================================================
+     REPORT CARD
+     ========================================================================== */
 
   .reports-list {
     display: grid;
-    gap: var(--space-3);
+
+    gap: 12px;
   }
 
-  .report-list-card {
+  .report-card {
+    position: relative;
+
     display: grid;
+
     grid-template-columns:
       minmax(0, 1fr)
-      auto;
-    gap: var(--space-5);
-    padding: var(--space-5);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-lg);
-    background: var(--color-surface);
-    box-shadow: var(--shadow-xs);
+      160px;
+
+    min-width: 0;
+
+    background: var(--white);
+
+    border:
+      3px solid
+      var(--ink);
+
+    box-shadow:
+      6px 6px 0
+      var(--ink);
+
+    overflow: hidden;
+
     transition:
-      transform 160ms ease,
-      border-color 160ms ease,
-      box-shadow 160ms ease;
+      transform 120ms steps(2, end),
+      box-shadow 120ms steps(2, end);
   }
 
-  .report-list-card:hover {
-    border-color: var(--color-border-strong);
-    box-shadow: var(--shadow-sm);
-    transform: translateY(-1px);
+  .report-card:hover {
+    transform:
+      translate(
+        -2px,
+        -2px
+      );
+
+    box-shadow:
+      8px 8px 0
+      var(--warning);
   }
 
-  .report-list-card__main {
+  .report-card[hidden] {
+    display: none;
+  }
+
+  .report-card__accent {
+    position: absolute;
+
+    top: 0;
+    bottom: 0;
+    left: 0;
+
+    width: 6px;
+
+    background: var(--acid);
+  }
+
+  .report-card__body {
+    min-width: 0;
+
+    padding:
+      18px
+      18px
+      17px
+      23px;
+  }
+
+  .report-card__header {
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 14px;
+
+    margin-bottom: 12px;
+  }
+
+  .report-card__type {
+    display: grid;
+
+    width: 39px;
+    height: 39px;
+
+    flex: 0 0 39px;
+
+    place-items: center;
+
+    border:
+      2px solid
+      var(--ink);
+  }
+
+  .report-card__type--warning {
+    color: var(--ink);
+
+    background: var(--acid);
+  }
+
+  .report-card__type--hazardous {
+    color: var(--white);
+
+    background: var(--warning);
+  }
+
+  .report-card__type--environmental {
+    color: var(--acid);
+
+    background: var(--ink);
+  }
+
+  .report-card__type--other {
+    color: var(--ink);
+
+    background: var(--paper-2);
+  }
+
+  .report-card__type svg {
+    color: inherit;
+    stroke: currentColor;
+  }
+
+  .report-card__badges {
+    display: flex;
+
+    align-items: center;
+
+    justify-content: flex-end;
+
+    flex-wrap: wrap;
+
+    gap: 6px;
+
     min-width: 0;
   }
 
-  .report-list-card__top {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--space-4);
-    margin-bottom: var(--space-3);
-  }
-
-  .report-list-card__type-icon {
+  .report-status,
+  .report-priority {
     display: inline-flex;
+
     align-items: center;
-    justify-content: center;
-    width: 40px;
-    height: 40px;
-    border-radius: var(--radius-md);
-  }
 
-  .report-list-card__type-icon--warning {
-    background: var(--color-warning-soft);
-    color: var(--color-warning-text);
-  }
+    min-height: 23px;
 
-  .report-list-card__type-icon--hazardous {
-    background: var(--color-danger-soft);
-    color: var(--color-danger-text);
-  }
+    padding:
+      0
+      7px;
 
-  .report-list-card__type-icon--environmental {
-    background: var(--color-info-soft);
-    color: var(--color-info);
-  }
+    border:
+      2px solid
+      var(--ink);
 
-  .report-list-card__type-icon--other {
-    background: var(--color-surface-soft);
-    color: var(--color-text-muted);
-  }
+    border-radius: 0;
 
-  .report-list-card__badges {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    flex-wrap: wrap;
-    gap: var(--space-2);
-  }
+    font-family:
+      "DM Mono",
+      monospace;
 
-  .status-badge,
-  .priority-badge {
-    display: inline-flex;
-    align-items: center;
-    min-height: 26px;
-    padding: 4px 9px;
-    border-radius: 999px;
-    font-size: var(--font-size-xs);
-    font-weight: 750;
+    font-size: 6px;
+
+    font-weight: 900;
+
     line-height: 1;
+
+    letter-spacing: 0.04em;
+
+    text-transform: uppercase;
+
     white-space: nowrap;
   }
 
-  .status-badge--pending {
-    background: var(--color-warning-soft);
-    color: var(--color-warning-text);
+  .report-status--pending {
+    color: var(--ink);
+
+    background: var(--acid);
   }
 
-  .status-badge--verified {
-    background: var(--color-info-soft);
-    color: var(--color-info);
+  .report-status--verified {
+    color: var(--ink);
+
+    background: #a9d8ff;
   }
 
-  .status-badge--progress {
-    background: var(--color-primary-soft);
-    color: var(--color-primary-dark);
+  .report-status--in-progress {
+    color: var(--ink);
+
+    background: #cfb9ff;
   }
 
-  .status-badge--resolved {
-    background: var(--color-success-soft);
-    color: var(--color-success-text);
+  .report-status--resolved {
+    color: var(--ink);
+
+    background: #a8efb5;
   }
 
-  .status-badge--rejected {
-    background: var(--color-danger-soft);
-    color: var(--color-danger-text);
+  .report-status--rejected {
+    color: var(--white);
+
+    background: var(--ink);
   }
 
-  .priority-badge--high {
-    background: var(--color-danger-soft);
-    color: var(--color-danger-text);
+  .report-priority--high {
+    color: var(--white);
+
+    background: var(--warning);
   }
 
-  .priority-badge--medium {
-    background: var(--color-warning-soft);
-    color: var(--color-warning-text);
+  .report-priority--medium {
+    color: var(--ink);
+
+    background: #ffd24a;
   }
 
-  .priority-badge--low {
-    background: var(--color-surface-soft);
-    color: var(--color-text-muted);
+  .report-priority--low {
+    color: var(--ink);
+
+    background: var(--paper-2);
   }
 
-  .report-list-card__title {
+  .report-card__title {
     display: block;
-    margin-bottom: var(--space-2);
-    color: var(--color-text-strong);
-    font-size: 1.08rem;
-    font-weight: 760;
-    line-height: 1.35;
+
+    margin: 0;
+
+    color: var(--ink);
+
+    font-family:
+      Sora,
+      Inter,
+      sans-serif;
+
+    font-size: 18px;
+
+    font-weight: 900;
+
+    line-height: 1.03;
+
+    letter-spacing: -0.045em;
+
+    text-transform: uppercase;
+
     text-decoration: none;
   }
 
-  .report-list-card__title:hover {
-    color: var(--color-primary);
+  .report-card__title:hover {
+    color: #474d43;
   }
 
-  .report-list-card__description {
+  .report-card__description {
     display: -webkit-box;
-    max-width: 850px;
-    margin: 0;
+
+    max-width: 860px;
+
+    margin: 9px 0 0;
+
     overflow: hidden;
-    color: var(--color-text-muted);
-    font-size: var(--font-size-sm);
-    line-height: 1.65;
+
+    color: #656c63;
+
+    font-size: 10px;
+
+    line-height: 1.7;
+
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
   }
 
-  .report-list-card__meta {
+  .report-card__meta {
     display: flex;
+
     align-items: center;
+
     flex-wrap: wrap;
-    gap: var(--space-4);
-    margin-top: var(--space-4);
+
+    gap:
+      8px
+      15px;
+
+    margin-top: 14px;
   }
 
-  .report-list-card__meta-item {
+  .report-card__meta span {
     display: inline-flex;
+
     align-items: center;
-    gap: 6px;
-    color: var(--color-text-faint);
-    font-size: var(--font-size-xs);
+
+    gap: 5px;
+
+    min-width: 0;
+
+    color: #757c72;
+
+    font-family:
+      "DM Mono",
+      monospace;
+
+    font-size: 6px;
+
+    font-weight: 800;
+
+    line-height: 1.3;
+
+    letter-spacing: 0.025em;
+
+    text-transform: uppercase;
   }
 
-  .report-list-card__action {
+  .report-card__meta svg {
+    color: var(--ink);
+    stroke: var(--ink);
+  }
+
+  .report-card__meta strong {
+    color: var(--ink);
+  }
+
+  .report-card__footer {
     display: flex;
+
     align-items: center;
-    justify-content: flex-end;
-    align-self: stretch;
+
+    justify-content: space-between;
+
+    gap: 12px;
+
+    padding:
+      18px
+      15px;
+
+    color: var(--white);
+
+    background: var(--ink);
+
+    border-left:
+      3px solid
+      var(--ink);
   }
 
-  .report-list-card__link {
+  .report-card__id {
+    display: grid;
+
+    gap: 4px;
+
+    color: #8f978e;
+
+    font-family:
+      "DM Mono",
+      monospace;
+
+    font-size: 6px;
+
+    font-weight: 800;
+
+    line-height: 1;
+
+    letter-spacing: 0.05em;
+  }
+
+  .report-card__id strong {
+    color: var(--acid);
+
+    font-size: 8px;
+  }
+
+  .report-card__detail {
     display: inline-flex;
-    flex: 0 0 auto;
+
     align-items: center;
-    gap: 7px;
-    color: var(--color-primary);
-    font-size: var(--font-size-sm);
-    font-weight: 750;
+
+    gap: 6px;
+
+    color: var(--acid);
+
+    font-family:
+      "DM Mono",
+      monospace;
+
+    font-size: 7px;
+
+    font-weight: 900;
+
+    line-height: 1;
+
+    letter-spacing: 0.05em;
+
     text-decoration: none;
-    white-space: nowrap;
+
+    text-transform: uppercase;
   }
 
-  .report-list-card__link:hover {
-    color: var(--color-primary-dark);
+  .report-card__detail:hover {
+    color: var(--white);
   }
+
+  .report-card__detail svg {
+    color: currentColor;
+    stroke: currentColor;
+  }
+
+  /* ==========================================================================
+     EMPTY STATES
+     ========================================================================== */
 
   .reports-empty,
-  .reports-filter-empty {
+  .reports-no-results {
     display: flex;
+
     flex-direction: column;
+
     align-items: center;
+
     justify-content: center;
-    padding: var(--space-12) var(--space-6);
-    border: 1px dashed var(--color-border-strong);
-    border-radius: var(--radius-xl);
-    background: var(--color-surface);
+
+    min-height: 340px;
+
+    padding: 40px 24px;
+
+    color: var(--ink);
+
+    background: var(--white);
+
+    border:
+      3px solid
+      var(--ink);
+
+    box-shadow:
+      6px 6px 0
+      var(--ink);
+
     text-align: center;
   }
 
   .reports-empty__icon,
-  .reports-filter-empty__icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 56px;
-    height: 56px;
-    margin-bottom: var(--space-4);
-    border-radius: 50%;
-    background: var(--color-primary-soft);
-    color: var(--color-primary);
+  .reports-no-results__icon {
+    display: grid;
+
+    width: 58px;
+    height: 58px;
+
+    place-items: center;
+
+    margin-bottom: 14px;
+
+    color: var(--acid);
+
+    background: var(--ink);
+
+    border:
+      3px solid
+      var(--ink);
+
+    box-shadow:
+      5px 5px 0
+      var(--warning);
   }
 
-  .reports-filter-empty__icon {
-    background: var(--color-surface-soft);
-    color: var(--color-text-muted);
+  .reports-empty__icon svg,
+  .reports-no-results__icon svg {
+    color: var(--acid);
+    stroke: var(--acid);
   }
 
-  .reports-empty__title,
-  .reports-filter-empty__title {
-    margin: 0;
-    color: var(--color-text-strong);
-    font-size: 1.08rem;
+  .reports-empty__label,
+  .reports-no-results > span {
+    color: #70776d;
+
+    font-family:
+      "DM Mono",
+      monospace;
+
+    font-size: 6px;
+
+    font-weight: 900;
+
+    letter-spacing: 0.08em;
+
+    text-transform: uppercase;
   }
 
-  .reports-empty__description,
-  .reports-filter-empty__description {
+  .reports-empty h3,
+  .reports-no-results h3 {
     max-width: 520px;
-    margin: var(--space-2) 0 0;
-    color: var(--color-text-muted);
-    font-size: var(--font-size-sm);
-    line-height: 1.65;
+
+    margin: 9px 0 0;
+
+    color: var(--ink);
+
+    font-family:
+      Sora,
+      Inter,
+      sans-serif;
+
+    font-size: 23px;
+
+    font-weight: 900;
+
+    line-height: 1;
+
+    letter-spacing: -0.05em;
+
+    text-transform: uppercase;
   }
 
-  .reports-empty__button {
+  .reports-empty p,
+  .reports-no-results p {
+    max-width: 480px;
+
+    margin: 9px 0 0;
+
+    color: var(--muted);
+
+    font-size: 9px;
+
+    line-height: 1.7;
+  }
+
+  .reports-empty__button,
+  .reports-no-results button {
     display: inline-flex;
+
     align-items: center;
-    gap: var(--space-2);
-    min-height: 42px;
-    margin-top: var(--space-5);
-    padding: 0 var(--space-4);
-    border: 1px solid var(--color-primary);
-    border-radius: var(--radius-md);
-    background: var(--color-primary);
-    color: var(--color-white);
-    font-size: var(--font-size-sm);
-    font-weight: 750;
+
+    justify-content: center;
+
+    gap: 7px;
+
+    min-height: 43px;
+
+    margin-top: 17px;
+
+    padding:
+      0
+      13px;
+
+    color: var(--ink);
+
+    background: var(--acid);
+
+    border:
+      3px solid
+      var(--ink);
+
+    box-shadow:
+      5px 5px 0
+      var(--warning);
+
+    font-family:
+      "DM Mono",
+      monospace;
+
+    font-size: 7px;
+
+    font-weight: 900;
+
+    line-height: 1;
+
+    letter-spacing: 0.06em;
+
     text-decoration: none;
+
+    text-transform: uppercase;
+
+    cursor: pointer;
   }
 
-  .reports-empty__button:hover {
-    background: var(--color-primary-dark);
+  .reports-empty__button:hover,
+  .reports-no-results button:hover {
+    background: var(--acid-soft);
   }
 
-  .reports-filter-empty {
-    margin-top: var(--space-4);
-  }
-
-  .reports-filter-empty[hidden] {
+  .reports-no-results[hidden] {
     display: none;
   }
 
-  .reports-filter-empty__button {
-    min-height: 40px;
-    margin-top: var(--space-4);
-    padding: 0 var(--space-4);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    background: var(--color-surface);
-    color: var(--color-text-strong);
-    cursor: pointer;
-    font: inherit;
-    font-size: var(--font-size-sm);
-    font-weight: 700;
+  /* ==========================================================================
+     GUIDANCE
+     ========================================================================== */
+
+  .reports-guidance {
+    padding:
+      0
+      0
+      110px;
   }
 
-  .reports-filter-empty__button:hover {
-    border-color: var(--color-primary);
-    color: var(--color-primary);
-  }
+  .reports-guidance__inner {
+    display: grid;
 
-  .reports-page__guidance {
-    padding: 0 0 var(--space-12);
-  }
+    grid-template-columns:
+      48px
+      minmax(0, 1fr)
+      auto;
 
-  .reports-guidance-card {
-    display: flex;
     align-items: center;
-    gap: var(--space-4);
-    padding: var(--space-5);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-xl);
-    background:
-      linear-gradient(
-        135deg,
-        var(--color-surface-soft),
-        var(--color-surface)
-      );
+
+    gap: 14px;
+
+    padding: 18px;
+
+    color: var(--white);
+
+    background: var(--ink);
+
+    border:
+      4px solid
+      var(--ink);
+
+    box-shadow:
+      9px 9px 0
+      var(--acid);
   }
 
-  .reports-guidance-card__icon {
+  .reports-guidance__icon {
+    display: grid;
+
+    width: 48px;
+    height: 48px;
+
+    place-items: center;
+
+    color: var(--ink);
+
+    background: var(--acid);
+
+    border:
+      2px solid
+      var(--white);
+  }
+
+  .reports-guidance__icon svg {
+    color: var(--ink);
+    stroke: var(--ink);
+  }
+
+  .reports-guidance__copy > span {
+    color: var(--acid);
+
+    font-family:
+      "DM Mono",
+      monospace;
+
+    font-size: 6px;
+
+    font-weight: 900;
+
+    line-height: 1;
+
+    letter-spacing: 0.08em;
+  }
+
+  .reports-guidance__copy h2 {
+    margin: 7px 0 0;
+
+    color: var(--white);
+
+    font-family:
+      Sora,
+      Inter,
+      sans-serif;
+
+    font-size: 18px;
+
+    font-weight: 900;
+
+    line-height: 1;
+
+    letter-spacing: -0.045em;
+
+    text-transform: uppercase;
+  }
+
+  .reports-guidance__copy p {
+    max-width: 620px;
+
+    margin: 7px 0 0;
+
+    color: #aeb5ab;
+
+    font-size: 8px;
+
+    line-height: 1.65;
+  }
+
+  .reports-guidance__link {
     display: inline-flex;
-    flex: 0 0 auto;
+
     align-items: center;
-    justify-content: center;
-    width: 46px;
-    height: 46px;
-    border-radius: var(--radius-md);
-    background: var(--color-primary-soft);
-    color: var(--color-primary);
-  }
 
-  .reports-guidance-card__content {
-    min-width: 0;
-    flex: 1;
-  }
-
-  .reports-guidance-card__title {
-    margin: 0;
-    color: var(--color-text-strong);
-    font-size: var(--font-size-base);
-    font-weight: 760;
-  }
-
-  .reports-guidance-card__description {
-    margin: 5px 0 0;
-    color: var(--color-text-muted);
-    font-size: var(--font-size-sm);
-    line-height: 1.6;
-  }
-
-  .reports-guidance-card__link {
-    display: inline-flex;
-    flex: 0 0 auto;
-    align-items: center;
     gap: 7px;
-    color: var(--color-primary);
-    font-size: var(--font-size-sm);
-    font-weight: 750;
+
+    min-height: 43px;
+
+    padding:
+      0
+      12px;
+
+    color: var(--ink);
+
+    background: var(--acid);
+
+    border:
+      3px solid
+      var(--white);
+
+    box-shadow:
+      4px 4px 0
+      var(--warning);
+
+    font-family:
+      "DM Mono",
+      monospace;
+
+    font-size: 7px;
+
+    font-weight: 900;
+
+    line-height: 1;
+
+    letter-spacing: 0.06em;
+
     text-decoration: none;
-    white-space: nowrap;
+
+    text-transform: uppercase;
   }
 
-  .reports-guidance-card__link:hover {
-    color: var(--color-primary-dark);
+  .reports-guidance__link:hover {
+    background: var(--acid-soft);
   }
 
-  .sr-only {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-    border: 0;
+  /* ==========================================================================
+     FOCUS
+     ========================================================================== */
+
+  .reports-page a:focus-visible,
+  .reports-page button:focus-visible,
+  .reports-page input:focus-visible,
+  .reports-page select:focus-visible {
+    outline:
+      4px solid
+      var(--acid);
+
+    outline-offset: 3px;
   }
 
-  @media (max-width: 1100px) {
-    .reports-stat-grid {
-      grid-template-columns: repeat(
-        2,
+  /* ==========================================================================
+     TABLET
+     ========================================================================== */
+
+  @media (max-width: 1050px) {
+    .reports-hero {
+      grid-template-columns:
         minmax(0, 1fr)
-      );
+        225px;
     }
 
-    .reports-toolbar {
-      align-items: stretch;
-      flex-direction: column;
+    .reports-stats__grid {
+      grid-template-columns:
+        repeat(
+          2,
+          minmax(0, 1fr)
+        );
     }
 
-    .reports-toolbar__heading {
-      width: 100%;
-    }
-
-    .reports-toolbar__controls {
-      width: 100%;
+    .reports-filters {
+      grid-template-columns:
+        minmax(220px, 1.5fr)
+        repeat(
+          3,
+          minmax(130px, 1fr)
+        );
     }
   }
 
-  @media (max-width: 860px) {
-    .reports-toolbar__controls {
-      grid-template-columns: 1fr 1fr;
-    }
-
-    .report-list-card {
+  @media (max-width: 900px) {
+    .reports-hero {
       grid-template-columns: 1fr;
     }
 
-    .report-list-card__action {
-      justify-content: flex-start;
-      padding-top: var(--space-1);
+    .reports-hero__side {
+      display: grid;
+
+      grid-template-columns:
+        57px
+        auto
+        minmax(0, 1fr);
+
+      align-items: center;
+
+      gap: 13px;
+
+      min-height: 125px;
+
+      border-top:
+        4px solid
+        var(--ink);
+
+      border-left: 0;
     }
 
-    .reports-guidance-card {
-      align-items: flex-start;
-      flex-direction: column;
+    .reports-hero__side-mark {
+      margin-bottom: 0;
     }
 
-    .reports-guidance-card__link {
-      padding-left: calc(
-        46px + var(--space-4)
+    .reports-hero__side strong {
+      font-size: 54px;
+    }
+
+    .reports-intro__grid {
+      grid-template-columns: 1fr;
+    }
+
+    .reports-create {
+      width: min(
+        100%,
+        420px
       );
+    }
+
+    .reports-filters {
+      grid-template-columns:
+        1fr
+        1fr;
+    }
+
+    .reports-filter--search {
+      grid-column: 1 / -1;
+    }
+
+    .reports-filter__reset {
+      width: fit-content;
+    }
+
+    .report-card {
+      grid-template-columns: 1fr;
+    }
+
+    .report-card__footer {
+      border-top:
+        3px solid
+        var(--ink);
+
+      border-left: 0;
+    }
+
+    .reports-guidance__inner {
+      grid-template-columns:
+        48px
+        minmax(0, 1fr);
+    }
+
+    .reports-guidance__link {
+      grid-column: 2;
+      width: fit-content;
     }
   }
 
-  @media (max-width: 680px) {
-    .reports-page {
-      --reports-container: min(
-        100%,
-        calc(100% - 28px)
-      );
+  /* ==========================================================================
+     MOBILE
+     ========================================================================== */
+
+  @media (max-width: 640px) {
+    .reports-container {
+      width: calc(100% - 24px);
     }
 
-    .reports-page__intro {
-      padding-top: var(--space-5);
+    .reports-hero {
+      width: calc(100% - 24px);
+
+      margin-top: 16px;
+
+      box-shadow:
+        8px 8px 0
+        var(--warning);
     }
 
-    .reports-page__intro-card {
-      align-items: flex-start;
-      flex-direction: column;
-      padding: var(--space-5);
+    .reports-hero__main {
+      padding:
+        31px
+        20px;
     }
 
-    .reports-page__create-button {
+    .reports-breadcrumbs {
+      margin-top: 21px;
+    }
+
+    .reports-hero h1 {
+      margin-top: 23px;
+
+      font-size:
+        clamp(
+          39px,
+          12.8vw,
+          61px
+        );
+
+      line-height: 0.84;
+    }
+
+    .reports-hero__description {
+      margin-top: 27px;
+
+      padding-left: 12px;
+
+      border-left-width: 5px;
+
+      font-size: 10px;
+
+      line-height: 1.75;
+    }
+
+    .reports-hero__side {
+      grid-template-columns:
+        49px
+        minmax(0, 1fr);
+
+      padding: 20px;
+    }
+
+    .reports-hero__side-mark {
+      width: 49px;
+      height: 49px;
+    }
+
+    .reports-hero__side-label {
+      margin-bottom: 4px;
+    }
+
+    .reports-hero__side strong {
+      font-size: 48px;
+    }
+
+    .reports-intro {
+      padding:
+        70px
+        0
+        28px;
+    }
+
+    .reports-intro__copy h2 {
+      font-size:
+        clamp(
+          29px,
+          10vw,
+          45px
+        );
+    }
+
+    .reports-create {
       width: 100%;
+    }
+
+    .reports-stats {
+      padding-bottom: 30px;
+    }
+
+    .reports-stats__grid {
+      grid-template-columns: 1fr;
+    }
+
+    .report-stat {
+      min-height: 86px;
+    }
+
+    .reports-content {
+      padding-bottom: 78px;
+    }
+
+    .reports-toolbar {
+      align-items: flex-start;
+
+      flex-direction: column;
+
+      gap: 13px;
+    }
+
+    .reports-toolbar__result {
+      align-self: flex-start;
+    }
+
+    .reports-filters {
+      grid-template-columns: 1fr;
+
+      gap: 9px;
+
+      margin-top: 15px;
+    }
+
+    .reports-filter--search {
+      grid-column: auto;
+    }
+
+    .reports-filter__reset {
+      width: 100%;
+    }
+
+    .report-card__body {
+      padding:
+        16px
+        16px
+        15px
+        19px;
+    }
+
+    .report-card__header {
+      align-items: flex-start;
+
+      flex-direction: column;
+
+      gap: 9px;
+    }
+
+    .report-card__badges {
+      justify-content: flex-start;
+    }
+
+    .report-card__title {
+      font-size: 16px;
+    }
+
+    .report-card__meta {
+      display: grid;
+
+      grid-template-columns: 1fr 1fr;
+
+      gap: 8px;
+    }
+
+    .report-card__meta span:last-child {
+      grid-column: 1 / -1;
+    }
+
+    .report-card__footer {
+      padding:
+        15px
+        14px;
+    }
+
+    .reports-empty,
+    .reports-no-results {
+      min-height: 300px;
+      padding:
+        32px
+        18px;
+    }
+
+    .reports-guidance {
+      padding-bottom: 82px;
+    }
+
+    .reports-guidance__inner {
+      grid-template-columns:
+        42px
+        minmax(0, 1fr);
+
+      gap: 10px;
+
+      padding: 15px;
+    }
+
+    .reports-guidance__icon {
+      width: 42px;
+      height: 42px;
+    }
+
+    .reports-guidance__copy h2 {
+      font-size: 15px;
+    }
+
+    .reports-guidance__copy p {
+      font-size: 8px;
+    }
+
+    .reports-guidance__link {
+      grid-column: 1 / -1;
+
+      width: 100%;
+
       justify-content: center;
     }
+  }
 
-    .reports-stat-grid {
-      grid-template-columns: 1fr;
+  @media (max-width: 430px) {
+    .reports-hero {
+      width: calc(100% - 16px);
     }
 
-    .reports-toolbar {
-      padding: var(--space-4);
+    .reports-container {
+      width: calc(100% - 16px);
     }
 
-    .reports-toolbar__controls {
-      grid-template-columns: 1fr;
+    .reports-hero__main {
+      padding:
+        27px
+        16px;
     }
 
-    .report-list-card {
-      padding: var(--space-4);
+    .reports-hero h1 {
+      font-size: 15vw;
     }
 
-    .report-list-card__top {
-      align-items: flex-start;
-      flex-direction: column;
+    .reports-intro {
+      padding-top: 60px;
     }
 
-    .report-list-card__badges {
-      justify-content: flex-start;
+    .reports-section-label {
+      font-size: 6px;
     }
 
-    .reports-guidance-card {
-      padding: var(--space-4);
+    .reports-toolbar__title {
+      font-size: 20px;
     }
 
-    .reports-guidance-card__link {
-      padding-left: 0;
+    .report-stat__number {
+      font-size: 37px;
     }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .reports-page__create-button,
-    .report-list-card {
+    .reports-create,
+    .report-card {
       transition: none;
     }
   }
 </style>
 
 <script>
-  const searchInput =
-    document.querySelector(
-      "[data-report-search]",
-    );
+  const initializeReportsPage =
+    () => {
+      const page =
+        document.querySelector<HTMLElement>(
+          "[data-reports-page]",
+        );
 
-  const statusSelect =
-    document.querySelector(
-      "[data-report-status]",
-    );
-
-  const prioritySelect =
-    document.querySelector(
-      "[data-report-priority]",
-    );
-
-  const typeSelect =
-    document.querySelector(
-      "[data-report-type]",
-    );
-
-  const resetButton =
-    document.querySelector(
-      "[data-report-reset]",
-    );
-
-  const filterEmpty =
-    document.querySelector(
-      "[data-report-filter-empty]",
-    );
-
-  const reportCards = Array.from(
-    document.querySelectorAll<HTMLElement>(
-      "[data-report-card]",
-    ),
-  );
-
-  function applyReportFilters() {
-    const searchValue =
-      searchInput instanceof HTMLInputElement
-        ? searchInput.value
-            .trim()
-            .toLowerCase()
-        : "";
-
-    const statusValue =
-      statusSelect instanceof HTMLSelectElement
-        ? statusSelect.value
-        : "all";
-
-    const priorityValue =
-      prioritySelect instanceof HTMLSelectElement
-        ? prioritySelect.value
-        : "all";
-
-    const typeValue =
-      typeSelect instanceof HTMLSelectElement
-        ? typeSelect.value
-        : "all";
-
-    let visibleCount = 0;
-
-    reportCards.forEach((card) => {
-      const cardStatus =
-        card.getAttribute(
-          "data-report-status-value",
-        ) ?? "";
-
-      const cardPriority =
-        card.getAttribute(
-          "data-report-priority-value",
-        ) ?? "";
-
-      const cardType =
-        card.getAttribute(
-          "data-report-type-value",
-        ) ?? "";
-
-      const cardSearch =
-        card.getAttribute(
-          "data-report-search-value",
-        ) ?? "";
-
-      const matchesSearch =
-        searchValue === "" ||
-        cardSearch.includes(searchValue);
-
-      const matchesStatus =
-        statusValue === "all" ||
-        cardStatus === statusValue;
-
-      const matchesPriority =
-        priorityValue === "all" ||
-        cardPriority === priorityValue;
-
-      const matchesType =
-        typeValue === "all" ||
-        cardType === typeValue;
-
-      const visible =
-        matchesSearch &&
-        matchesStatus &&
-        matchesPriority &&
-        matchesType;
-
-      card.hidden = !visible;
-
-      if (visible) {
-        visibleCount += 1;
+      if (
+        !page ||
+        page.dataset.initialized ===
+          "true"
+      ) {
+        return;
       }
-    });
 
-    if (filterEmpty instanceof HTMLElement) {
-      filterEmpty.hidden =
-        visibleCount !== 0;
-    }
+      page.dataset.initialized =
+        "true";
+
+      const searchInput =
+        page.querySelector<HTMLInputElement>(
+          "[data-report-search]",
+        );
+
+      const statusSelect =
+        page.querySelector<HTMLSelectElement>(
+          "[data-report-status]",
+        );
+
+      const prioritySelect =
+        page.querySelector<HTMLSelectElement>(
+          "[data-report-priority]",
+        );
+
+      const typeSelect =
+        page.querySelector<HTMLSelectElement>(
+          "[data-report-type]",
+        );
+
+      const resetButton =
+        page.querySelector<HTMLButtonElement>(
+          "[data-report-reset]",
+        );
+
+      const resetEmptyButton =
+        page.querySelector<HTMLButtonElement>(
+          "[data-report-reset-empty]",
+        );
+
+      const filterSection =
+        page.querySelector<HTMLElement>(
+          "[data-report-filters]",
+        );
+
+      const noResults =
+        page.querySelector<HTMLElement>(
+          "[data-report-no-results]",
+        );
+
+      const resultCount =
+        page.querySelector<HTMLElement>(
+          "[data-report-result-count]",
+        );
+
+      const reportCards =
+        Array.from(
+          page.querySelectorAll<HTMLElement>(
+            "[data-report-card]",
+          ),
+        );
+
+      const normalize =
+        (value: string) =>
+          value
+            .normalize("NFD")
+            .replace(
+              /[\u0300-\u036f]/g,
+              "",
+            )
+            .toLowerCase()
+            .replace(
+              /\s+/g,
+              " ",
+            )
+            .trim();
+
+      const updateResetButton =
+        () => {
+          if (!resetButton) {
+            return;
+          }
+
+          const hasSearch =
+            Boolean(
+              searchInput?.value.trim(),
+            );
+
+          const hasStatus =
+            Boolean(
+              statusSelect &&
+                statusSelect.value !==
+                  "all",
+            );
+
+          const hasPriority =
+            Boolean(
+              prioritySelect &&
+                prioritySelect.value !==
+                  "all",
+            );
+
+          const hasType =
+            Boolean(
+              typeSelect &&
+                typeSelect.value !==
+                  "all",
+            );
+
+          resetButton.hidden =
+            !(
+              hasSearch ||
+              hasStatus ||
+              hasPriority ||
+              hasType
+            );
+        };
+
+      const applyFilters =
+        () => {
+          const search =
+            normalize(
+              searchInput?.value ??
+                "",
+            );
+
+          const status =
+            statusSelect?.value ??
+            "all";
+
+          const priority =
+            prioritySelect?.value ??
+            "all";
+
+          const type =
+            typeSelect?.value ??
+            "all";
+
+          let visibleCount =
+            0;
+
+          reportCards.forEach(
+            (
+              card,
+            ) => {
+              const cardStatus =
+                card.dataset
+                  .reportStatus ??
+                "";
+
+              const cardPriority =
+                card.dataset
+                  .reportPriority ??
+                "";
+
+              const cardType =
+                card.dataset
+                  .reportType ??
+                "";
+
+              const cardSearch =
+                normalize(
+                  card.dataset
+                    .reportSearch ??
+                    "",
+                );
+
+              const matchesSearch =
+                !search ||
+                cardSearch.includes(
+                  search,
+                );
+
+              const matchesStatus =
+                status === "all" ||
+                cardStatus ===
+                  status;
+
+              const matchesPriority =
+                priority ===
+                  "all" ||
+                cardPriority ===
+                  priority;
+
+              const matchesType =
+                type === "all" ||
+                cardType === type;
+
+              const visible =
+                matchesSearch &&
+                matchesStatus &&
+                matchesPriority &&
+                matchesType;
+
+              card.hidden =
+                !visible;
+
+              if (
+                visible
+              ) {
+                visibleCount += 1;
+              }
+            },
+          );
+
+          if (
+            resultCount
+          ) {
+            resultCount.textContent =
+              String(
+                visibleCount,
+              );
+          }
+
+          const filtering =
+            Boolean(
+              search ||
+                status !== "all" ||
+                priority !== "all" ||
+                type !== "all",
+            );
+
+          if (
+            noResults
+          ) {
+            noResults.hidden =
+              !(
+                filtering &&
+                visibleCount ===
+                  0
+              );
+          }
+
+          if (
+            filterSection
+          ) {
+            filterSection.toggleAttribute(
+              "data-filtering",
+              filtering,
+            );
+          }
+
+          updateResetButton();
+        };
+
+      const resetFilters =
+        () => {
+          if (
+            searchInput
+          ) {
+            searchInput.value =
+              "";
+          }
+
+          if (
+            statusSelect
+          ) {
+            statusSelect.value =
+              "all";
+          }
+
+          if (
+            prioritySelect
+          ) {
+            prioritySelect.value =
+              "all";
+          }
+
+          if (
+            typeSelect
+          ) {
+            typeSelect.value =
+              "all";
+          }
+
+          applyFilters();
+        };
+
+      searchInput?.addEventListener(
+        "input",
+        applyFilters,
+      );
+
+      statusSelect?.addEventListener(
+        "change",
+        applyFilters,
+      );
+
+      prioritySelect?.addEventListener(
+        "change",
+        applyFilters,
+      );
+
+      typeSelect?.addEventListener(
+        "change",
+        applyFilters,
+      );
+
+      resetButton?.addEventListener(
+        "click",
+        resetFilters,
+      );
+
+      resetEmptyButton?.addEventListener(
+        "click",
+        resetFilters,
+      );
+
+      applyFilters();
+    };
+
+  if (
+    document.readyState ===
+    "loading"
+  ) {
+    document.addEventListener(
+      "DOMContentLoaded",
+      initializeReportsPage,
+      {
+        once: true,
+      },
+    );
+  } else {
+    initializeReportsPage();
   }
 
-  function resetReportFilters() {
-    if (searchInput instanceof HTMLInputElement) {
-      searchInput.value = "";
-    }
-
-    if (statusSelect instanceof HTMLSelectElement) {
-      statusSelect.value = "all";
-    }
-
-    if (prioritySelect instanceof HTMLSelectElement) {
-      prioritySelect.value = "all";
-    }
-
-    if (typeSelect instanceof HTMLSelectElement) {
-      typeSelect.value = "all";
-    }
-
-    applyReportFilters();
-  }
-
-  searchInput?.addEventListener(
-    "input",
-    applyReportFilters,
+  document.addEventListener(
+    "astro:page-load",
+    initializeReportsPage,
   );
-
-  statusSelect?.addEventListener(
-    "change",
-    applyReportFilters,
-  );
-
-  prioritySelect?.addEventListener(
-    "change",
-    applyReportFilters,
-  );
-
-  typeSelect?.addEventListener(
-    "change",
-    applyReportFilters,
-  );
-
-  resetButton?.addEventListener(
-    "click",
-    resetReportFilters,
-  );
-
-  applyReportFilters();
 </script>
