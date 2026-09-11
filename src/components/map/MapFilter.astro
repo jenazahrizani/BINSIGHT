@@ -86,8 +86,14 @@ const filterId = `map-filter-${Math.random()
   data-map-filter
   novalidate
 >
+  <!-- =======================================================================
+       HEADER
+       ==================================================================== -->
+
   <div class="map-filter__heading">
+
     <div class="map-filter__title-wrap">
+
       <span
         class="map-filter__title-icon"
         aria-hidden="true"
@@ -98,16 +104,21 @@ const filterId = `map-filter-${Math.random()
         />
       </span>
 
-      <div>
+      <div class="map-filter__title-copy">
+
         <h2 class="map-filter__title">
           Filter peta
         </h2>
 
         <p class="map-filter__subtitle">
-          Temukan lokasi pengelolaan berdasarkan area dan jenis.
+          Temukan lokasi pengelolaan berdasarkan
+          area dan jenis.
         </p>
+
       </div>
+
     </div>
+
 
     <button
       type="button"
@@ -120,14 +131,25 @@ const filterId = `map-filter-${Math.random()
         stroke-width={2}
         aria-hidden="true"
       />
-      <span>Reset</span>
+
+      <span>
+        Reset
+      </span>
     </button>
+
   </div>
 
+
+  <!-- =======================================================================
+       FIELDS
+       ==================================================================== -->
+
   <div class="map-filter__fields">
+
     {
       showSearch && (
         <div class="map-filter__field map-filter__field--search">
+
           <label
             class="map-filter__label"
             for={`${filterId}-search`}
@@ -136,10 +158,11 @@ const filterId = `map-filter-${Math.random()
           </label>
 
           <div class="map-filter__input-wrap">
+
             <Search
               class="map-filter__input-icon"
               size={16}
-              stroke-width={1.9}
+              stroke-width={2}
               aria-hidden="true"
             />
 
@@ -154,14 +177,18 @@ const filterId = `map-filter-${Math.random()
               spellcheck="false"
               data-map-filter-search
             />
+
           </div>
+
         </div>
       )
     }
 
+
     {
       showArea && (
         <div class="map-filter__field">
+
           <label
             class="map-filter__label"
             for={`${filterId}-area`}
@@ -170,10 +197,11 @@ const filterId = `map-filter-${Math.random()
           </label>
 
           <div class="map-filter__select-wrap">
+
             <MapPin
               class="map-filter__select-icon"
               size={16}
-              stroke-width={1.9}
+              stroke-width={2}
               aria-hidden="true"
             />
 
@@ -183,7 +211,10 @@ const filterId = `map-filter-${Math.random()
               name="area"
               data-map-filter-area
             >
-              <option value="" selected={selectedArea === ""}>
+              <option
+                value=""
+                selected={selectedArea === ""}
+              >
                 Semua area
               </option>
 
@@ -203,14 +234,18 @@ const filterId = `map-filter-${Math.random()
                 )
               }
             </select>
+
           </div>
+
         </div>
       )
     }
 
+
     {
       showType && (
         <div class="map-filter__field">
+
           <label
             class="map-filter__label"
             for={`${filterId}-type`}
@@ -219,10 +254,11 @@ const filterId = `map-filter-${Math.random()
           </label>
 
           <div class="map-filter__select-wrap">
+
             <ListFilter
               class="map-filter__select-icon"
               size={16}
-              stroke-width={1.9}
+              stroke-width={2}
               aria-hidden="true"
             />
 
@@ -232,7 +268,10 @@ const filterId = `map-filter-${Math.random()
               name="type"
               data-map-filter-type
             >
-              <option value="" selected={selectedType === ""}>
+              <option
+                value=""
+                selected={selectedType === ""}
+              >
                 Semua jenis
               </option>
 
@@ -252,28 +291,44 @@ const filterId = `map-filter-${Math.random()
                 )
               }
             </select>
+
           </div>
+
         </div>
-      )}
+      )
+    }
+
   </div>
+
+
+  <!-- =======================================================================
+       SUMMARY
+       ==================================================================== -->
 
   <div
     class="map-filter__footer"
     data-map-filter-summary
     aria-live="polite"
   >
-    <span class="map-filter__summary-icon" aria-hidden="true">
+
+    <span
+      class="map-filter__summary-icon"
+      aria-hidden="true"
+    >
       <MapPin
         size={14}
-        stroke-width={1.9}
+        stroke-width={2}
       />
     </span>
 
     <span data-map-filter-summary-text>
       Semua lokasi ditampilkan
     </span>
+
   </div>
+
 </form>
+
 
 <script is:inline>
   (() => {
@@ -377,14 +432,14 @@ const filterId = `map-filter-${Math.random()
       if (activeCount === 0) {
         summary.textContent =
           "Semua lokasi ditampilkan";
+
         return;
       }
 
-      if (
-        activeCount === 1
-      ) {
+      if (activeCount === 1) {
         summary.textContent =
           "1 filter aktif";
+
         return;
       }
 
@@ -422,23 +477,19 @@ const filterId = `map-filter-${Math.random()
       );
     };
 
-    const handleInput = () => {
-      emit();
-    };
-
     searchInput?.addEventListener(
       "input",
-      handleInput,
+      emit,
     );
 
     areaSelect?.addEventListener(
       "change",
-      handleInput,
+      emit,
     );
 
     typeSelect?.addEventListener(
       "change",
-      handleInput,
+      emit,
     );
 
     resetButton?.addEventListener(
@@ -481,111 +532,255 @@ const filterId = `map-filter-${Math.random()
   })();
 </script>
 
+
 <style>
+  /* ==========================================================================
+     BINSIGHT MAP FILTER
+     Shared visual language with homepage / map page
+     ========================================================================== */
+
+  .map-filter,
+  .map-filter *,
+  .map-filter *::before,
+  .map-filter *::after {
+    box-sizing: border-box;
+  }
+
   .map-filter {
+    --acid: #dfff00;
+    --acid-soft: #efff70;
+
+    --ink: #090a08;
+    --ink-2: #11130f;
+    --ink-3: #1b1f18;
+
+    --paper: #f2f0e6;
+    --paper-2: #e4e1d4;
+    --paper-3: #cfcabd;
+
+    --white: #fffef8;
+    --muted: #6c7068;
+
+    --warning: #ff6a00;
+
     width: 100%;
     min-width: 0;
-    padding: 1rem 1.125rem;
-    border: 1px solid
-      var(--color-border, #e2e8f0);
-    border-radius: 1rem;
-    background: var(
-      --color-surface,
-      #ffffff
-    );
-    box-shadow:
-      0 1px 2px
-        rgb(15 23 42 / 0.03),
-      0 8px 24px
-        rgb(15 23 42 / 0.04);
+
+    padding: 20px;
+
+    color: var(--white) !important;
+
+    background:
+      linear-gradient(
+        rgba(255, 255, 255, 0.035) 1px,
+        transparent 1px
+      ),
+      linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0.035) 1px,
+        transparent 1px
+      ),
+      var(--ink) !important;
+
+    background-size: 24px 24px;
+
+    border: 3px solid var(--ink);
+
+    box-shadow: 7px 7px 0 var(--warning);
+
+    font-family:
+      Inter,
+      ui-sans-serif,
+      system-ui,
+      -apple-system,
+      BlinkMacSystemFont,
+      "Segoe UI",
+      sans-serif;
+
+    -webkit-font-smoothing: antialiased;
   }
+
+
+  /* ==========================================================================
+     HEADER
+     ========================================================================== */
 
   .map-filter__heading {
     display: flex;
+
     align-items: flex-start;
+
     justify-content: space-between;
-    gap: 1rem;
-    margin-bottom: 1rem;
+
+    gap: 20px;
+
+    margin-bottom: 20px;
   }
 
   .map-filter__title-wrap {
     display: flex;
+
     align-items: flex-start;
-    gap: 0.7rem;
+
+    gap: 12px;
+
+    min-width: 0;
   }
 
   .map-filter__title-icon {
-    width: 2.15rem;
-    height: 2.15rem;
-    flex: 0 0 2.15rem;
     display: inline-flex;
+
     align-items: center;
+
     justify-content: center;
-    border-radius: 0.65rem;
-    background: var(
-      --color-primary-light,
-      #dcfce7
-    );
-    color: var(
-      --color-primary,
-      #166534
-    );
+
+    width: 46px;
+    height: 46px;
+
+    flex: 0 0 46px;
+
+    color: var(--ink) !important;
+
+    background: var(--acid) !important;
+
+    border: 2px solid var(--ink);
+
+    box-shadow: 4px 4px 0 var(--warning);
+  }
+
+  .map-filter__title-icon svg {
+    color: var(--ink) !important;
+
+    stroke: var(--ink) !important;
+  }
+
+  .map-filter__title-copy {
+    min-width: 0;
   }
 
   .map-filter__title {
-    margin: 0;
-    color: #0f172a;
-    font-size: 0.9rem;
-    font-weight: 750;
-    line-height: 1.35;
+    margin: 2px 0 0;
+
+    color: var(--white) !important;
+
+    font-family:
+      Sora,
+      Inter,
+      ui-sans-serif,
+      system-ui,
+      sans-serif;
+
+    font-size: 20px;
+
+    font-weight: 900;
+
+    line-height: 0.95;
+
+    letter-spacing: -0.055em;
+
+    text-transform: uppercase;
   }
 
   .map-filter__subtitle {
-    margin: 0.2rem 0 0;
-    color: #64748b;
-    font-size: 0.7rem;
-    line-height: 1.45;
+    max-width: 560px;
+
+    margin: 8px 0 0;
+
+    color: #c4c8bd !important;
+
+    font-size: 10px;
+
+    line-height: 1.65;
   }
 
+
+  /* ==========================================================================
+     RESET
+     ========================================================================== */
+
   .map-filter__reset {
-    min-height: 2rem;
     display: inline-flex;
+
     align-items: center;
-    gap: 0.35rem;
-    padding: 0 0.55rem;
-    border: 1px solid
-      #e2e8f0;
-    border-radius: 0.55rem;
-    background: #ffffff;
-    color: #64748b;
-    font: inherit;
-    font-size: 0.68rem;
-    font-weight: 700;
+
+    justify-content: center;
+
+    gap: 7px;
+
+    min-height: 38px;
+
+    flex: 0 0 auto;
+
+    padding: 0 11px;
+
+    color: var(--ink) !important;
+
+    background: var(--acid) !important;
+
+    border: 2px solid var(--ink);
+
+    box-shadow: 4px 4px 0 var(--warning);
+
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+
+    font-size: 8px;
+
+    font-weight: 900;
+
+    line-height: 1;
+
+    letter-spacing: 0.07em;
+
+    text-transform: uppercase;
+
     cursor: pointer;
+
     transition:
-      background-color 160ms ease,
-      color 160ms ease,
-      border-color 160ms ease;
+      transform 120ms steps(2, end),
+      box-shadow 120ms steps(2, end),
+      background 120ms linear;
+  }
+
+  .map-filter__reset span {
+    color: var(--ink) !important;
+  }
+
+  .map-filter__reset svg {
+    color: var(--ink) !important;
+
+    stroke: var(--ink) !important;
   }
 
   .map-filter__reset:hover {
-    border-color: #bbf7d0;
-    background: #f0fdf4;
-    color: #166534;
+    color: var(--ink) !important;
+
+    background: var(--acid-soft) !important;
+
+    transform: translate(-2px, -2px);
+
+    box-shadow: 6px 6px 0 var(--white);
   }
 
-  .map-filter__reset:focus-visible {
-    outline: 3px solid
-      rgb(37 99 235 / 0.18);
-    outline-offset: 2px;
-  }
+
+  /* ==========================================================================
+     FIELDS
+     ========================================================================== */
 
   .map-filter__fields {
     display: grid;
+
     grid-template-columns:
       minmax(15rem, 1.5fr)
-      repeat(2, minmax(10rem, 1fr));
-    gap: 0.75rem;
+      repeat(
+        2,
+        minmax(10rem, 1fr)
+      );
+
+    gap: 13px;
   }
 
   .map-filter__field {
@@ -594,124 +789,336 @@ const filterId = `map-filter-${Math.random()
 
   .map-filter__label {
     display: block;
-    margin-bottom: 0.35rem;
-    color: #334155;
-    font-size: 0.68rem;
-    font-weight: 700;
-    line-height: 1.3;
+
+    margin: 0 0 8px;
+
+    color: var(--acid) !important;
+
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+
+    font-size: 8px;
+
+    font-weight: 900;
+
+    line-height: 1;
+
+    letter-spacing: 0.08em;
+
+    text-transform: uppercase;
   }
+
+
+  /* ==========================================================================
+     INPUT / SELECT WRAPPERS
+     ========================================================================== */
 
   .map-filter__input-wrap,
   .map-filter__select-wrap {
     position: relative;
+
     display: flex;
+
     align-items: center;
+
+    min-width: 0;
   }
 
-  .map-filter__input,
-  .map-filter__select {
-    width: 100%;
-    min-height: 2.55rem;
-    border: 1px solid
-      #e2e8f0;
-    border-radius: 0.65rem;
-    background: #ffffff;
-    color: #0f172a;
-    font: inherit;
-    font-size: 0.75rem;
-    outline: 0;
-    transition:
-      border-color 160ms ease,
-      box-shadow 160ms ease,
-      background-color 160ms ease;
-  }
+
+  /* ==========================================================================
+     INPUT
+     ========================================================================== */
 
   .map-filter__input {
-    padding:
-      0 2.25rem
-      0 2.25rem;
-  }
+    display: block;
 
-  .map-filter__select {
-    appearance: none;
+    width: 100%;
+
+    min-width: 0;
+
+    min-height: 50px;
+
     padding:
-      0 2.25rem
-      0 2.25rem;
-    cursor: pointer;
+      0
+      42px
+      0
+      43px;
+
+    color: var(--ink) !important;
+
+    background: var(--white) !important;
+
+    border: 3px solid var(--ink);
+
+    border-radius: 0;
+
+    outline: 0;
+
+    box-shadow: 5px 5px 0 var(--ink);
+
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+
+    font-size: 9px;
+
+    font-weight: 700;
+
+    line-height: 1;
+
+    transition:
+      transform 120ms steps(2, end),
+      box-shadow 120ms steps(2, end),
+      border-color 120ms linear;
   }
 
   .map-filter__input::placeholder {
-    color: #94a3b8;
+    color: #727970 !important;
+
+    opacity: 1;
   }
 
-  .map-filter__input:focus,
-  .map-filter__select:focus {
-    border-color: #166534;
-    box-shadow:
-      0 0 0 3px
-        rgb(22 101 52 / 0.1);
-  }
+  .map-filter__input:focus {
+    border-color: var(--ink);
 
-  .map-filter__input-icon,
-  .map-filter__select-icon {
-    position: absolute;
-    z-index: 1;
-    color: #94a3b8;
-    pointer-events: none;
+    transform: translate(-2px, -2px);
+
+    box-shadow: 7px 7px 0 var(--acid);
   }
 
   .map-filter__input-icon {
-    left: 0.75rem;
-  }
-
-  .map-filter__select-icon {
-    left: 0.75rem;
-  }
-
-  .map-filter__select-wrap::after {
-    content: "";
     position: absolute;
-    right: 0.75rem;
-    width: 0.45rem;
-    height: 0.45rem;
-    border-right: 1.5px solid
-      #64748b;
-    border-bottom: 1.5px solid
-      #64748b;
-    transform:
-      rotate(45deg)
-      translateY(-2px);
+
+    left: 15px;
+
+    z-index: 2;
+
+    color: var(--warning) !important;
+
+    stroke: var(--warning) !important;
+
     pointer-events: none;
   }
 
+
+  /* ==========================================================================
+     SELECT
+     ========================================================================== */
+
+  .map-filter__select {
+    display: block;
+
+    width: 100%;
+
+    min-width: 0;
+
+    min-height: 50px;
+
+    padding:
+      0
+      42px
+      0
+      43px;
+
+    color: var(--ink) !important;
+
+    background: var(--white) !important;
+
+    border: 3px solid var(--ink);
+
+    border-radius: 0;
+
+    outline: 0;
+
+    box-shadow: 5px 5px 0 var(--ink);
+
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+
+    font-size: 9px;
+
+    font-weight: 700;
+
+    line-height: 1;
+
+    appearance: none;
+
+    cursor: pointer;
+
+    transition:
+      transform 120ms steps(2, end),
+      box-shadow 120ms steps(2, end),
+      border-color 120ms linear;
+  }
+
+  .map-filter__select:focus {
+    border-color: var(--ink);
+
+    transform: translate(-2px, -2px);
+
+    box-shadow: 7px 7px 0 var(--acid);
+  }
+
+  .map-filter__select-icon {
+    position: absolute;
+
+    left: 15px;
+
+    z-index: 2;
+
+    color: var(--warning) !important;
+
+    stroke: var(--warning) !important;
+
+    pointer-events: none;
+  }
+
+  .map-filter__select-wrap::after {
+    position: absolute;
+
+    right: 16px;
+
+    width: 9px;
+    height: 9px;
+
+    content: "";
+
+    border-right: 3px solid var(--ink);
+
+    border-bottom: 3px solid var(--ink);
+
+    transform:
+      rotate(45deg)
+      translateY(-3px);
+
+    pointer-events: none;
+  }
+
+
+  /* ==========================================================================
+     OPTION
+     ========================================================================== */
+
+  .map-filter__select option {
+    color: var(--ink);
+
+    background: var(--white);
+
+    font-family:
+      Inter,
+      ui-sans-serif,
+      system-ui,
+      sans-serif;
+  }
+
+
+  /* ==========================================================================
+     FOOTER
+     ========================================================================== */
+
   .map-filter__footer {
-    min-height: 2rem;
     display: flex;
+
     align-items: center;
-    gap: 0.45rem;
-    margin-top: 0.75rem;
-    padding-top: 0.75rem;
-    border-top: 1px solid
-      #f1f5f9;
-    color: #64748b;
-    font-size: 0.68rem;
-    line-height: 1.4;
+
+    gap: 9px;
+
+    min-height: 34px;
+
+    margin-top: 17px;
+
+    padding-top: 13px;
+
+    color: #aeb5aa !important;
+
+    border-top:
+      2px solid
+      rgba(
+        255,
+        255,
+        255,
+        0.16
+      );
+
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+
+    font-size: 8px;
+
+    font-weight: 900;
+
+    line-height: 1.3;
+
+    letter-spacing: 0.06em;
+
+    text-transform: uppercase;
   }
 
   .map-filter__summary-icon {
-    width: 1.55rem;
-    height: 1.55rem;
-    flex: 0 0 1.55rem;
     display: inline-flex;
+
     align-items: center;
+
     justify-content: center;
-    border-radius: 0.45rem;
-    background: #f8fafc;
-    color: #166534;
+
+    width: 28px;
+    height: 28px;
+
+    flex: 0 0 28px;
+
+    color: var(--ink) !important;
+
+    background: var(--acid) !important;
+
+    border: 2px solid var(--ink);
   }
 
+  .map-filter__summary-icon svg {
+    color: var(--ink) !important;
+
+    stroke: var(--ink) !important;
+  }
+
+  .map-filter__footer
+    [data-map-filter-summary-text] {
+    color: #aeb5aa !important;
+  }
+
+
+  /* ==========================================================================
+     COMPACT
+     ========================================================================== */
+
   .map-filter--compact {
-    padding: 0.8rem 0.9rem;
+    padding: 15px;
+  }
+
+  .map-filter--compact
+    .map-filter__title {
+    font-size: 17px;
+  }
+
+  .map-filter--compact
+    .map-filter__title-icon {
+    width: 40px;
+    height: 40px;
+    flex-basis: 40px;
+  }
+
+  .map-filter--compact
+    .map-filter__heading {
+    margin-bottom: 15px;
   }
 
   .map-filter--compact
@@ -720,14 +1127,34 @@ const filterId = `map-filter-${Math.random()
   }
 
   .map-filter--compact
-    .map-filter__heading {
-    margin-bottom: 0.75rem;
-  }
-
-  .map-filter--compact
     .map-filter__footer {
     display: none;
   }
+
+  .map-filter--compact
+    .map-filter__input,
+  .map-filter--compact
+    .map-filter__select {
+    min-height: 46px;
+  }
+
+
+  /* ==========================================================================
+     FOCUS
+     ========================================================================== */
+
+  .map-filter__reset:focus-visible,
+  .map-filter__input:focus-visible,
+  .map-filter__select:focus-visible {
+    outline: 4px solid var(--acid);
+
+    outline-offset: 4px;
+  }
+
+
+  /* ==========================================================================
+     TABLET
+     ========================================================================== */
 
   @media (max-width: 900px) {
     .map-filter__fields {
@@ -741,14 +1168,36 @@ const filterId = `map-filter-${Math.random()
     }
   }
 
+
+  /* ==========================================================================
+     MOBILE
+     ========================================================================== */
+
   @media (max-width: 640px) {
     .map-filter {
-      padding: 0.9rem;
-      border-radius: 0.875rem;
+      padding: 17px;
     }
 
     .map-filter__heading {
-      align-items: center;
+      align-items: flex-start;
+
+      gap: 12px;
+
+      margin-bottom: 17px;
+    }
+
+    .map-filter__title-wrap {
+      gap: 10px;
+    }
+
+    .map-filter__title-icon {
+      width: 42px;
+      height: 42px;
+      flex-basis: 42px;
+    }
+
+    .map-filter__title {
+      font-size: 17px;
     }
 
     .map-filter__subtitle {
@@ -763,23 +1212,92 @@ const filterId = `map-filter-${Math.random()
       grid-column: auto;
     }
 
+    .map-filter__reset {
+      width: 38px;
+      min-width: 38px;
+
+      padding: 0;
+    }
+
     .map-filter__reset span {
       display: none;
     }
 
-    .map-filter__reset {
-      width: 2rem;
-      min-width: 2rem;
-      justify-content: center;
-      padding: 0;
+    .map-filter__input,
+    .map-filter__select {
+      min-height: 50px;
+    }
+
+    .map-filter__footer {
+      margin-top: 15px;
+      padding-top: 12px;
     }
   }
 
-  @media (prefers-reduced-motion: reduce) {
-    .map-filter__reset,
+
+  /* ==========================================================================
+     SMALL MOBILE
+     ========================================================================== */
+
+  @media (max-width: 430px) {
+    .map-filter {
+      padding: 15px;
+    }
+
+    .map-filter__heading {
+      gap: 10px;
+    }
+
+    .map-filter__title-icon {
+      width: 40px;
+      height: 40px;
+      flex-basis: 40px;
+    }
+
+    .map-filter__title {
+      font-size: 16px;
+    }
+
+    .map-filter__label {
+      font-size: 7px;
+    }
+
     .map-filter__input,
     .map-filter__select {
-      transition: none;
+      min-height: 48px;
+      font-size: 8px;
+    }
+
+    .map-filter__input {
+      padding-left: 39px;
+    }
+
+    .map-filter__select {
+      padding-left: 39px;
+    }
+
+    .map-filter__input-icon,
+    .map-filter__select-icon {
+      left: 13px;
+    }
+
+    .map-filter__select-wrap::after {
+      right: 13px;
+    }
+  }
+
+
+  /* ==========================================================================
+     REDUCED MOTION
+     ========================================================================== */
+
+  @media (prefers-reduced-motion: reduce) {
+    .map-filter *,
+    .map-filter *::before,
+    .map-filter *::after {
+      transition-duration: 0.01ms !important;
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
     }
   }
 </style>

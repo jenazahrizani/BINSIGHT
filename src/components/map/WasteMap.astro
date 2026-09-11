@@ -14,8 +14,7 @@ import {
   type WasteLocation,
 } from "@lib/data/locations";
 
-export interface WasteMapLocation
-  extends WasteLocation {}
+export interface WasteMapLocation extends WasteLocation {}
 
 interface Props {
   locations?: WasteMapLocation[];
@@ -54,31 +53,24 @@ const {
 const mapLocations = locations.filter(
   (location) =>
     location.status === "active" &&
-    Number.isFinite(
-      location.coordinates.lat,
-    ) &&
-    Number.isFinite(
-      location.coordinates.lng,
-    ),
+    Number.isFinite(location.coordinates.lat) &&
+    Number.isFinite(location.coordinates.lng),
 );
 
-const locationPayload =
-  mapLocations.map((location) => ({
-    id: location.id,
-    slug: location.slug,
-    name: location.name,
-    description:
-      location.description,
-    address: location.address,
-    areaId: location.areaId,
-    areaName:
-      location.areaName,
-    type: location.type,
-    coordinates: {
-      lat: location.coordinates.lat,
-      lng: location.coordinates.lng,
-    },
-  }));
+const locationPayload = mapLocations.map((location) => ({
+  id: location.id,
+  slug: location.slug,
+  name: location.name,
+  description: location.description,
+  address: location.address,
+  areaId: location.areaId,
+  areaName: location.areaName,
+  type: location.type,
+  coordinates: {
+    lat: location.coordinates.lat,
+    lng: location.coordinates.lng,
+  },
+}));
 
 const mapId = `waste-map-${Math.random()
   .toString(36)
@@ -86,15 +78,10 @@ const mapId = `waste-map-${Math.random()
 ---
 
 <div
-  class:list={[
-    "waste-map",
-    className,
-  ]}
+  class:list={["waste-map", className]}
   data-waste-map
   data-map-id={mapId}
-  data-locations={JSON.stringify(
-    locationPayload,
-  )}
+  data-locations={JSON.stringify(locationPayload)}
   data-center-lat={centerLat}
   data-center-lng={centerLng}
   data-initial-zoom={initialZoom}
@@ -103,58 +90,12 @@ const mapId = `waste-map-${Math.random()
   style={`--waste-map-height: ${height};`}
 >
   <div class="waste-map__stage">
+
     <div
       id={mapId}
       class="waste-map__canvas"
       aria-label="Peta lokasi pengelolaan sampah Kabupaten Badung"
     ></div>
-
-    {
-      showSearch && (
-        <div class="waste-map__search">
-          <label
-            class="waste-map__sr-only"
-            for={`${mapId}-search`}
-          >
-            Cari lokasi
-          </label>
-
-          <div class="waste-map__search-box">
-            <MapPin
-              size={16}
-              stroke-width={1.9}
-              aria-hidden="true"
-            />
-
-            <input
-              id={`${mapId}-search`}
-              class="waste-map__search-input"
-              type="search"
-              placeholder="Cari lokasi atau area..."
-              autocomplete="off"
-              spellcheck="false"
-              data-map-search
-            />
-
-            <button
-              type="button"
-              class="waste-map__search-clear"
-              data-map-search-clear
-              aria-label="Hapus pencarian"
-              hidden
-            >
-              ×
-            </button>
-          </div>
-
-          <div
-            class="waste-map__search-results"
-            data-map-search-results
-            hidden
-          ></div>
-        </div>
-      )
-    }
 
     {
       showControls && (
@@ -201,7 +142,7 @@ const mapId = `waste-map-${Math.random()
               >
                 <LocateFixed
                   size={17}
-                  stroke-width={1.9}
+                  stroke-width={2}
                   aria-hidden="true"
                 />
               </button>
@@ -219,7 +160,7 @@ const mapId = `waste-map-${Math.random()
               >
                 <Maximize2
                   size={17}
-                  stroke-width={1.9}
+                  stroke-width={2}
                   aria-hidden="true"
                 />
               </button>
@@ -237,7 +178,7 @@ const mapId = `waste-map-${Math.random()
               >
                 <Layers
                   size={17}
-                  stroke-width={1.9}
+                  stroke-width={2}
                   aria-hidden="true"
                 />
               </button>
@@ -253,7 +194,7 @@ const mapId = `waste-map-${Math.random()
           >
             <RefreshCw
               size={17}
-              stroke-width={1.9}
+              stroke-width={2}
               aria-hidden="true"
             />
           </button>
@@ -305,70 +246,149 @@ const mapId = `waste-map-${Math.random()
         </p>
       </div>
     </noscript>
+
   </div>
 </div>
 
-<script is:inline>
-  (() => {
-    const root = document.currentScript
-      ?.previousElementSibling;
+<script>
+  import L from "leaflet";
+  import "leaflet/dist/leaflet.css";
 
-    if (
-      !(root instanceof HTMLElement) ||
-      !root.matches("[data-waste-map]")
-    ) {
+  type MapLocationPayload = {
+    id: string;
+    slug: string;
+    name: string;
+    description?: string;
+    address?: string;
+    areaId?: string;
+    areaName?: string;
+    type?: string;
+    coordinates: {
+      lat: number;
+      lng: number;
+    };
+  };
+
+  type WasteMapRoot = HTMLElement & {
+    __binsightWasteMapInitialized?: boolean;
+  };
+
+  const roots = Array.from(
+    document.querySelectorAll<WasteMapRoot>(
+      "[data-waste-map]",
+    ),
+  );
+
+  const formatLocationType = (type: unknown) => {
+    const labels: Record<string, string> = {
+      "collection-point":
+        "Titik pengumpulan",
+      "recycling-center":
+        "Pusat daur ulang",
+      "waste-bank":
+        "Bank sampah",
+      "processing-facility":
+        "Fasilitas pengolahan",
+      "drop-point":
+        "Drop point",
+      other:
+        "Lokasi pengelolaan",
+    };
+
+    return (
+      labels[String(type ?? "")] ??
+      "Lokasi pengelolaan"
+    );
+  };
+
+  const escapeHtml = (value: unknown) => {
+    return String(value ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  };
+
+  const createMarkerIcon = () => {
+    return L.divIcon({
+      className:
+        "binsight-map-marker-wrapper",
+
+      html: `
+        <span
+          class="binsight-map-marker"
+          aria-hidden="true"
+        >
+          <span
+            class="binsight-map-marker__dot"
+          ></span>
+        </span>
+      `,
+
+      iconSize: [28, 36],
+      iconAnchor: [14, 35],
+      popupAnchor: [0, -32],
+    });
+  };
+
+  const initializeWasteMap = (
+    root: WasteMapRoot,
+  ) => {
+    if (root.__binsightWasteMapInitialized) {
       return;
     }
 
-    if (root.dataset.mapInitialized === "true") {
-      return;
-    }
-
-    root.dataset.mapInitialized = "true";
+    root.__binsightWasteMapInitialized = true;
 
     const canvas =
-      root.querySelector(
+      root.querySelector<HTMLElement>(
         ".waste-map__canvas",
       );
 
-    if (!(canvas instanceof HTMLElement)) {
+    if (!canvas) {
       return;
     }
 
     const status =
-      root.querySelector(
+      root.querySelector<HTMLElement>(
         "[data-map-status]",
       );
 
-    const locations = (() => {
-      try {
-        const raw =
-          root.dataset.locations ?? "[]";
-
-        const parsed =
-          JSON.parse(raw);
-
-        return Array.isArray(parsed)
-          ? parsed
-          : [];
-      } catch {
-        return [];
+    const setStatus = (message: string) => {
+      if (status) {
+        status.textContent = message;
       }
-    })();
+    };
+
+    const parseLocations =
+      (): MapLocationPayload[] => {
+        try {
+          const raw =
+            root.dataset.locations ?? "[]";
+
+          const parsed = JSON.parse(raw);
+
+          return Array.isArray(parsed)
+            ? parsed
+            : [];
+        } catch {
+          return [];
+        }
+      };
+
+    const locations = parseLocations();
 
     const centerLat = Number(
-      root.dataset.centerLat ??
-        "-8.55",
+      root.dataset.centerLat ?? "-8.55",
     );
 
     const centerLng = Number(
-      root.dataset.centerLng ??
-        "115.18",
+      root.dataset.centerLng ?? "115.18",
     );
 
     const initialZoom = Number(
-      root.dataset.initialZoom ??
-        "11",
+      root.dataset.initialZoom ?? "11",
     );
 
     const minZoom = Number(
@@ -379,134 +399,43 @@ const mapId = `waste-map-${Math.random()
       root.dataset.maxZoom ?? "18",
     );
 
-    const setStatus = (
-      message,
-    ) => {
-      if (
-        status instanceof HTMLElement
-      ) {
-        status.textContent =
-          message;
-      }
-    };
+    let map: L.Map | null = null;
 
-    const loadLeaflet = async () => {
-      if (
-        window.__BINSIGHT_LEAFLET__
-      ) {
-        return window.__BINSIGHT_LEAFLET__;
-      }
+    let markerLayer:
+      | L.LayerGroup
+      | null = null;
 
-      const [
-        leafletModule,
-      ] = await Promise.all([
-        import("leaflet"),
-        import("leaflet/dist/leaflet.css"),
-      ]);
+    const markerById = new Map<
+      string,
+      L.Marker
+    >();
 
-      const leaflet =
-        leafletModule.default ??
-        leafletModule;
-
-      window.__BINSIGHT_LEAFLET__ =
-        leaflet;
-
-      return leaflet;
-    };
-
-    const createMarkerIcon = (
-      leaflet,
-    ) =>
-      leaflet.divIcon({
-        className:
-          "binsight-map-marker-wrapper",
-        html: `
-          <span class="binsight-map-marker" aria-hidden="true">
-            <span class="binsight-map-marker__dot"></span>
-          </span>
-        `,
-        iconSize: [28, 36],
-        iconAnchor: [14, 35],
-        popupAnchor: [0, -32],
-      });
-
-    const escapeHtml = (
-      value,
-    ) => {
-      const text =
-        String(value ?? "");
-
-      return text
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll(
-          "'",
-          "&#039;",
-        );
-    };
-
-    const formatLocationType = (
-      type,
-    ) => {
-      const labels = {
-        "collection-point":
-          "Titik pengumpulan",
-        "recycling-center":
-          "Pusat daur ulang",
-        "waste-bank":
-          "Bank sampah",
-        "processing-facility":
-          "Fasilitas pengolahan",
-        "drop-point":
-          "Drop point",
-        other: "Lokasi pengelolaan",
-      };
-
-      return (
-        labels[type] ??
-        "Lokasi pengelolaan"
-      );
-    };
-
-    let map = null;
-    let markerLayer = null;
-    let leaflet = null;
-
-    const markerById =
-      new Map();
+    const markerIcon = createMarkerIcon();
 
     const fitToLocations = () => {
-      if (
-        !map ||
-        !leaflet ||
-        locations.length === 0
-      ) {
+      if (!map || locations.length === 0) {
         return;
       }
 
-      const bounds =
-        leaflet.latLngBounds(
-          locations.map(
-            (location) => [
+      const bounds = L.latLngBounds(
+        locations.map(
+          (location) =>
+            [
               location.coordinates.lat,
               location.coordinates.lng,
-            ],
-          ),
-        );
+            ] as L.LatLngTuple,
+        ),
+      );
 
       if (bounds.isValid()) {
-        map.fitBounds(
-          bounds,
-          {
-            padding: [32, 32],
-            maxZoom: Math.min(
-              initialZoom + 2,
-              maxZoom,
-            ),
-          },
-        );
+        map.fitBounds(bounds, {
+          padding: [32, 32],
+          maxZoom: Math.min(
+            initialZoom + 2,
+            maxZoom,
+          ),
+          animate: false,
+        });
       }
     };
 
@@ -516,27 +445,26 @@ const mapId = `waste-map-${Math.random()
       }
 
       map.setView(
-        [centerLat, centerLng],
+        [
+          centerLat,
+          centerLng,
+        ],
         initialZoom,
         {
           animate: false,
         },
       );
 
-      if (
-        locations.length > 0
-      ) {
+      if (locations.length > 0) {
         fitToLocations();
       }
     };
 
     const openLocation = (
-      location,
+      location: MapLocationPayload,
     ) => {
       const marker =
-        markerById.get(
-          location.id,
-        );
+        markerById.get(location.id);
 
       if (!marker || !map) {
         return;
@@ -555,1035 +483,992 @@ const mapId = `waste-map-${Math.random()
       );
     };
 
-    const renderSearchResults = (
-      query,
-    ) => {
-      const resultsContainer =
-        root.querySelector(
-          "[data-map-search-results]",
+    try {
+      setStatus(
+        locations.length > 0
+          ? "Memuat peta..."
+          : "Tidak ada lokasi untuk ditampilkan.",
+      );
+
+      map = L.map(canvas, {
+        center: [
+          centerLat,
+          centerLng,
+        ],
+
+        zoom: initialZoom,
+
+        minZoom,
+        maxZoom,
+
+        zoomControl: false,
+
+        attributionControl: true,
+      });
+
+      L.tileLayer(
+        "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+        {
+          maxZoom,
+
+          attribution:
+            '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a> contributors',
+        },
+      ).addTo(map);
+
+      markerLayer =
+        L.layerGroup().addTo(map);
+
+      for (const location of locations) {
+        const marker = L.marker(
+          [
+            location.coordinates.lat,
+            location.coordinates.lng,
+          ],
+          {
+            icon: markerIcon,
+            title: location.name,
+            alt: location.name,
+          },
         );
 
-      const clearButton =
-        root.querySelector(
-          "[data-map-search-clear]",
-        );
+        const popupContent = `
+          <div
+            class="binsight-map-popup"
+          >
+            <div
+              class="binsight-map-popup__eyebrow"
+            >
+              ${escapeHtml(
+                formatLocationType(
+                  location.type,
+                ),
+              )}
+            </div>
 
-      if (
-        !(resultsContainer instanceof HTMLElement)
-      ) {
-        return;
-      }
-
-      const normalizedQuery =
-        String(query ?? "")
-          .trim()
-          .toLowerCase();
-
-      if (
-        clearButton instanceof HTMLButtonElement
-      ) {
-        clearButton.hidden =
-          normalizedQuery.length ===
-          0;
-      }
-
-      if (!normalizedQuery) {
-        resultsContainer.hidden =
-          true;
-        resultsContainer.innerHTML =
-          "";
-        return;
-      }
-
-      const matches =
-        locations
-          .filter(
-            (location) => {
-              const haystack = [
+            <h3
+              class="binsight-map-popup__title"
+            >
+              ${escapeHtml(
                 location.name,
-                location.address,
+              )}
+            </h3>
+
+            <p
+              class="binsight-map-popup__area"
+            >
+              ${escapeHtml(
                 location.areaName,
-                location.type,
-              ]
-                .join(" ")
-                .toLowerCase();
-
-              return haystack.includes(
-                normalizedQuery,
-              );
-            },
-          )
-          .slice(0, 6);
-
-      resultsContainer.innerHTML =
-        "";
-
-      if (matches.length === 0) {
-        resultsContainer.innerHTML =
-          `
-            <div class="waste-map__search-empty">
-              Tidak ada lokasi yang cocok.
-            </div>
-          `;
-
-        resultsContainer.hidden =
-          false;
-
-        return;
-      }
-
-      for (const location of matches) {
-        const button =
-          document.createElement(
-            "button",
-          );
-
-        button.type = "button";
-        button.className =
-          "waste-map__search-result";
-
-        button.innerHTML = `
-          <span class="waste-map__search-result-icon" aria-hidden="true">
-            <span class="waste-map__search-result-dot"></span>
-          </span>
-
-          <span class="waste-map__search-result-copy">
-            <strong>${escapeHtml(
-              location.name,
-            )}</strong>
-            <span>${escapeHtml(
-              location.areaName,
-            )} · ${escapeHtml(
-              formatLocationType(
-                location.type,
-              ),
-            )}</span>
-          </span>
-        `;
-
-        button.addEventListener(
-          "click",
-          () => {
-            openLocation(
-              location,
-            );
-
-            resultsContainer.hidden =
-              true;
-          },
-        );
-
-        resultsContainer.appendChild(
-          button,
-        );
-      }
-
-      resultsContainer.hidden =
-        false;
-    };
-
-    const initialize = async () => {
-      try {
-        setStatus(
-          locations.length > 0
-            ? "Memuat peta..."
-            : "Tidak ada lokasi untuk ditampilkan.",
-        );
-
-        leaflet =
-          await loadLeaflet();
-
-        map =
-          leaflet.map(
-            canvas,
-            {
-              center: [
-                centerLat,
-                centerLng,
-              ],
-              zoom: initialZoom,
-              minZoom,
-              maxZoom,
-              zoomControl: false,
-              attributionControl: true,
-            },
-          );
-
-        leaflet
-          .tileLayer(
-            "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-            {
-              maxZoom,
-              attribution:
-                '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a> contributors',
-            },
-          )
-          .addTo(map);
-
-        markerLayer =
-          leaflet.layerGroup().addTo(
-            map,
-          );
-
-        const markerIcon =
-          createMarkerIcon(
-            leaflet,
-          );
-
-        for (const location of locations) {
-          const {
-            lat,
-            lng,
-          } = location.coordinates;
-
-          const marker =
-            leaflet.marker(
-              [lat, lng],
-              {
-                icon: markerIcon,
-                title: location.name,
-                alt: location.name,
-              },
-            );
-
-          const popupContent = `
-            <div class="binsight-map-popup">
-              <div class="binsight-map-popup__eyebrow">
-                ${escapeHtml(
-                  formatLocationType(
-                    location.type,
-                  ),
-                )}
-              </div>
-
-              <h3 class="binsight-map-popup__title">
-                ${escapeHtml(
-                  location.name,
-                )}
-              </h3>
-
-              <p class="binsight-map-popup__area">
-                ${escapeHtml(
-                  location.areaName,
-                )}
-              </p>
-
-              <p class="binsight-map-popup__address">
-                ${escapeHtml(
-                  location.address,
-                )}
-              </p>
-
-              <a
-                class="binsight-map-popup__link"
-                href="/map/${encodeURIComponent(
-                  location.areaId,
-                )}"
-              >
-                Lihat area
-                <span aria-hidden="true">→</span>
-              </a>
-            </div>
-          `;
-
-          marker.bindPopup(
-            popupContent,
-            {
-              maxWidth: 300,
-              className:
-                "binsight-leaflet-popup",
-            },
-          );
-
-          markerLayer.addLayer(
-            marker,
-          );
-
-          markerById.set(
-            location.id,
-            marker,
-          );
-        }
-
-        map.on(
-          "zoomend moveend",
-          () => {
-            const zoom =
-              map.getZoom();
-
-            setStatus(
-              `${locations.length.toLocaleString(
-                "id-ID",
-              )} lokasi · zoom ${zoom}`,
-            );
-          },
-        );
-
-        const zoomIn =
-          root.querySelector(
-            "[data-map-zoom-in]",
-          );
-
-        const zoomOut =
-          root.querySelector(
-            "[data-map-zoom-out]",
-          );
-
-        const locateButton =
-          root.querySelector(
-            "[data-map-locate]",
-          );
-
-        const fullscreenButton =
-          root.querySelector(
-            "[data-map-fullscreen]",
-          );
-
-        const fitButton =
-          root.querySelector(
-            "[data-map-fit]",
-          );
-
-        const refreshButton =
-          root.querySelector(
-            "[data-map-refresh]",
-          );
-
-        const searchInput =
-          root.querySelector(
-            "[data-map-search]",
-          );
-
-        const searchClear =
-          root.querySelector(
-            "[data-map-search-clear]",
-          );
-
-        zoomIn?.addEventListener(
-          "click",
-          () => {
-            map?.zoomIn();
-          },
-        );
-
-        zoomOut?.addEventListener(
-          "click",
-          () => {
-            map?.zoomOut();
-          },
-        );
-
-        locateButton?.addEventListener(
-          "click",
-          () => {
-            if (!navigator.geolocation) {
-              setStatus(
-                "Browser tidak mendukung lokasi.",
-              );
-
-              return;
-            }
-
-            setStatus(
-              "Mencari lokasi Anda...",
-            );
-
-            navigator.geolocation.getCurrentPosition(
-              (position) => {
-                const lat =
-                  position.coords
-                    .latitude;
-
-                const lng =
-                  position.coords
-                    .longitude;
-
-                map?.setView(
-                  [lat, lng],
-                  Math.max(
-                    15,
-                    initialZoom,
-                  ),
-                );
-
-                leaflet
-                  .circleMarker(
-                    [lat, lng],
-                    {
-                      radius: 7,
-                      className:
-                        "binsight-user-location",
-                    },
-                  )
-                  .addTo(map);
-
-                setStatus(
-                  "Lokasi Anda ditampilkan di peta.",
-                );
-              },
-              () => {
-                setStatus(
-                  "Lokasi Anda tidak dapat diakses.",
-                );
-              },
-              {
-                enableHighAccuracy: true,
-                timeout: 10000,
-                maximumAge: 60000,
-              },
-            );
-          },
-        );
-
-        fullscreenButton?.addEventListener(
-          "click",
-          async () => {
-            try {
-              if (
-                !document.fullscreenElement
-              ) {
-                await root.requestFullscreen?.();
-              } else {
-                await document.exitFullscreen();
-              }
-            } catch {
-              setStatus(
-                "Mode layar penuh tidak tersedia.",
-              );
-            }
-          },
-        );
-
-        fitButton?.addEventListener(
-          "click",
-          () => {
-            fitToLocations();
-          },
-        );
-
-        refreshButton?.addEventListener(
-          "click",
-          () => {
-            map?.invalidateSize({
-              pan: false,
-              debounceMoveend: true,
-            });
-
-            resetMap();
-          },
-        );
-
-        searchInput?.addEventListener(
-          "input",
-          (event) => {
-            const target =
-              event.target;
-
-            if (
-              target instanceof
-              HTMLInputElement
-            ) {
-              renderSearchResults(
-                target.value,
-              );
-            }
-          },
-        );
-
-        searchClear?.addEventListener(
-          "click",
-          () => {
-            if (
-              searchInput instanceof
-              HTMLInputElement
-            ) {
-              searchInput.value =
-                "";
-              searchInput.focus();
-            }
-
-            renderSearchResults(
-              "",
-            );
-          },
-        );
-
-        if (
-          locations.length > 0
-        ) {
-          fitToLocations();
-        }
-
-        requestAnimationFrame(
-          () => {
-            map?.invalidateSize();
-          },
-        );
-
-        setStatus(
-          `${locations.length.toLocaleString(
-            "id-ID",
-          )} lokasi tersedia`,
-        );
-      } catch (error) {
-        console.error(
-          "[BINSIGHT] Failed to initialize map:",
-          error,
-        );
-
-        setStatus(
-          "Peta tidak dapat dimuat.",
-        );
-
-        canvas.innerHTML = `
-          <div class="waste-map__error">
-            <div class="waste-map__error-icon">
-              !
-            </div>
-
-            <strong>
-              Peta tidak tersedia
-            </strong>
-
-            <p>
-              Periksa koneksi internet lalu
-              coba muat ulang halaman.
+              )}
             </p>
 
-            <button
-              type="button"
-              class="waste-map__error-button"
-              data-map-retry
+            <p
+              class="binsight-map-popup__address"
             >
-              Coba lagi
-            </button>
+              ${escapeHtml(
+                location.address,
+              )}
+            </p>
+
+            <a
+              class="binsight-map-popup__link"
+              href="/map/${encodeURIComponent(
+                String(
+                  location.areaId ?? "",
+                ),
+              )}"
+            >
+              Lihat area
+
+              <span aria-hidden="true">
+                →
+              </span>
+            </a>
           </div>
         `;
 
-        canvas
-          .querySelector(
-            "[data-map-retry]",
-          )
-          ?.addEventListener(
-            "click",
+        marker.bindPopup(
+          popupContent,
+          {
+            maxWidth: 300,
+            className:
+              "binsight-leaflet-popup",
+          },
+        );
+
+        markerLayer.addLayer(marker);
+
+        markerById.set(
+          location.id,
+          marker,
+        );
+      }
+
+      map.on(
+        "zoomend moveend",
+        () => {
+          if (!map) {
+            return;
+          }
+
+          const zoom = map.getZoom();
+
+          setStatus(
+            `${locations.length.toLocaleString(
+              "id-ID",
+            )} lokasi · zoom ${zoom}`,
+          );
+        },
+      );
+
+      const zoomIn =
+        root.querySelector<HTMLButtonElement>(
+          "[data-map-zoom-in]",
+        );
+
+      const zoomOut =
+        root.querySelector<HTMLButtonElement>(
+          "[data-map-zoom-out]",
+        );
+
+      const locateButton =
+        root.querySelector<HTMLButtonElement>(
+          "[data-map-locate]",
+        );
+
+      const fullscreenButton =
+        root.querySelector<HTMLButtonElement>(
+          "[data-map-fullscreen]",
+        );
+
+      const fitButton =
+        root.querySelector<HTMLButtonElement>(
+          "[data-map-fit]",
+        );
+
+      const refreshButton =
+        root.querySelector<HTMLButtonElement>(
+          "[data-map-refresh]",
+        );
+
+      zoomIn?.addEventListener(
+        "click",
+        () => {
+          map?.zoomIn();
+        },
+      );
+
+      zoomOut?.addEventListener(
+        "click",
+        () => {
+          map?.zoomOut();
+        },
+      );
+
+      locateButton?.addEventListener(
+        "click",
+        () => {
+          if (!navigator.geolocation) {
+            setStatus(
+              "Browser tidak mendukung lokasi.",
+            );
+
+            return;
+          }
+
+          setStatus(
+            "Mencari lokasi Anda...",
+          );
+
+          navigator.geolocation.getCurrentPosition(
+            (position) => {
+              if (!map) {
+                return;
+              }
+
+              const lat =
+                position.coords
+                  .latitude;
+
+              const lng =
+                position.coords
+                  .longitude;
+
+              map.setView(
+                [
+                  lat,
+                  lng,
+                ],
+                Math.max(
+                  15,
+                  initialZoom,
+                ),
+                {
+                  animate: true,
+                },
+              );
+
+              L.circleMarker(
+                [
+                  lat,
+                  lng,
+                ],
+                {
+                  radius: 7,
+
+                  className:
+                    "binsight-user-location",
+
+                  color: "#ffffff",
+
+                  weight: 3,
+
+                  fillColor:
+                    "#2563eb",
+
+                  fillOpacity: 1,
+                },
+              ).addTo(map);
+
+              setStatus(
+                "Lokasi Anda ditampilkan di peta.",
+              );
+            },
+
             () => {
-              window.location.reload();
+              setStatus(
+                "Lokasi Anda tidak dapat diakses.",
+              );
+            },
+
+            {
+              enableHighAccuracy:
+                true,
+
+              timeout: 10000,
+
+              maximumAge: 60000,
             },
           );
-      }
-    };
+        },
+      );
 
-    void initialize();
-  })();
+      fullscreenButton?.addEventListener(
+        "click",
+        async () => {
+          try {
+            if (
+              !document.fullscreenElement
+            ) {
+              await root.requestFullscreen?.();
+            } else {
+              await document.exitFullscreen();
+            }
+          } catch {
+            setStatus(
+              "Mode layar penuh tidak tersedia.",
+            );
+          }
+        },
+      );
+
+      fitButton?.addEventListener(
+        "click",
+        () => {
+          fitToLocations();
+        },
+      );
+
+      refreshButton?.addEventListener(
+        "click",
+        () => {
+          map?.invalidateSize({
+            pan: false,
+            debounceMoveend: true,
+          });
+
+          resetMap();
+        },
+      );
+
+      if (locations.length > 0) {
+        fitToLocations();
+      }
+
+      requestAnimationFrame(() => {
+        map?.invalidateSize();
+      });
+
+      setStatus(
+        `${locations.length.toLocaleString(
+          "id-ID",
+        )} lokasi tersedia`,
+      );
+    } catch (error) {
+      console.error(
+        "[BINSIGHT] Failed to initialize map:",
+        error,
+      );
+
+      setStatus(
+        "Peta tidak dapat dimuat.",
+      );
+
+      canvas.innerHTML = `
+        <div
+          class="waste-map__error"
+        >
+          <div
+            class="waste-map__error-icon"
+          >
+            !
+          </div>
+
+          <strong>
+            Peta tidak tersedia
+          </strong>
+
+          <p>
+            Leaflet gagal dimuat.
+            Periksa instalasi dependency
+            lalu coba muat ulang halaman.
+          </p>
+
+          <button
+            type="button"
+            class="waste-map__error-button"
+            data-map-retry
+          >
+            Coba lagi
+          </button>
+        </div>
+      `;
+
+      canvas
+        .querySelector<HTMLButtonElement>(
+          "[data-map-retry]",
+        )
+        ?.addEventListener(
+          "click",
+          () => {
+            window.location.reload();
+          },
+        );
+    }
+  };
+
+  for (const root of roots) {
+    initializeWasteMap(root);
+  }
 </script>
 
 <style>
+  .waste-map,
+  .waste-map *,
+  .waste-map *::before,
+  .waste-map *::after {
+    box-sizing: border-box;
+  }
+
   .waste-map {
+    --acid: #dfff00;
+    --acid-soft: #efff70;
+
+    --ink: #090a08;
+    --ink-2: #11130f;
+    --ink-3: #1b1f18;
+
+    --paper: #f2f0e6;
+    --paper-2: #e4e1d4;
+    --paper-3: #cfcabd;
+
+    --white: #fffef8;
+    --muted: #6c7068;
+
+    --warning: #ff6a00;
+
     position: relative;
-    min-width: 0;
     width: 100%;
+    min-width: 0;
     overflow: hidden;
-    border: 1px solid
-      var(--color-border, #e2e8f0);
-    border-radius: 1rem;
-    background: #e2e8f0;
+
+    color: var(--ink);
+    background: var(--paper);
+
+    border: 3px solid var(--ink);
+
     box-shadow:
-      0 1px 2px
-        rgb(15 23 42 / 0.03),
-      0 12px 32px
-        rgb(15 23 42 / 0.08);
+      8px 8px 0 var(--warning);
+
+    font-family:
+      Inter,
+      ui-sans-serif,
+      system-ui,
+      -apple-system,
+      BlinkMacSystemFont,
+      "Segoe UI",
+      sans-serif;
+
+    -webkit-font-smoothing: antialiased;
+    text-rendering: geometricPrecision;
   }
 
   .waste-map__stage {
     position: relative;
-    height: var(--waste-map-height);
+
+    width: 100%;
     min-height: 320px;
-    background: #e2e8f0;
+    height: var(--waste-map-height);
+
+    overflow: hidden;
+
+    background: #253021;
   }
 
   .waste-map__canvas {
     position: absolute;
     inset: 0;
+
     z-index: 0;
+
     width: 100%;
     height: 100%;
+
+    background: #253021;
   }
 
   .waste-map__canvas :global(.leaflet-container) {
     width: 100%;
     height: 100%;
+
+    background: #253021;
+
     font-family:
-      inherit;
-    background: #e2e8f0;
+      Inter,
+      ui-sans-serif,
+      system-ui,
+      sans-serif;
+  }
+
+  .waste-map__canvas :global(.leaflet-control-attribution) {
+    padding: 3px 5px;
+
+    color: #4a5148;
+
+    background:
+      rgb(255 254 248 / 0.88);
+
+    border-top: 2px solid var(--ink);
+
+    font-family:
+      "DM Mono",
+      monospace;
+
+    font-size: 7px;
+    font-weight: 700;
+  }
+
+  .waste-map__canvas :global(.leaflet-control-attribution a) {
+    color: var(--ink);
+
+    text-decoration: underline;
+    text-underline-offset: 2px;
   }
 
   .waste-map__controls {
     position: absolute;
-    top: 1rem;
-    right: 1rem;
+
+    top: 16px;
+    right: 16px;
+
     z-index: 1000;
+
     display: flex;
     flex-direction: column;
-    gap: 0.4rem;
+    gap: 7px;
   }
 
   .waste-map__control {
-    width: 2.35rem;
-    height: 2.35rem;
     display: inline-flex;
+
     align-items: center;
     justify-content: center;
-    border: 1px solid
-      rgb(226 232 240 / 0.95);
-    border-radius: 0.65rem;
-    background: rgb(
-      255 255 255 / 0.96
-    );
-    color: #334155;
+
+    width: 42px;
+    height: 42px;
+
+    padding: 0;
+
+    color: var(--ink) !important;
+    background: var(--acid) !important;
+
+    border: 3px solid var(--ink);
+
     box-shadow:
-      0 2px 6px
-        rgb(15 23 42 / 0.08);
+      5px 5px 0 var(--warning);
+
     cursor: pointer;
-    backdrop-filter: blur(
-      8px
-    );
+
     transition:
-      background-color 160ms ease,
-      border-color 160ms ease,
-      color 160ms ease,
-      transform 160ms ease;
+      transform 120ms steps(2, end),
+      box-shadow 120ms steps(2, end),
+      background 120ms linear;
+  }
+
+  .waste-map__control svg {
+    color: var(--ink) !important;
+    stroke: var(--ink) !important;
   }
 
   .waste-map__control:hover {
-    border-color: #bbf7d0;
-    background: #f0fdf4;
-    color: #166534;
-    transform: translateY(
-      -1px
-    );
-  }
+    color: var(--ink) !important;
+    background: var(--acid-soft) !important;
 
-  .waste-map__control:focus-visible {
-    outline: 3px solid
-      rgb(37 99 235 / 0.2);
-    outline-offset: 2px;
-  }
+    transform:
+      translate(-2px, -2px);
 
-  .waste-map__search {
-    position: absolute;
-    top: 1rem;
-    left: 1rem;
-    z-index: 1000;
-    width: min(
-      25rem,
-      calc(100% - 5rem)
-    );
-  }
-
-  .waste-map__search-box {
-    display: flex;
-    align-items: center;
-    gap: 0.55rem;
-    min-height: 2.7rem;
-    padding: 0 0.75rem;
-    border: 1px solid
-      rgb(226 232 240 / 0.95);
-    border-radius: 0.75rem;
-    background: rgb(
-      255 255 255 / 0.96
-    );
-    color: #64748b;
     box-shadow:
-      0 2px 10px
-        rgb(15 23 42 / 0.08);
-    backdrop-filter: blur(
-      10px
-    );
-  }
-
-  .waste-map__search-input {
-    min-width: 0;
-    flex: 1;
-    height: 2.5rem;
-    border: 0;
-    outline: 0;
-    background: transparent;
-    color: #0f172a;
-    font: inherit;
-    font-size: 0.8rem;
-  }
-
-  .waste-map__search-input::placeholder {
-    color: #94a3b8;
-  }
-
-  .waste-map__search-clear {
-    width: 1.5rem;
-    height: 1.5rem;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    flex: 0 0 1.5rem;
-    border: 0;
-    border-radius: 999px;
-    background: #f1f5f9;
-    color: #64748b;
-    cursor: pointer;
-    font-size: 1rem;
-    line-height: 1;
-  }
-
-  .waste-map__search-clear:hover {
-    background: #e2e8f0;
-    color: #334155;
-  }
-
-  .waste-map__search-results {
-    max-height: 20rem;
-    margin-top: 0.4rem;
-    overflow: auto;
-    border: 1px solid
-      rgb(226 232 240 / 0.95);
-    border-radius: 0.75rem;
-    background: rgb(
-      255 255 255 / 0.98
-    );
-    box-shadow:
-      0 10px 28px
-        rgb(15 23 42 / 0.12);
-    backdrop-filter: blur(
-      10px
-    );
-  }
-
-  .waste-map__search-result {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    gap: 0.65rem;
-    padding: 0.7rem 0.75rem;
-    border: 0;
-    border-bottom: 1px solid
-      #f1f5f9;
-    background: transparent;
-    color: #0f172a;
-    text-align: left;
-    cursor: pointer;
-  }
-
-  .waste-map__search-result:last-child {
-    border-bottom: 0;
-  }
-
-  .waste-map__search-result:hover {
-    background: #f8fafc;
-  }
-
-  .waste-map__search-result:focus-visible {
-    outline: 2px solid
-      #2563eb;
-    outline-offset: -2px;
-  }
-
-  .waste-map__search-result-icon {
-    width: 1.8rem;
-    height: 1.8rem;
-    flex: 0 0 1.8rem;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 0.55rem;
-    background: #f0fdf4;
-  }
-
-  .waste-map__search-result-dot {
-    width: 0.55rem;
-    height: 0.55rem;
-    border-radius: 999px;
-    background: #166534;
-  }
-
-  .waste-map__search-result-copy {
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 0.15rem;
-  }
-
-  .waste-map__search-result-copy strong {
-    overflow: hidden;
-    font-size: 0.75rem;
-    font-weight: 700;
-    line-height: 1.3;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .waste-map__search-result-copy span {
-    overflow: hidden;
-    color: #64748b;
-    font-size: 0.65rem;
-    line-height: 1.3;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .waste-map__search-empty {
-    padding: 0.9rem;
-    color: #64748b;
-    font-size: 0.72rem;
+      7px 7px 0 var(--ink);
   }
 
   .waste-map__status {
     position: absolute;
-    left: 1rem;
-    bottom: 1rem;
+
+    left: 16px;
+    bottom: 16px;
+
     z-index: 900;
+
     display: inline-flex;
     align-items: center;
-    min-height: 1.75rem;
-    max-width: calc(100% - 2rem);
-    padding: 0.3rem 0.6rem;
-    border: 1px solid
-      rgb(226 232 240 / 0.95);
-    border-radius: 999px;
-    background: rgb(
-      255 255 255 / 0.94
-    );
-    color: #475569;
+
+    min-height: 30px;
+    max-width: calc(100% - 32px);
+
+    padding: 0 9px;
+
+    color: var(--acid) !important;
+    background: var(--ink) !important;
+
+    border: 2px solid var(--white);
+
     box-shadow:
-      0 2px 8px
-        rgb(15 23 42 / 0.07);
-    font-size: 0.65rem;
-    font-weight: 600;
-    backdrop-filter: blur(
-      8px
-    );
+      4px 4px 0 var(--warning);
+
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+
+    font-size: 7px;
+    font-weight: 900;
+    line-height: 1;
+
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+
+    white-space: nowrap;
   }
 
   .waste-map__legend {
     position: absolute;
-    right: 1rem;
-    bottom: 1rem;
+
+    right: 16px;
+    bottom: 16px;
+
     z-index: 900;
-    min-width: 10rem;
-    padding: 0.65rem 0.75rem;
-    border: 1px solid
-      rgb(226 232 240 / 0.95);
-    border-radius: 0.7rem;
-    background: rgb(
-      255 255 255 / 0.94
-    );
-    color: #475569;
+
+    min-width: 165px;
+
+    padding: 11px;
+
+    color: var(--white) !important;
+    background: var(--ink) !important;
+
+    border: 3px solid var(--white);
+
     box-shadow:
-      0 2px 8px
-        rgb(15 23 42 / 0.07);
-    font-size: 0.65rem;
-    backdrop-filter: blur(
-      8px
-    );
+      5px 5px 0 var(--warning);
+
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+
+    font-size: 7px;
+    font-weight: 900;
+    line-height: 1.4;
+
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
   }
 
   .waste-map__legend-title {
-    margin-bottom: 0.4rem;
-    color: #334155;
-    font-size: 0.65rem;
-    font-weight: 750;
+    margin-bottom: 7px;
+    padding-bottom: 7px;
+
+    color: var(--acid) !important;
+
+    border-bottom:
+      2px solid
+      var(--white);
   }
 
   .waste-map__legend-item {
     display: flex;
     align-items: center;
-    gap: 0.45rem;
+    gap: 7px;
+
+    color: var(--white) !important;
   }
 
   .waste-map__legend-marker {
-    width: 0.6rem;
-    height: 0.6rem;
-    border: 2px solid
-      #ffffff;
-    border-radius: 999px;
-    background: #166534;
+    width: 12px;
+    height: 12px;
+
+    flex: 0 0 12px;
+
+    background: var(--acid);
+
+    border: 3px solid var(--white);
+  }
+
+  :global(.binsight-map-marker-wrapper) {
+    background: transparent !important;
+    border: 0 !important;
+  }
+
+  :global(.binsight-map-marker) {
+    position: relative;
+
+    display: block;
+
+    width: 28px;
+    height: 36px;
+
+    background: var(--acid);
+
+    border:
+      3px solid
+      var(--ink);
+
     box-shadow:
-      0 0 0 2px
-        rgb(22 101 52 / 0.25);
+      4px 4px 0
+      var(--warning);
+
+    transform:
+      rotate(-45deg);
+  }
+
+  :global(.binsight-map-marker__dot) {
+    position: absolute;
+
+    top: 6px;
+    left: 6px;
+
+    width: 10px;
+    height: 10px;
+
+    background: var(--warning);
+
+    border:
+      2px solid
+      var(--ink);
+  }
+
+  :global(.binsight-leaflet-popup .leaflet-popup-content-wrapper) {
+    overflow: hidden;
+
+    background: var(--white);
+
+    border:
+      3px solid
+      var(--ink);
+
+    border-radius: 0;
+
+    box-shadow:
+      7px 7px 0
+      var(--warning);
+  }
+
+  :global(.binsight-leaflet-popup .leaflet-popup-tip) {
+    background: var(--white);
+  }
+
+  :global(.binsight-leaflet-popup .leaflet-popup-content) {
+    margin: 0;
+  }
+
+  :global(.binsight-map-popup) {
+    min-width: 220px;
+
+    padding: 15px;
+
+    color: var(--ink);
+
+    font-family:
+      Inter,
+      ui-sans-serif,
+      system-ui,
+      sans-serif;
+  }
+
+  :global(.binsight-map-popup__eyebrow) {
+    display: inline-block;
+
+    margin-bottom: 9px;
+    padding: 5px 7px;
+
+    color: var(--ink);
+
+    background: var(--acid);
+
+    border:
+      2px solid
+      var(--ink);
+
+    font-family:
+      "DM Mono",
+      monospace;
+
+    font-size: 7px;
+    font-weight: 900;
+    line-height: 1;
+
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+  }
+
+  :global(.binsight-map-popup__title) {
+    margin: 0;
+
+    color: var(--ink) !important;
+
+    font-family:
+      Sora,
+      Inter,
+      sans-serif;
+
+    font-size: 16px;
+    font-weight: 900;
+    line-height: 0.95;
+
+    letter-spacing: -0.04em;
+    text-transform: uppercase;
+  }
+
+  :global(.binsight-map-popup__area) {
+    margin: 9px 0 0;
+
+    color: #4c554b !important;
+
+    font-family:
+      "DM Mono",
+      monospace;
+
+    font-size: 8px;
+    font-weight: 900;
+    line-height: 1.4;
+
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  :global(.binsight-map-popup__address) {
+    margin: 10px 0 13px;
+
+    color: var(--muted) !important;
+
+    font-size: 9px;
+    line-height: 1.55;
+  }
+
+  :global(.binsight-map-popup__link) {
+    display: inline-flex;
+
+    align-items: center;
+    gap: 7px;
+
+    min-height: 34px;
+
+    padding: 0 9px;
+
+    color: var(--ink) !important;
+    background: var(--acid) !important;
+
+    border:
+      2px solid
+      var(--ink);
+
+    font-family:
+      "DM Mono",
+      monospace;
+
+    font-size: 7px;
+    font-weight: 900;
+    line-height: 1;
+
+    letter-spacing: 0.06em;
+    text-decoration: none;
+    text-transform: uppercase;
+  }
+
+  :global(.binsight-map-popup__link span) {
+    color: var(--ink) !important;
+  }
+
+  :global(.binsight-user-location) {
+    color: #ffffff;
+
+    fill: #2563eb;
+    fill-opacity: 1;
+
+    stroke: #ffffff;
+    stroke-width: 3px;
   }
 
   .waste-map__error,
   .waste-map__no-script {
     position: absolute;
     inset: 0;
+
     z-index: 20;
+
     display: flex;
-    flex-direction: column;
+
     align-items: center;
     justify-content: center;
-    padding: 2rem;
-    background: #f8fafc;
-    color: #475569;
+
+    flex-direction: column;
+
+    padding: 30px;
+
+    color: var(--white) !important;
+    background: var(--ink) !important;
+
     text-align: center;
   }
 
   .waste-map__error-icon {
-    width: 2.75rem;
-    height: 2.75rem;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 0.75rem;
-    border-radius: 0.75rem;
-    background: #fef2f2;
-    color: #b91c1c;
-    font-size: 1.25rem;
-    font-weight: 800;
+    display: grid;
+
+    width: 58px;
+    height: 58px;
+
+    place-items: center;
+
+    margin-bottom: 14px;
+
+    color: var(--ink) !important;
+    background: var(--acid) !important;
+
+    border: 3px solid var(--white);
+
+    box-shadow:
+      7px 7px 0 var(--warning);
+
+    font-family:
+      Sora,
+      Inter,
+      sans-serif;
+
+    font-size: 24px;
+    font-weight: 900;
   }
 
   .waste-map__error strong,
   .waste-map__no-script strong {
-    color: #0f172a;
-    font-size: 0.9rem;
+    color: var(--white) !important;
+
+    font-family:
+      Sora,
+      Inter,
+      sans-serif;
+
+    font-size: 21px;
+    font-weight: 900;
+    line-height: 1;
+
+    text-transform: uppercase;
   }
 
   .waste-map__error p,
   .waste-map__no-script p {
-    max-width: 28rem;
-    margin: 0.35rem 0 1rem;
-    color: #64748b;
-    font-size: 0.75rem;
-    line-height: 1.6;
+    max-width: 430px;
+
+    margin: 11px 0 20px;
+
+    color: #c9cdc4 !important;
+
+    font-size: 10px;
+    line-height: 1.7;
   }
 
   .waste-map__error-button {
-    min-height: 2.2rem;
-    padding: 0 0.8rem;
-    border: 1px solid #166534;
-    border-radius: 0.6rem;
-    background: #166534;
-    color: #ffffff;
-    font: inherit;
-    font-size: 0.7rem;
-    font-weight: 700;
+    min-height: 46px;
+
+    padding: 0 14px;
+
+    color: var(--ink) !important;
+    background: var(--acid) !important;
+
+    border: 3px solid var(--white);
+
+    box-shadow:
+      6px 6px 0 var(--warning);
+
+    font-family:
+      "DM Mono",
+      monospace;
+
+    font-size: 8px;
+    font-weight: 900;
+
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+
     cursor: pointer;
   }
 
   .waste-map__error-button:hover {
-    background: #14532d;
+    background: var(--acid-soft) !important;
+  }
+
+  .waste-map button:focus-visible,
+  .waste-map input:focus-visible,
+  .waste-map a:focus-visible {
+    outline:
+      4px solid
+      var(--acid);
+
+    outline-offset: 4px;
   }
 
   .waste-map__sr-only {
     position: absolute;
+
     width: 1px;
     height: 1px;
+
     padding: 0;
     margin: -1px;
+
     overflow: hidden;
-    clip: rect(
-      0,
-      0,
-      0,
-      0
-    );
+
+    clip:
+      rect(
+        0,
+        0,
+        0,
+        0
+      );
+
     white-space: nowrap;
+
     border: 0;
-  }
-
-  :global(.binsight-map-marker-wrapper) {
-    background: transparent;
-    border: 0;
-  }
-
-  :global(.binsight-map-marker) {
-    position: relative;
-    display: block;
-    width: 28px;
-    height: 36px;
-    transform: rotate(
-      -45deg
-    );
-    border-radius:
-      50% 50% 50% 0;
-    background: #166534;
-    box-shadow:
-      0 3px 10px
-        rgb(15 23 42 / 0.2);
-  }
-
-  :global(.binsight-map-marker__dot) {
-    position: absolute;
-    top: 7px;
-    left: 7px;
-    width: 14px;
-    height: 14px;
-    border-radius: 50%;
-    background: #ffffff;
-    box-shadow:
-      inset 0 0 0 4px #84cc16;
-  }
-
-  :global(.binsight-map-popup) {
-    min-width: 220px;
-    font-family:
-      inherit;
-  }
-
-  :global(.binsight-map-popup__eyebrow) {
-    margin-bottom: 0.3rem;
-    color: #166534;
-    font-size: 0.6rem;
-    font-weight: 750;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-  }
-
-  :global(.binsight-map-popup__title) {
-    margin: 0;
-    color: #0f172a;
-    font-size: 0.85rem;
-    font-weight: 750;
-    line-height: 1.35;
-  }
-
-  :global(.binsight-map-popup__area) {
-    margin: 0.3rem 0 0;
-    color: #334155;
-    font-size: 0.7rem;
-    font-weight: 650;
-  }
-
-  :global(.binsight-map-popup__address) {
-    margin: 0.25rem 0 0.75rem;
-    color: #64748b;
-    font-size: 0.68rem;
-    line-height: 1.45;
-  }
-
-  :global(.binsight-map-popup__link) {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.25rem;
-    color: #166534;
-    font-size: 0.68rem;
-    font-weight: 750;
-    text-decoration: none;
-  }
-
-  :global(.binsight-map-popup__link:hover) {
-    text-decoration: underline;
-    text-underline-offset: 3px;
-  }
-
-  :global(.binsight-user-location) {
-    fill: #2563eb;
-    stroke: #ffffff;
-    stroke-width: 3px;
-  }
-
-  :global(.binsight-leaflet-popup .leaflet-popup-content-wrapper) {
-    border-radius: 0.8rem;
-  }
-
-  :global(.binsight-leaflet-popup .leaflet-popup-content) {
-    margin: 0.9rem;
   }
 
   @media (max-width: 640px) {
@@ -1591,10 +1476,16 @@ const mapId = `waste-map-${Math.random()
       min-height: 360px;
     }
 
-    .waste-map__search {
-      width: calc(
-        100% - 5rem
-      );
+    .waste-map__controls {
+      top: 11px;
+      right: 11px;
+
+      gap: 6px;
+    }
+
+    .waste-map__control {
+      width: 38px;
+      height: 38px;
     }
 
     .waste-map__legend {
@@ -1602,33 +1493,40 @@ const mapId = `waste-map-${Math.random()
     }
 
     .waste-map__status {
-      left: 0.75rem;
-      bottom: 0.75rem;
-    }
+      left: 11px;
+      bottom: 11px;
 
-    .waste-map__controls {
-      top: 0.75rem;
-      right: 0.75rem;
+      min-height: 28px;
+
+      max-width: calc(
+        100% - 22px
+      );
+
+      padding-inline: 8px;
+
+      font-size: 6px;
+    }
+  }
+
+  @media (max-width: 430px) {
+    .waste-map__stage {
+      min-height: 320px;
     }
 
     .waste-map__control {
-      width: 2.2rem;
-      height: 2.2rem;
+      width: 36px;
+      height: 36px;
     }
 
-    .waste-map__search {
-      top: 0.75rem;
-      left: 0.75rem;
+    .waste-map__error,
+    .waste-map__no-script {
+      padding: 20px;
     }
   }
 
   @media (prefers-reduced-motion: reduce) {
     .waste-map__control {
       transition: none;
-    }
-
-    :global(.leaflet-zoom-animated) {
-      transition: none !important;
     }
   }
 </style>
