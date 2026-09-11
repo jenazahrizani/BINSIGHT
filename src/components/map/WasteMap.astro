@@ -24,7 +24,14 @@ interface Props {
   showLocateControl?: boolean;
   showFullscreenControl?: boolean;
   showLegend?: boolean;
+
+  /**
+   * Deprecated.
+   * Search is now handled by MapFilter.
+   * Kept for backwards compatibility with existing callers.
+   */
   showSearch?: boolean;
+
   initialZoom?: number;
   minZoom?: number;
   maxZoom?: number;
@@ -41,7 +48,7 @@ const {
   showLocateControl = true,
   showFullscreenControl = true,
   showLegend = true,
-  showSearch = true,
+  showSearch: _showSearch = false,
   initialZoom = 11,
   minZoom = 9,
   maxZoom = 18,
@@ -234,6 +241,17 @@ const mapId = `waste-map-${Math.random()
       )
     }
 
+    <!--
+      Keep OpenStreetMap attribution without showing
+      the default Leaflet attribution watermark.
+    -->
+    <div
+      class="waste-map__attribution"
+      aria-label="Atribusi peta"
+    >
+      © OpenStreetMap
+    </div>
+
     <noscript>
       <div class="waste-map__no-script">
         <strong>
@@ -273,33 +291,22 @@ const mapId = `waste-map-${Math.random()
     __binsightWasteMapInitialized?: boolean;
   };
 
-  const roots = Array.from(
-    document.querySelectorAll<WasteMapRoot>(
-      "[data-waste-map]",
-    ),
-  );
+  type MapFilterDetail = {
+    search?: string;
+    query?: string;
 
-  const formatLocationType = (type: unknown) => {
-    const labels: Record<string, string> = {
-      "collection-point":
-        "Titik pengumpulan",
-      "recycling-center":
-        "Pusat daur ulang",
-      "waste-bank":
-        "Bank sampah",
-      "processing-facility":
-        "Fasilitas pengolahan",
-      "drop-point":
-        "Drop point",
-      other:
-        "Lokasi pengelolaan",
-    };
+    area?: string;
+    selectedArea?: string;
+    areaId?: string;
 
-    return (
-      labels[String(type ?? "")] ??
-      "Lokasi pengelolaan"
-    );
+    type?: string;
+    selectedType?: string;
   };
+
+  const normalize = (value: unknown) =>
+    String(value ?? "")
+      .trim()
+      .toLowerCase();
 
   const escapeHtml = (value: unknown) => {
     return String(value ?? "")
@@ -308,6 +315,33 @@ const mapId = `waste-map-${Math.random()
       .replaceAll(">", "&gt;")
       .replaceAll('"', "&quot;")
       .replaceAll("'", "&#039;");
+  };
+
+  const formatLocationType = (type: unknown) => {
+    const labels: Record<string, string> = {
+      "collection-point":
+        "Titik pengumpulan",
+
+      "recycling-center":
+        "Pusat daur ulang",
+
+      "waste-bank":
+        "Bank sampah",
+
+      "processing-facility":
+        "Fasilitas pengolahan",
+
+      "drop-point":
+        "Drop point",
+
+      other:
+        "Lokasi pengelolaan",
+    };
+
+    return (
+      labels[normalize(type)] ??
+      "Lokasi pengelolaan"
+    );
   };
 
   const createMarkerIcon = () => {
@@ -335,11 +369,14 @@ const mapId = `waste-map-${Math.random()
   const initializeWasteMap = (
     root: WasteMapRoot,
   ) => {
-    if (root.__binsightWasteMapInitialized) {
+    if (
+      root.__binsightWasteMapInitialized
+    ) {
       return;
     }
 
-    root.__binsightWasteMapInitialized = true;
+    root.__binsightWasteMapInitialized =
+      true;
 
     const canvas =
       root.querySelector<HTMLElement>(
@@ -355,7 +392,9 @@ const mapId = `waste-map-${Math.random()
         "[data-map-status]",
       );
 
-    const setStatus = (message: string) => {
+    const setStatus = (
+      message: string,
+    ) => {
       if (status) {
         status.textContent = message;
       }
@@ -365,9 +404,11 @@ const mapId = `waste-map-${Math.random()
       (): MapLocationPayload[] => {
         try {
           const raw =
-            root.dataset.locations ?? "[]";
+            root.dataset.locations ??
+            "[]";
 
-          const parsed = JSON.parse(raw);
+          const parsed =
+            JSON.parse(raw);
 
           return Array.isArray(parsed)
             ? parsed
@@ -377,69 +418,290 @@ const mapId = `waste-map-${Math.random()
         }
       };
 
-    const locations = parseLocations();
+    const locations =
+      parseLocations();
 
-    const centerLat = Number(
-      root.dataset.centerLat ?? "-8.55",
-    );
+    const centerLat =
+      Number(
+        root.dataset.centerLat ??
+          "-8.55",
+      );
 
-    const centerLng = Number(
-      root.dataset.centerLng ?? "115.18",
-    );
+    const centerLng =
+      Number(
+        root.dataset.centerLng ??
+          "115.18",
+      );
 
-    const initialZoom = Number(
-      root.dataset.initialZoom ?? "11",
-    );
+    const initialZoom =
+      Number(
+        root.dataset.initialZoom ??
+          "11",
+      );
 
-    const minZoom = Number(
-      root.dataset.minZoom ?? "9",
-    );
+    const minZoom =
+      Number(
+        root.dataset.minZoom ??
+          "9",
+      );
 
-    const maxZoom = Number(
-      root.dataset.maxZoom ?? "18",
-    );
+    const maxZoom =
+      Number(
+        root.dataset.maxZoom ??
+          "18",
+      );
 
-    let map: L.Map | null = null;
+    let map:
+      | L.Map
+      | null = null;
 
     let markerLayer:
       | L.LayerGroup
       | null = null;
 
-    const markerById = new Map<
-      string,
-      L.Marker
-    >();
+    let userLocationMarker:
+      | L.CircleMarker
+      | null = null;
 
-    const markerIcon = createMarkerIcon();
+    const markerById =
+      new Map<
+        string,
+        L.Marker
+      >();
 
-    const fitToLocations = () => {
-      if (!map || locations.length === 0) {
+    const markerIcon =
+      createMarkerIcon();
+
+    /*
+     * Keep the current filter state inside the map.
+     * MapFilter dispatches the event.
+     */
+    let currentFilter = {
+      search: "",
+      area: "",
+      type: "",
+    };
+
+    const getAreaCandidates = (
+      location: MapLocationPayload,
+    ) => {
+      return [
+        location.areaId,
+        location.areaName,
+        location.slug,
+      ]
+        .filter(Boolean)
+        .map(normalize);
+    };
+
+    const matchesFilters = (
+      location: MapLocationPayload,
+    ) => {
+      const query =
+        normalize(
+          currentFilter.search,
+        );
+
+      const area =
+        normalize(
+          currentFilter.area,
+        );
+
+      const type =
+        normalize(
+          currentFilter.type,
+        );
+
+      if (query) {
+        const haystack = [
+          location.name,
+          location.address,
+          location.areaName,
+          location.type,
+          formatLocationType(
+            location.type,
+          ),
+        ]
+          .filter(Boolean)
+          .join(" ")
+          .toLowerCase();
+
+        if (!haystack.includes(query)) {
+          return false;
+        }
+      }
+
+      if (area) {
+        const areaCandidates =
+          getAreaCandidates(location);
+
+        if (
+          !areaCandidates.includes(
+            area,
+          )
+        ) {
+          return false;
+        }
+      }
+
+      if (type) {
+        if (
+          normalize(
+            location.type,
+          ) !== type
+        ) {
+          return false;
+        }
+      }
+
+      return true;
+    };
+
+    const getVisibleLocations =
+      () =>
+        locations.filter(
+          matchesFilters,
+        );
+
+    const updateStatus = (
+      visibleLocations:
+        MapLocationPayload[],
+    ) => {
+      if (!map) {
         return;
       }
 
-      const bounds = L.latLngBounds(
-        locations.map(
-          (location) =>
-            [
-              location.coordinates.lat,
-              location.coordinates.lng,
-            ] as L.LatLngTuple,
-        ),
-      );
+      const zoom =
+        map.getZoom();
 
-      if (bounds.isValid()) {
-        map.fitBounds(bounds, {
-          padding: [32, 32],
-          maxZoom: Math.min(
-            initialZoom + 2,
-            maxZoom,
-          ),
-          animate: false,
-        });
+      const total =
+        locations.length;
+
+      const visible =
+        visibleLocations.length;
+
+      if (
+        currentFilter.search ||
+        currentFilter.area ||
+        currentFilter.type
+      ) {
+        setStatus(
+          `${visible.toLocaleString(
+            "id-ID",
+          )} dari ${total.toLocaleString(
+            "id-ID",
+          )} lokasi · zoom ${zoom}`,
+        );
+      } else {
+        setStatus(
+          `${total.toLocaleString(
+            "id-ID",
+          )} lokasi tersedia · zoom ${zoom}`,
+        );
       }
     };
 
+    const renderMarkers = (
+      options?: {
+        fit?: boolean;
+      },
+    ) => {
+      if (!map || !markerLayer) {
+        return;
+      }
+
+      markerLayer.clearLayers();
+
+      const visibleLocations =
+        getVisibleLocations();
+
+      for (
+        const location of visibleLocations
+      ) {
+        const marker =
+          markerById.get(
+            location.id,
+          );
+
+        if (!marker) {
+          continue;
+        }
+
+        markerLayer.addLayer(
+          marker,
+        );
+      }
+
+      updateStatus(
+        visibleLocations,
+      );
+
+      if (
+        options?.fit &&
+        visibleLocations.length > 0
+      ) {
+        const bounds =
+          L.latLngBounds(
+            visibleLocations.map(
+              (location) =>
+                [
+                  location.coordinates.lat,
+                  location.coordinates.lng,
+                ] as L.LatLngTuple,
+            ),
+          );
+
+        if (bounds.isValid()) {
+          map.fitBounds(
+            bounds,
+            {
+              padding: [
+                42,
+                42,
+              ],
+
+              maxZoom:
+                Math.min(
+                  initialZoom + 2,
+                  maxZoom,
+                ),
+
+              animate: false,
+            },
+          );
+        }
+      }
+
+      if (
+        options?.fit &&
+        visibleLocations.length === 0
+      ) {
+        map.setView(
+          [
+            centerLat,
+            centerLng,
+          ],
+          initialZoom,
+          {
+            animate: false,
+          },
+        );
+      }
+    };
+
+    const fitToLocations = () => {
+      renderMarkers({
+        fit: true,
+      });
+    };
+
     const resetMap = () => {
+      currentFilter = {
+        search: "",
+        area: "",
+        type: "",
+      };
+
       if (!map) {
         return;
       }
@@ -455,18 +717,23 @@ const mapId = `waste-map-${Math.random()
         },
       );
 
-      if (locations.length > 0) {
-        fitToLocations();
-      }
+      renderMarkers({
+        fit: true,
+      });
     };
 
     const openLocation = (
       location: MapLocationPayload,
     ) => {
       const marker =
-        markerById.get(location.id);
+        markerById.get(
+          location.id,
+        );
 
-      if (!marker || !map) {
+      if (
+        !marker ||
+        !map
+      ) {
         return;
       }
 
@@ -490,47 +757,84 @@ const mapId = `waste-map-${Math.random()
           : "Tidak ada lokasi untuk ditampilkan.",
       );
 
-      map = L.map(canvas, {
-        center: [
-          centerLat,
-          centerLng,
-        ],
+      map = L.map(
+        canvas,
+        {
+          center: [
+            centerLat,
+            centerLng,
+          ],
 
-        zoom: initialZoom,
+          zoom: initialZoom,
 
-        minZoom,
-        maxZoom,
+          minZoom,
+          maxZoom,
 
-        zoomControl: false,
+          zoomControl: false,
 
-        attributionControl: true,
-      });
+          /*
+           * Disable Leaflet's default
+           * "Leaflet | © OpenStreetMap"
+           * attribution watermark.
+           */
+          attributionControl: false,
+
+          scrollWheelZoom: true,
+          doubleClickZoom: true,
+          dragging: true,
+          touchZoom: true,
+          boxZoom: true,
+          keyboard: true,
+        },
+      );
 
       L.tileLayer(
         "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
         {
           maxZoom,
 
+          /*
+           * Attribution is rendered manually
+           * in .waste-map__attribution.
+           */
           attribution:
-            '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a> contributors',
+            "© OpenStreetMap contributors",
         },
       ).addTo(map);
 
       markerLayer =
-        L.layerGroup().addTo(map);
-
-      for (const location of locations) {
-        const marker = L.marker(
-          [
-            location.coordinates.lat,
-            location.coordinates.lng,
-          ],
-          {
-            icon: markerIcon,
-            title: location.name,
-            alt: location.name,
-          },
+        L.layerGroup().addTo(
+          map,
         );
+
+      /*
+       * Create every marker once.
+       * Filtering only changes what is inside
+       * markerLayer, which is much faster.
+       */
+      for (
+        const location of locations
+      ) {
+        const marker =
+          L.marker(
+            [
+              location.coordinates.lat,
+              location.coordinates.lng,
+            ],
+            {
+              icon:
+                markerIcon,
+
+              title:
+                location.name,
+
+              alt:
+                location.name,
+
+              keyboard:
+                true,
+            },
+          );
 
         const popupContent = `
           <div
@@ -574,13 +878,16 @@ const mapId = `waste-map-${Math.random()
               class="binsight-map-popup__link"
               href="/map/${encodeURIComponent(
                 String(
-                  location.areaId ?? "",
+                  location.areaId ??
+                    "",
                 ),
               )}"
             >
               Lihat area
 
-              <span aria-hidden="true">
+              <span
+                aria-hidden="true"
+              >
                 →
               </span>
             </a>
@@ -591,12 +898,11 @@ const mapId = `waste-map-${Math.random()
           popupContent,
           {
             maxWidth: 300,
+
             className:
               "binsight-leaflet-popup",
           },
         );
-
-        markerLayer.addLayer(marker);
 
         markerById.set(
           location.id,
@@ -604,23 +910,28 @@ const mapId = `waste-map-${Math.random()
         );
       }
 
+      /*
+       * Initial marker render.
+       */
+      renderMarkers({
+        fit: locations.length > 0,
+      });
+
+      /*
+       * MAP EVENTS
+       */
       map.on(
         "zoomend moveend",
         () => {
-          if (!map) {
-            return;
-          }
-
-          const zoom = map.getZoom();
-
-          setStatus(
-            `${locations.length.toLocaleString(
-              "id-ID",
-            )} lokasi · zoom ${zoom}`,
+          updateStatus(
+            getVisibleLocations(),
           );
         },
       );
 
+      /*
+       * CONTROL ELEMENTS
+       */
       const zoomIn =
         root.querySelector<HTMLButtonElement>(
           "[data-map-zoom-in]",
@@ -651,24 +962,44 @@ const mapId = `waste-map-${Math.random()
           "[data-map-refresh]",
         );
 
+      /*
+       * ZOOM IN
+       */
       zoomIn?.addEventListener(
         "click",
-        () => {
+        (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+
           map?.zoomIn();
         },
       );
 
+      /*
+       * ZOOM OUT
+       */
       zoomOut?.addEventListener(
         "click",
-        () => {
+        (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+
           map?.zoomOut();
         },
       );
 
+      /*
+       * LOCATE USER
+       */
       locateButton?.addEventListener(
         "click",
-        () => {
-          if (!navigator.geolocation) {
+        (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+
+          if (
+            !navigator.geolocation
+          ) {
             setStatus(
               "Browser tidak mendukung lokasi.",
             );
@@ -694,6 +1025,36 @@ const mapId = `waste-map-${Math.random()
                 position.coords
                   .longitude;
 
+              if (
+                userLocationMarker
+              ) {
+                userLocationMarker.remove();
+              }
+
+              userLocationMarker =
+                L.circleMarker(
+                  [
+                    lat,
+                    lng,
+                  ],
+                  {
+                    radius: 7,
+
+                    className:
+                      "binsight-user-location",
+
+                    color:
+                      "#ffffff",
+
+                    weight: 3,
+
+                    fillColor:
+                      "#2563eb",
+
+                    fillOpacity: 1,
+                  },
+                ).addTo(map);
+
               map.setView(
                 [
                   lat,
@@ -707,28 +1068,6 @@ const mapId = `waste-map-${Math.random()
                   animate: true,
                 },
               );
-
-              L.circleMarker(
-                [
-                  lat,
-                  lng,
-                ],
-                {
-                  radius: 7,
-
-                  className:
-                    "binsight-user-location",
-
-                  color: "#ffffff",
-
-                  weight: 3,
-
-                  fillColor:
-                    "#2563eb",
-
-                  fillOpacity: 1,
-                },
-              ).addTo(map);
 
               setStatus(
                 "Lokasi Anda ditampilkan di peta.",
@@ -745,26 +1084,40 @@ const mapId = `waste-map-${Math.random()
               enableHighAccuracy:
                 true,
 
-              timeout: 10000,
+              timeout:
+                10000,
 
-              maximumAge: 60000,
+              maximumAge:
+                60000,
             },
           );
         },
       );
 
+      /*
+       * FULLSCREEN
+       */
       fullscreenButton?.addEventListener(
         "click",
-        async () => {
+        async (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+
           try {
             if (
-              !document.fullscreenElement
+              document.fullscreenElement ===
+              root
             ) {
-              await root.requestFullscreen?.();
-            } else {
               await document.exitFullscreen();
+            } else {
+              await root.requestFullscreen();
             }
-          } catch {
+          } catch (error) {
+            console.error(
+              "[BINSIGHT] Fullscreen error:",
+              error,
+            );
+
             setStatus(
               "Mode layar penuh tidak tersedia.",
             );
@@ -772,38 +1125,167 @@ const mapId = `waste-map-${Math.random()
         },
       );
 
+      /*
+       * Browser fullscreen changes
+       * the actual map dimensions.
+       * Leaflet must be told to recalculate.
+       */
+      const handleFullscreenChange =
+        () => {
+          window.setTimeout(
+            () => {
+              map?.invalidateSize({
+                pan: false,
+              });
+
+              updateStatus(
+                getVisibleLocations(),
+              );
+            },
+            150,
+          );
+        };
+
+      document.addEventListener(
+        "fullscreenchange",
+        handleFullscreenChange,
+      );
+
+      /*
+       * FIT / SHOW FILTERED LOCATIONS
+       */
       fitButton?.addEventListener(
         "click",
-        () => {
+        (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+
           fitToLocations();
         },
       );
 
+      /*
+       * REFRESH MAP
+       */
       refreshButton?.addEventListener(
         "click",
-        () => {
-          map?.invalidateSize({
-            pan: false,
-            debounceMoveend: true,
-          });
+        (event) => {
+          event.preventDefault();
+          event.stopPropagation();
 
           resetMap();
+
+          window.setTimeout(
+            () => {
+              map?.invalidateSize({
+                pan: false,
+              });
+            },
+            50,
+          );
         },
       );
 
-      if (locations.length > 0) {
-        fitToLocations();
-      }
+      /*
+       * MAP FILTER INTEGRATION
+       *
+       * Compatible with these possible
+       * MapFilter detail names:
+       * search / query
+       * area / selectedArea / areaId
+       * type / selectedType
+       */
+      const handleMapFilter =
+        (
+          event: Event,
+        ) => {
+          const customEvent =
+            event as CustomEvent<MapFilterDetail>;
 
+          const detail =
+            customEvent.detail ??
+            {};
+
+          currentFilter = {
+            search:
+              String(
+                detail.search ??
+                  detail.query ??
+                  "",
+              ),
+
+            area:
+              String(
+                detail.area ??
+                  detail.selectedArea ??
+                  detail.areaId ??
+                  "",
+              ),
+
+            type:
+              String(
+                detail.type ??
+                  detail.selectedType ??
+                  "",
+              ),
+          };
+
+          renderMarkers({
+            fit: true,
+          });
+        };
+
+      window.addEventListener(
+        "binsight-map-filter",
+        handleMapFilter,
+      );
+
+      document.addEventListener(
+        "binsight-map-filter",
+        handleMapFilter,
+      );
+
+      /*
+       * Also support an explicit
+       * reset event if MapFilter emits one.
+       */
+      const handleMapFilterReset =
+        () => {
+          resetMap();
+        };
+
+      window.addEventListener(
+        "binsight-map-filter-reset",
+        handleMapFilterReset,
+      );
+
+      document.addEventListener(
+        "binsight-map-filter-reset",
+        handleMapFilterReset,
+      );
+
+      /*
+       * Ensure the map is correctly measured
+       * after layout/paint.
+       */
       requestAnimationFrame(() => {
-        map?.invalidateSize();
+        map?.invalidateSize({
+          pan: false,
+        });
       });
+
+      window.setTimeout(() => {
+        map?.invalidateSize({
+          pan: false,
+        });
+      }, 200);
 
       setStatus(
         `${locations.length.toLocaleString(
           "id-ID",
         )} lokasi tersedia`,
       );
+
     } catch (error) {
       console.error(
         "[BINSIGHT] Failed to initialize map:",
@@ -857,12 +1339,57 @@ const mapId = `waste-map-${Math.random()
     }
   };
 
-  for (const root of roots) {
-    initializeWasteMap(root);
+  /*
+   * Astro lifecycle-safe initialization.
+   *
+   * This matters when using:
+   * - normal first page load
+   * - Astro client navigation
+   * - View Transitions
+   */
+  const initializeAllMaps = () => {
+    const roots =
+      Array.from(
+        document.querySelectorAll<WasteMapRoot>(
+          "[data-waste-map]",
+        ),
+      );
+
+    for (
+      const root of roots
+    ) {
+      initializeWasteMap(
+        root,
+      );
+    }
+  };
+
+  if (
+    document.readyState ===
+    "loading"
+  ) {
+    document.addEventListener(
+      "DOMContentLoaded",
+      initializeAllMaps,
+      {
+        once: true,
+      },
+    );
+  } else {
+    initializeAllMaps();
   }
+
+  document.addEventListener(
+    "astro:page-load",
+    initializeAllMaps,
+  );
 </script>
 
 <style>
+  /* ==========================================================================
+     BINSIGHT MAP
+     ========================================================================== */
+
   .waste-map,
   .waste-map *,
   .waste-map *::before,
@@ -888,8 +1415,12 @@ const mapId = `waste-map-${Math.random()
     --warning: #ff6a00;
 
     position: relative;
+
+    display: block;
+
     width: 100%;
     min-width: 0;
+
     overflow: hidden;
 
     color: var(--ink);
@@ -913,11 +1444,63 @@ const mapId = `waste-map-${Math.random()
     text-rendering: geometricPrecision;
   }
 
+  /* ==========================================================================
+     REAL FULLSCREEN
+     ========================================================================== */
+
+  .waste-map:fullscreen {
+    position: fixed;
+
+    inset: 0;
+
+    width: 100vw;
+    height: 100vh;
+
+    min-width: 100vw;
+    min-height: 100vh;
+
+    max-width: 100vw;
+    max-height: 100vh;
+
+    margin: 0;
+
+    padding: 0;
+
+    overflow: hidden;
+
+    border: 0;
+
+    box-shadow: none;
+
+    z-index: 2147483647;
+  }
+
+  .waste-map:fullscreen .waste-map__stage {
+    width: 100%;
+    height: 100vh;
+    min-height: 100vh;
+  }
+
+  .waste-map:fullscreen .waste-map__canvas {
+    width: 100%;
+    height: 100%;
+  }
+
+  .waste-map::backdrop {
+    background: var(--ink);
+  }
+
+  /* ==========================================================================
+     STAGE
+     ========================================================================== */
+
   .waste-map__stage {
     position: relative;
 
     width: 100%;
+
     min-height: 320px;
+
     height: var(--waste-map-height);
 
     overflow: hidden;
@@ -927,6 +1510,7 @@ const mapId = `waste-map-${Math.random()
 
   .waste-map__canvas {
     position: absolute;
+
     inset: 0;
 
     z-index: 0;
@@ -936,6 +1520,10 @@ const mapId = `waste-map-${Math.random()
 
     background: #253021;
   }
+
+  /* ==========================================================================
+     LEAFLET
+     ========================================================================== */
 
   .waste-map__canvas :global(.leaflet-container) {
     width: 100%;
@@ -948,32 +1536,59 @@ const mapId = `waste-map-${Math.random()
       ui-sans-serif,
       system-ui,
       sans-serif;
+
+    outline: none;
   }
 
+  /*
+   * Remove Leaflet default attribution completely.
+   * We provide our own OSM attribution below.
+   */
   .waste-map__canvas :global(.leaflet-control-attribution) {
+    display: none !important;
+  }
+
+  /* ==========================================================================
+     MANUAL ATTRIBUTION
+     ========================================================================== */
+
+  .waste-map__attribution {
+    position: absolute;
+
+    right: 5px;
+    bottom: 4px;
+
+    z-index: 850;
+
     padding: 3px 5px;
 
     color: #4a5148;
 
     background:
-      rgb(255 254 248 / 0.88);
+      rgb(255 254 248 / 0.86);
 
-    border-top: 2px solid var(--ink);
+    border:
+      1px solid
+      rgb(9 10 8 / 0.2);
 
     font-family:
       "DM Mono",
       monospace;
 
-    font-size: 7px;
+    font-size: 6px;
     font-weight: 700;
+
+    line-height: 1;
   }
 
-  .waste-map__canvas :global(.leaflet-control-attribution a) {
-    color: var(--ink);
-
-    text-decoration: underline;
-    text-underline-offset: 2px;
+  .waste-map:fullscreen .waste-map__attribution {
+    bottom: 7px;
+    right: 7px;
   }
+
+  /* ==========================================================================
+     CONTROLS
+     ========================================================================== */
 
   .waste-map__controls {
     position: absolute;
@@ -984,11 +1599,15 @@ const mapId = `waste-map-${Math.random()
     z-index: 1000;
 
     display: flex;
+
     flex-direction: column;
+
     gap: 7px;
   }
 
   .waste-map__control {
+    appearance: none;
+
     display: inline-flex;
 
     align-items: center;
@@ -1000,14 +1619,22 @@ const mapId = `waste-map-${Math.random()
     padding: 0;
 
     color: var(--ink) !important;
+
     background: var(--acid) !important;
 
-    border: 3px solid var(--ink);
+    border:
+      3px solid
+      var(--ink);
+
+    border-radius: 0;
 
     box-shadow:
-      5px 5px 0 var(--warning);
+      5px 5px 0
+      var(--warning);
 
     cursor: pointer;
+
+    pointer-events: auto;
 
     transition:
       transform 120ms steps(2, end),
@@ -1016,20 +1643,41 @@ const mapId = `waste-map-${Math.random()
   }
 
   .waste-map__control svg {
+    width: 17px;
+    height: 17px;
+
     color: var(--ink) !important;
+
     stroke: var(--ink) !important;
+
+    pointer-events: none;
   }
 
   .waste-map__control:hover {
     color: var(--ink) !important;
+
     background: var(--acid-soft) !important;
 
     transform:
       translate(-2px, -2px);
 
     box-shadow:
-      7px 7px 0 var(--ink);
+      7px 7px 0
+      var(--ink);
   }
+
+  .waste-map__control:active {
+    transform:
+      translate(2px, 2px);
+
+    box-shadow:
+      2px 2px 0
+      var(--ink);
+  }
+
+  /* ==========================================================================
+     STATUS
+     ========================================================================== */
 
   .waste-map__status {
     position: absolute;
@@ -1040,20 +1688,27 @@ const mapId = `waste-map-${Math.random()
     z-index: 900;
 
     display: inline-flex;
+
     align-items: center;
 
     min-height: 30px;
-    max-width: calc(100% - 32px);
+
+    max-width:
+      calc(100% - 32px);
 
     padding: 0 9px;
 
     color: var(--acid) !important;
+
     background: var(--ink) !important;
 
-    border: 2px solid var(--white);
+    border:
+      2px solid
+      var(--white);
 
     box-shadow:
-      4px 4px 0 var(--warning);
+      4px 4px 0
+      var(--warning);
 
     font-family:
       "DM Mono",
@@ -1063,13 +1718,21 @@ const mapId = `waste-map-${Math.random()
 
     font-size: 7px;
     font-weight: 900;
+
     line-height: 1;
 
     letter-spacing: 0.06em;
+
     text-transform: uppercase;
 
     white-space: nowrap;
+
+    pointer-events: none;
   }
+
+  /* ==========================================================================
+     LEGEND
+     ========================================================================== */
 
   .waste-map__legend {
     position: absolute;
@@ -1084,12 +1747,16 @@ const mapId = `waste-map-${Math.random()
     padding: 11px;
 
     color: var(--white) !important;
+
     background: var(--ink) !important;
 
-    border: 3px solid var(--white);
+    border:
+      3px solid
+      var(--white);
 
     box-shadow:
-      5px 5px 0 var(--warning);
+      5px 5px 0
+      var(--warning);
 
     font-family:
       "DM Mono",
@@ -1099,14 +1766,17 @@ const mapId = `waste-map-${Math.random()
 
     font-size: 7px;
     font-weight: 900;
+
     line-height: 1.4;
 
     letter-spacing: 0.05em;
+
     text-transform: uppercase;
   }
 
   .waste-map__legend-title {
     margin-bottom: 7px;
+
     padding-bottom: 7px;
 
     color: var(--acid) !important;
@@ -1118,7 +1788,9 @@ const mapId = `waste-map-${Math.random()
 
   .waste-map__legend-item {
     display: flex;
+
     align-items: center;
+
     gap: 7px;
 
     color: var(--white) !important;
@@ -1132,11 +1804,18 @@ const mapId = `waste-map-${Math.random()
 
     background: var(--acid);
 
-    border: 3px solid var(--white);
+    border:
+      3px solid
+      var(--white);
   }
+
+  /* ==========================================================================
+     MARKER
+     ========================================================================== */
 
   :global(.binsight-map-marker-wrapper) {
     background: transparent !important;
+
     border: 0 !important;
   }
 
@@ -1177,6 +1856,10 @@ const mapId = `waste-map-${Math.random()
       2px solid
       var(--ink);
   }
+
+  /* ==========================================================================
+     POPUP
+     ========================================================================== */
 
   :global(.binsight-leaflet-popup .leaflet-popup-content-wrapper) {
     overflow: hidden;
@@ -1220,6 +1903,7 @@ const mapId = `waste-map-${Math.random()
     display: inline-block;
 
     margin-bottom: 9px;
+
     padding: 5px 7px;
 
     color: var(--ink);
@@ -1236,9 +1920,11 @@ const mapId = `waste-map-${Math.random()
 
     font-size: 7px;
     font-weight: 900;
+
     line-height: 1;
 
     letter-spacing: 0.07em;
+
     text-transform: uppercase;
   }
 
@@ -1254,9 +1940,11 @@ const mapId = `waste-map-${Math.random()
 
     font-size: 16px;
     font-weight: 900;
+
     line-height: 0.95;
 
     letter-spacing: -0.04em;
+
     text-transform: uppercase;
   }
 
@@ -1271,9 +1959,11 @@ const mapId = `waste-map-${Math.random()
 
     font-size: 8px;
     font-weight: 900;
+
     line-height: 1.4;
 
     letter-spacing: 0.04em;
+
     text-transform: uppercase;
   }
 
@@ -1283,6 +1973,7 @@ const mapId = `waste-map-${Math.random()
     color: var(--muted) !important;
 
     font-size: 9px;
+
     line-height: 1.55;
   }
 
@@ -1290,6 +1981,7 @@ const mapId = `waste-map-${Math.random()
     display: inline-flex;
 
     align-items: center;
+
     gap: 7px;
 
     min-height: 34px;
@@ -1297,6 +1989,7 @@ const mapId = `waste-map-${Math.random()
     padding: 0 9px;
 
     color: var(--ink) !important;
+
     background: var(--acid) !important;
 
     border:
@@ -1309,10 +2002,13 @@ const mapId = `waste-map-${Math.random()
 
     font-size: 7px;
     font-weight: 900;
+
     line-height: 1;
 
     letter-spacing: 0.06em;
+
     text-decoration: none;
+
     text-transform: uppercase;
   }
 
@@ -1320,19 +2016,30 @@ const mapId = `waste-map-${Math.random()
     color: var(--ink) !important;
   }
 
+  /* ==========================================================================
+     USER LOCATION
+     ========================================================================== */
+
   :global(.binsight-user-location) {
     color: #ffffff;
 
     fill: #2563eb;
+
     fill-opacity: 1;
 
     stroke: #ffffff;
+
     stroke-width: 3px;
   }
+
+  /* ==========================================================================
+     ERROR
+     ========================================================================== */
 
   .waste-map__error,
   .waste-map__no-script {
     position: absolute;
+
     inset: 0;
 
     z-index: 20;
@@ -1340,6 +2047,7 @@ const mapId = `waste-map-${Math.random()
     display: flex;
 
     align-items: center;
+
     justify-content: center;
 
     flex-direction: column;
@@ -1347,6 +2055,7 @@ const mapId = `waste-map-${Math.random()
     padding: 30px;
 
     color: var(--white) !important;
+
     background: var(--ink) !important;
 
     text-align: center;
@@ -1363,12 +2072,16 @@ const mapId = `waste-map-${Math.random()
     margin-bottom: 14px;
 
     color: var(--ink) !important;
+
     background: var(--acid) !important;
 
-    border: 3px solid var(--white);
+    border:
+      3px solid
+      var(--white);
 
     box-shadow:
-      7px 7px 0 var(--warning);
+      7px 7px 0
+      var(--warning);
 
     font-family:
       Sora,
@@ -1390,6 +2103,7 @@ const mapId = `waste-map-${Math.random()
 
     font-size: 21px;
     font-weight: 900;
+
     line-height: 1;
 
     text-transform: uppercase;
@@ -1404,6 +2118,7 @@ const mapId = `waste-map-${Math.random()
     color: #c9cdc4 !important;
 
     font-size: 10px;
+
     line-height: 1.7;
   }
 
@@ -1413,12 +2128,16 @@ const mapId = `waste-map-${Math.random()
     padding: 0 14px;
 
     color: var(--ink) !important;
+
     background: var(--acid) !important;
 
-    border: 3px solid var(--white);
+    border:
+      3px solid
+      var(--white);
 
     box-shadow:
-      6px 6px 0 var(--warning);
+      6px 6px 0
+      var(--warning);
 
     font-family:
       "DM Mono",
@@ -1428,6 +2147,7 @@ const mapId = `waste-map-${Math.random()
     font-weight: 900;
 
     letter-spacing: 0.06em;
+
     text-transform: uppercase;
 
     cursor: pointer;
@@ -1436,6 +2156,10 @@ const mapId = `waste-map-${Math.random()
   .waste-map__error-button:hover {
     background: var(--acid-soft) !important;
   }
+
+  /* ==========================================================================
+     ACCESSIBILITY
+     ========================================================================== */
 
   .waste-map button:focus-visible,
   .waste-map input:focus-visible,
@@ -1447,29 +2171,9 @@ const mapId = `waste-map-${Math.random()
     outline-offset: 4px;
   }
 
-  .waste-map__sr-only {
-    position: absolute;
-
-    width: 1px;
-    height: 1px;
-
-    padding: 0;
-    margin: -1px;
-
-    overflow: hidden;
-
-    clip:
-      rect(
-        0,
-        0,
-        0,
-        0
-      );
-
-    white-space: nowrap;
-
-    border: 0;
-  }
+  /* ==========================================================================
+     MOBILE
+     ========================================================================== */
 
   @media (max-width: 640px) {
     .waste-map__stage {
@@ -1498,13 +2202,19 @@ const mapId = `waste-map-${Math.random()
 
       min-height: 28px;
 
-      max-width: calc(
-        100% - 22px
-      );
+      max-width:
+        calc(100% - 22px);
 
       padding-inline: 8px;
 
       font-size: 6px;
+    }
+
+    .waste-map__attribution {
+      right: 4px;
+      bottom: 4px;
+
+      font-size: 5px;
     }
   }
 
@@ -1523,6 +2233,10 @@ const mapId = `waste-map-${Math.random()
       padding: 20px;
     }
   }
+
+  /* ==========================================================================
+     REDUCED MOTION
+     ========================================================================== */
 
   @media (prefers-reduced-motion: reduce) {
     .waste-map__control {
