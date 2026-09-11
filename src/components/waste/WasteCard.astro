@@ -54,19 +54,16 @@ const {
 const visibleCharacteristics =
   waste.characteristics?.slice(0, compact ? 2 : 3) ?? [];
 
-const remainingCharacteristics =
-  Math.max(
-    0,
-    (waste.characteristics?.length ?? 0) -
-      visibleCharacteristics.length,
-  );
+const remainingCharacteristics = Math.max(
+  0,
+  (waste.characteristics?.length ?? 0) -
+    visibleCharacteristics.length,
+);
 
 const description =
-  waste.shortDescription ??
-  waste.description;
+  waste.shortDescription ?? waste.description;
 
-const isFeatured =
-  featured || waste.isFeatured === true;
+const isFeatured = featured || waste.isFeatured === true;
 ---
 
 <article
@@ -90,100 +87,62 @@ const isFeatured =
           loading="lazy"
         />
       ) : (
-        <div
-          class="waste-card__visual-placeholder"
-          aria-hidden="true"
-        >
-          <Recycle
-            size={36}
-            stroke-width="1.7"
-          />
+        <div class="waste-card__visual-placeholder" aria-hidden="true">
+          <Recycle size={36} stroke-width="1.7" />
         </div>
       )}
 
       <div class="waste-card__visual-overlay"></div>
 
-      <span class="waste-card__category">
-        {waste.category}
-      </span>
+      <span class="waste-card__category">{waste.category}</span>
 
       {isFeatured && (
-        <span class="waste-card__featured">
-          Unggulan
-        </span>
+        <span class="waste-card__featured">Unggulan</span>
       )}
     </div>
 
     <div class="waste-card__body">
       <div class="waste-card__heading">
         <div class="waste-card__title-group">
-          <span class="waste-card__eyebrow">
-            Jenis sampah
-          </span>
-
+          <span class="waste-card__eyebrow">Jenis sampah</span>
           <h3>{waste.name}</h3>
         </div>
 
-        <span
-          class="waste-card__arrow"
-          aria-hidden="true"
-        >
-          <ArrowRight
-            size={17}
-            stroke-width="1.8"
-          />
+        <span class="waste-card__arrow" aria-hidden="true">
+          <ArrowRight size={17} stroke-width="1.8" />
         </span>
       </div>
 
-      <p class="waste-card__description">
-        {description}
-      </p>
+      <p class="waste-card__description">{description}</p>
 
-      {showCharacteristics &&
-        visibleCharacteristics.length > 0 && (
-          <div class="waste-card__characteristics">
-            <div class="waste-card__section-label">
-              <span>
-                Karakteristik
-              </span>
-            </div>
-
-            <div class="waste-card__tags">
-              {visibleCharacteristics.map(
-                (characteristic) => (
-                  <span class="waste-card__tag">
-                    <Check
-                      size={12}
-                      stroke-width="2"
-                      aria-hidden="true"
-                    />
-                    {characteristic}
-                  </span>
-                ),
-              )}
-
-              {remainingCharacteristics > 0 && (
-                <span class="waste-card__tag waste-card__tag--muted">
-                  +{remainingCharacteristics}
-                </span>
-              )}
-            </div>
+      {showCharacteristics && visibleCharacteristics.length > 0 && (
+        <div class="waste-card__characteristics">
+          <div class="waste-card__section-label">
+            <span>Karakteristik</span>
           </div>
-        )}
+
+          <div class="waste-card__tags">
+            {visibleCharacteristics.map((characteristic) => (
+              <span class="waste-card__tag">
+                <Check size={12} stroke-width="2" aria-hidden="true" />
+                {characteristic}
+              </span>
+            ))}
+
+            {remainingCharacteristics > 0 && (
+              <span class="waste-card__tag waste-card__tag--muted">
+                +{remainingCharacteristics}
+              </span>
+            )}
+          </div>
+        </div>
+      )}
 
       <div class="waste-card__footer">
-        <span>
-          Lihat detail
-        </span>
+        <span>Lihat detail</span>
 
-        <span
-          class="waste-card__footer-icon"
-          aria-hidden="true"
-        >
-          <ArrowRight
-            size={16}
-            stroke-width="1.8"
-          />
+        <span class="waste-card__footer-icon" aria-hidden="true">
+          <ArrowRight size={16} stroke-width="1.8" />
         </span>
       </div>
     </div>
@@ -192,30 +151,61 @@ const isFeatured =
 
 <style>
   .waste-card {
+    --acid: #dfff00;
+    --acid-soft: #efff70;
+    --ink: #090a08;
+    --ink-2: #11130f;
+    --paper: #f2f0e6;
+    --paper-2: #e4e1d4;
+    --white: #fffef8;
+    --muted: #6c7068;
+    --warning: #ff6a00;
+
     position: relative;
     height: 100%;
-    overflow: hidden;
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-xl);
-    background: var(--color-surface);
+    overflow: visible;
+    color: var(--ink);
+    background: var(--white);
+    border: 3px solid var(--ink);
+    border-radius: 0;
+    box-shadow: 8px 8px 0 var(--ink);
     transition:
-      border-color 160ms ease,
-      box-shadow 160ms ease,
-      transform 160ms ease;
+      transform 120ms steps(2, end),
+      box-shadow 120ms steps(2, end),
+      background 120ms linear;
   }
 
   .waste-card:hover {
-    border-color: var(--color-primary-light);
-    box-shadow: var(--shadow-md);
-    transform: translateY(-2px);
+    background: var(--acid);
+    box-shadow: 12px 12px 0 var(--warning);
+    transform: translate(-4px, -4px);
+  }
+
+  .waste-card:focus-within {
+    outline: 4px solid var(--acid);
+    outline-offset: 5px;
   }
 
   .waste-card--featured {
-    border-color: var(--color-primary-light);
+    box-shadow: 10px 10px 0 var(--warning);
+  }
+
+  .waste-card--featured::before {
+    position: absolute;
+    top: -10px;
+    right: 16px;
+    z-index: 4;
+    width: 54px;
+    height: 10px;
+    content: "";
+    background: var(--acid);
+    border: 3px solid var(--ink);
+    border-bottom: 0;
   }
 
   .waste-card__link {
     display: flex;
+    min-height: 100%;
     height: 100%;
     flex-direction: column;
     color: inherit;
@@ -230,76 +220,118 @@ const isFeatured =
     justify-content: center;
     overflow: hidden;
     background:
-      radial-gradient(
-        circle at 82% 18%,
-        rgba(132, 204, 22, 0.28),
-        transparent 34%
-      ),
-      linear-gradient(
-        135deg,
-        var(--color-primary-dark),
-        var(--color-primary)
-      );
+      linear-gradient(rgba(255, 255, 255, 0.06) 2px, transparent 2px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.06) 2px, transparent 2px),
+      var(--ink-2);
+    background-size: 28px 28px;
+    border-bottom: 3px solid var(--ink);
+  }
+
+  .waste-card__visual::before {
+    position: absolute;
+    inset: 11px;
+    z-index: 2;
+    content: "";
+    pointer-events: none;
+    border: 2px solid rgba(223, 255, 0, 0.48);
+    transform: rotate(-2deg);
   }
 
   .waste-card__image {
     position: absolute;
     inset: 0;
+    z-index: 0;
     display: block;
     width: 100%;
     height: 100%;
     object-fit: cover;
+    filter: saturate(0.75) contrast(1.08);
+    transition:
+      transform 120ms steps(2, end),
+      filter 120ms linear;
+  }
+
+  .waste-card:hover .waste-card__image {
+    filter: saturate(1.05) contrast(1.12);
+    transform: scale(1.035);
   }
 
   .waste-card__visual-overlay {
     position: absolute;
     inset: 0;
-    background:
-      linear-gradient(
-        to bottom,
-        rgba(0, 0, 0, 0.04) 0%,
-        rgba(0, 0, 0, 0.14) 60%,
-        rgba(0, 0, 0, 0.28) 100%
-      );
+    z-index: 1;
+    background: linear-gradient(
+      to bottom,
+      rgba(9, 10, 8, 0.08),
+      rgba(9, 10, 8, 0.34)
+    );
+    transition: background 120ms linear;
+  }
+
+  .waste-card:hover .waste-card__visual-overlay {
+    background: linear-gradient(
+      to bottom,
+      rgba(223, 255, 0, 0.04),
+      rgba(9, 10, 8, 0.18)
+    );
   }
 
   .waste-card__visual-placeholder {
     position: relative;
-    z-index: 1;
+    z-index: 3;
     display: grid;
-    width: 5rem;
-    height: 5rem;
+    width: 5.25rem;
+    height: 5.25rem;
     place-items: center;
-    border: 1px solid rgba(255, 255, 255, 0.28);
-    border-radius: 1.1rem;
-    background: rgba(255, 255, 255, 0.12);
-    color: #fff;
-    backdrop-filter: blur(8px);
+    color: var(--acid);
+    background: var(--ink);
+    border: 3px solid var(--white);
+    border-radius: 0;
+    box-shadow: 7px 7px 0 var(--warning);
+    transform: rotate(-3deg);
+    transition:
+      transform 120ms steps(2, end),
+      color 120ms linear,
+      background 120ms linear;
+  }
+
+  .waste-card:hover .waste-card__visual-placeholder {
+    color: var(--ink);
+    background: var(--white);
+    transform: rotate(3deg) scale(1.05);
   }
 
   .waste-card__category,
   .waste-card__featured {
     position: absolute;
-    z-index: 2;
-    top: 1rem;
-    padding: 0.38rem 0.65rem;
-    border-radius: 999px;
-    font-size: 0.7rem;
-    font-weight: 750;
+    z-index: 4;
+    top: 12px;
+    padding: 6px 8px;
+    color: var(--ink);
+    border: 2px solid var(--ink);
+    border-radius: 0;
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+    font-size: 8px;
+    font-weight: 900;
+    letter-spacing: 0.08em;
     line-height: 1;
+    text-transform: uppercase;
   }
 
   .waste-card__category {
-    left: 1rem;
-    border: 1px solid rgba(255, 255, 255, 0.25);
-    background: rgba(255, 255, 255, 0.92);
-    color: var(--color-primary-dark);
+    left: 12px;
+    background: var(--white);
+    box-shadow: 4px 4px 0 var(--warning);
   }
 
   .waste-card__featured {
-    right: 1rem;
-    background: var(--color-primary);
-    color: #fff;
+    right: 12px;
+    background: var(--acid);
+    box-shadow: 4px 4px 0 var(--ink);
   }
 
   .waste-card__body {
@@ -307,7 +339,24 @@ const isFeatured =
     flex: 1;
     min-height: 0;
     flex-direction: column;
-    padding: 1.25rem;
+    padding: 1.15rem;
+    background:
+      repeating-linear-gradient(
+        135deg,
+        rgba(9, 10, 8, 0.025) 0 1px,
+        transparent 1px 9px
+      ),
+      var(--white);
+  }
+
+  .waste-card:hover .waste-card__body {
+    background:
+      repeating-linear-gradient(
+        135deg,
+        rgba(9, 10, 8, 0.035) 0 1px,
+        transparent 1px 9px
+      ),
+      var(--acid);
   }
 
   .waste-card__heading {
@@ -315,6 +364,8 @@ const isFeatured =
     align-items: flex-start;
     justify-content: space-between;
     gap: 0.8rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 3px solid var(--ink);
   }
 
   .waste-card__title-group {
@@ -322,95 +373,131 @@ const isFeatured =
   }
 
   .waste-card__eyebrow {
-    display: block;
-    margin-bottom: 0.25rem;
-    color: var(--color-primary);
-    font-size: 0.68rem;
-    font-weight: 800;
-    letter-spacing: 0.07em;
+    display: inline-block;
+    margin-bottom: 0.4rem;
+    padding: 4px 6px;
+    color: var(--acid);
+    background: var(--ink);
+    border: 2px solid var(--ink);
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+    font-size: 7px;
+    font-weight: 900;
+    letter-spacing: 0.09em;
+    line-height: 1;
     text-transform: uppercase;
   }
 
   .waste-card__title-group h3 {
     margin: 0;
-    color: var(--color-text);
-    font-size: 1.05rem;
-    font-weight: 750;
-    line-height: 1.35;
+    color: var(--ink);
+    font-family:
+      Sora,
+      Inter,
+      ui-sans-serif,
+      system-ui,
+      sans-serif;
+    font-size: 1.45rem;
+    font-weight: 900;
+    line-height: 0.95;
+    letter-spacing: -0.055em;
+    text-transform: uppercase;
   }
 
   .waste-card__arrow {
     display: grid;
-    width: 2.2rem;
-    height: 2.2rem;
-    flex: 0 0 2.2rem;
+    width: 2.35rem;
+    height: 2.35rem;
+    flex: 0 0 2.35rem;
     place-items: center;
-    border: 1px solid var(--color-border);
-    border-radius: 0.65rem;
-    background: var(--color-background);
-    color: var(--color-text-secondary);
+    color: var(--acid);
+    background: var(--ink);
+    border: 3px solid var(--ink);
+    border-radius: 0;
+    transform: rotate(-3deg);
     transition:
-      background 160ms ease,
-      color 160ms ease,
-      border-color 160ms ease,
-      transform 160ms ease;
+      transform 120ms steps(2, end),
+      color 120ms linear,
+      background 120ms linear;
   }
 
   .waste-card:hover .waste-card__arrow {
-    border-color: var(--color-primary-light);
-    background: var(--color-primary-light);
-    color: var(--color-primary-dark);
-    transform: translateX(2px);
+    color: var(--ink);
+    background: var(--white);
+    transform: rotate(4deg) translateX(2px);
   }
 
   .waste-card__description {
     display: -webkit-box;
     overflow: hidden;
-    margin: 0.75rem 0 0;
-    color: var(--color-text-secondary);
-    font-size: 0.87rem;
-    line-height: 1.62;
+    margin: 0.8rem 0 0;
+    color: var(--muted);
+    font-size: 0.78rem;
+    line-height: 1.65;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 3;
   }
 
+  .waste-card:hover .waste-card__description {
+    color: var(--ink);
+  }
+
   .waste-card__characteristics {
     margin-top: 1rem;
+    padding: 0.8rem;
+    background: var(--paper-2);
+    border: 2px solid var(--ink);
+  }
+
+  .waste-card:hover .waste-card__characteristics {
+    background: var(--white);
   }
 
   .waste-card__section-label {
     margin-bottom: 0.5rem;
-    color: var(--color-text-secondary);
-    font-size: 0.73rem;
-    font-weight: 700;
+    color: var(--ink);
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+    font-size: 8px;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
   }
 
   .waste-card__tags {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.4rem;
+    gap: 5px;
   }
 
   .waste-card__tag {
     display: inline-flex;
     align-items: center;
     gap: 0.3rem;
-    padding: 0.35rem 0.5rem;
-    border-radius: 0.45rem;
-    background: var(--color-background);
-    color: var(--color-text);
-    font-size: 0.7rem;
-    font-weight: 600;
-    line-height: 1.3;
+    padding: 5px 7px;
+    color: var(--ink);
+    background: var(--white);
+    border: 2px solid var(--ink);
+    border-radius: 0;
+    font-size: 8px;
+    font-weight: 800;
+    line-height: 1.25;
   }
 
   .waste-card__tag svg {
     flex: 0 0 auto;
-    color: var(--color-primary);
+    color: var(--warning);
   }
 
   .waste-card__tag--muted {
-    color: var(--color-text-secondary);
+    color: var(--acid);
+    background: var(--ink);
   }
 
   .waste-card__footer {
@@ -419,25 +506,35 @@ const isFeatured =
     justify-content: space-between;
     gap: 0.75rem;
     margin-top: auto;
-    padding-top: 1.1rem;
-    color: var(--color-primary);
-    font-size: 0.8rem;
-    font-weight: 750;
+    padding-top: 1rem;
+    color: var(--ink);
+    border-top: 3px solid var(--ink);
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+    font-size: 8px;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
   }
 
   .waste-card__footer-icon {
     display: grid;
-    width: 1.9rem;
-    height: 1.9rem;
+    width: 2rem;
+    height: 2rem;
     place-items: center;
-    border-radius: 0.5rem;
-    background: var(--color-primary-light);
-    color: var(--color-primary-dark);
-    transition: transform 160ms ease;
+    color: var(--ink);
+    background: var(--acid);
+    border: 2px solid var(--ink);
+    border-radius: 0;
+    box-shadow: 4px 4px 0 var(--warning);
+    transition: transform 120ms steps(2, end);
   }
 
   .waste-card:hover .waste-card__footer-icon {
-    transform: translateX(3px);
+    transform: translateX(4px) translateY(-2px);
   }
 
   .waste-card--compact .waste-card__visual {
@@ -445,7 +542,11 @@ const isFeatured =
   }
 
   .waste-card--compact .waste-card__body {
-    padding: 1rem;
+    padding: 0.95rem;
+  }
+
+  .waste-card--compact .waste-card__title-group h3 {
+    font-size: 1.15rem;
   }
 
   .waste-card--compact .waste-card__description {
@@ -454,29 +555,53 @@ const isFeatured =
 
   .waste-card--compact .waste-card__characteristics {
     margin-top: 0.75rem;
+    padding: 0.65rem;
   }
 
   .waste-card--compact .waste-card__footer {
-    padding-top: 0.9rem;
+    padding-top: 0.8rem;
   }
 
   @media (max-width: 640px) {
+    .waste-card {
+      box-shadow: 6px 6px 0 var(--ink);
+    }
+
+    .waste-card:hover {
+      box-shadow: 9px 9px 0 var(--warning);
+      transform: translate(-3px, -3px);
+    }
+
     .waste-card__visual {
       min-height: 9.5rem;
     }
 
     .waste-card__body {
-      padding: 1.1rem;
+      padding: 1rem;
     }
 
     .waste-card__heading {
       gap: 0.6rem;
     }
 
+    .waste-card__title-group h3 {
+      font-size: 1.25rem;
+    }
+
     .waste-card__arrow {
-      width: 2rem;
-      height: 2rem;
-      flex-basis: 2rem;
+      width: 2.1rem;
+      height: 2.1rem;
+      flex-basis: 2.1rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .waste-card,
+    .waste-card__image,
+    .waste-card__visual-placeholder,
+    .waste-card__arrow,
+    .waste-card__footer-icon {
+      transition: none;
     }
   }
 </style>

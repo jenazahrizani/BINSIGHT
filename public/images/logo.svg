@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 256" width="920" height="256" fill="none">
+  <title>BINSIGHT</title>
+  <desc>Geometric BINSIGHT logo with a solid blue B mark, cyan insight arrow and dark navy wordmark.</desc>
+
+  <!-- Icon -->
+  <g transform="translate(0 0)">
+    <path fill="#2563EB" d="M42 42H115C153 42 174 59 174 88C174 104 167 116 154 124C171 132 181 145 181 165C181 199 156 214 116 214H42V42ZM78 74V111H111C128 111 136 104 136 93C136 81 128 74 111 74H78ZM78 143V182H115C134 182 143 174 143 162C143 149 134 143 115 143H78Z"/>
+    <path fill="#0EA5E9" d="M153 68H214V98H177L153 122L133 102L153 82V68Z"/>
+    <path fill="#0EA5E9" d="M133 143L157 119L177 139L214 102V139L177 176L157 156L133 180V143Z"/>
+  </g>
+
+  <!-- Wordmark -->
+  <g font-family="Inter, Arial, Helvetica, sans-serif" font-size="92" font-weight="800" letter-spacing="-4">
+    <text x="255" y="163" fill="#2563EB">B</text>
+    <text x="321" y="163" fill="#0F172A">INSIGHT</text>
+  </g>
+</svg>

@@ -1,1628 +1,1432 @@
----
-import {
-  ArrowRight,
-  Building2,
-  CircleCheck,
-  MapPin,
-  Search,
-  ShieldCheck,
-  SlidersHorizontal,
-  Users,
-} from "@lucide/astro";
-
-import PageHeader from "@components/layout/PageHeader.astro";
-import PublicLayout from "@layouts/PublicLayout.astro";
-
-import {
-  getPublicOrganizations,
-  type Organization,
-} from "@lib/data/organizations";
-
-/* -------------------------------------------------------------------------- */
-/* Data                                                                        */
-/* -------------------------------------------------------------------------- */
-
-const organizations: Organization[] =
-  getPublicOrganizations();
-
-/* -------------------------------------------------------------------------- */
-/* Public / verified organizations                                             */
-/* -------------------------------------------------------------------------- */
-
-const publicOrganizations = organizations.filter(
-  (organization: Organization) =>
-    organization.isPublic === true,
-);
-
-const verifiedOrganizations =
-  publicOrganizations.filter(
-    (organization: Organization) =>
-      organization.status === "verified",
-  );
-
-/* -------------------------------------------------------------------------- */
-/* Area summary                                                                */
-/* -------------------------------------------------------------------------- */
-
-const areaCounts: Record<string, number> = {};
-
-for (const organization of verifiedOrganizations) {
-  const area =
-    organization.location?.area?.trim();
-
-  if (!area) {
-    continue;
-  }
-
-  areaCounts[area] =
-    (areaCounts[area] ?? 0) + 1;
-}
-
-const areaSummary = Object.entries(areaCounts)
-  .map(
-    ([name, count]: [string, number]) => ({
-      name,
-      count,
-    }),
-  )
-  .sort(
-    (first, second) =>
-      second.count - first.count,
-  );
-
-/* -------------------------------------------------------------------------- */
-/* Search metadata                                                             */
-/* -------------------------------------------------------------------------- */
-
-const breadcrumbs = [
-  {
-    label: "Beranda",
-    href: "/",
-  },
-  {
-    label: "Organisasi",
-  },
-];
-
-const pageTitle =
-  "Organisasi Pengelolaan Sampah";
-
-const pageDescription =
-  "Temukan organisasi yang terlibat dalam ekosistem pengelolaan sampah di Kabupaten Badung.";
-
-/* -------------------------------------------------------------------------- */
-/* Display helpers                                                             */
-/* -------------------------------------------------------------------------- */
-
-const organizationCount =
-  verifiedOrganizations.length;
-
-const areaCount =
-  areaSummary.length;
-
----
-
-<PublicLayout
-  title={pageTitle}
-  description={pageDescription}
->
-  <PageHeader
-    title={pageTitle}
-    description={pageDescription}
-    breadcrumbs={breadcrumbs}
-    icon="organization"
-    eyebrow="BINSIGHT Â· ORGANISASI"
-    tone="green"
-  />
-
-  <main class="organizations-page">
-    <section class="organizations-hero">
-      <div class="organizations-hero__content">
-        <div class="organizations-hero__eyebrow">
-          <Building2
-            size={16}
-            stroke-width={2}
-            aria-hidden="true"
-          />
-
-          <span>
-            Ekosistem pengelolaan sampah
-          </span>
-        </div>
-
-        <h1>
-          Kenali organisasi yang mengelola
-          sampah di Badung
-        </h1>
-
-        <p>
-          Jelajahi organisasi yang telah
-          diverifikasi dan dipublikasikan dalam
-          BINSIGHT. Pahami siapa mereka, di mana
-          mereka berada, dan bagaimana mereka
-          terhubung dengan ekosistem persampahan.
-        </p>
-
-        <div class="organizations-hero__actions">
-          <a
-            href="#organization-directory"
-            class="primary-action"
-          >
-            <Building2
-              size={18}
-              stroke-width={2}
-              aria-hidden="true"
-            />
-
-            <span>
-              Jelajahi organisasi
-            </span>
-
-            <ArrowRight
-              size={17}
-              stroke-width={2}
-              aria-hidden="true"
-            />
-          </a>
-
-          <a
-            href="/map"
-            class="secondary-action"
-          >
-            <MapPin
-              size={17}
-              stroke-width={2}
-              aria-hidden="true"
-            />
-
-            <span>
-              Lihat di peta
-            </span>
-          </a>
-        </div>
-      </div>
-
-      <div
-        class="organizations-hero__stats"
-        aria-label="Ringkasan organisasi"
-      >
-        <div class="hero-stat">
-          <span class="hero-stat__icon">
-            <Building2
-              size={19}
-              stroke-width={2}
-              aria-hidden="true"
-            />
-          </span>
-
-          <strong>{organizationCount}</strong>
-
-          <span>
-            Organisasi terverifikasi
-          </span>
-        </div>
-
-        <div class="hero-stat">
-          <span class="hero-stat__icon">
-            <MapPin
-              size={19}
-              stroke-width={2}
-              aria-hidden="true"
-            />
-          </span>
-
-          <strong>{areaCount}</strong>
-
-          <span>
-            Area terwakili
-          </span>
-        </div>
-
-        <div class="hero-stat">
-          <span class="hero-stat__icon">
-            <ShieldCheck
-              size={19}
-              stroke-width={2}
-              aria-hidden="true"
-            />
-          </span>
-
-          <strong>
-            {publicOrganizations.length}
-          </strong>
-
-          <span>
-            Profil publik
-          </span>
-        </div>
-      </div>
-    </section>
-
-    <section
-      id="organization-directory"
-      class="directory-section"
-      aria-labelledby="directory-title"
-    >
-      <div class="section-heading">
-        <div>
-          <span class="section-eyebrow">
-            Direktori organisasi
-          </span>
-
-          <h2 id="directory-title">
-            Temukan organisasi
-          </h2>
-
-          <p>
-            Gunakan pencarian dan filter area untuk
-            menemukan organisasi yang relevan.
-          </p>
-        </div>
-
-        <span class="section-count">
-          {organizationCount} terverifikasi
-        </span>
-      </div>
-
-      <div class="directory-tools">
-        <label
-          class="search-field"
-          for="organization-search"
-        >
-          <Search
-            size={18}
-            stroke-width={2}
-            aria-hidden="true"
-          />
-
-          <input
-            id="organization-search"
-            type="search"
-            placeholder="Cari nama organisasi atau lokasi..."
-            autocomplete="off"
-          />
-        </label>
-
-        <button
-          type="button"
-          class="filter-button"
-          id="organization-filter-button"
-          aria-expanded="false"
-          aria-controls="organization-filter-panel"
-        >
-          <SlidersHorizontal
-            size={17}
-            stroke-width={2}
-            aria-hidden="true"
-          />
-
-          <span>
-            Filter area
-          </span>
-        </button>
-      </div>
-
-      <div
-        class="filter-panel"
-        id="organization-filter-panel"
-      >
-        <div class="filter-panel__heading">
-          <div>
-            <span class="filter-panel__eyebrow">
-              Area
-            </span>
-
-            <h3>
-              Organisasi berdasarkan wilayah
-            </h3>
-          </div>
-
-          <button
-            type="button"
-            class="clear-filter"
-            id="clear-area-filter"
-          >
-            Semua area
-          </button>
-        </div>
-
-        <div class="area-filter-list">
-          <button
-            type="button"
-            class="area-filter is-active"
-            data-area-filter=""
-          >
-            <span>
-              Semua area
-            </span>
-
-            <strong>
-              {organizationCount}
-            </strong>
-          </button>
-
-          {
-            areaSummary.map(
-              ({
-                name,
-                count,
-              }: {
-                name: string;
-                count: number;
-              }) => (
-                <button
-                  type="button"
-                  class="area-filter"
-                  data-area-filter={name}
-                >
-                  <span>{name}</span>
-                  <strong>{count}</strong>
-                </button>
-              ),
-            )
-          }
-        </div>
-      </div>
-
-      {
-        verifiedOrganizations.length > 0 ? (
-          <div
-            class="organization-grid"
-            id="organization-grid"
-          >
-            {verifiedOrganizations.map(
-              (
-                organization: Organization,
-              ) => {
-                const area =
-                  organization.location?.area?.trim() ||
-                  "Kabupaten Badung";
-
-                const address =
-                  organization.location?.address?.trim() ||
-                  area;
-
-                return (
-                  <article
-                    class="organization-card"
-                    data-organization-card
-                    data-organization-name={
-                      organization.name
-                    }
-                    data-organization-area={area}
-                  >
-                    <a
-                      href={`/organizations/${organization.slug}`}
-                      class="organization-card__main"
-                      aria-label={`Lihat profil ${organization.name}`}
-                    >
-                      <div class="organization-card__visual">
-                        <div class="organization-card__logo">
-                          <Building2
-                            size={25}
-                            stroke-width={1.8}
-                            aria-hidden="true"
-                          />
-                        </div>
-
-                        <span class="verified-badge">
-                          <CircleCheck
-                            size={14}
-                            stroke-width={2}
-                            aria-hidden="true"
-                          />
-
-                          <span>
-                            Terverifikasi
-                          </span>
-                        </span>
-                      </div>
-
-                      <div class="organization-card__body">
-                        <h3>
-                          {organization.name}
-                        </h3>
-
-                        <div class="organization-card__location">
-                          <MapPin
-                            size={15}
-                            stroke-width={2}
-                            aria-hidden="true"
-                          />
-
-                          <span>
-                            {address}
-                          </span>
-                        </div>
-
-                        <p>
-                          Profil organisasi yang
-                          terdaftar dalam ekosistem
-                          BINSIGHT.
-                        </p>
-                      </div>
-
-                      <span class="organization-card__arrow">
-                        <ArrowRight
-                          size={17}
-                          stroke-width={2}
-                          aria-hidden="true"
-                        />
-                      </span>
-                    </a>
-
-                    <div
-                      class="organization-card__footer"
-                    >
-                      <span>
-                        <MapPin
-                          size={14}
-                          stroke-width={2}
-                          aria-hidden="true"
-                        />
-
-                        {area}
-                      </span>
-
-                      <a
-                        href={`/organizations/${organization.slug}`}
-                        class="organization-card__link"
-                      >
-                        Lihat profil
-                        <ArrowRight
-                          size={14}
-                          stroke-width={2}
-                          aria-hidden="true"
-                        />
-                      </a>
-                    </div>
-                  </article>
-                );
-              },
-            )}
-          </div>
-        ) : (
-          <div class="empty-state">
-            <div class="empty-state__icon">
-              <Building2
-                size={28}
-                stroke-width={1.8}
-                aria-hidden="true"
-              />
-            </div>
-
-            <h3>
-              Belum ada organisasi publik
-            </h3>
-
-            <p>
-              Belum ada organisasi yang tersedia
-              untuk ditampilkan pada direktori publik.
-            </p>
-          </div>
-        )
-      }
-
-      <div
-        id="organization-no-results"
-        class="empty-state empty-state--hidden"
-      >
-        <div class="empty-state__icon">
-          <Search
-            size={27}
-            stroke-width={1.8}
-            aria-hidden="true"
-          />
-        </div>
-
-        <h3>
-          Organisasi tidak ditemukan
-        </h3>
-
-        <p>
-          Coba gunakan kata kunci atau area
-          yang berbeda.
-        </p>
-
-        <button
-          type="button"
-          id="reset-organization-search"
-        >
-          Reset pencarian
-        </button>
-      </div>
-    </section>
-
-    <section
-      class="trust-section"
-      aria-labelledby="trust-title"
-    >
-      <div class="trust-section__content">
-        <span class="section-eyebrow">
-          Kepercayaan data
-        </span>
-
-        <h2 id="trust-title">
-          Informasi publik yang lebih dapat dipercaya
-        </h2>
-
-        <p>
-          BINSIGHT menempatkan verifikasi sebagai
-          bagian penting dari direktori organisasi.
-          Informasi yang ditampilkan kepada publik
-          dipisahkan dari data yang masih dalam proses
-          verifikasi.
-        </p>
-      </div>
-
-      <div class="trust-points">
-        <div class="trust-point">
-          <span class="trust-point__icon">
-            <ShieldCheck
-              size={19}
-              stroke-width={2}
-              aria-hidden="true"
-            />
-          </span>
-
-          <div>
-            <strong>
-              Verifikasi organisasi
-            </strong>
-
-            <p>
-              Profil publik berasal dari organisasi
-              yang telah melewati status verifikasi.
-            </p>
-          </div>
-        </div>
-
-        <div class="trust-point">
-          <span class="trust-point__icon">
-            <MapPin
-              size={19}
-              stroke-width={2}
-              aria-hidden="true"
-            />
-          </span>
-
-          <div>
-            <strong>
-              Konteks wilayah
-            </strong>
-
-            <p>
-              Lokasi organisasi membantu pengguna
-              memahami ekosistem pada setiap area.
-            </p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="organization-cta">
-      <div class="organization-cta__icon">
-        <Users
-          size={24}
-          stroke-width={2}
-          aria-hidden="true"
-        />
-      </div>
-
-      <div class="organization-cta__content">
-        <span>
-          Ekosistem bersama
-        </span>
-
-        <h2>
-          Ingin mengetahui organisasi dari area
-          tertentu?
-        </h2>
-
-        <p>
-          Gunakan peta BINSIGHT untuk melihat
-          keterhubungan antara organisasi dan
-          wilayah pengelolaan sampah.
-        </p>
-      </div>
-
-      <a
-        href="/map"
-        class="organization-cta__button"
-      >
-        Buka peta
-        <ArrowRight
-          size={17}
-          stroke-width={2}
-          aria-hidden="true"
-        />
-      </a>
-    </section>
-  </main>
-</PublicLayout>
-
-<script>
-  const searchInput =
-    document.querySelector<HTMLInputElement>(
-      "#organization-search",
-    );
-
-  const cards =
-    Array.from(
-      document.querySelectorAll<HTMLElement>(
-        "[data-organization-card]",
-      ),
-    );
-
-  const noResults =
-    document.querySelector<HTMLElement>(
-      "#organization-no-results",
-    );
-
-  const resetSearch =
-    document.querySelector<HTMLButtonElement>(
-      "#reset-organization-search",
-    );
-
-  const filterButton =
-    document.querySelector<HTMLButtonElement>(
-      "#organization-filter-button",
-    );
-
-  const filterPanel =
-    document.querySelector<HTMLElement>(
-      "#organization-filter-panel",
-    );
-
-  const areaButtons =
-    Array.from(
-      document.querySelectorAll<HTMLButtonElement>(
-        "[data-area-filter]",
-      ),
-    );
-
-  let activeArea = "";
-
-  function filterOrganizations() {
-    const query =
-      searchInput?.value
-        .trim()
-        .toLowerCase() ?? "";
-
-    let visibleCount = 0;
-
-    cards.forEach((card) => {
-      const name =
-        card
-          .dataset[
-            "organizationName"
-          ]
-          ?.toLowerCase() ?? "";
-
-      const area =
-        card
-          .dataset[
-            "organizationArea"
-          ]
-          ?.toLowerCase() ?? "";
-
-      const searchableText =
-        `${name} ${area}`;
-
-      const queryMatches =
-        query.length === 0 ||
-        searchableText.includes(query);
-
-      const areaMatches =
-        activeArea.length === 0 ||
-        area === activeArea.toLowerCase();
-
-      const visible =
-        queryMatches && areaMatches;
-
-      card.hidden = !visible;
-
-      if (visible) {
-        visibleCount += 1;
-      }
-    });
-
-    if (noResults) {
-      noResults.classList.toggle(
-        "empty-state--hidden",
-        visibleCount > 0,
-      );
-    }
-  }
-
-  searchInput?.addEventListener(
-    "input",
-    filterOrganizations,
-  );
-
-  areaButtons.forEach(
-    (button) => {
-      button.addEventListener(
-        "click",
-        () => {
-          activeArea =
-            button.dataset[
-              "areaFilter"
-            ] ?? "";
-
-          areaButtons.forEach(
-            (item) => {
-              item.classList.toggle(
-                "is-active",
-                item === button,
-              );
-            },
-          );
-
-          if (activeArea === "") {
-            const clearButton =
-              document.querySelector<HTMLElement>(
-                "#clear-area-filter",
-              );
-
-            clearButton?.focus();
-          }
-
-          filterOrganizations();
-        },
-      );
-    },
-  );
-
-  document
-    .querySelector<HTMLButtonElement>(
-      "#clear-area-filter",
-    )
-    ?.addEventListener(
-      "click",
-      () => {
-        activeArea = "";
-
-        areaButtons.forEach(
-          (button) => {
-            button.classList.toggle(
-              "is-active",
-              button.dataset[
-                "areaFilter"
-              ] === "",
-            );
-          },
-        );
-
-        filterOrganizations();
-      },
-    );
-
-  filterButton?.addEventListener(
-    "click",
-    () => {
-      const expanded =
-        filterButton.getAttribute(
-          "aria-expanded",
-        ) === "true";
-
-      filterButton.setAttribute(
-        "aria-expanded",
-        String(!expanded),
-      );
-
-      filterPanel?.toggleAttribute(
-        "data-open",
-        !expanded,
-      );
-    },
-  );
-
-  resetSearch?.addEventListener(
-    "click",
-    () => {
-      if (searchInput) {
-        searchInput.value = "";
-        searchInput.focus();
-      }
-
-      activeArea = "";
-
-      areaButtons.forEach(
-        (button) => {
-          button.classList.toggle(
-            "is-active",
-            button.dataset[
-              "areaFilter"
-            ] === "",
-          );
-        },
-      );
-
-      filterOrganizations();
-    },
-  );
-</script>
-
-<style>
-  .organizations-page {
-    width: min(100% - 32px, 1440px);
-    margin-inline: auto;
-    padding-bottom: 84px;
-  }
-
-  .organizations-hero {
-    display: grid;
-    grid-template-columns:
-      minmax(0, 1.35fr)
-      minmax(300px, 0.65fr);
-    gap: 32px;
-    margin-top: 32px;
-    padding: 40px;
-    overflow: hidden;
-    border: 1px solid #dbe7df;
-    border-radius: 28px;
-    background:
-      radial-gradient(
-        circle at 84% 16%,
-        rgba(132, 204, 22, 0.14),
-        transparent 31%
-      ),
-      linear-gradient(
-        135deg,
-        #ffffff 0%,
-        #f0fdf4 100%
-      );
-  }
-
-  .organizations-hero__eyebrow,
-  .section-eyebrow,
-  .filter-panel__eyebrow {
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-    color: #166534;
-    font-size: 0.75rem;
-    font-weight: 800;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-  }
-
-  .organizations-hero h1 {
-    max-width: 850px;
-    margin: 12px 0 0;
-    color: #0f172a;
-    font-size: clamp(
-      2.15rem,
-      4vw,
-      3.65rem
-    );
-    line-height: 1.04;
-    letter-spacing: -0.045em;
-  }
-
-  .organizations-hero__content > p {
-    max-width: 770px;
-    margin: 19px 0 0;
-    color: #64748b;
-    font-size: 1rem;
-    line-height: 1.75;
-  }
-
-  .organizations-hero__actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 11px;
-    margin-top: 28px;
-  }
-
-  .primary-action,
-  .secondary-action {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    min-height: 44px;
-    padding-inline: 15px;
-    border-radius: 12px;
-    text-decoration: none;
-    font-size: 0.86rem;
-    font-weight: 750;
-  }
-
-  .primary-action {
-    background: #166534;
-    color: #ffffff;
-  }
-
-  .primary-action:hover {
-    background: #14532d;
-  }
-
-  .secondary-action {
-    border: 1px solid #dbe7df;
-    background: #ffffff;
-    color: #166534;
-  }
-
-  .secondary-action:hover {
-    background: #f0fdf4;
-  }
-
-  .organizations-hero__stats {
-    display: grid;
-    align-content: center;
-    gap: 11px;
-  }
-
-  .hero-stat {
-    display: grid;
-    grid-template-columns: auto 1fr;
-    align-items: center;
-    gap: 10px;
-    padding: 14px;
-    border: 1px solid #dbe7df;
-    border-radius: 16px;
-    background: rgba(
-      255,
-      255,
-      255,
-      0.85
-    );
-  }
-
-  .hero-stat__icon {
-    display: grid;
-    width: 42px;
-    height: 42px;
-    place-items: center;
-    border-radius: 13px;
-    background: #dcfce7;
-    color: #166534;
-  }
-
-  .hero-stat strong {
-    color: #0f172a;
-    font-size: 1.2rem;
-  }
-
-  .hero-stat > span:last-child {
-    grid-column: 2;
-    margin-top: -5px;
-    color: #64748b;
-    font-size: 0.76rem;
-  }
-
-  .directory-section,
-  .trust-section {
-    margin-top: 58px;
-  }
-
-  .section-heading {
-    display: flex;
-    align-items: end;
-    justify-content: space-between;
-    gap: 20px;
-    margin-bottom: 22px;
-  }
-
-  .section-heading h2 {
-    margin: 7px 0 0;
-    color: #0f172a;
-    font-size: clamp(
-      1.55rem,
-      2.6vw,
-      2.1rem
-    );
-    line-height: 1.1;
-    letter-spacing: -0.035em;
-  }
-
-  .section-heading p {
-    max-width: 700px;
-    margin: 8px 0 0;
-    color: #64748b;
-    line-height: 1.65;
-  }
-
-  .section-count {
-    color: #166534;
-    font-size: 0.84rem;
-    font-weight: 750;
-    white-space: nowrap;
-  }
-
-  .directory-tools {
-    display: flex;
-    align-items: center;
-    gap: 11px;
-    margin-bottom: 12px;
-  }
-
-  .search-field {
-    display: flex;
-    align-items: center;
-    width: min(100%, 670px);
-    height: 48px;
-    gap: 10px;
-    padding-inline: 15px;
-    border: 1px solid #e2e8f0;
-    border-radius: 14px;
-    background: #ffffff;
-    color: #64748b;
-  }
-
-  .search-field:focus-within {
-    border-color: #166534;
-    box-shadow:
-      0 0 0 3px
-      rgba(22, 101, 52, 0.08);
-  }
-
-  .search-field input {
-    width: 100%;
-    border: 0;
-    outline: 0;
-    background: transparent;
-    color: #0f172a;
-    font: inherit;
-  }
-
-  .search-field input::placeholder {
-    color: #94a3b8;
-  }
-
-  .filter-button {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    min-height: 48px;
-    padding-inline: 14px;
-    border: 1px solid #e2e8f0;
-    border-radius: 14px;
-    background: #ffffff;
-    color: #334155;
-    font: inherit;
-    font-size: 0.84rem;
-    font-weight: 700;
-    cursor: pointer;
-  }
-
-  .filter-button:hover,
-  .filter-button[aria-expanded="true"] {
-    border-color: #bbf7d0;
-    background: #f0fdf4;
-    color: #166534;
-  }
-
-  .filter-panel {
-    display: none;
-    margin-bottom: 15px;
-    padding: 18px;
-    border: 1px solid #e2e8f0;
-    border-radius: 18px;
-    background: #ffffff;
-  }
-
-  .filter-panel[data-open] {
-    display: block;
-  }
-
-  .filter-panel__heading {
-    display: flex;
-    align-items: end;
-    justify-content: space-between;
-    gap: 15px;
-    margin-bottom: 14px;
-  }
-
-  .filter-panel__heading h3 {
-    margin: 7px 0 0;
-    color: #0f172a;
-    font-size: 1rem;
-  }
-
-  .clear-filter {
-    border: 0;
-    background: transparent;
-    color: #166534;
-    font: inherit;
-    font-size: 0.8rem;
-    font-weight: 750;
-    cursor: pointer;
-  }
-
-  .area-filter-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-
-  .area-filter {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    min-height: 38px;
-    padding-inline: 11px;
-    border: 1px solid #e2e8f0;
-    border-radius: 10px;
-    background: #ffffff;
-    color: #475569;
-    font: inherit;
-    font-size: 0.78rem;
-    cursor: pointer;
-  }
-
-  .area-filter strong {
-    display: inline-grid;
-    min-width: 21px;
-    height: 21px;
-    place-items: center;
-    padding-inline: 4px;
-    border-radius: 7px;
-    background: #f1f5f9;
-    color: #475569;
-    font-size: 0.68rem;
-  }
-
-  .area-filter:hover,
-  .area-filter.is-active {
-    border-color: #bbf7d0;
-    background: #f0fdf4;
-    color: #166534;
-  }
-
-  .area-filter.is-active strong {
-    background: #dcfce7;
-    color: #166534;
-  }
-
-  .organization-grid {
-    display: grid;
-    grid-template-columns: repeat(
-      3,
-      minmax(0, 1fr)
-    );
-    gap: 15px;
-  }
-
-  .organization-card {
-    min-width: 0;
-    border: 1px solid #e2e8f0;
-    border-radius: 18px;
-    background: #ffffff;
-    overflow: hidden;
-    transition:
-      transform 0.18s ease,
-      border-color 0.18s ease,
-      box-shadow 0.18s ease;
-  }
-
-  .organization-card:hover {
-    transform: translateY(-2px);
-    border-color: #cdebd8;
-    box-shadow:
-      0 14px 35px
-      rgba(15, 23, 42, 0.07);
-  }
-
-  .organization-card__main {
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr) auto;
-    gap: 13px;
-    align-items: start;
-    padding: 18px;
-    color: inherit;
-    text-decoration: none;
-  }
-
-  .organization-card__visual {
-    display: grid;
-    gap: 9px;
-  }
-
-  .organization-card__logo {
-    display: grid;
-    width: 48px;
-    height: 48px;
-    place-items: center;
-    border: 1px solid #dbe7df;
-    border-radius: 14px;
-    background: #f0fdf4;
-    color: #166534;
-  }
-
-  .verified-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    width: max-content;
-    padding: 4px 7px;
-    border-radius: 7px;
-    background: #f0fdf4;
-    color: #166534;
-    font-size: 0.62rem;
-    font-weight: 800;
-    white-space: nowrap;
-  }
-
-  .organization-card__body {
-    min-width: 0;
-  }
-
-  .organization-card__body h3 {
-    margin: 1px 0 0;
-    color: #0f172a;
-    font-size: 1rem;
-    line-height: 1.3;
-  }
-
-  .organization-card__location {
-    display: flex;
-    align-items: flex-start;
-    gap: 5px;
-    margin-top: 7px;
-    color: #64748b;
-    font-size: 0.74rem;
-    line-height: 1.45;
-  }
-
-  .organization-card__location svg {
-    flex: 0 0 auto;
-    margin-top: 1px;
-  }
-
-  .organization-card__body p {
-    margin: 10px 0 0;
-    color: #64748b;
-    font-size: 0.78rem;
-    line-height: 1.6;
-  }
-
-  .organization-card__arrow {
-    display: grid;
-    width: 30px;
-    height: 30px;
-    place-items: center;
-    border-radius: 9px;
-    background: #f8fafc;
-    color: #94a3b8;
-  }
-
-  .organization-card__main:hover
-    .organization-card__arrow {
-    background: #f0fdf4;
-    color: #166534;
-  }
-
-  .organization-card__footer {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-    padding: 11px 17px;
-    border-top: 1px solid #eef2f7;
-    background: #fcfdfd;
-  }
-
-  .organization-card__footer > span {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    min-width: 0;
-    color: #64748b;
-    font-size: 0.72rem;
-  }
-
-  .organization-card__footer > span svg {
-    flex: 0 0 auto;
-  }
-
-  .organization-card__link {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    color: #166534;
-    font-size: 0.73rem;
-    font-weight: 750;
-    text-decoration: none;
-    white-space: nowrap;
-  }
-
-  .empty-state {
-    display: grid;
-    place-items: center;
-    padding: 55px 24px;
-    border: 1px dashed #e2e8f0;
-    border-radius: 18px;
-    background: #f8fafc;
-    text-align: center;
-  }
-
-  .empty-state--hidden {
-    display: none;
-  }
-
-  .empty-state__icon {
-    display: grid;
-    width: 66px;
-    height: 66px;
-    place-items: center;
-    margin-bottom: 14px;
-    border-radius: 20px;
-    background: #dcfce7;
-    color: #166534;
-  }
-
-  .empty-state h3 {
-    margin: 0;
-    color: #334155;
-    font-size: 1rem;
-  }
-
-  .empty-state p {
-    max-width: 500px;
-    margin: 8px 0 17px;
-    color: #64748b;
-    line-height: 1.6;
-  }
-
-  .empty-state button {
-    min-height: 40px;
-    padding-inline: 14px;
-    border: 1px solid #bbf7d0;
-    border-radius: 10px;
-    background: #ffffff;
-    color: #166534;
-    font: inherit;
-    font-size: 0.8rem;
-    font-weight: 750;
-    cursor: pointer;
-  }
-
-  .trust-section {
-    display: grid;
-    grid-template-columns:
-      minmax(0, 0.9fr)
-      minmax(0, 1.1fr);
-    gap: 28px;
-    padding: 30px;
-    border: 1px solid #e2e8f0;
-    border-radius: 22px;
-    background: #ffffff;
-  }
-
-  .trust-section__content h2 {
-    margin: 9px 0 0;
-    color: #0f172a;
-    font-size: clamp(
-      1.35rem,
-      2.2vw,
-      1.8rem
-    );
-    line-height: 1.12;
-    letter-spacing: -0.03em;
-  }
-
-  .trust-section__content p {
-    margin: 12px 0 0;
-    color: #64748b;
-    line-height: 1.7;
-  }
-
-  .trust-points {
-    display: grid;
-    gap: 12px;
-  }
-
-  .trust-point {
-    display: flex;
-    gap: 12px;
-    padding: 15px;
-    border: 1px solid #e2e8f0;
-    border-radius: 15px;
-    background: #f8fafc;
-  }
-
-  .trust-point__icon {
-    display: grid;
-    width: 40px;
-    height: 40px;
-    place-items: center;
-    flex: 0 0 40px;
-    border-radius: 12px;
-    background: #dcfce7;
-    color: #166534;
-  }
-
-  .trust-point strong {
-    color: #0f172a;
-    font-size: 0.86rem;
-  }
-
-  .trust-point p {
-    margin: 4px 0 0;
-    color: #64748b;
-    font-size: 0.78rem;
-    line-height: 1.55;
-  }
-
-  .organization-cta {
-    display: grid;
-    grid-template-columns:
-      auto minmax(0, 1fr)
-      auto;
-    align-items: center;
-    gap: 18px;
-    margin-top: 58px;
-    padding: 24px;
-    border: 1px solid #bbf7d0;
-    border-radius: 20px;
-    background:
-      linear-gradient(
-        135deg,
-        #f0fdf4 0%,
-        #ffffff 100%
-      );
-  }
-
-  .organization-cta__icon {
-    display: grid;
-    width: 48px;
-    height: 48px;
-    place-items: center;
-    border-radius: 14px;
-    background: #dcfce7;
-    color: #166534;
-  }
-
-  .organization-cta__content > span {
-    display: block;
-    margin-bottom: 4px;
-    color: #166534;
-    font-size: 0.75rem;
-    font-weight: 800;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-  }
-
-  .organization-cta__content h2 {
-    margin: 0;
-    color: #0f172a;
-    font-size: 1.18rem;
-    letter-spacing: -0.02em;
-  }
-
-  .organization-cta__content p {
-    margin: 5px 0 0;
-    color: #64748b;
-    line-height: 1.6;
-  }
-
-  .organization-cta__button {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    min-height: 44px;
-    padding-inline: 16px;
-    border-radius: 12px;
-    background: #166534;
-    color: #ffffff;
-    font-size: 0.86rem;
-    font-weight: 750;
-    text-decoration: none;
-  }
-
-  .organization-cta__button:hover {
-    background: #14532d;
-  }
-
-  @media (max-width: 1100px) {
-    .organization-grid {
-      grid-template-columns: repeat(
-        2,
-        minmax(0, 1fr)
-      );
-    }
-  }
-
-  @media (max-width: 900px) {
-    .organizations-hero,
-    .trust-section {
-      grid-template-columns: 1fr;
-    }
-
-    .organizations-hero__stats {
-      grid-template-columns: repeat(
-        3,
-        minmax(0, 1fr)
-      );
-    }
-  }
-
-  @media (max-width: 720px) {
-    .organizations-page {
-      width: min(100% - 20px, 1440px);
-      padding-bottom: 52px;
-    }
-
-    .organizations-hero {
-      margin-top: 20px;
-      padding: 24px;
-      border-radius: 20px;
-    }
-
-    .organizations-hero h1 {
-      font-size: 2rem;
-    }
-
-    .organizations-hero__stats {
-      grid-template-columns: 1fr;
-    }
-
-    .organizations-hero__actions {
-      flex-direction: column;
-    }
-
-    .primary-action,
-    .secondary-action {
-      width: 100%;
-    }
-
-    .section-heading {
-      align-items: flex-start;
-      flex-direction: column;
-    }
-
-    .directory-tools {
-      align-items: stretch;
-      flex-direction: column;
-    }
-
-    .search-field {
-      width: 100%;
-    }
-
-    .filter-button {
-      width: 100%;
-    }
-
-    .organization-grid {
-      grid-template-columns: 1fr;
-    }
-
-    .organization-card__main {
-      grid-template-columns: auto minmax(
-          0,
-          1fr
-        );
-    }
-
-    .organization-card__arrow {
-      display: none;
-    }
-
-    .organization-cta {
-      grid-template-columns:
-        auto minmax(0, 1fr);
-    }
-
-    .organization-cta__button {
-      grid-column: 1 / -1;
-      justify-content: center;
-    }
-  }
-
-  @media (max-width: 480px) {
-    .organization-card__footer {
-      align-items: flex-start;
-      flex-direction: column;
-    }
-
-    .filter-panel__heading {
-      align-items: flex-start;
-      flex-direction: column;
-    }
-  }
-</style>
+--- 
+import { 
+  ArrowRight, 
+  Building2, 
+  CircleCheck, 
+  MapPin, 
+  Search, 
+  ShieldCheck, 
+  SlidersHorizontal, 
+  Users, 
+} from "@lucide/astro"; 
+
+import PageHeader from "@components/layout/PageHeader.astro"; 
+import PublicLayout from "@layouts/PublicLayout.astro"; 
+
+import { 
+  getPublicOrganizations, 
+  type Organization, 
+} from "@lib/data/organizations"; 
+
+const organizations: Organization[] = getPublicOrganizations(); 
+
+const publicOrganizations = organizations.filter( 
+  (organization: Organization) => organization.isPublic === true, 
+); 
+
+const verifiedOrganizations = publicOrganizations.filter( 
+  (organization: Organization) => organization.status === "verified", 
+); 
+
+const areaCounts: Record<string, number> = {}; 
+
+for (const organization of verifiedOrganizations) { 
+  const area = organization.location?.area?.trim(); 
+  if (!area) continue; 
+  areaCounts[area] = (areaCounts[area] ?? 0) + 1; 
+} 
+
+const areaSummary = Object.entries(areaCounts) 
+  .map(([name, count]: [string, number]) => ({ name, count })) 
+  .sort((first, second) => second.count - first.count); 
+
+const breadcrumbs = [ 
+  { label: "Beranda", href: "/" }, 
+  { label: "Organisasi" }, 
+]; 
+
+const pageTitle = "Organisasi Pengelolaan Sampah"; 
+
+const pageDescription = 
+  "Temukan organisasi yang terlibat dalam ekosistem pengelolaan sampah di Kabupaten Badung."; 
+
+const organizationCount = verifiedOrganizations.length; 
+const areaCount = areaSummary.length; 
+--- 
+
+<PublicLayout title={pageTitle} description={pageDescription}> 
+  <PageHeader 
+    title={pageTitle} 
+    description={pageDescription} 
+    breadcrumbs={breadcrumbs} 
+    icon="organization" 
+    eyebrow="BINSIGHT · ORGANISASI" 
+    tone="green" 
+  /> 
+
+  <main class="organizations-page"> 
+    <section class="organizations-hero"> 
+      <div class="organizations-hero__grid" aria-hidden="true"></div> 
+      <div class="organizations-hero__accent" aria-hidden="true"></div> 
+
+      <div class="organizations-hero__content"> 
+        <div class="organizations-hero__eyebrow"> 
+          <span class="organizations-hero__eyebrow-dot" aria-hidden="true"></span> 
+          <Building2 size={15} stroke-width={2} aria-hidden="true" /> 
+          <span>EKOSISTEM PENGELOLAAN SAMPAH</span> 
+        </div> 
+
+        <h1> 
+          Kenali organisasi yang 
+          <span class="organizations-hero__outline">mengelola</span> 
+          <span class="organizations-hero__lime">sampah di Badung.</span> 
+        </h1> 
+
+        <div class="organizations-hero__rule" aria-hidden="true"></div> 
+
+        <p> 
+          Jelajahi organisasi yang telah diverifikasi dan dipublikasikan dalam 
+          BINSIGHT. Pahami siapa mereka, di mana mereka berada, dan bagaimana 
+          mereka terhubung dengan ekosistem persampahan. 
+        </p> 
+
+        <div class="organizations-hero__actions"> 
+          <a href="#organization-directory" class="primary-action"> 
+            <Building2 size={17} stroke-width={2} aria-hidden="true" /> 
+            <span>JELAJAHI ORGANISASI</span> 
+            <ArrowRight size={16} stroke-width={2} aria-hidden="true" /> 
+          </a> 
+
+          <a href="/map" class="secondary-action"> 
+            <MapPin size={16} stroke-width={2} aria-hidden="true" /> 
+            <span>LIHAT DI PETA</span> 
+          </a> 
+        </div> 
+      </div> 
+
+      <div class="organizations-hero__stats" aria-label="Ringkasan organisasi"> 
+        <div class="hero-stat"> 
+          <span class="hero-stat__index">01</span> 
+          <span class="hero-stat__icon"> 
+            <Building2 size={18} stroke-width={2} aria-hidden="true" /> 
+          </span> 
+          <strong>{organizationCount}</strong> 
+          <span class="hero-stat__label">ORGANISASI<br />TERVERIFIKASI</span> 
+        </div> 
+
+        <div class="hero-stat"> 
+          <span class="hero-stat__index">02</span> 
+          <span class="hero-stat__icon"> 
+            <MapPin size={18} stroke-width={2} aria-hidden="true" /> 
+          </span> 
+          <strong>{areaCount}</strong> 
+          <span class="hero-stat__label">AREA<br />TERWAKILI</span> 
+        </div> 
+
+        <div class="hero-stat"> 
+          <span class="hero-stat__index">03</span> 
+          <span class="hero-stat__icon"> 
+            <ShieldCheck size={18} stroke-width={2} aria-hidden="true" /> 
+          </span> 
+          <strong>{publicOrganizations.length}</strong> 
+          <span class="hero-stat__label">PROFIL<br />PUBLIK</span> 
+        </div> 
+
+        <div class="hero-stat__footer"> 
+          <span>PUBLIC DIRECTORY</span> 
+          <span>BINSIGHT / 03</span> 
+        </div> 
+      </div> 
+    </section> 
+
+    <section id="organization-directory" class="directory-section" aria-labelledby="directory-title"> 
+      <div class="section-heading"> 
+        <div> 
+          <span class="section-eyebrow">03 / NETWORK</span> 
+          <h2 id="directory-title">Temukan organisasi.</h2> 
+          <p>Gunakan pencarian dan filter area untuk menemukan organisasi yang relevan.</p> 
+        </div> 
+        <span class="section-count">{organizationCount} TERVERIFIKASI</span> 
+      </div> 
+
+      <div class="directory-tools"> 
+        <label class="search-field" for="organization-search"> 
+          <Search size={17} stroke-width={2} aria-hidden="true" /> 
+          <input 
+            id="organization-search" 
+            type="search" 
+            placeholder="Cari nama organisasi atau lokasi..." 
+            autocomplete="off" 
+          /> 
+        </label> 
+
+        <button 
+          type="button" 
+          class="filter-button" 
+          id="organization-filter-button" 
+          aria-expanded="false" 
+          aria-controls="organization-filter-panel" 
+        > 
+          <SlidersHorizontal size={17} stroke-width={2} aria-hidden="true" /> 
+          <span>FILTER AREA</span> 
+        </button> 
+      </div> 
+
+      <div class="filter-panel" id="organization-filter-panel"> 
+        <div class="filter-panel__heading"> 
+          <div> 
+            <span class="filter-panel__eyebrow">AREA / INDEX</span> 
+            <h3>Organisasi berdasarkan wilayah</h3> 
+          </div> 
+          <button type="button" class="clear-filter" id="clear-area-filter">SEMUA AREA</button> 
+        </div> 
+
+        <div class="area-filter-list"> 
+          <button type="button" class="area-filter is-active" data-area-filter=""> 
+            <span>Semua area</span> 
+            <strong>{organizationCount}</strong> 
+          </button> 
+
+          {areaSummary.map(({ name, count }: { name: string; count: number }) => ( 
+            <button type="button" class="area-filter" data-area-filter={name}> 
+              <span>{name}</span> 
+              <strong>{count}</strong> 
+            </button> 
+          ))} 
+        </div> 
+      </div> 
+
+      {verifiedOrganizations.length > 0 ? ( 
+        <div class="organization-grid" id="organization-grid"> 
+          {verifiedOrganizations.map((organization: Organization) => { 
+            const area = organization.location?.area?.trim() || "Kabupaten Badung"; 
+            const address = organization.location?.address?.trim() || area; 
+
+            return ( 
+              <article 
+                class="organization-card" 
+                data-organization-card 
+                data-organization-name={organization.name} 
+                data-organization-area={area} 
+              > 
+                <a 
+                  href={`/organizations/${organization.slug}`} 
+                  class="organization-card__main" 
+                  aria-label={`Lihat profil ${organization.name}`} 
+                > 
+                  <div class="organization-card__topline"> 
+                    <span>ORGANIZATION / {String(verifiedOrganizations.indexOf(organization) + 1).padStart(2, "0")}</span> 
+                    <span class="verified-badge"> 
+                      <CircleCheck size={13} stroke-width={2} aria-hidden="true" /> 
+                      VERIFIED 
+                    </span> 
+                  </div> 
+
+                  <div class="organization-card__body"> 
+                    <div class="organization-card__logo"> 
+                      <Building2 size={25} stroke-width={1.8} aria-hidden="true" /> 
+                    </div> 
+
+                    <div class="organization-card__copy"> 
+                      <h3>{organization.name}</h3> 
+
+                      <div class="organization-card__location"> 
+                        <MapPin size={14} stroke-width={2} aria-hidden="true" /> 
+                        <span>{address}</span> 
+                      </div> 
+
+                      <p>Profil organisasi yang terdaftar dalam ekosistem BINSIGHT.</p> 
+                    </div> 
+
+                    <span class="organization-card__arrow"> 
+                      <ArrowRight size={18} stroke-width={2} aria-hidden="true" /> 
+                    </span> 
+                  </div> 
+                </a> 
+
+                <div class="organization-card__footer"> 
+                  <span> 
+                    <MapPin size={13} stroke-width={2} aria-hidden="true" /> 
+                    {area} 
+                  </span> 
+
+                  <a href={`/organizations/${organization.slug}`} class="organization-card__link"> 
+                    OPEN PROFILE 
+                    <ArrowRight size={13} stroke-width={2} aria-hidden="true" /> 
+                  </a> 
+                </div> 
+              </article> 
+            ); 
+          })} 
+        </div> 
+      ) : ( 
+        <div class="empty-state"> 
+          <div class="empty-state__icon"> 
+            <Building2 size={27} stroke-width={1.8} aria-hidden="true" /> 
+          </div> 
+          <h3>Belum ada organisasi publik</h3> 
+          <p>Belum ada organisasi yang tersedia untuk ditampilkan pada direktori publik.</p> 
+        </div> 
+      )} 
+
+      <div id="organization-no-results" class="empty-state empty-state--hidden"> 
+        <div class="empty-state__icon"> 
+          <Search size={27} stroke-width={1.8} aria-hidden="true" /> 
+        </div> 
+        <h3>Organisasi tidak ditemukan</h3> 
+        <p>Coba gunakan kata kunci atau area yang berbeda.</p> 
+        <button type="button" id="reset-organization-search">RESET PENCARIAN</button> 
+      </div> 
+    </section> 
+
+    <section class="trust-section" aria-labelledby="trust-title"> 
+      <div class="trust-section__content"> 
+        <span class="section-eyebrow section-eyebrow--lime">04 / TRUST LAYER</span> 
+        <h2 id="trust-title">Informasi publik yang lebih dapat dipercaya.</h2> 
+        <p> 
+          BINSIGHT menempatkan verifikasi sebagai bagian penting dari direktori organisasi. 
+          Informasi yang ditampilkan kepada publik dipisahkan dari data yang masih dalam proses verifikasi. 
+        </p> 
+      </div> 
+
+      <div class="trust-points"> 
+        <div class="trust-point"> 
+          <span class="trust-point__index">01</span> 
+          <span class="trust-point__icon"> 
+            <ShieldCheck size={19} stroke-width={2} aria-hidden="true" /> 
+          </span> 
+          <div> 
+            <strong>VERIFIKASI ORGANISASI</strong> 
+            <p>Profil publik berasal dari organisasi yang telah melewati status verifikasi.</p> 
+          </div> 
+        </div> 
+
+        <div class="trust-point"> 
+          <span class="trust-point__index">02</span> 
+          <span class="trust-point__icon"> 
+            <MapPin size={19} stroke-width={2} aria-hidden="true" /> 
+          </span> 
+          <div> 
+            <strong>KONTEKS WILAYAH</strong> 
+            <p>Lokasi organisasi membantu pengguna memahami ekosistem pada setiap area.</p> 
+          </div> 
+        </div> 
+      </div> 
+    </section> 
+
+    <section class="organization-cta"> 
+      <div class="organization-cta__icon"> 
+        <Users size={23} stroke-width={2} aria-hidden="true" /> 
+      </div> 
+
+      <div class="organization-cta__content"> 
+        <span>05 / ECOSYSTEM</span> 
+        <h2>Ingin mengetahui organisasi dari area tertentu?</h2> 
+        <p>Gunakan peta BINSIGHT untuk melihat keterhubungan antara organisasi dan wilayah pengelolaan sampah.</p> 
+      </div> 
+
+      <a href="/map" class="organization-cta__button"> 
+        BUKA PETA 
+        <ArrowRight size={17} stroke-width={2} aria-hidden="true" /> 
+      </a> 
+    </section> 
+  </main> 
+</PublicLayout> 
+
+<script> 
+  const searchInput = document.querySelector<HTMLInputElement>("#organization-search"); 
+
+  const cards = Array.from( 
+    document.querySelectorAll<HTMLElement>("[data-organization-card]"), 
+  ); 
+
+  const noResults = document.querySelector<HTMLElement>("#organization-no-results"); 
+  const resetSearch = document.querySelector<HTMLButtonElement>("#reset-organization-search"); 
+  const filterButton = document.querySelector<HTMLButtonElement>("#organization-filter-button"); 
+  const filterPanel = document.querySelector<HTMLElement>("#organization-filter-panel"); 
+
+  const areaButtons = Array.from( 
+    document.querySelectorAll<HTMLButtonElement>("[data-area-filter]"), 
+  ); 
+
+  let activeArea = ""; 
+
+  function filterOrganizations() { 
+    const query = searchInput?.value.trim().toLowerCase() ?? ""; 
+    let visibleCount = 0; 
+
+    cards.forEach((card) => { 
+      const name = card.dataset["organizationName"]?.toLowerCase() ?? ""; 
+      const area = card.dataset["organizationArea"]?.toLowerCase() ?? ""; 
+      const searchableText = `${name} ${area}`; 
+
+      const queryMatches = query.length === 0 || searchableText.includes(query); 
+      const areaMatches = activeArea.length === 0 || area === activeArea.toLowerCase(); 
+      const visible = queryMatches && areaMatches; 
+
+      card.hidden = !visible; 
+      if (visible) visibleCount += 1; 
+    }); 
+
+    if (noResults) { 
+      noResults.classList.toggle("empty-state--hidden", visibleCount > 0); 
+    } 
+  } 
+
+  searchInput?.addEventListener("input", filterOrganizations); 
+
+  areaButtons.forEach((button) => { 
+    button.addEventListener("click", () => { 
+      activeArea = button.dataset["areaFilter"] ?? ""; 
+
+      areaButtons.forEach((item) => { 
+        item.classList.toggle("is-active", item === button); 
+      }); 
+
+      if (activeArea === "") { 
+        document.querySelector<HTMLElement>("#clear-area-filter")?.focus(); 
+      } 
+
+      filterOrganizations(); 
+    }); 
+  }); 
+
+  document.querySelector<HTMLButtonElement>("#clear-area-filter")?.addEventListener("click", () => { 
+    activeArea = ""; 
+
+    areaButtons.forEach((button) => { 
+      button.classList.toggle("is-active", button.dataset["areaFilter"] === ""); 
+    }); 
+
+    filterOrganizations(); 
+  }); 
+
+  filterButton?.addEventListener("click", () => { 
+    const expanded = filterButton.getAttribute("aria-expanded") === "true"; 
+
+    filterButton.setAttribute("aria-expanded", String(!expanded)); 
+    filterPanel?.toggleAttribute("data-open", !expanded); 
+  }); 
+
+  resetSearch?.addEventListener("click", () => { 
+    if (searchInput) { 
+      searchInput.value = ""; 
+      searchInput.focus(); 
+    } 
+
+    activeArea = ""; 
+
+    areaButtons.forEach((button) => { 
+      button.classList.toggle("is-active", button.dataset["areaFilter"] === ""); 
+    }); 
+
+    filterOrganizations(); 
+  }); 
+</script> 
+
+<style> 
+  .organizations-page { 
+    --acid: #dfff00; 
+    --acid-soft: #efff70; 
+    --ink: #090a08; 
+    --ink-2: #11130f; 
+    --ink-3: #1b1f18; 
+    --paper: #f2f0e6; 
+    --paper-2: #e4e1d4; 
+    --paper-3: #cfcabd; 
+    --white: #fffef8; 
+    --muted: #6c7068; 
+    --line: #090a08; 
+    --orange: #ff6a00; 
+
+    width: min(1320px, calc(100% - 40px)); 
+    margin-inline: auto; 
+    padding-bottom: 110px; 
+    color: var(--ink); 
+  } 
+
+  .organizations-page *, 
+  .organizations-page *::before, 
+  .organizations-page *::after { 
+    box-sizing: border-box; 
+  } 
+
+  /* HERO */ 
+
+  .organizations-hero { 
+    position: relative; 
+    display: grid; 
+    grid-template-columns: minmax(0, 1.1fr) minmax(360px, 0.9fr); 
+    min-height: 670px; 
+    gap: 42px; 
+    margin-top: 30px; 
+    padding: 68px; 
+    overflow: hidden; 
+    isolation: isolate; 
+    color: var(--white); 
+    background: var(--ink); 
+    border: 4px solid var(--white); 
+    box-shadow: 14px 14px 0 var(--orange); 
+  } 
+
+  .organizations-hero__grid { 
+    position: absolute; 
+    inset: 0; 
+    z-index: -2; 
+    background: 
+      linear-gradient(rgba(255,255,255,.08) 2px, transparent 2px), 
+      linear-gradient(90deg, rgba(255,255,255,.08) 2px, transparent 2px); 
+    background-size: 70px 70px; 
+    opacity: .12; 
+    mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent); 
+  } 
+
+  .organizations-hero__accent { 
+    position: absolute; 
+    top: -100px; 
+    right: -75px; 
+    z-index: -1; 
+    width: 390px; 
+    height: 300px; 
+    background: var(--acid); 
+    clip-path: polygon(0 18%, 80% 0, 100% 72%, 28% 100%); 
+    opacity: .92; 
+    mix-blend-mode: screen; 
+  } 
+
+  .organizations-hero__content { 
+    position: relative; 
+    z-index: 2; 
+    align-self: center; 
+  } 
+
+  .organizations-hero__eyebrow { 
+    display: inline-flex; 
+    align-items: center; 
+    gap: 8px; 
+    padding: 8px 10px; 
+    color: var(--ink); 
+    background: var(--acid); 
+    border: 3px solid var(--ink); 
+    box-shadow: 7px 7px 0 var(--white); 
+    font-family: "DM Mono", "SFMono-Regular", Consolas, monospace; 
+    font-size: 10px; 
+    font-weight: 900; 
+    letter-spacing: .08em; 
+    text-transform: uppercase; 
+  } 
+
+  .organizations-hero__eyebrow-dot { 
+    width: 9px; 
+    height: 9px; 
+    border: 2px solid var(--ink); 
+    background: var(--orange); 
+  } 
+
+  .organizations-hero h1 { 
+    max-width: 840px; 
+    margin: 42px 0 0; 
+    color: var(--white); 
+    font-family: Sora, Inter, ui-sans-serif, system-ui, sans-serif; 
+    font-size: clamp(70px, 8vw, 122px); 
+    font-weight: 900; 
+    line-height: .84; 
+    letter-spacing: -.085em; 
+    text-transform: uppercase; 
+  } 
+
+  .organizations-hero__outline { 
+    display: block; 
+    color: transparent; 
+    -webkit-text-stroke: 3px var(--white); 
+    transform: translateX(3vw); 
+  } 
+
+  .organizations-hero__lime { 
+    display: block; 
+    color: var(--acid); 
+    transform: translateX(-1vw); 
+  } 
+
+  .organizations-hero__rule { 
+    width: 150px; 
+    height: 14px; 
+    margin-top: 34px; 
+    background: var(--acid); 
+    border: 3px solid var(--white); 
+    box-shadow: 10px 10px 0 var(--orange); 
+  } 
+
+  .organizations-hero__content > p { 
+    max-width: 650px; 
+    margin: 32px 0 0; 
+    padding-left: 16px; 
+    color: #deded5; 
+    border-left: 7px solid var(--acid); 
+    font-size: 15px; 
+    font-weight: 500; 
+    line-height: 1.7; 
+  } 
+
+  .organizations-hero__actions { 
+    display: flex; 
+    flex-wrap: wrap; 
+    gap: 10px; 
+    margin-top: 28px; 
+  } 
+
+  .primary-action, 
+  .secondary-action { 
+    min-height: 52px; 
+    display: inline-flex; 
+    align-items: center; 
+    justify-content: center; 
+    gap: 10px; 
+    padding: 0 16px; 
+    border: 3px solid currentColor; 
+    border-radius: 0; 
+    font-size: 10px; 
+    font-weight: 900; 
+    letter-spacing: .05em; 
+    text-decoration: none; 
+    text-transform: uppercase; 
+    transition: transform 120ms steps(2,end), box-shadow 120ms steps(2,end), background 120ms linear; 
+  } 
+
+  .primary-action { 
+    color: var(--ink); 
+    background: var(--acid); 
+    border-color: var(--ink); 
+    box-shadow: 8px 8px 0 var(--white); 
+  } 
+
+  .primary-action:hover { 
+    background: var(--acid-soft); 
+    transform: translate(-3px,-3px); 
+    box-shadow: 11px 11px 0 var(--orange); 
+  } 
+
+  .secondary-action { 
+    color: var(--white); 
+    background: transparent; 
+    border-color: var(--white); 
+    box-shadow: 8px 8px 0 rgba(255,255,255,.18); 
+  } 
+
+  .secondary-action:hover { 
+    color: var(--ink); 
+    background: var(--white); 
+    border-color: var(--white); 
+    transform: translate(-3px,-3px); 
+    box-shadow: 11px 11px 0 var(--acid); 
+  } 
+
+  .organizations-hero__stats { 
+    align-self: center; 
+    display: grid; 
+    gap: 10px; 
+    padding: 16px; 
+    background: var(--ink-2); 
+    border: 3px solid var(--white); 
+  } 
+
+  .hero-stat { 
+    display: grid; 
+    grid-template-columns: 30px 42px minmax(0, 1fr) auto; 
+    align-items: center; 
+    gap: 10px; 
+    min-height: 82px; 
+    padding: 10px; 
+    color: var(--white); 
+    background: var(--ink-3); 
+    border: 2px solid var(--white); 
+  } 
+
+  .hero-stat__index { 
+    color: var(--orange); 
+    font-family: "DM Mono", "SFMono-Regular", Consolas, monospace; 
+    font-size: 9px; 
+    font-weight: 900; 
+  } 
+
+  .hero-stat__icon { 
+    display: grid; 
+    width: 42px; 
+    height: 42px; 
+    place-items: center; 
+    color: var(--ink); 
+    background: var(--acid); 
+    border: 2px solid var(--ink); 
+  } 
+
+  .hero-stat strong { 
+    color: var(--acid); 
+    font-family: Sora, Inter, sans-serif; 
+    font-size: 34px; 
+    font-weight: 900; 
+    line-height: .9; 
+    letter-spacing: -.06em; 
+  } 
+
+  .hero-stat__label { 
+    color: var(--white); 
+    font-family: "DM Mono", "SFMono-Regular", Consolas, monospace; 
+    font-size: 8px; 
+    font-weight: 900; 
+    line-height: 1.35; 
+    letter-spacing: .08em; 
+  } 
+
+  .hero-stat__footer { 
+    display: flex; 
+    justify-content: space-between; 
+    gap: 12px; 
+    padding: 5px 2px 0; 
+    color: var(--white); 
+    font-family: "DM Mono", "SFMono-Regular", Consolas, monospace; 
+    font-size: 8px; 
+    font-weight: 900; 
+    letter-spacing: .08em; 
+  } 
+
+  .hero-stat__footer span:last-child { 
+    color: var(--acid); 
+  } 
+
+  /* SECTIONS */ 
+
+  .directory-section { 
+    position: relative; 
+    padding: 120px 0; 
+    border-bottom: 4px solid var(--ink); 
+  } 
+
+  .directory-section::before { 
+    position: absolute; 
+    inset: 0; 
+    z-index: -1; 
+    content: ""; 
+    pointer-events: none; 
+    background: repeating-linear-gradient(135deg, rgba(9,10,8,.025) 0 1px, transparent 1px 9px); 
+  } 
+
+  .section-heading { 
+    display: grid; 
+    grid-template-columns: minmax(0, 1fr) auto; 
+    gap: 30px; 
+    align-items: end; 
+    margin-bottom: 44px; 
+  } 
+
+  .section-eyebrow { 
+    display: inline-block; 
+    margin-bottom: 14px; 
+    padding: 6px 8px; 
+    color: var(--white); 
+    background: var(--ink); 
+    border: 2px solid var(--ink); 
+    font-family: "DM Mono", "SFMono-Regular", Consolas, monospace; 
+    font-size: 8px; 
+    font-weight: 900; 
+    letter-spacing: .11em; 
+    text-transform: uppercase; 
+  } 
+
+  .section-eyebrow--lime { 
+    color: var(--ink); 
+    background: var(--acid); 
+    border-color: var(--acid); 
+  } 
+
+  .section-heading h2 { 
+    margin: 0; 
+    font-family: Sora, Inter, ui-sans-serif, system-ui, sans-serif; 
+    font-size: clamp(48px, 6.2vw, 90px); 
+    font-weight: 900; 
+    line-height: .88; 
+    letter-spacing: -.08em; 
+    text-transform: uppercase; 
+  } 
+
+  .section-heading p { 
+    max-width: 620px; 
+    margin: 12px 0 0; 
+    color: var(--muted); 
+    font-size: 13px; 
+    line-height: 1.7; 
+  } 
+
+  .section-count { 
+    align-self: start; 
+    padding: 8px 10px; 
+    color: var(--ink); 
+    background: var(--acid); 
+    border: 2px solid var(--ink); 
+    box-shadow: 4px 4px 0 var(--orange); 
+    font-family: "DM Mono", "SFMono-Regular", Consolas, monospace; 
+    font-size: 8px; 
+    font-weight: 900; 
+    letter-spacing: .08em; 
+  } 
+
+  .directory-tools { 
+    display: grid; 
+    grid-template-columns: minmax(0, 1fr) auto; 
+    gap: 10px; 
+    margin-bottom: 12px; 
+  } 
+
+  .search-field { 
+    display: flex; 
+    align-items: center; 
+    gap: 10px; 
+    min-height: 54px; 
+    padding: 0 14px; 
+    color: var(--ink); 
+    background: var(--white); 
+    border: 3px solid var(--ink); 
+    box-shadow: 7px 7px 0 var(--ink); 
+  } 
+
+  .search-field:focus-within { 
+    border-color: var(--acid); 
+    box-shadow: 7px 7px 0 var(--acid); 
+  } 
+
+  .search-field input { 
+    width: 100%; 
+    border: 0; 
+    outline: 0; 
+    color: var(--ink); 
+    background: transparent; 
+    font: inherit; 
+    font-size: 13px; 
+  } 
+
+  .search-field input::placeholder { 
+    color: #8a8f86; 
+  } 
+
+  .filter-button { 
+    min-height: 54px; 
+    display: inline-flex; 
+    align-items: center; 
+    justify-content: center; 
+    gap: 8px; 
+    padding: 0 15px; 
+    color: var(--white); 
+    background: var(--ink); 
+    border: 3px solid var(--ink); 
+    box-shadow: 7px 7px 0 var(--orange); 
+    font-family: "DM Mono", "SFMono-Regular", Consolas, monospace; 
+    font-size: 9px; 
+    font-weight: 900; 
+    letter-spacing: .08em; 
+    cursor: pointer; 
+  } 
+
+  .filter-button:hover, 
+  .filter-button[aria-expanded="true"] { 
+    color: var(--ink); 
+    background: var(--acid); 
+  } 
+
+  .filter-panel { 
+    display: none; 
+    margin-bottom: 16px; 
+    padding: 18px; 
+    background: var(--paper-2); 
+    border: 3px solid var(--ink); 
+    box-shadow: 7px 7px 0 var(--ink); 
+  } 
+
+  .filter-panel[data-open] { 
+    display: block; 
+  } 
+
+  .filter-panel__heading { 
+    display: flex; 
+    align-items: end; 
+    justify-content: space-between; 
+    gap: 14px; 
+    margin-bottom: 14px; 
+  } 
+
+  .filter-panel__eyebrow { 
+    display: inline-block; 
+    color: var(--ink); 
+    font-family: "DM Mono", "SFMono-Regular", Consolas, monospace; 
+    font-size: 8px; 
+    font-weight: 900; 
+    letter-spacing: .1em; 
+    text-transform: uppercase; 
+  } 
+
+  .filter-panel__heading h3 { 
+    margin: 6px 0 0; 
+    font-family: Sora, Inter, sans-serif; 
+    font-size: 20px; 
+    font-weight: 900; 
+    letter-spacing: -.05em; 
+    text-transform: uppercase; 
+  } 
+
+  .clear-filter { 
+    padding: 7px 9px; 
+    color: var(--ink); 
+    background: var(--acid); 
+    border: 2px solid var(--ink); 
+    font-family: "DM Mono", "SFMono-Regular", Consolas, monospace; 
+    font-size: 8px; 
+    font-weight: 900; 
+    cursor: pointer; 
+  } 
+
+  .area-filter-list { 
+    display: flex; 
+    flex-wrap: wrap; 
+    gap: 7px; 
+  } 
+
+  .area-filter { 
+    display: inline-flex; 
+    align-items: center; 
+    gap: 8px; 
+    min-height: 36px; 
+    padding: 0 10px; 
+    color: var(--ink); 
+    background: var(--white); 
+    border: 2px solid var(--ink); 
+    font-size: 12px; 
+    font-weight: 750; 
+    cursor: pointer; 
+  } 
+
+  .area-filter strong { 
+    display: grid; 
+    min-width: 22px; 
+    height: 22px; 
+    place-items: center; 
+    color: var(--ink); 
+    background: var(--paper-3); 
+    font-family: "DM Mono", "SFMono-Regular", Consolas, monospace; 
+    font-size: 8px; 
+  } 
+
+  .area-filter:hover, 
+  .area-filter.is-active { 
+    color: var(--ink); 
+    background: var(--acid); 
+    box-shadow: 4px 4px 0 var(--orange); 
+  } 
+
+  .organization-grid { 
+    display: grid; 
+    grid-template-columns: repeat(3, minmax(0, 1fr)); 
+    gap: 12px; 
+  } 
+
+  .organization-card { 
+    min-width: 0; 
+    background: var(--white); 
+    border: 4px solid var(--ink); 
+    box-shadow: 8px 8px 0 var(--ink); 
+    overflow: hidden; 
+    transition: transform 120ms steps(2,end), box-shadow 120ms steps(2,end); 
+  } 
+
+  .organization-card:hover { 
+    transform: translate(-4px,-4px); 
+    box-shadow: 12px 12px 0 var(--orange); 
+  } 
+
+  .organization-card__main { 
+    display: block; 
+    padding: 17px; 
+    color: var(--ink); 
+    text-decoration: none; 
+  } 
+
+  .organization-card__topline { 
+    display: flex; 
+    justify-content: space-between; 
+    gap: 10px; 
+    padding-bottom: 13px; 
+    border-bottom: 3px solid var(--ink); 
+    font-family: "DM Mono", "SFMono-Regular", Consolas, monospace; 
+    font-size: 8px; 
+    font-weight: 900; 
+    letter-spacing: .08em; 
+  } 
+
+  .verified-badge { 
+    display: inline-flex; 
+    align-items: center; 
+    gap: 5px; 
+    color: var(--ink); 
+  } 
+
+  .organization-card__topline .verified-badge svg { 
+    color: var(--orange); 
+  } 
+
+  .organization-card__body { 
+    display: grid; 
+    grid-template-columns: auto minmax(0, 1fr) auto; 
+    gap: 13px; 
+    align-items: start; 
+    padding-top: 16px; 
+  } 
+
+  .organization-card__logo { 
+    display: grid; 
+    width: 48px; 
+    height: 48px; 
+    place-items: center; 
+    color: var(--ink); 
+    background: var(--acid); 
+    border: 3px solid var(--ink); 
+  } 
+
+  .organization-card__copy { 
+    min-width: 0; 
+  } 
+
+  .organization-card__copy h3 { 
+    margin: 0; 
+    color: var(--ink); 
+    font-family: Sora, Inter, sans-serif; 
+    font-size: 17px; 
+    font-weight: 900; 
+    line-height: 1.08; 
+    letter-spacing: -.04em; 
+    text-transform: uppercase; 
+  } 
+
+  .organization-card__location { 
+    display: flex; 
+    align-items: flex-start; 
+    gap: 6px; 
+    margin-top: 9px; 
+    color: var(--muted); 
+    font-size: 11px; 
+    line-height: 1.45; 
+  } 
+
+  .organization-card__location svg { 
+    flex: 0 0 auto; 
+    margin-top: 1px; 
+    color: var(--ink); 
+  } 
+
+  .organization-card__copy p { 
+    margin: 11px 0 0; 
+    color: #6d726b; 
+    font-size: 12px; 
+    line-height: 1.6; 
+  } 
+
+  .organization-card__arrow { 
+    display: grid; 
+    width: 34px; 
+    height: 34px; 
+    place-items: center; 
+    color: var(--ink); 
+    background: var(--paper-2); 
+    border: 2px solid var(--ink); 
+  } 
+
+  .organization-card:hover .organization-card__arrow { 
+    color: var(--ink); 
+    background: var(--acid); 
+  } 
+
+  .organization-card__footer { 
+    display: flex; 
+    align-items: center; 
+    justify-content: space-between; 
+    gap: 10px; 
+    padding: 11px 14px; 
+    color: var(--white); 
+    background: var(--ink); 
+    border-top: 4px solid var(--ink); 
+  } 
+
+  .organization-card__footer > span, 
+  .organization-card__link { 
+    display: inline-flex; 
+    align-items: center; 
+    gap: 5px; 
+    font-family: "DM Mono", "SFMono-Regular", Consolas, monospace; 
+    font-size: 8px; 
+    font-weight: 900; 
+    letter-spacing: .07em; 
+    text-transform: uppercase; 
+  } 
+
+  .organization-card__footer > span { 
+    color: var(--white); 
+  } 
+
+  .organization-card__link { 
+    color: var(--acid); 
+    text-decoration: none; 
+  } 
+
+  .organization-card__link:hover { 
+    color: var(--acid-soft); 
+  } 
+
+  /* TRUST / CTA */ 
+
+  .trust-section { 
+    display: grid; 
+    grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr); 
+    gap: 50px; 
+    padding: 120px 0; 
+    color: var(--white); 
+    background: var(--ink); 
+    border-bottom: 4px solid var(--white); 
+  } 
+
+  .trust-section__content h2 { 
+    max-width: 760px; 
+    margin: 0; 
+    font-family: Sora, Inter, sans-serif; 
+    font-size: clamp(44px, 5vw, 78px); 
+    font-weight: 900; 
+    line-height: .88; 
+    letter-spacing: -.075em; 
+    text-transform: uppercase; 
+  } 
+
+  .trust-section__content p { 
+    max-width: 640px; 
+    margin: 24px 0 0; 
+    padding-left: 15px; 
+    color: #c3c4ba; 
+    border-left: 7px solid var(--acid); 
+    font-size: 13px; 
+    line-height: 1.75; 
+  } 
+
+  .trust-points { 
+    display: grid; 
+    gap: 10px; 
+    align-content: center; 
+  } 
+
+  .trust-point { 
+    display: grid; 
+    grid-template-columns: 36px 42px minmax(0, 1fr); 
+    gap: 12px; 
+    align-items: start; 
+    padding: 15px; 
+    background: var(--ink-3); 
+    border: 3px solid var(--white); 
+  } 
+
+  .trust-point__index { 
+    color: var(--orange); 
+    font-family: "DM Mono", "SFMono-Regular", Consolas, monospace; 
+    font-size: 9px; 
+    font-weight: 900; 
+  } 
+
+  .trust-point__icon { 
+    display: grid; 
+    width: 42px; 
+    height: 42px; 
+    place-items: center; 
+    color: var(--ink); 
+    background: var(--acid); 
+    border: 2px solid var(--ink); 
+  } 
+
+  .trust-point strong { 
+    display: block; 
+    color: var(--white); 
+    font-family: "DM Mono", "SFMono-Regular", Consolas, monospace; 
+    font-size: 10px; 
+    font-weight: 900; 
+    letter-spacing: .08em; 
+  } 
+
+  .trust-point p { 
+    margin: 6px 0 0; 
+    color: #aeb1a8; 
+    font-size: 12px; 
+    line-height: 1.6; 
+  } 
+
+  .organization-cta { 
+    display: grid; 
+    grid-template-columns: auto minmax(0, 1fr) auto; 
+    gap: 18px; 
+    align-items: center; 
+    margin-top: 28px; 
+    padding: 26px; 
+    color: var(--ink); 
+    background: var(--acid); 
+    border: 4px solid var(--ink); 
+    box-shadow: 10px 10px 0 var(--orange); 
+  } 
+
+  .organization-cta__icon { 
+    display: grid; 
+    width: 50px; 
+    height: 50px; 
+    place-items: center; 
+    color: var(--acid); 
+    background: var(--ink); 
+    border: 3px solid var(--ink); 
+  } 
+
+  .organization-cta__content > span { 
+    display: block; 
+    margin-bottom: 6px; 
+    font-family: "DM Mono", "SFMono-Regular", Consolas, monospace; 
+    font-size: 8px; 
+    font-weight: 900; 
+    letter-spacing: .11em; 
+    text-transform: uppercase; 
+  } 
+
+  .organization-cta__content h2 { 
+    margin: 0; 
+    font-family: Sora, Inter, sans-serif; 
+    font-size: clamp(22px, 3vw, 34px); 
+    font-weight: 900; 
+    line-height: .95; 
+    letter-spacing: -.055em; 
+    text-transform: uppercase; 
+  } 
+
+  .organization-cta__content p { 
+    max-width: 760px; 
+    margin: 6px 0 0; 
+    color: #33362f; 
+    font-size: 12px; 
+    line-height: 1.6; 
+  } 
+
+  .organization-cta__button { 
+    min-height: 50px; 
+    display: inline-flex; 
+    align-items: center; 
+    justify-content: center; 
+    gap: 9px; 
+    padding: 0 16px; 
+    color: var(--white); 
+    background: var(--ink); 
+    border: 3px solid var(--ink); 
+    box-shadow: 6px 6px 0 var(--white); 
+    font-family: "DM Mono", "SFMono-Regular", Consolas, monospace; 
+    font-size: 9px; 
+    font-weight: 900; 
+    letter-spacing: .08em; 
+    text-decoration: none; 
+    text-transform: uppercase; 
+    transition: transform 120ms steps(2,end), box-shadow 120ms steps(2,end); 
+  } 
+
+  .organization-cta__button:hover { 
+    transform: translate(-3px,-3px); 
+    box-shadow: 9px 9px 0 var(--orange); 
+  } 
+
+  /* STATES */ 
+
+  .empty-state { 
+    display: grid; 
+    place-items: center; 
+    padding: 56px 24px; 
+    background: var(--paper-2); 
+    border: 3px solid var(--ink); 
+    box-shadow: 8px 8px 0 var(--ink); 
+    text-align: center; 
+  } 
+
+  .empty-state--hidden { 
+    display: none; 
+  } 
+
+  .empty-state__icon { 
+    display: grid; 
+    width: 66px; 
+    height: 66px; 
+    place-items: center; 
+    margin-bottom: 14px; 
+    color: var(--ink); 
+    background: var(--acid); 
+    border: 3px solid var(--ink); 
+  } 
+
+  .empty-state h3 { 
+    margin: 0; 
+    font-family: Sora, Inter, sans-serif; 
+    font-size: 20px; 
+    font-weight: 900; 
+    letter-spacing: -.05em; 
+    text-transform: uppercase; 
+  } 
+
+  .empty-state p { 
+    max-width: 520px; 
+    margin: 8px 0 17px; 
+    color: var(--muted); 
+    font-size: 13px; 
+    line-height: 1.6; 
+  } 
+
+  .empty-state button { 
+    min-height: 40px; 
+    padding: 0 13px; 
+    color: var(--ink); 
+    background: var(--acid); 
+    border: 2px solid var(--ink); 
+    font-family: "DM Mono", "SFMono-Regular", Consolas, monospace; 
+    font-size: 8px; 
+    font-weight: 900; 
+    letter-spacing: .08em; 
+    cursor: pointer; 
+  } 
+
+  @media (max-width: 1100px) { 
+    .organizations-hero { 
+      grid-template-columns: minmax(0, 1fr) 340px; 
+      padding: 54px; 
+    } 
+
+    .organization-grid { 
+      grid-template-columns: repeat(2, minmax(0, 1fr)); 
+    } 
+
+    .trust-section { 
+      grid-template-columns: 1fr; 
+    } 
+  } 
+
+  @media (max-width: 900px) { 
+    .organizations-hero { 
+      grid-template-columns: 1fr; 
+      gap: 34px; 
+      min-height: 0; 
+    } 
+
+    .organizations-hero__stats { 
+      max-width: 600px; 
+    } 
+
+    .organization-cta { 
+      grid-template-columns: auto minmax(0, 1fr); 
+    } 
+
+    .organization-cta__button { 
+      grid-column: 1 / -1; 
+      justify-content: center; 
+    } 
+  } 
+
+  @media (max-width: 720px) { 
+    .organizations-page { 
+      width: min(1320px, calc(100% - 24px)); 
+    } 
+
+    .organizations-hero { 
+      margin-top: 20px; 
+      padding: 28px; 
+      box-shadow: 9px 9px 0 var(--orange); 
+    } 
+
+    .organizations-hero h1 { 
+      font-size: clamp(54px, 15vw, 82px); 
+    } 
+
+    .organizations-hero__outline { 
+      -webkit-text-stroke-width: 2px; 
+    } 
+
+    .hero-stat { 
+      grid-template-columns: 28px 40px minmax(0, 1fr); 
+    } 
+
+    .hero-stat strong { 
+      font-size: 30px; 
+    } 
+
+    .hero-stat__label { 
+      grid-column: 3; 
+    } 
+
+    .directory-section, 
+    .trust-section { 
+      padding: 84px 0; 
+    } 
+
+    .section-heading { 
+      grid-template-columns: 1fr; 
+      align-items: start; 
+    } 
+
+    .section-count { 
+      width: max-content; 
+    } 
+
+    .directory-tools { 
+      grid-template-columns: 1fr; 
+    } 
+
+    .organization-grid { 
+      grid-template-columns: 1fr; 
+    } 
+
+    .organization-card__body { 
+      grid-template-columns: auto minmax(0, 1fr); 
+    } 
+
+    .organization-card__arrow { 
+      display: none; 
+    } 
+
+    .organization-cta { 
+      grid-template-columns: auto minmax(0, 1fr); 
+      padding: 20px; 
+    } 
+  } 
+
+  @media (max-width: 480px) { 
+    .organizations-hero { 
+      padding: 22px; 
+    } 
+
+    .organizations-hero__actions { 
+      flex-direction: column; 
+    } 
+
+    .primary-action, 
+    .secondary-action { 
+      width: 100%; 
+    } 
+
+    .filter-panel__heading { 
+      align-items: flex-start; 
+      flex-direction: column; 
+    } 
+
+    .organization-card__footer { 
+      align-items: flex-start; 
+      flex-direction: column; 
+    } 
+  } 
+
+  @media (prefers-reduced-motion: reduce) { 
+    .organizations-page, 
+    .organizations-page * { 
+      scroll-behavior: auto !important; 
+      transition-duration: .01ms !important; 
+      animation-duration: .01ms !important; 
+      animation-iteration-count: 1 !important; 
+    } 
+  } 
+</style> 

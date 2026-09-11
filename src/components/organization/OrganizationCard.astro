@@ -190,35 +190,81 @@ const remainingWaste =
 </article>
 
 <style>
+  /* ==========================================================================
+     BINSIGHT // ORGANIZATION CARD
+     Shared visual language:
+     - Brutalist / editorial environmental intelligence
+     - Hard edges, thick borders, offset shadows
+     - Acid lime + black + paper + warning orange
+     - Mono technical labels
+     ========================================================================== */
+
   .organization-card {
+    --acid: #dfff00;
+    --acid-soft: #efff70;
+    --ink: #090a08;
+    --ink-2: #11130f;
+    --paper: #f2f0e6;
+    --paper-2: #e4e1d4;
+    --paper-3: #cfcabd;
+    --white: #fffef8;
+    --muted: #6c7068;
+    --warning: #ff6a00;
+
     position: relative;
     height: 100%;
-    overflow: hidden;
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-xl);
-    background: var(--color-surface);
+    overflow: visible;
+    color: var(--ink);
+    background: var(--white);
+    border: 3px solid var(--ink);
+    border-radius: 0;
+    box-shadow: 8px 8px 0 var(--ink);
     transition:
-      border-color 160ms ease,
-      box-shadow 160ms ease,
-      transform 160ms ease;
+      transform 120ms steps(2, end),
+      box-shadow 120ms steps(2, end),
+      background 120ms linear;
   }
 
   .organization-card:hover {
-    border-color: var(--color-primary-light);
-    box-shadow: var(--shadow-md);
-    transform: translateY(-2px);
+    background: var(--acid);
+    border-color: var(--ink);
+    box-shadow: 12px 12px 0 var(--warning);
+    transform: translate(-4px, -4px);
+  }
+
+  .organization-card:focus-within {
+    outline: 4px solid var(--acid);
+    outline-offset: 5px;
   }
 
   .organization-card--featured {
-    border-color: var(--color-primary-light);
+    box-shadow: 10px 10px 0 var(--warning);
+  }
+
+  .organization-card--featured::before {
+    position: absolute;
+    top: -10px;
+    right: 16px;
+    z-index: 3;
+    width: 54px;
+    height: 10px;
+    content: "";
+    background: var(--acid);
+    border: 3px solid var(--ink);
+    border-bottom: 0;
   }
 
   .organization-card__link {
-    display: block;
-    height: 100%;
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
     color: inherit;
     text-decoration: none;
   }
+
+  /* --------------------------------------------------------------------------
+     MEDIA / IDENTITY
+     -------------------------------------------------------------------------- */
 
   .organization-card__media {
     position: relative;
@@ -226,26 +272,70 @@ const remainingWaste =
     min-height: 11rem;
     place-items: center;
     padding: 1.5rem;
+    overflow: hidden;
     background:
-      radial-gradient(
-        circle at top right,
-        rgba(132, 204, 22, 0.16),
-        transparent 42%
+      linear-gradient(
+        rgba(255, 255, 255, 0.05) 2px,
+        transparent 2px
       ),
-      var(--color-background);
+      linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0.05) 2px,
+        transparent 2px
+      ),
+      var(--ink-2);
+    background-size: 28px 28px;
+    border-bottom: 3px solid var(--ink);
+  }
+
+  .organization-card__media::before {
+    position: absolute;
+    inset: 12px;
+    content: "";
+    pointer-events: none;
+    border: 2px solid rgba(223, 255, 0, 0.45);
+    transform: rotate(-2deg);
+  }
+
+  .organization-card:hover .organization-card__media {
+    background:
+      linear-gradient(
+        rgba(9, 10, 8, 0.07) 2px,
+        transparent 2px
+      ),
+      linear-gradient(
+        90deg,
+        rgba(9, 10, 8, 0.07) 2px,
+        transparent 2px
+      ),
+      var(--acid);
+    background-size: 28px 28px;
   }
 
   .organization-card__logo {
+    position: relative;
+    z-index: 1;
     display: grid;
     width: 5.5rem;
     height: 5.5rem;
     place-items: center;
     overflow: hidden;
-    border: 1px solid var(--color-border);
-    border-radius: 1rem;
-    background: var(--color-surface);
-    color: var(--color-primary);
-    box-shadow: var(--shadow-sm);
+    color: var(--acid);
+    background: var(--ink);
+    border: 3px solid var(--white);
+    border-radius: 0;
+    box-shadow: 7px 7px 0 var(--warning);
+    transform: rotate(-3deg);
+    transition:
+      transform 120ms steps(2, end),
+      background 120ms linear,
+      color 120ms linear;
+  }
+
+  .organization-card:hover .organization-card__logo {
+    color: var(--ink);
+    background: var(--white);
+    transform: rotate(3deg) scale(1.04);
   }
 
   .organization-card__logo img {
@@ -254,37 +344,68 @@ const remainingWaste =
     height: 100%;
     padding: 0.75rem;
     object-fit: contain;
+    background: var(--white);
   }
 
   .organization-card__type,
   .organization-card__featured {
     position: absolute;
-    top: 1rem;
-    padding: 0.35rem 0.65rem;
-    border-radius: 999px;
-    font-size: 0.72rem;
-    font-weight: 700;
+    top: 12px;
+    z-index: 2;
+    padding: 6px 8px;
+    color: var(--ink);
+    border: 2px solid var(--ink);
+    border-radius: 0;
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+    font-size: 8px;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    line-height: 1;
+    text-transform: uppercase;
   }
 
   .organization-card__type {
-    left: 1rem;
-    border: 1px solid var(--color-border);
-    background: rgba(255, 255, 255, 0.92);
-    color: var(--color-text-secondary);
+    left: 12px;
+    background: var(--white);
   }
 
   .organization-card__featured {
-    right: 1rem;
-    background: var(--color-primary);
-    color: #fff;
+    right: 12px;
+    background: var(--acid);
+    box-shadow: 4px 4px 0 var(--warning);
   }
+
+  /* --------------------------------------------------------------------------
+     BODY / INFORMATION
+     -------------------------------------------------------------------------- */
 
   .organization-card__body {
     display: flex;
     min-height: 0;
-    height: calc(100% - 11rem);
+    flex: 1;
     flex-direction: column;
-    padding: 1.25rem;
+    padding: 1.15rem;
+    background:
+      repeating-linear-gradient(
+        135deg,
+        rgba(9, 10, 8, 0.025) 0 1px,
+        transparent 1px 9px
+      ),
+      var(--white);
+  }
+
+  .organization-card:hover .organization-card__body {
+    background:
+      repeating-linear-gradient(
+        135deg,
+        rgba(9, 10, 8, 0.035) 0 1px,
+        transparent 1px 9px
+      ),
+      var(--acid);
   }
 
   .organization-card__heading {
@@ -292,6 +413,8 @@ const remainingWaste =
     align-items: flex-start;
     justify-content: space-between;
     gap: 0.75rem;
+    padding-bottom: 0.8rem;
+    border-bottom: 3px solid var(--ink);
   }
 
   .organization-card__name {
@@ -300,41 +423,71 @@ const remainingWaste =
 
   .organization-card__name h3 {
     margin: 0;
-    color: var(--color-text);
-    font-size: 1.05rem;
-    font-weight: 750;
-    line-height: 1.4;
+    color: var(--ink);
+    font-family:
+      Sora,
+      Inter,
+      ui-sans-serif,
+      system-ui,
+      sans-serif;
+    font-size: 1.45rem;
+    font-weight: 900;
+    line-height: 0.95;
+    letter-spacing: -0.055em;
+    text-transform: uppercase;
   }
 
   .organization-card__name span {
-    display: block;
-    margin-top: 0.2rem;
-    color: var(--color-text-secondary);
-    font-size: 0.76rem;
-    font-weight: 600;
+    display: inline-block;
+    margin-top: 0.45rem;
+    padding: 4px 6px;
+    color: var(--acid);
+    background: var(--ink);
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+    font-size: 8px;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    line-height: 1;
+    text-transform: uppercase;
   }
 
   .organization-card__verified {
     flex: 0 0 auto;
-    padding: 0.32rem 0.52rem;
-    border: 1px solid var(--color-primary-light);
-    border-radius: 999px;
-    background: var(--color-primary-light);
-    color: var(--color-primary-dark);
-    font-size: 0.68rem;
-    font-weight: 700;
+    padding: 5px 7px;
+    color: var(--ink);
+    background: var(--acid);
+    border: 2px solid var(--ink);
+    border-radius: 0;
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+    font-size: 7px;
+    font-weight: 900;
+    letter-spacing: 0.07em;
+    line-height: 1;
+    text-transform: uppercase;
     white-space: nowrap;
   }
 
   .organization-card__description {
     display: -webkit-box;
     overflow: hidden;
-    margin: 0.8rem 0 0;
-    color: var(--color-text-secondary);
-    font-size: 0.88rem;
-    line-height: 1.6;
+    margin: 0.85rem 0 0;
+    color: var(--muted);
+    font-size: 0.78rem;
+    line-height: 1.65;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 3;
+  }
+
+  .organization-card:hover .organization-card__description {
+    color: var(--ink);
   }
 
   .organization-card__location {
@@ -342,59 +495,95 @@ const remainingWaste =
     align-items: center;
     gap: 0.45rem;
     margin-top: 1rem;
-    color: var(--color-text);
-    font-size: 0.82rem;
-    font-weight: 650;
+    padding-top: 0.8rem;
+    color: var(--ink);
+    border-top: 2px solid var(--ink);
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+    font-size: 8px;
+    font-weight: 900;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
   }
 
   .organization-card__location svg {
     flex: 0 0 auto;
-    color: var(--color-primary);
+    color: var(--warning);
   }
 
   .organization-card__address {
-    margin: 0.3rem 0 0;
-    color: var(--color-text-secondary);
-    font-size: 0.76rem;
-    line-height: 1.5;
+    margin: 0.4rem 0 0;
+    padding-left: 21px;
+    color: var(--muted);
+    font-size: 0.72rem;
+    line-height: 1.55;
   }
+
+  /* --------------------------------------------------------------------------
+     WASTE TAGS
+     -------------------------------------------------------------------------- */
 
   .organization-card__waste {
     margin-top: 1rem;
+    padding: 0.8rem;
+    color: var(--ink);
+    background: var(--paper-2);
+    border: 2px solid var(--ink);
+  }
+
+  .organization-card:hover .organization-card__waste {
+    background: var(--white);
   }
 
   .organization-card__waste-title {
     display: flex;
     align-items: center;
     gap: 0.4rem;
-    margin-bottom: 0.5rem;
-    color: var(--color-text-secondary);
-    font-size: 0.74rem;
-    font-weight: 700;
+    margin-bottom: 0.55rem;
+    color: var(--ink);
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+    font-size: 8px;
+    font-weight: 900;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
   }
 
   .organization-card__waste-title svg {
-    color: var(--color-primary);
+    color: var(--warning);
   }
 
   .organization-card__tags {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.4rem;
+    gap: 5px;
   }
 
   .organization-card__tag {
-    padding: 0.35rem 0.55rem;
-    border-radius: 0.45rem;
-    background: var(--color-background);
-    color: var(--color-text);
-    font-size: 0.72rem;
-    font-weight: 600;
+    padding: 5px 7px;
+    color: var(--ink);
+    background: var(--white);
+    border: 2px solid var(--ink);
+    border-radius: 0;
+    font-size: 9px;
+    font-weight: 800;
+    line-height: 1.1;
   }
 
   .organization-card__tag--muted {
-    color: var(--color-text-secondary);
+    color: var(--acid);
+    background: var(--ink);
   }
+
+  /* --------------------------------------------------------------------------
+     FOOTER / ACTION
+     -------------------------------------------------------------------------- */
 
   .organization-card__footer {
     display: flex;
@@ -402,46 +591,77 @@ const remainingWaste =
     justify-content: space-between;
     gap: 0.75rem;
     margin-top: auto;
-    padding-top: 1.1rem;
-    color: var(--color-primary);
-    font-size: 0.8rem;
-    font-weight: 700;
+    padding-top: 1rem;
+    color: var(--ink);
+    border-top: 3px solid var(--ink);
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+    font-size: 8px;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .organization-card__footer svg {
+    transition: transform 120ms steps(2, end);
+  }
+
+  .organization-card:hover .organization-card__footer svg {
+    transform: translateX(4px);
   }
 
   .organization-card__external {
     position: absolute;
-    right: 1rem;
-    bottom: 1rem;
-    z-index: 2;
+    right: -8px;
+    bottom: -8px;
+    z-index: 4;
     display: grid;
-    width: 2rem;
-    height: 2rem;
+    width: 34px;
+    height: 34px;
     place-items: center;
-    border: 1px solid var(--color-border);
-    border-radius: 0.55rem;
-    background: var(--color-surface);
-    color: var(--color-text-secondary);
+    color: var(--ink);
+    background: var(--acid);
+    border: 3px solid var(--ink);
+    border-radius: 0;
+    box-shadow: 4px 4px 0 var(--warning);
     opacity: 0;
+    transform: rotate(3deg);
     transition:
-      opacity 160ms ease,
-      color 160ms ease;
+      opacity 120ms linear,
+      transform 120ms steps(2, end),
+      background 120ms linear;
   }
 
-  .organization-card:hover .organization-card__external {
+  .organization-card:hover .organization-card__external,
+  .organization-card:focus-within .organization-card__external {
     opacity: 1;
+    transform: rotate(-3deg);
   }
 
   .organization-card__external:hover {
-    color: var(--color-primary);
+    background: var(--white);
+    transform: rotate(0deg) scale(1.06);
   }
 
+  /* --------------------------------------------------------------------------
+     RESPONSIVE
+     -------------------------------------------------------------------------- */
+
   @media (max-width: 640px) {
-    .organization-card__media {
-      min-height: 9.5rem;
+    .organization-card {
+      box-shadow: 6px 6px 0 var(--ink);
     }
 
-    .organization-card__body {
-      height: calc(100% - 9.5rem);
+    .organization-card:hover {
+      box-shadow: 9px 9px 0 var(--warning);
+      transform: translate(-3px, -3px);
+    }
+
+    .organization-card__media {
+      min-height: 9rem;
     }
 
     .organization-card__logo {
@@ -449,8 +669,32 @@ const remainingWaste =
       height: 4.75rem;
     }
 
+    .organization-card__body {
+      padding: 1rem;
+    }
+
     .organization-card__heading {
       flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    .organization-card__name h3 {
+      font-size: 1.25rem;
+    }
+
+    .organization-card__external {
+      right: 8px;
+      bottom: 8px;
+      opacity: 1;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .organization-card,
+    .organization-card__logo,
+    .organization-card__footer svg,
+    .organization-card__external {
+      transition: none;
     }
   }
 </style>

@@ -34,9 +34,9 @@ import * as locationData from "@lib/data/locations";
 
 const { area: areaSlug } = Astro.params;
 
-/* -------------------------------------------------------------------------- */
-/* Area                                                                        */
-/* -------------------------------------------------------------------------- */
+/* ============================================================================
+   AREA
+   ========================================================================== */
 
 const areas: Area[] = getAreas();
 
@@ -52,24 +52,15 @@ if (!area) {
   return Astro.redirect("/map");
 }
 
-/* -------------------------------------------------------------------------- */
-/* Compatibility layer                                                        */
-/* -------------------------------------------------------------------------- */
-/**
- * The current locations module exposes Area/WasteLocation types and getAreas(),
- * but does not expose getWasteLocations().
- *
- * Instead of inventing an API name, inspect the module at runtime and accept
- * the common array/getter shapes when available.
- *
- * This keeps this page type-safe against the real module surface and avoids
- * coupling the page to a guessed export.
- */
+/* ============================================================================
+   LOCATION COMPATIBILITY
+   ========================================================================== */
 
 type LocationModuleCompatibility = {
   getLocations?: () => WasteLocation[];
   getPublicLocations?: () => WasteLocation[];
   getActiveLocations?: () => WasteLocation[];
+
   locations?: readonly WasteLocation[];
   wasteLocations?: readonly WasteLocation[];
   WASTE_LOCATIONS?: readonly WasteLocation[];
@@ -79,7 +70,7 @@ type LocationModuleCompatibility = {
 const compatibleLocationModule =
   locationData as unknown as LocationModuleCompatibility;
 
-const getLocationCandidates = (): WasteLocation[] => {
+function getLocationCandidates(): WasteLocation[] {
   const getterCandidates = [
     compatibleLocationModule.getLocations,
     compatibleLocationModule.getPublicLocations,
@@ -87,12 +78,14 @@ const getLocationCandidates = (): WasteLocation[] => {
   ];
 
   for (const getter of getterCandidates) {
-    if (typeof getter === "function") {
-      const value = getter();
+    if (typeof getter !== "function") {
+      continue;
+    }
 
-      if (Array.isArray(value)) {
-        return value;
-      }
+    const value = getter();
+
+    if (Array.isArray(value)) {
+      return value;
     }
   }
 
@@ -110,19 +103,19 @@ const getLocationCandidates = (): WasteLocation[] => {
   }
 
   return [];
-};
+}
 
 const allLocations = getLocationCandidates();
 
-/* -------------------------------------------------------------------------- */
-/* Organizations                                                               */
-/* -------------------------------------------------------------------------- */
+/* ============================================================================
+   ORGANIZATIONS
+   ========================================================================== */
 
 const organizations: Organization[] =
   getPublicOrganizations();
 
-const areaOrganizations = organizations.filter(
-  (organization) => {
+const areaOrganizations =
+  organizations.filter((organization) => {
     if (!organization.isPublic) {
       return false;
     }
@@ -134,12 +127,11 @@ const areaOrganizations = organizations.filter(
     return (
       organization.location?.area === area.name
     );
-  },
-);
+  });
 
-/* -------------------------------------------------------------------------- */
-/* Locations                                                                   */
-/* -------------------------------------------------------------------------- */
+/* ============================================================================
+   LOCATIONS
+   ========================================================================== */
 
 const areaLocations: WasteLocation[] =
   allLocations.filter(
@@ -148,9 +140,9 @@ const areaLocations: WasteLocation[] =
       location.areaId === area.id,
   );
 
-/* -------------------------------------------------------------------------- */
-/* Reports                                                                     */
-/* -------------------------------------------------------------------------- */
+/* ============================================================================
+   REPORTS
+   ========================================================================== */
 
 const reports: Report[] = getReports();
 
@@ -160,9 +152,9 @@ const areaReports = reports.filter(
     report.status !== "rejected",
 );
 
-/* -------------------------------------------------------------------------- */
-/* Location statistics                                                        */
-/* -------------------------------------------------------------------------- */
+/* ============================================================================
+   LOCATION TYPES
+   ========================================================================== */
 
 const locationTypeLabels: Record<string, string> = {
   "collection-point": "Titik Pengumpulan",
@@ -189,9 +181,9 @@ const topLocationTypes = Object.entries(
   )
   .slice(0, 5);
 
-/* -------------------------------------------------------------------------- */
-/* Page metadata                                                               */
-/* -------------------------------------------------------------------------- */
+/* ============================================================================
+   PAGE META
+   ========================================================================== */
 
 const breadcrumbItems = [
   {
@@ -224,12 +216,19 @@ const pageDescription =
     description={pageDescription}
     breadcrumbs={breadcrumbItems}
     icon="map"
-    eyebrow="Eksplorasi area"
+    eyebrow="BINSIGHT · AREA"
     tone="green"
   />
 
   <main class="area-page">
-    <section class="area-hero">
+    <!-- =====================================================================
+         AREA HERO
+         ================================================================== -->
+
+    <section
+      class="area-hero"
+      aria-labelledby="area-title"
+    >
       <div class="area-hero__content">
         <a
           href="/map"
@@ -240,6 +239,7 @@ const pageDescription =
             stroke-width={2}
             aria-hidden="true"
           />
+
           <span>Kembali ke Peta Badung</span>
         </a>
 
@@ -249,17 +249,23 @@ const pageDescription =
             stroke-width={2}
             aria-hidden="true"
           />
+
           <span>Kecamatan / Area</span>
         </div>
 
-        <h1>{area.name}</h1>
+        <h1 id="area-title">
+          {area.name}
+        </h1>
 
         <p class="area-hero__description">
           {area.description ||
             `Jelajahi ekosistem pengelolaan sampah yang tercatat di ${area.name}.`}
         </p>
 
-        <div class="area-stats">
+        <div
+          class="area-stats"
+          aria-label="Ringkasan area"
+        >
           <div class="area-stat">
             <span class="area-stat__icon">
               <MapPin
@@ -270,7 +276,10 @@ const pageDescription =
             </span>
 
             <span class="area-stat__content">
-              <strong>{areaLocations.length}</strong>
+              <strong>
+                {areaLocations.length}
+              </strong>
+
               <small>Lokasi aktif</small>
             </span>
           </div>
@@ -285,7 +294,10 @@ const pageDescription =
             </span>
 
             <span class="area-stat__content">
-              <strong>{areaOrganizations.length}</strong>
+              <strong>
+                {areaOrganizations.length}
+              </strong>
+
               <small>Organisasi</small>
             </span>
           </div>
@@ -300,7 +312,10 @@ const pageDescription =
             </span>
 
             <span class="area-stat__content">
-              <strong>{areaReports.length}</strong>
+              <strong>
+                {areaReports.length}
+              </strong>
+
               <small>Laporan</small>
             </span>
           </div>
@@ -311,8 +326,14 @@ const pageDescription =
         class="area-hero__visual"
         aria-hidden="true"
       >
+        <div class="visual-grid"></div>
+
         <div class="visual-ring visual-ring--outer"></div>
+        <div class="visual-ring visual-ring--middle"></div>
         <div class="visual-ring visual-ring--inner"></div>
+
+        <div class="visual-cross visual-cross--one"></div>
+        <div class="visual-cross visual-cross--two"></div>
 
         <div class="visual-marker">
           <MapPin
@@ -327,12 +348,16 @@ const pageDescription =
       </div>
     </section>
 
+    <!-- =====================================================================
+         MAP
+         ================================================================== -->
+
     <section
       class="map-section"
       aria-labelledby="map-section-title"
     >
       <div class="section-heading">
-        <div>
+        <div class="section-heading__content">
           <span class="section-eyebrow">
             Peta area
           </span>
@@ -356,6 +381,7 @@ const pageDescription =
             stroke-width={2}
             aria-hidden="true"
           />
+
           <span>Laporkan masalah</span>
         </a>
       </div>
@@ -379,15 +405,42 @@ const pageDescription =
           />
         </label>
 
-        <div class="map-count">
-          <strong>{areaLocations.length}</strong>
+        <div
+          class="map-count"
+          aria-label={`${areaLocations.length} lokasi aktif`}
+        >
+          <strong>
+            {areaLocations.length}
+          </strong>
+
           <span>lokasi aktif</span>
         </div>
       </div>
 
       <div class="map-layout">
-        <aside class="map-sidebar">
+        <aside
+          class="map-sidebar"
+          aria-label="Filter dan informasi area"
+        >
           <div class="filter-card">
+            <div class="filter-card__header">
+              <div>
+                <span class="filter-card__eyebrow">
+                  Wilayah
+                </span>
+
+                <strong>
+                  Area Badung
+                </strong>
+              </div>
+
+              <MapPin
+                size={18}
+                stroke-width={2}
+                aria-hidden="true"
+              />
+            </div>
+
             <MapFilter areas={activeAreas} />
           </div>
 
@@ -400,7 +453,7 @@ const pageDescription =
               />
             </div>
 
-            <div>
+            <div class="sidebar-note__body">
               <strong>
                 Jelajahi area lain
               </strong>
@@ -412,7 +465,8 @@ const pageDescription =
             </div>
 
             <a href="/map">
-              Lihat semua area
+              <span>Lihat semua area</span>
+
               <ArrowLeft
                 size={15}
                 stroke-width={2}
@@ -425,7 +479,9 @@ const pageDescription =
         <div class="map-container">
           {
             areaLocations.length > 0 ? (
-              <WasteMap locations={areaLocations} />
+              <WasteMap
+                locations={areaLocations}
+              />
             ) : (
               <div class="map-empty">
                 <div class="map-empty__icon">
@@ -443,7 +499,8 @@ const pageDescription =
                 <p>
                   Belum terdapat lokasi pengelolaan
                   sampah aktif yang tersedia untuk
-                  ditampilkan pada area {area.name}.
+                  ditampilkan pada area{" "}
+                  {area.name}.
                 </p>
 
                 <a href="/reports/create">
@@ -456,12 +513,16 @@ const pageDescription =
       </div>
     </section>
 
+    <!-- =====================================================================
+         OVERVIEW
+         ================================================================== -->
+
     <section
       class="overview-section"
       aria-labelledby="overview-title"
     >
       <div class="section-heading section-heading--compact">
-        <div>
+        <div class="section-heading__content">
           <span class="section-eyebrow">
             Ringkasan
           </span>
@@ -479,19 +540,27 @@ const pageDescription =
 
       <div class="overview-grid">
         <article class="overview-card">
-          <div class="overview-card__icon overview-card__icon--green">
-            <MapPin
-              size={20}
-              stroke-width={2}
-              aria-hidden="true"
-            />
+          <div class="overview-card__top">
+            <div class="overview-card__icon">
+              <MapPin
+                size={20}
+                stroke-width={2}
+                aria-hidden="true"
+              />
+            </div>
+
+            <span>
+              01
+            </span>
           </div>
 
           <span class="overview-card__label">
             Lokasi aktif
           </span>
 
-          <strong>{areaLocations.length}</strong>
+          <strong>
+            {areaLocations.length}
+          </strong>
 
           <p>
             Titik pengelolaan sampah yang saat ini
@@ -500,19 +569,27 @@ const pageDescription =
         </article>
 
         <article class="overview-card">
-          <div class="overview-card__icon overview-card__icon--lime">
-            <Building2
-              size={20}
-              stroke-width={2}
-              aria-hidden="true"
-            />
+          <div class="overview-card__top">
+            <div class="overview-card__icon">
+              <Building2
+                size={20}
+                stroke-width={2}
+                aria-hidden="true"
+              />
+            </div>
+
+            <span>
+              02
+            </span>
           </div>
 
           <span class="overview-card__label">
             Organisasi
           </span>
 
-          <strong>{areaOrganizations.length}</strong>
+          <strong>
+            {areaOrganizations.length}
+          </strong>
 
           <p>
             Organisasi terverifikasi yang tersedia
@@ -521,26 +598,39 @@ const pageDescription =
         </article>
 
         <article class="overview-card">
-          <div class="overview-card__icon overview-card__icon--blue">
-            <Recycle
-              size={20}
-              stroke-width={2}
-              aria-hidden="true"
-            />
+          <div class="overview-card__top">
+            <div class="overview-card__icon">
+              <TriangleAlert
+                size={20}
+                stroke-width={2}
+                aria-hidden="true"
+              />
+            </div>
+
+            <span>
+              03
+            </span>
           </div>
 
           <span class="overview-card__label">
-            Tipe lokasi
+            Laporan
           </span>
 
-          <strong>{topLocationTypes.length}</strong>
+          <strong>
+            {areaReports.length}
+          </strong>
 
           <p>
-            Kategori lokasi pengelolaan yang tersedia.
+            Laporan yang terkait dengan lokasi pada
+            area ini.
           </p>
         </article>
       </div>
     </section>
+
+    <!-- =====================================================================
+         DISTRIBUTION
+         ================================================================== -->
 
     {
       topLocationTypes.length > 0 && (
@@ -549,7 +639,7 @@ const pageDescription =
           aria-labelledby="distribution-title"
         >
           <div class="section-heading section-heading--compact">
-            <div>
+            <div class="section-heading__content">
               <span class="section-eyebrow">
                 Distribusi
               </span>
@@ -567,7 +657,7 @@ const pageDescription =
 
           <div class="distribution-grid">
             {topLocationTypes.map(
-              ([type, count]) => {
+              ([type, count], index) => {
                 const percentage =
                   areaLocations.length > 0
                     ? Math.round(
@@ -577,44 +667,60 @@ const pageDescription =
                       )
                     : 0;
 
+                const width =
+                  count > 0
+                    ? Math.max(
+                        percentage,
+                        8,
+                      )
+                    : 0;
+
                 return (
                   <article class="distribution-card">
-                    <div class="distribution-card__top">
-                      <div class="distribution-card__icon">
-                        <Recycle
-                          size={19}
-                          stroke-width={2}
-                          aria-hidden="true"
-                        />
-                      </div>
-
-                      <div class="distribution-card__text">
-                        <span>
-                          {locationTypeLabels[type] ??
-                            type}
-                        </span>
-
-                        <strong>
-                          {count}
-                        </strong>
-                      </div>
+                    <div class="distribution-card__number">
+                      {String(index + 1).padStart(
+                        2,
+                        "0",
+                      )}
                     </div>
 
-                    <div
-                      class="distribution-bar"
-                      aria-hidden="true"
-                    >
-                      <span
-                        style={`width: ${Math.max(
-                          percentage,
-                          count > 0 ? 8 : 0,
-                        )}%`}
-                      ></span>
-                    </div>
+                    <div class="distribution-card__main">
+                      <div class="distribution-card__top">
+                        <div class="distribution-card__icon">
+                          <Recycle
+                            size={19}
+                            stroke-width={2}
+                            aria-hidden="true"
+                          />
+                        </div>
 
-                    <small>
-                      {percentage}% dari seluruh lokasi
-                    </small>
+                        <div class="distribution-card__text">
+                          <strong>
+                            {locationTypeLabels[
+                              type
+                            ] ?? type}
+                          </strong>
+
+                          <span>
+                            {count} lokasi
+                          </span>
+                        </div>
+                      </div>
+
+                      <div
+                        class="distribution-bar"
+                        aria-hidden="true"
+                      >
+                        <span
+                          style={`width:${width}%`}
+                        ></span>
+                      </div>
+
+                      <small>
+                        {percentage}% dari seluruh
+                        lokasi
+                      </small>
+                    </div>
                   </article>
                 );
               },
@@ -624,12 +730,16 @@ const pageDescription =
       )
     }
 
+    <!-- =====================================================================
+         ORGANIZATIONS
+         ================================================================== -->
+
     <section
       class="organizations-section"
       aria-labelledby="organizations-title"
     >
       <div class="section-heading">
-        <div>
+        <div class="section-heading__content">
           <span class="section-eyebrow">
             Organisasi
           </span>
@@ -639,8 +749,8 @@ const pageDescription =
           </h2>
 
           <p>
-            Organisasi yang tercatat berada di
-            {` ${area.name}`}.
+            Organisasi yang tercatat berada di{" "}
+            {area.name}.
           </p>
         </div>
 
@@ -718,7 +828,14 @@ const pageDescription =
       }
     </section>
 
-    <section class="area-cta">
+    <!-- =====================================================================
+         CTA
+         ================================================================== -->
+
+    <section
+      class="area-cta"
+      aria-labelledby="area-cta-title"
+    >
       <div class="area-cta__icon">
         <TriangleAlert
           size={23}
@@ -728,9 +845,11 @@ const pageDescription =
       </div>
 
       <div class="area-cta__content">
-        <span>Kontribusi masyarakat</span>
+        <span>
+          Kontribusi masyarakat
+        </span>
 
-        <h2>
+        <h2 id="area-cta-title">
           Punya informasi tentang area ini?
         </h2>
 
@@ -745,7 +864,7 @@ const pageDescription =
         href={`/reports/create?area=${encodeURIComponent(area.slug)}`}
         class="area-cta__button"
       >
-        Buat laporan
+        <span>Buat laporan</span>
 
         <ArrowLeft
           size={17}
@@ -789,726 +908,1944 @@ const pageDescription =
 </script>
 
 <style>
-  .area-page {
-    width: min(100% - 32px, 1440px);
-    margin-inline: auto;
-    padding-bottom: 80px;
+  /* ==========================================================================
+     BINSIGHT // AREA PAGE
+     Editorial environmental intelligence
+     Brutalist / hard-edge interface
+     ========================================================================== */
+
+  .area-page,
+  .area-page *,
+  .area-page *::before,
+  .area-page *::after {
+    box-sizing: border-box;
   }
 
-  .area-hero {
+  .area-page {
+    --acid: #dfff00;
+    --acid-soft: #efff70;
+
+    --ink: #090a08;
+    --ink-2: #11130f;
+    --ink-3: #1b1f18;
+
+    --paper: #f2f0e6;
+    --paper-2: #e4e1d4;
+
+    --white: #fffef8;
+    --muted: #6c7068;
+
+    --warning: #ff6a00;
+
+    width: min(
+      1320px,
+      calc(100% - 40px)
+    );
+
+    margin-inline: auto;
+
+    padding-bottom: 110px;
+
+    color: var(--ink);
+
+    overflow: visible;
+  }
+
+  .area-page img,
+  .area-page svg {
+    max-width: 100%;
+  }
+
+  .area-page input,
+  .area-page button {
+    font: inherit;
+  }
+
+  .area-page section {
     position: relative;
+    min-width: 0;
+  }
+
+  .area-page h1,
+  .area-page h2,
+  .area-page h3,
+  .area-page p {
+    overflow-wrap: anywhere;
+  }
+
+  /* ==========================================================================
+     HERO
+     ========================================================================== */
+
+  .area-hero {
     display: grid;
-    grid-template-columns: minmax(0, 1.3fr) minmax(280px, 0.7fr);
-    gap: 32px;
+
+    grid-template-columns:
+      minmax(0, 1.3fr)
+      minmax(310px, 0.7fr);
+
+    min-width: 0;
+
+    margin-top: 34px;
+
     overflow: hidden;
-    margin-top: 32px;
-    padding: 40px;
-    border: 1px solid var(--color-border, #e2e8f0);
-    border-radius: 28px;
-    background:
-      radial-gradient(
-        circle at 84% 18%,
-        rgba(132, 204, 22, 0.14),
-        transparent 32%
-      ),
-      linear-gradient(
-        135deg,
-        #ffffff 0%,
-        #f0fdf4 100%
-      );
+
+    background: var(--ink);
+
+    border: 4px solid var(--white);
+
+    box-shadow:
+      15px 15px 0 var(--warning);
   }
 
   .area-hero__content {
     position: relative;
-    z-index: 2;
+    z-index: 1;
+
+    min-width: 0;
+
+    padding: clamp(
+      32px,
+      5vw,
+      56px
+    );
+
+    color: var(--white);
+
+    background:
+      linear-gradient(
+        rgba(255, 255, 255, 0.045) 2px,
+        transparent 2px
+      ),
+      linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0.045) 2px,
+        transparent 2px
+      ),
+      var(--ink);
+
+    background-size: 30px 30px;
   }
 
   .back-link {
     display: inline-flex;
+
     align-items: center;
+
     gap: 8px;
-    margin-bottom: 25px;
-    color: #166534;
-    font-size: 0.9rem;
-    font-weight: 750;
+
+    min-height: 36px;
+
+    padding-inline: 9px;
+
+    color: var(--ink);
+
+    background: var(--acid);
+
+    border: 2px solid var(--ink);
+
+    box-shadow:
+      4px 4px 0 var(--white);
+
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+
+    font-size: 8px;
+    font-weight: 900;
+
+    letter-spacing: 0.06em;
+
     text-decoration: none;
+
+    text-transform: uppercase;
+
+    transition:
+      transform 120ms steps(2, end),
+      box-shadow 120ms steps(2, end);
   }
 
   .back-link:hover {
-    text-decoration: underline;
+    transform:
+      translate(-2px, -2px);
+
+    box-shadow:
+      6px 6px 0 var(--warning);
   }
 
-  .area-label,
-  .section-eyebrow {
+  .area-label {
     display: inline-flex;
+
     align-items: center;
+
     gap: 7px;
-    color: #166534;
-    font-size: 0.76rem;
-    font-weight: 800;
-    letter-spacing: 0.08em;
+
+    margin-top: 28px;
+
+    padding: 6px 8px;
+
+    color: var(--ink);
+
+    background: var(--acid);
+
+    border: 2px solid var(--ink);
+
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+
+    font-size: 8px;
+    font-weight: 900;
+
+    letter-spacing: 0.09em;
+
     text-transform: uppercase;
   }
 
   .area-hero h1 {
-    max-width: 820px;
-    margin: 10px 0 0;
-    color: #0f172a;
-    font-size: clamp(2.2rem, 4vw, 3.8rem);
-    line-height: 1.04;
-    letter-spacing: -0.045em;
+    max-width: 850px;
+
+    margin: 20px 0 0;
+
+    color: var(--white);
+
+    font-family:
+      Sora,
+      Inter,
+      ui-sans-serif,
+      system-ui,
+      sans-serif;
+
+    font-size:
+      clamp(
+        48px,
+        6.5vw,
+        90px
+      );
+
+    font-weight: 900;
+
+    line-height: 0.86;
+
+    letter-spacing: -0.085em;
+
+    text-transform: uppercase;
   }
 
   .area-hero__description {
-    max-width: 760px;
-    margin: 19px 0 0;
-    color: #64748b;
-    font-size: 1.02rem;
+    max-width: 720px;
+
+    margin: 28px 0 0;
+
+    padding-left: 15px;
+
+    color: #d1d4cb;
+
+    border-left:
+      7px solid var(--acid);
+
+    font-size: 13px;
+
     line-height: 1.75;
   }
 
   .area-stats {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    margin-top: 28px;
+    display: grid;
+
+    grid-template-columns:
+      repeat(3, minmax(0, 1fr));
+
+    gap: 10px;
+
+    max-width: 780px;
+
+    margin-top: 30px;
   }
 
   .area-stat {
-    display: flex;
+    display: grid;
+
+    grid-template-columns:
+      42px minmax(0, 1fr);
+
     align-items: center;
+
     gap: 10px;
-    min-width: 154px;
-    padding: 11px 13px;
-    border: 1px solid #e2e8f0;
-    border-radius: 15px;
-    background: rgba(255, 255, 255, 0.86);
+
+    min-width: 0;
+
+    padding: 12px;
+
+    color: var(--white);
+
+    background:
+      rgba(255, 255, 255, 0.045);
+
+    border: 2px solid
+      rgba(255, 255, 255, 0.25);
   }
 
   .area-stat__icon {
     display: grid;
-    width: 38px;
-    height: 38px;
+
+    width: 42px;
+    height: 42px;
+
     place-items: center;
-    flex: 0 0 38px;
-    border-radius: 12px;
-    background: #dcfce7;
-    color: #166534;
+
+    color: var(--ink);
+
+    background: var(--acid);
+
+    border: 2px solid var(--ink);
+
+    transform: rotate(-3deg);
   }
 
   .area-stat__content {
+    min-width: 0;
+
     display: grid;
-    gap: 1px;
+
+    gap: 4px;
   }
 
   .area-stat__content strong {
-    color: #0f172a;
-    font-size: 1.08rem;
-    line-height: 1.1;
+    color: var(--white);
+
+    font-family:
+      Sora,
+      Inter,
+      sans-serif;
+
+    font-size: 25px;
+    font-weight: 900;
+
+    line-height: 0.9;
+
+    letter-spacing: -0.05em;
   }
 
   .area-stat__content small {
-    color: #64748b;
-    font-size: 0.75rem;
+    color: #bfc2b9;
+
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+
+    font-size: 7px;
+    font-weight: 900;
+
+    letter-spacing: 0.07em;
+
+    text-transform: uppercase;
   }
+
+  /* ==========================================================================
+     HERO VISUAL
+     ========================================================================== */
 
   .area-hero__visual {
     position: relative;
-    min-height: 300px;
+
+    min-width: 0;
+    min-height: 340px;
+
+    overflow: hidden;
+
+    background:
+      linear-gradient(
+        rgba(223, 255, 0, 0.07) 2px,
+        transparent 2px
+      ),
+      linear-gradient(
+        90deg,
+        rgba(223, 255, 0, 0.07) 2px,
+        transparent 2px
+      ),
+      #20271b;
+
+    background-size: 28px 28px;
+
+    border-left:
+      4px solid var(--white);
+  }
+
+  .visual-grid {
+    position: absolute;
+    inset: 0;
+
+    background:
+      linear-gradient(
+        90deg,
+        transparent 49.5%,
+        rgba(223, 255, 0, 0.2) 50%,
+        transparent 50.5%
+      ),
+      linear-gradient(
+        transparent 49.5%,
+        rgba(223, 255, 0, 0.2) 50%,
+        transparent 50.5%
+      );
+
+    background-size:
+      90px 90px;
+
+    opacity: 0.45;
   }
 
   .visual-ring {
     position: absolute;
-    border: 1px solid rgba(22, 101, 52, 0.13);
-    border-radius: 999px;
+
+    border:
+      2px solid rgba(
+        223,
+        255,
+        0,
+        0.24
+      );
+
+    border-radius: 50%;
+
+    transform:
+      translate(-50%, -50%);
   }
 
   .visual-ring--outer {
-    inset: 6%;
+    top: 50%;
+    left: 50%;
+
+    width: 280px;
+    height: 280px;
+  }
+
+  .visual-ring--middle {
+    top: 50%;
+    left: 50%;
+
+    width: 190px;
+    height: 190px;
   }
 
   .visual-ring--inner {
-    inset: 22%;
+    top: 50%;
+    left: 50%;
+
+    width: 110px;
+    height: 110px;
+
+    border-color:
+      rgba(255, 255, 255, 0.3);
   }
 
   .visual-marker {
     position: absolute;
+
     top: 50%;
     left: 50%;
+
     display: grid;
-    width: 88px;
-    height: 88px;
+
+    width: 76px;
+    height: 76px;
+
     place-items: center;
-    transform: translate(-50%, -50%);
-    border: 1px solid rgba(22, 101, 52, 0.18);
-    border-radius: 27px;
-    background: rgba(255, 255, 255, 0.96);
+
+    color: var(--ink);
+
+    background: var(--acid);
+
+    border: 3px solid var(--ink);
+
     box-shadow:
-      0 20px 50px rgba(15, 23, 42, 0.1);
-    color: #166534;
+      8px 8px 0 var(--warning);
+
+    transform:
+      translate(-50%, -50%) rotate(-3deg);
   }
 
   .visual-dot {
     position: absolute;
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background: #84cc16;
-    box-shadow: 0 0 0 7px rgba(132, 204, 22, 0.12);
+
+    width: 9px;
+    height: 9px;
+
+    background: var(--acid);
+
+    border: 2px solid var(--ink);
+
+    box-shadow:
+      0 0 0 5px
+      rgba(223, 255, 0, 0.12);
   }
 
   .visual-dot--one {
-    top: 20%;
-    left: 24%;
+    top: 22%;
+    left: 22%;
   }
 
   .visual-dot--two {
     top: 28%;
-    right: 17%;
+    right: 19%;
   }
 
   .visual-dot--three {
     right: 25%;
-    bottom: 17%;
+    bottom: 20%;
   }
+
+  .visual-cross {
+    position: absolute;
+
+    width: 22px;
+    height: 22px;
+  }
+
+  .visual-cross::before,
+  .visual-cross::after {
+    position: absolute;
+
+    content: "";
+
+    background: var(--warning);
+  }
+
+  .visual-cross::before {
+    top: 10px;
+    left: 0;
+
+    width: 22px;
+    height: 2px;
+  }
+
+  .visual-cross::after {
+    top: 0;
+    left: 10px;
+
+    width: 2px;
+    height: 22px;
+  }
+
+  .visual-cross--one {
+    top: 16%;
+    right: 16%;
+  }
+
+  .visual-cross--two {
+    bottom: 16%;
+    left: 17%;
+  }
+
+  /* ==========================================================================
+     SECTION HEADINGS
+     ========================================================================== */
 
   .map-section,
   .overview-section,
   .distribution-section,
   .organizations-section {
-    margin-top: 56px;
+    margin-top: 118px;
   }
 
   .section-heading {
-    display: flex;
+    display: grid;
+
+    grid-template-columns:
+      minmax(0, 1fr)
+      auto;
+
     align-items: end;
-    justify-content: space-between;
-    gap: 24px;
-    margin-bottom: 22px;
+
+    gap: 30px;
+
+    margin-bottom: 28px;
   }
 
   .section-heading--compact {
-    align-items: start;
+    grid-template-columns:
+      minmax(0, 1fr);
+  }
+
+  .section-heading__content {
+    min-width: 0;
+  }
+
+  .section-eyebrow {
+    padding: 6px 8px;
+
+    color: var(--ink);
+
+    background: var(--acid);
+
+    border: 2px solid var(--ink);
+
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+
+    font-size: 8px;
+    font-weight: 900;
+
+    letter-spacing: 0.09em;
+
+    text-transform: uppercase;
   }
 
   .section-heading h2 {
-    margin: 7px 0 0;
-    color: #0f172a;
-    font-size: clamp(1.5rem, 2.5vw, 2.1rem);
-    line-height: 1.1;
-    letter-spacing: -0.035em;
+    max-width: 850px;
+
+    margin: 16px 0 0;
+
+    color: var(--ink);
+
+    font-family:
+      Sora,
+      Inter,
+      ui-sans-serif,
+      system-ui,
+      sans-serif;
+
+    font-size:
+      clamp(
+        40px,
+        4.8vw,
+        70px
+      );
+
+    font-weight: 900;
+
+    line-height: 0.88;
+
+    letter-spacing: -0.08em;
+
+    text-transform: uppercase;
   }
 
   .section-heading p {
-    max-width: 720px;
-    margin: 8px 0 0;
-    color: #64748b;
-    line-height: 1.65;
+    max-width: 650px;
+
+    margin: 13px 0 0;
+
+    color: var(--muted);
+
+    font-size: 13px;
+
+    line-height: 1.7;
   }
 
   .section-action {
     display: inline-flex;
+
     align-items: center;
     justify-content: center;
+
     gap: 8px;
-    min-height: 44px;
-    flex: 0 0 auto;
-    padding: 0 15px;
-    border: 1px solid #166534;
-    border-radius: 12px;
-    background: #166534;
-    color: #fff;
-    font-size: 0.86rem;
-    font-weight: 750;
+
+    min-height: 48px;
+
+    padding-inline: 14px;
+
+    color: var(--ink);
+
+    background: var(--acid);
+
+    border: 3px solid var(--ink);
+
+    box-shadow:
+      6px 6px 0 var(--warning);
+
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+
+    font-size: 8px;
+    font-weight: 900;
+
+    letter-spacing: 0.06em;
+
     text-decoration: none;
+
+    text-transform: uppercase;
+
+    transition:
+      transform 120ms steps(2, end),
+      box-shadow 120ms steps(2, end);
   }
 
   .section-action:hover {
-    background: #14532d;
-    border-color: #14532d;
+    transform:
+      translate(-3px, -3px);
+
+    box-shadow:
+      9px 9px 0 var(--ink);
   }
 
   .section-action--secondary {
-    background: #fff;
-    color: #166534;
+    color: var(--acid);
+
+    background: var(--ink);
+
+    border-color: var(--ink);
+
+    box-shadow:
+      6px 6px 0 var(--warning);
   }
 
   .section-action--secondary:hover {
-    background: #f0fdf4;
+    color: var(--ink);
+
+    background: var(--acid);
   }
 
+  /* ==========================================================================
+     MAP TOOLBAR
+     ========================================================================== */
+
   .map-toolbar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    margin-bottom: 14px;
+    display: grid;
+
+    grid-template-columns:
+      minmax(0, 1fr)
+      auto;
+
+    align-items: stretch;
+
+    gap: 12px;
+
+    margin-bottom: 16px;
   }
 
   .search-box {
     display: flex;
+
     align-items: center;
-    width: min(100%, 520px);
-    height: 48px;
-    gap: 10px;
+
+    width: 100%;
+    min-width: 0;
+    min-height: 56px;
+
+    gap: 11px;
+
     padding-inline: 15px;
-    border: 1px solid #e2e8f0;
-    border-radius: 14px;
-    background: #fff;
-    color: #64748b;
+
+    color: var(--ink);
+
+    background: var(--white);
+
+    border: 3px solid var(--ink);
+
+    box-shadow:
+      6px 6px 0 var(--ink);
+
+    transition:
+      transform 120ms steps(2, end),
+      box-shadow 120ms steps(2, end);
   }
 
   .search-box:focus-within {
-    border-color: #166534;
     box-shadow:
-      0 0 0 3px rgba(22, 101, 52, 0.08);
+      8px 8px 0 var(--warning);
+
+    transform:
+      translate(-2px, -2px);
+  }
+
+  .search-box svg {
+    flex: 0 0 auto;
+
+    color: var(--warning);
   }
 
   .search-box input {
     width: 100%;
+    min-width: 0;
+
+    padding: 0;
+
     border: 0;
     outline: 0;
+
     background: transparent;
-    color: #0f172a;
-    font: inherit;
+
+    color: var(--ink);
+
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+
+    font-size: 10px;
+    font-weight: 700;
   }
 
   .search-box input::placeholder {
-    color: #94a3b8;
+    color: var(--muted);
   }
 
   .map-count {
     display: inline-flex;
-    align-items: baseline;
-    gap: 6px;
-    color: #64748b;
-    font-size: 0.84rem;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 8px;
+
+    min-width: 150px;
+
+    padding: 0 14px;
+
+    color: var(--acid);
+
+    background: var(--ink);
+
+    border: 3px solid var(--ink);
+
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+
+    font-size: 8px;
+    font-weight: 900;
+
+    letter-spacing: 0.06em;
+
+    text-transform: uppercase;
   }
 
   .map-count strong {
-    color: #0f172a;
-    font-size: 1rem;
+    color: var(--acid);
+
+    font-family:
+      Sora,
+      Inter,
+      sans-serif;
+
+    font-size: 23px;
+
+    line-height: 1;
+
+    letter-spacing: -0.05em;
   }
+
+  /* ==========================================================================
+     MAP LAYOUT
+     ========================================================================== */
 
   .map-layout {
     display: grid;
-    grid-template-columns: 290px minmax(0, 1fr);
-    gap: 16px;
+
+    grid-template-columns:
+      minmax(240px, 300px)
+      minmax(0, 1fr);
+
+    gap: 20px;
+
+    width: 100%;
+    min-width: 0;
+
+    align-items: start;
   }
 
   .map-sidebar {
     display: flex;
     flex-direction: column;
-    gap: 16px;
+
+    gap: 14px;
+
+    min-width: 0;
   }
 
+  /* ==========================================================================
+     FILTER CARD
+     ========================================================================== */
+
   .filter-card {
-    padding: 16px;
-    border: 1px solid #e2e8f0;
-    border-radius: 17px;
-    background: #fff;
+    min-width: 0;
+
+    padding: 17px;
+
+    color: var(--white);
+
+    background: var(--ink);
+
+    border: 3px solid var(--white);
+
+    box-shadow:
+      7px 7px 0 var(--warning);
   }
+
+  .filter-card__header {
+    display: flex;
+
+    align-items: flex-start;
+
+    justify-content: space-between;
+
+    gap: 12px;
+
+    margin-bottom: 16px;
+  }
+
+  .filter-card__header > div {
+    min-width: 0;
+  }
+
+  .filter-card__eyebrow {
+    display: block;
+
+    color: #aeb1a8;
+
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+
+    font-size: 7px;
+    font-weight: 900;
+
+    letter-spacing: 0.09em;
+
+    text-transform: uppercase;
+  }
+
+  .filter-card__header strong {
+    display: block;
+
+    margin-top: 5px;
+
+    color: var(--white);
+
+    font-family:
+      Sora,
+      Inter,
+      sans-serif;
+
+    font-size: 18px;
+    font-weight: 900;
+
+    line-height: 0.95;
+
+    letter-spacing: -0.05em;
+
+    text-transform: uppercase;
+  }
+
+  .filter-card__header > svg {
+    flex: 0 0 auto;
+
+    color: var(--acid);
+  }
+
+  /* ==========================================================================
+     SIDEBAR NOTE
+     ========================================================================== */
 
   .sidebar-note {
     display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
-    gap: 11px;
+
+    grid-template-columns:
+      42px minmax(0, 1fr);
+
+    gap: 10px;
+
+    min-width: 0;
+
     padding: 16px;
-    border: 1px solid #e2e8f0;
-    border-radius: 17px;
-    background: #fff;
+
+    color: var(--ink);
+
+    background: var(--white);
+
+    border: 3px solid var(--ink);
+
+    box-shadow:
+      6px 6px 0 var(--ink);
   }
 
   .sidebar-note__icon {
     display: grid;
-    width: 38px;
-    height: 38px;
+
+    width: 42px;
+    height: 42px;
+
     place-items: center;
-    border-radius: 11px;
-    background: #f0fdf4;
-    color: #166534;
+
+    color: var(--ink);
+
+    background: var(--acid);
+
+    border: 2px solid var(--ink);
+  }
+
+  .sidebar-note__body {
+    min-width: 0;
   }
 
   .sidebar-note strong {
     display: block;
-    color: #0f172a;
-    font-size: 0.9rem;
+
+    color: var(--ink);
+
+    font-family:
+      Sora,
+      Inter,
+      sans-serif;
+
+    font-size: 11px;
+    font-weight: 900;
+
+    line-height: 1.05;
+
+    text-transform: uppercase;
   }
 
   .sidebar-note p {
-    margin: 4px 0 0;
-    color: #64748b;
-    font-size: 0.79rem;
-    line-height: 1.55;
+    margin: 5px 0 0;
+
+    color: var(--muted);
+
+    font-size: 9px;
+
+    line-height: 1.6;
   }
 
   .sidebar-note a {
     grid-column: 1 / -1;
-    display: inline-flex;
+
+    display: flex;
+
     align-items: center;
+
     justify-content: space-between;
+
     gap: 8px;
-    margin-top: 3px;
-    padding-top: 11px;
-    border-top: 1px solid #e2e8f0;
-    color: #166534;
-    font-size: 0.81rem;
-    font-weight: 750;
+
+    margin-top: 4px;
+
+    padding-top: 12px;
+
+    color: var(--ink);
+
+    border-top:
+      2px solid var(--ink);
+
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+
+    font-size: 8px;
+    font-weight: 900;
+
+    letter-spacing: 0.05em;
+
     text-decoration: none;
+
+    text-transform: uppercase;
   }
 
   .sidebar-note a svg {
-    transform: rotate(180deg);
+    transform:
+      rotate(180deg);
   }
+
+  .sidebar-note a:hover {
+    color: var(--warning);
+  }
+
+  /* ==========================================================================
+     MAP CONTAINER
+     ========================================================================== */
 
   .map-container {
+    position: relative;
+
+    width: 100%;
     min-width: 0;
-    min-height: 650px;
+
+    height: 660px;
+
     overflow: hidden;
-    border: 1px solid #e2e8f0;
-    border-radius: 20px;
-    background: #e2e8f0;
+
+    background: #22281d;
+
+    border: 4px solid var(--white);
+
+    box-shadow:
+      12px 12px 0 var(--warning);
   }
 
+  .map-container > * {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .map-container iframe,
+  .map-container canvas,
+  .map-container .leaflet-container,
+  .map-container .maplibregl-map {
+    display: block;
+
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  /* ==========================================================================
+     MAP EMPTY
+     ========================================================================== */
+
   .map-empty {
+    position: relative;
+
     display: flex;
-    min-height: 650px;
+
+    min-height: 100%;
+
+    flex-direction: column;
+
     align-items: center;
     justify-content: center;
-    flex-direction: column;
-    padding: 32px;
-    background: #f8fafc;
+
+    padding: 34px;
+
+    color: var(--white);
+
+    background:
+      linear-gradient(
+        rgba(223, 255, 0, 0.08) 2px,
+        transparent 2px
+      ),
+      linear-gradient(
+        90deg,
+        rgba(223, 255, 0, 0.08) 2px,
+        transparent 2px
+      ),
+      #22281d;
+
+    background-size: 32px 32px;
+
     text-align: center;
   }
 
+  .map-empty::before {
+    position: absolute;
+
+    inset: 8%;
+
+    content: "";
+
+    border: 3px solid var(--acid);
+
+    opacity: 0.3;
+
+    clip-path: polygon(
+      4% 20%,
+      22% 6%,
+      68% 10%,
+      94% 30%,
+      82% 76%,
+      52% 96%,
+      16% 84%
+    );
+  }
+
   .map-empty__icon {
+    position: relative;
+    z-index: 1;
+
     display: grid;
-    width: 64px;
-    height: 64px;
+
+    width: 72px;
+    height: 72px;
+
     place-items: center;
-    margin-bottom: 15px;
-    border-radius: 18px;
-    background: #dcfce7;
-    color: #166534;
+
+    margin-bottom: 18px;
+
+    color: var(--ink);
+
+    background: var(--acid);
+
+    border: 3px solid var(--ink);
+
+    box-shadow:
+      7px 7px 0 var(--warning);
   }
 
   .map-empty h3 {
+    position: relative;
+    z-index: 1;
+
     margin: 0;
-    color: #0f172a;
-    font-size: 1.08rem;
+
+    color: var(--white);
+
+    font-family:
+      Sora,
+      Inter,
+      sans-serif;
+
+    font-size: 22px;
+    font-weight: 900;
+
+    line-height: 0.95;
+
+    letter-spacing: -0.05em;
+
+    text-transform: uppercase;
   }
 
   .map-empty p {
-    max-width: 480px;
-    margin: 8px 0 18px;
-    color: #64748b;
-    line-height: 1.65;
+    position: relative;
+    z-index: 1;
+
+    max-width: 500px;
+
+    margin: 11px 0 20px;
+
+    color: #c7c9c1;
+
+    font-size: 11px;
+
+    line-height: 1.7;
   }
 
   .map-empty a {
+    position: relative;
+    z-index: 1;
+
     display: inline-flex;
+
     align-items: center;
-    min-height: 42px;
+
+    min-height: 46px;
+
     padding-inline: 15px;
-    border-radius: 11px;
-    background: #166534;
-    color: #fff;
-    font-size: 0.85rem;
-    font-weight: 750;
+
+    color: var(--ink);
+
+    background: var(--acid);
+
+    border: 3px solid var(--ink);
+
+    box-shadow:
+      7px 7px 0 var(--warning);
+
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+
+    font-size: 8px;
+    font-weight: 900;
+
+    letter-spacing: 0.06em;
+
     text-decoration: none;
+
+    text-transform: uppercase;
   }
+
+  /* ==========================================================================
+     OVERVIEW
+     ========================================================================== */
 
   .overview-grid {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 15px;
+
+    grid-template-columns:
+      repeat(3, minmax(0, 1fr));
+
+    gap: 14px;
   }
 
   .overview-card {
-    padding: 20px;
-    border: 1px solid #e2e8f0;
-    border-radius: 18px;
-    background: #fff;
+    position: relative;
+
+    min-width: 0;
+
+    padding: 18px;
+
+    background: var(--white);
+
+    border: 3px solid var(--ink);
+
+    box-shadow:
+      6px 6px 0 var(--ink);
+  }
+
+  .overview-card__top {
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 10px;
+  }
+
+  .overview-card__top > span {
+    color: var(--muted);
+
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+
+    font-size: 8px;
+    font-weight: 900;
+
+    letter-spacing: 0.08em;
   }
 
   .overview-card__icon {
     display: grid;
+
     width: 44px;
     height: 44px;
+
     place-items: center;
-    margin-bottom: 14px;
-    border-radius: 13px;
-  }
 
-  .overview-card__icon--green {
-    background: #dcfce7;
-    color: #166534;
-  }
+    color: var(--acid);
 
-  .overview-card__icon--lime {
-    background: #ecfccb;
-    color: #3f6212;
-  }
+    background: var(--ink);
 
-  .overview-card__icon--blue {
-    background: #dbeafe;
-    color: #2563eb;
+    border: 2px solid var(--ink);
+
+    transform: rotate(-3deg);
   }
 
   .overview-card__label {
     display: block;
-    color: #64748b;
-    font-size: 0.78rem;
-    font-weight: 650;
+
+    margin-top: 20px;
+
+    color: var(--muted);
+
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+
+    font-size: 8px;
+    font-weight: 900;
+
+    letter-spacing: 0.07em;
+
+    text-transform: uppercase;
   }
 
   .overview-card > strong {
     display: block;
-    margin-top: 2px;
-    color: #0f172a;
-    font-size: 1.45rem;
+
+    margin-top: 5px;
+
+    color: var(--ink);
+
+    font-family:
+      Sora,
+      Inter,
+      sans-serif;
+
+    font-size: 42px;
+    font-weight: 900;
+
+    line-height: 0.9;
+
+    letter-spacing: -0.07em;
   }
 
   .overview-card p {
-    margin: 12px 0 0;
-    color: #64748b;
-    font-size: 0.88rem;
+    margin: 13px 0 0;
+
+    color: var(--muted);
+
+    font-size: 10px;
+
     line-height: 1.65;
   }
 
+  /* ==========================================================================
+     DISTRIBUTION
+     ========================================================================== */
+
   .distribution-grid {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+
     gap: 14px;
   }
 
   .distribution-card {
-    padding: 17px;
-    border: 1px solid #e2e8f0;
-    border-radius: 17px;
-    background: #fff;
+    display: grid;
+
+    grid-template-columns:
+      42px minmax(0, 1fr);
+
+    gap: 12px;
+
+    min-width: 0;
+
+    padding: 16px;
+
+    color: var(--white);
+
+    background: var(--ink);
+
+    border: 3px solid var(--white);
+
+    box-shadow:
+      6px 6px 0 var(--ink);
+  }
+
+  .distribution-card__number {
+    display: grid;
+
+    width: 42px;
+    height: 42px;
+
+    place-items: center;
+
+    color: var(--ink);
+
+    background: var(--acid);
+
+    border: 2px solid var(--ink);
+
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+
+    font-size: 8px;
+    font-weight: 900;
+  }
+
+  .distribution-card__main {
+    min-width: 0;
   }
 
   .distribution-card__top {
     display: flex;
+
     align-items: center;
-    gap: 12px;
+
+    gap: 11px;
+
+    min-width: 0;
   }
 
   .distribution-card__icon {
     display: grid;
-    width: 42px;
-    height: 42px;
+
+    width: 38px;
+    height: 38px;
+
     place-items: center;
-    flex: 0 0 42px;
-    border-radius: 12px;
-    background: #f0fdf4;
-    color: #166534;
+
+    flex: 0 0 38px;
+
+    color: var(--ink);
+
+    background: var(--acid);
+
+    border: 2px solid var(--ink);
   }
 
   .distribution-card__text {
-    display: flex;
-    width: 100%;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-  }
+    min-width: 0;
 
-  .distribution-card__text span {
-    color: #0f172a;
-    font-size: 0.89rem;
-    font-weight: 700;
+    display: grid;
+
+    gap: 4px;
   }
 
   .distribution-card__text strong {
-    color: #166534;
-    font-size: 1.04rem;
+    overflow-wrap: anywhere;
+
+    color: var(--white);
+
+    font-family:
+      Sora,
+      Inter,
+      sans-serif;
+
+    font-size: 12px;
+    font-weight: 900;
+
+    line-height: 1;
+
+    letter-spacing: -0.03em;
+
+    text-transform: uppercase;
+  }
+
+  .distribution-card__text span {
+    color: #aeb1a8;
+
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+
+    font-size: 7px;
+    font-weight: 900;
+
+    letter-spacing: 0.06em;
+
+    text-transform: uppercase;
   }
 
   .distribution-bar {
-    height: 6px;
-    margin-top: 15px;
+    height: 8px;
+
+    margin-top: 14px;
+
     overflow: hidden;
-    border-radius: 999px;
-    background: #f1f5f9;
+
+    background: var(--ink-3);
+
+    border: 2px solid var(--white);
   }
 
   .distribution-bar span {
     display: block;
+
     height: 100%;
-    border-radius: inherit;
-    background: #84cc16;
+
+    background: var(--acid);
   }
 
   .distribution-card small {
     display: block;
-    margin-top: 7px;
-    color: #94a3b8;
-    font-size: 0.72rem;
+
+    margin-top: 8px;
+
+    color: #bfc2b9;
+
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+
+    font-size: 7px;
+
+    font-weight: 900;
+
+    letter-spacing: 0.06em;
+
+    text-transform: uppercase;
   }
+
+  /* ==========================================================================
+     ORGANIZATIONS
+     ========================================================================== */
 
   .organization-grid {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+
     gap: 14px;
   }
 
   .organization-card {
-    display: flex;
+    display: grid;
+
+    grid-template-columns:
+      44px minmax(0, 1fr) 28px;
+
     align-items: center;
-    gap: 13px;
-    padding: 16px;
-    border: 1px solid #e2e8f0;
-    border-radius: 16px;
-    background: #fff;
-    color: inherit;
+
+    gap: 12px;
+
+    min-width: 0;
+
+    padding: 14px;
+
+    color: var(--ink);
+
+    background: var(--white);
+
+    border: 3px solid var(--ink);
+
+    box-shadow:
+      6px 6px 0 var(--ink);
+
     text-decoration: none;
+
+    transition:
+      transform 120ms steps(2, end),
+      background 120ms linear,
+      box-shadow 120ms steps(2, end);
   }
 
   .organization-card:hover {
-    border-color: #bbf7d0;
-    background: #f8fffa;
+    background: var(--acid);
+
+    box-shadow:
+      9px 9px 0 var(--warning);
+
+    transform:
+      translate(-3px, -3px);
   }
 
   .organization-card__icon {
     display: grid;
+
     width: 44px;
     height: 44px;
+
     place-items: center;
-    flex: 0 0 44px;
-    border-radius: 13px;
-    background: #dcfce7;
-    color: #166534;
+
+    color: var(--acid);
+
+    background: var(--ink);
+
+    border: 2px solid var(--ink);
   }
 
   .organization-card__body {
     min-width: 0;
+
     display: grid;
+
     gap: 4px;
   }
 
   .organization-card__body strong {
     overflow: hidden;
-    color: #0f172a;
-    font-size: 0.91rem;
+
+    color: var(--ink);
+
+    font-family:
+      Sora,
+      Inter,
+      sans-serif;
+
+    font-size: 11px;
+    font-weight: 900;
+
+    line-height: 1.05;
+
     text-overflow: ellipsis;
+
+    text-transform: uppercase;
+
     white-space: nowrap;
   }
 
   .organization-card__body span {
     overflow: hidden;
-    color: #64748b;
-    font-size: 0.77rem;
+
+    color: var(--muted);
+
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+
+    font-size: 7px;
+    font-weight: 900;
+
+    letter-spacing: 0.05em;
+
     text-overflow: ellipsis;
+
+    text-transform: uppercase;
+
     white-space: nowrap;
   }
 
   .organization-card__arrow {
-    margin-left: auto;
-    flex: 0 0 auto;
-    transform: rotate(180deg);
-    color: #94a3b8;
+    justify-self: end;
+
+    color: var(--ink);
+
+    transform:
+      rotate(180deg);
+
+    transition:
+      transform 120ms steps(2, end);
   }
+
+  .organization-card:hover
+    .organization-card__arrow {
+    transform:
+      rotate(180deg)
+      translateX(4px);
+  }
+
+  /* ==========================================================================
+     EMPTY
+     ========================================================================== */
 
   .empty-panel {
     display: grid;
+
     place-items: center;
-    padding: 50px 24px;
-    border: 1px dashed #e2e8f0;
-    border-radius: 18px;
-    background: #f8fafc;
-    color: #94a3b8;
+
+    padding: 54px 24px;
+
+    color: var(--muted);
+
+    background: var(--paper-2);
+
+    border: 3px solid var(--ink);
+
+    box-shadow:
+      7px 7px 0 var(--ink);
+
     text-align: center;
   }
 
   .empty-panel h3 {
-    margin: 12px 0 0;
-    color: #334155;
-    font-size: 1rem;
+    margin: 14px 0 0;
+
+    color: var(--ink);
+
+    font-family:
+      Sora,
+      Inter,
+      sans-serif;
+
+    font-size: 19px;
+
+    font-weight: 900;
+
+    line-height: 0.95;
+
+    letter-spacing: -0.04em;
+
+    text-transform: uppercase;
   }
 
   .empty-panel p {
     max-width: 520px;
-    margin: 7px 0 0;
-    color: #64748b;
+
+    margin: 9px 0 0;
+
+    color: var(--muted);
+
+    font-size: 10px;
+
     line-height: 1.6;
   }
 
+  /* ==========================================================================
+     CTA
+     ========================================================================== */
+
   .area-cta {
     display: grid;
-    grid-template-columns: auto minmax(0, 1fr) auto;
+
+    grid-template-columns:
+      auto minmax(0, 1fr)
+      auto;
+
     align-items: center;
+
     gap: 18px;
-    margin-top: 56px;
+
+    margin-top: 118px;
+
     padding: 24px;
-    border: 1px solid #bbf7d0;
-    border-radius: 20px;
-    background:
-      linear-gradient(
-        135deg,
-        #f0fdf4 0%,
-        #ffffff 100%
-      );
+
+    color: var(--white);
+
+    background: var(--ink);
+
+    border: 4px solid var(--white);
+
+    box-shadow:
+      14px 14px 0 var(--acid);
   }
 
   .area-cta__icon {
     display: grid;
-    width: 48px;
-    height: 48px;
+
+    width: 58px;
+    height: 58px;
+
     place-items: center;
-    border-radius: 14px;
-    background: #dcfce7;
-    color: #166534;
+
+    color: var(--ink);
+
+    background: var(--acid);
+
+    border: 3px solid var(--ink);
+  }
+
+  .area-cta__content {
+    min-width: 0;
   }
 
   .area-cta__content > span {
-    display: block;
-    margin-bottom: 4px;
-    color: #166534;
-    font-size: 0.76rem;
-    font-weight: 800;
+    display: inline-block;
+
+    margin-bottom: 8px;
+
+    padding: 5px 7px;
+
+    color: var(--ink);
+
+    background: var(--acid);
+
+    border: 2px solid var(--ink);
+
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+
+    font-size: 7px;
+    font-weight: 900;
+
     letter-spacing: 0.08em;
+
     text-transform: uppercase;
   }
 
   .area-cta__content h2 {
+    max-width: 740px;
+
     margin: 0;
-    color: #0f172a;
-    font-size: 1.2rem;
-    letter-spacing: -0.02em;
+
+    color: var(--white);
+
+    font-family:
+      Sora,
+      Inter,
+      sans-serif;
+
+    font-size:
+      clamp(
+        25px,
+        3vw,
+        42px
+      );
+
+    font-weight: 900;
+
+    line-height: 0.92;
+
+    letter-spacing: -0.06em;
+
+    text-transform: uppercase;
   }
 
   .area-cta__content p {
-    margin: 5px 0 0;
-    color: #64748b;
-    line-height: 1.6;
+    max-width: 720px;
+
+    margin: 10px 0 0;
+
+    color: #c5c8bf;
+
+    font-size: 11px;
+
+    line-height: 1.65;
   }
 
   .area-cta__button {
     display: inline-flex;
+
     align-items: center;
-    gap: 8px;
-    min-height: 44px;
-    padding-inline: 16px;
-    border-radius: 12px;
-    background: #166534;
-    color: #fff;
-    font-size: 0.86rem;
-    font-weight: 750;
+    justify-content: space-between;
+
+    gap: 12px;
+
+    min-width: 165px;
+    min-height: 52px;
+
+    padding-inline: 15px;
+
+    color: var(--ink);
+
+    background: var(--acid);
+
+    border: 3px solid var(--ink);
+
+    box-shadow:
+      8px 8px 0 var(--warning);
+
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+
+    font-size: 8px;
+    font-weight: 900;
+
+    letter-spacing: 0.07em;
+
     text-decoration: none;
+
+    text-transform: uppercase;
+
+    transition:
+      transform 120ms steps(2, end),
+      box-shadow 120ms steps(2, end),
+      background 120ms linear;
   }
 
   .area-cta__button:hover {
-    background: #14532d;
+    background: var(--acid-soft);
+
+    box-shadow:
+      12px 12px 0 var(--warning);
+
+    transform:
+      translate(-4px, -4px);
   }
 
   .area-cta__button svg {
-    transform: rotate(180deg);
+    transform:
+      rotate(180deg);
   }
 
+  /* ==========================================================================
+     RESPONSIVE
+     ========================================================================== */
+
   @media (max-width: 1100px) {
+    .area-page {
+      width:
+        min(
+          calc(100% - 32px),
+          1000px
+        );
+    }
+
     .area-hero {
-      grid-template-columns: minmax(0, 1fr);
+      grid-template-columns: 1fr;
     }
 
     .area-hero__visual {
@@ -1516,7 +2853,13 @@ const pageDescription =
     }
 
     .map-layout {
-      grid-template-columns: 250px minmax(0, 1fr);
+      grid-template-columns:
+        minmax(220px, 270px)
+        minmax(0, 1fr);
+    }
+
+    .area-stats {
+      max-width: none;
     }
   }
 
@@ -1525,43 +2868,86 @@ const pageDescription =
       grid-template-columns: 1fr;
     }
 
+    .map-container {
+      height: 560px;
+    }
+
     .overview-grid {
-      grid-template-columns: 1fr;
+      grid-template-columns:
+        repeat(3, minmax(0, 1fr));
     }
 
     .organization-grid {
-      grid-template-columns: 1fr;
+      grid-template-columns:
+        repeat(2, minmax(0, 1fr));
     }
   }
 
   @media (max-width: 720px) {
     .area-page {
-      width: min(100% - 20px, 1440px);
-      padding-bottom: 52px;
+      width: calc(100% - 24px);
+
+      padding-bottom: 76px;
     }
 
     .area-hero {
-      margin-top: 20px;
-      padding: 24px;
-      border-radius: 20px;
+      margin-top: 22px;
+
+      box-shadow:
+        10px 10px 0 var(--warning);
+    }
+
+    .area-hero__content {
+      padding: 30px 22px;
+    }
+
+    .area-label {
+      margin-top: 22px;
     }
 
     .area-hero h1 {
-      font-size: 2rem;
+      margin-top: 17px;
+
+      font-size:
+        clamp(
+          42px,
+          13vw,
+          68px
+        );
+    }
+
+    .area-hero__description {
+      margin-top: 22px;
+
+      padding-left: 12px;
+
+      border-left-width: 6px;
+
+      font-size: 11px;
     }
 
     .area-stats {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-    }
+      grid-template-columns:
+        1fr;
 
-    .area-stat {
-      min-width: 0;
+      gap: 8px;
     }
 
     .section-heading {
-      align-items: flex-start;
-      flex-direction: column;
+      grid-template-columns: 1fr;
+
+      align-items: start;
+
+      gap: 20px;
+    }
+
+    .section-heading h2 {
+      font-size:
+        clamp(
+          38px,
+          11vw,
+          62px
+        );
     }
 
     .section-action {
@@ -1569,36 +2955,87 @@ const pageDescription =
     }
 
     .map-toolbar {
-      align-items: stretch;
-      flex-direction: column;
-    }
-
-    .search-box {
-      width: 100%;
-    }
-
-    .distribution-grid {
       grid-template-columns: 1fr;
     }
 
-    .map-container,
-    .map-empty {
-      min-height: 520px;
+    .map-count {
+      justify-content: flex-start;
+
+      width: fit-content;
+
+      min-width: 0;
+
+      min-height: 44px;
+    }
+
+    .map-container {
+      height: 480px;
+    }
+
+    .overview-grid,
+    .distribution-grid,
+    .organization-grid {
+      grid-template-columns: 1fr;
     }
 
     .area-cta {
-      grid-template-columns: auto minmax(0, 1fr);
+      grid-template-columns:
+        58px minmax(0, 1fr);
+
+      margin-top: 78px;
+
+      padding: 18px;
     }
 
     .area-cta__button {
       grid-column: 1 / -1;
-      justify-content: center;
+
+      width: 100%;
+
+      justify-content: space-between;
     }
   }
 
   @media (max-width: 480px) {
-    .area-stats {
+    .area-page {
+      width: calc(100% - 16px);
+    }
+
+    .area-hero__content {
+      padding: 27px 18px;
+    }
+
+    .area-hero h1 {
+      font-size: 17vw;
+    }
+
+    .map-container {
+      height: 400px;
+    }
+
+    .filter-card,
+    .sidebar-note {
+      box-shadow:
+        5px 5px 0 var(--ink);
+    }
+
+    .area-cta {
       grid-template-columns: 1fr;
+    }
+
+    .area-cta__icon {
+      width: 50px;
+      height: 50px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .back-link,
+    .section-action,
+    .search-box,
+    .organization-card,
+    .area-cta__button {
+      transition: none;
     }
   }
 </style>
