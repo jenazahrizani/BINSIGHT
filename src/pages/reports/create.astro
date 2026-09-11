@@ -1,9 +1,10 @@
 ---
 import {
   ArrowLeft,
+  ArrowRight,
   CircleCheck,
   FileText,
-  Image,
+  Image as ImageIcon,
   Info,
   LocateFixed,
   MapPin,
@@ -13,10 +14,11 @@ import {
 } from "@lucide/astro";
 
 import PublicLayout from "../../layouts/PublicLayout.astro";
-import PageHeader from "../../components/layout/PageHeader.astro";
 import { getAreas } from "../../lib/data/locations";
 
-const areas = getAreas();
+const areas = getAreas().filter(
+  (area) => area.status === "active",
+);
 
 const reportTypes = [
   {
@@ -84,6 +86,12 @@ const reportCategories = [
   },
 ];
 
+const pageTitle =
+  "Buat Laporan — BINSIGHT";
+
+const pageDescription =
+  "Laporkan kondisi persampahan dan lingkungan yang Anda temukan di Kabupaten Badung.";
+
 const jsonLd = {
   "@context": "https://schema.org",
   "@type": "WebPage",
@@ -100,8 +108,8 @@ const jsonLd = {
 ---
 
 <PublicLayout
-  title="Buat Laporan"
-  description="Laporkan kondisi persampahan dan lingkungan yang Anda temukan di Kabupaten Badung."
+  title={pageTitle}
+  description={pageDescription}
 >
   <script
     type="application/ld+json"
@@ -110,45 +118,132 @@ const jsonLd = {
   />
 
   <main class="report-create-page">
-    <PageHeader
-      eyebrow="LAPORAN MASYARAKAT"
-      title="Laporkan kondisi persampahan yang Anda temukan"
-      description="Berikan informasi lokasi dan kondisi lapangan secara jelas. Laporan yang masuk dapat menjadi data pendukung untuk proses verifikasi dan pemantauan."
-      icon="report"
-      tone="green"
-      breadcrumbs={[
-        {
-          label: "Beranda",
-          href: "/",
-        },
-        {
-          label: "Laporan Masyarakat",
-          href: "/reports",
-        },
-        {
-          label: "Buat Laporan",
-          href: "/reports/create",
-        },
-      ]}
-    />
 
-    <section class="report-create-page__content">
-      <div class="report-create-page__container">
+    <!-- =====================================================================
+         HERO
+         ================================================================== -->
+
+    <section
+      class="report-hero"
+      aria-labelledby="report-hero-title"
+    >
+      <div class="report-hero__main">
+
+        <div class="report-label">
+          <TriangleAlert
+            size={15}
+            stroke-width={2}
+            aria-hidden="true"
+          />
+
+          <span>
+            BINSIGHT · LAPORAN
+          </span>
+        </div>
+
+        <div class="report-hero__crumbs">
+          <a href="/">
+            Beranda
+          </a>
+
+          <span aria-hidden="true">
+            /
+          </span>
+
+          <a href="/reports">
+            Laporan masyarakat
+          </a>
+
+          <span aria-hidden="true">
+            /
+          </span>
+
+          <span>
+            Buat laporan
+          </span>
+        </div>
+
+        <h1 id="report-hero-title">
+          Laporkan kondisi persampahan yang Anda temukan
+        </h1>
+
+        <p class="report-hero__description">
+          Berikan informasi lokasi dan kondisi lapangan secara jelas.
+          Laporan yang masuk dapat menjadi data pendukung untuk proses
+          verifikasi dan pemantauan.
+        </p>
+
+      </div>
+
+      <div class="report-hero__side">
+
+        <div class="report-hero__side-mark">
+          <Send
+            size={22}
+            stroke-width={2}
+            aria-hidden="true"
+          />
+        </div>
+
+        <div>
+          <span class="report-hero__side-label">
+            Kontribusi publik
+          </span>
+
+          <strong>
+            Data lapangan
+          </strong>
+
+          <p>
+            Detail yang jelas membantu laporan lebih mudah diverifikasi.
+          </p>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         CONTENT
+         ================================================================== -->
+
+    <section
+      class="report-create-content"
+      aria-label="Formulir laporan"
+    >
+      <div class="report-create-container">
+
         <div class="report-create-layout">
+
+          <!-- ===============================================================
+               MAIN
+               ============================================================ -->
+
           <div class="report-create-main">
+
             <form
               id="report-create-form"
               class="report-form"
               novalidate
               data-report-form
             >
+
+              <!-- =========================================================
+                   01
+                   ====================================================== -->
+
               <section class="form-section">
-                <div class="form-section__header">
-                  <div class="form-section__number">
+
+                <header class="form-section__header">
+
+                  <span class="form-section__number">
                     01
-                  </div>
+                  </span>
 
                   <div>
+                    <span class="form-section__eyebrow">
+                      INFORMASI DASAR
+                    </span>
+
                     <h2 class="form-section__title">
                       Informasi laporan
                     </h2>
@@ -157,15 +252,21 @@ const jsonLd = {
                       Jelaskan masalah persampahan yang Anda temukan.
                     </p>
                   </div>
-                </div>
+
+                </header>
 
                 <div class="form-grid">
+
+                  <!-- TITLE -->
+
                   <div class="form-field form-field--full">
+
                     <label
                       class="form-field__label"
                       for="title"
                     >
                       Judul laporan
+
                       <span
                         class="form-field__required"
                         aria-hidden="true"
@@ -194,20 +295,33 @@ const jsonLd = {
                       autocomplete="off"
                     />
 
-                    <p
-                      id="title-error"
-                      class="form-field__error"
-                      data-field-error="title"
-                      hidden
-                    ></p>
+                    <div class="field-meta">
+
+                      <p
+                        id="title-error"
+                        class="form-field__error"
+                        data-field-error="title"
+                        hidden
+                      ></p>
+
+                      <span class="field-meta__counter">
+                        Maks. 120 karakter
+                      </span>
+
+                    </div>
+
                   </div>
 
+                  <!-- DESCRIPTION -->
+
                   <div class="form-field form-field--full">
+
                     <label
                       class="form-field__label"
                       for="description"
                     >
                       Deskripsi kondisi
+
                       <span
                         class="form-field__required"
                         aria-hidden="true"
@@ -220,8 +334,8 @@ const jsonLd = {
                       id="description-hint"
                       class="form-field__hint"
                     >
-                      Jelaskan apa yang Anda lihat, perkiraan kondisi, dan
-                      hal penting lain yang membantu proses verifikasi.
+                      Jelaskan apa yang Anda lihat, perkiraan kondisi,
+                      dan hal penting lain yang membantu proses verifikasi.
                     </p>
 
                     <textarea
@@ -236,7 +350,8 @@ const jsonLd = {
                       aria-describedby="description-hint description-error"
                     ></textarea>
 
-                    <div class="form-field__footer">
+                    <div class="field-meta">
+
                       <p
                         id="description-error"
                         class="form-field__error"
@@ -245,20 +360,26 @@ const jsonLd = {
                       ></p>
 
                       <span
-                        class="form-field__counter"
+                        class="field-counter"
                         data-description-counter
                       >
                         0 / 2000
                       </span>
+
                     </div>
+
                   </div>
 
+                  <!-- TYPE -->
+
                   <div class="form-field">
+
                     <label
                       class="form-field__label"
                       for="type"
                     >
                       Jenis laporan
+
                       <span
                         class="form-field__required"
                         aria-hidden="true"
@@ -272,18 +393,20 @@ const jsonLd = {
                       name="type"
                       class="form-field__select"
                       required
-                      aria-describedby="type-error"
+                      aria-describedby="type-error type-explainer"
                     >
                       <option value="">
                         Pilih jenis laporan
                       </option>
 
                       {
-                        reportTypes.map((item) => (
-                          <option value={item.value}>
-                            {item.label}
-                          </option>
-                        ))
+                        reportTypes.map(
+                          (item) => (
+                            <option value={item.value}>
+                              {item.label}
+                            </option>
+                          ),
+                        )
                       }
                     </select>
 
@@ -295,14 +418,19 @@ const jsonLd = {
                     ></p>
 
                     <div
+                      id="type-explainer"
                       class="type-explainer"
                       data-type-explainer
                     >
                       Pilih kategori yang paling sesuai dengan kondisi lapangan.
                     </div>
+
                   </div>
 
+                  <!-- CATEGORY -->
+
                   <div class="form-field">
+
                     <label
                       class="form-field__label"
                       for="category"
@@ -321,11 +449,13 @@ const jsonLd = {
                       </option>
 
                       {
-                        reportCategories.map((item) => (
-                          <option value={item.value}>
-                            {item.label}
-                          </option>
-                        ))
+                        reportCategories.map(
+                          (item) => (
+                            <option value={item.value}>
+                              {item.label}
+                            </option>
+                          ),
+                        )
                       }
                     </select>
 
@@ -335,28 +465,42 @@ const jsonLd = {
                     >
                       Pilih kategori apabila jenis sampah dapat diidentifikasi.
                     </p>
+
                   </div>
+
                 </div>
               </section>
 
+              <!-- =========================================================
+                   02
+                   ====================================================== -->
+
               <section class="form-section">
-                <div class="form-section__header">
-                  <div class="form-section__number">
+
+                <header class="form-section__header">
+
+                  <span class="form-section__number">
                     02
-                  </div>
+                  </span>
 
                   <div>
+                    <span class="form-section__eyebrow">
+                      DATA SPASIAL
+                    </span>
+
                     <h2 class="form-section__title">
                       Lokasi kejadian
                     </h2>
 
                     <p class="form-section__description">
-                      Lokasi yang jelas membantu laporan dipahami dan diverifikasi.
+                      Pilih lokasi langsung pada peta agar titik laporan lebih akurat.
                     </p>
                   </div>
-                </div>
+
+                </header>
 
                 <div class="location-notice">
+
                   <div class="location-notice__icon">
                     <LocateFixed
                       size={19}
@@ -367,65 +511,29 @@ const jsonLd = {
 
                   <div>
                     <strong>
-                      Gunakan lokasi yang mudah dikenali
+                      Tentukan lokasi dengan peta
                     </strong>
 
                     <p>
-                      Cantumkan area dan alamat atau patokan terdekat.
-                      Koordinat dapat ditambahkan apabila tersedia.
+                      Klik peta atau geser marker ke lokasi kejadian.
+                      Gunakan lokasi perangkat untuk mendapatkan posisi saat ini.
                     </p>
                   </div>
+
                 </div>
 
                 <div class="form-grid">
-                  <div class="form-field">
-                    <label
-                      class="form-field__label"
-                      for="areaId"
-                    >
-                      Area / Kecamatan
-                      <span
-                        class="form-field__required"
-                        aria-hidden="true"
-                      >
-                        *
-                      </span>
-                    </label>
 
-                    <select
-                      id="areaId"
-                      name="areaId"
-                      class="form-field__select"
-                      required
-                      aria-describedby="area-error"
-                    >
-                      <option value="">
-                        Pilih area
-                      </option>
-
-                      {
-                        areas.map((area) => (
-                          <option value={area.id}>
-                            {area.name}
-                          </option>
-                        ))
-                      }
-                    </select>
-
-                    <p
-                      id="area-error"
-                      class="form-field__error"
-                      data-field-error="areaId"
-                      hidden
-                    ></p>
-                  </div>
+                  <!-- ADDRESS -->
 
                   <div class="form-field">
+
                     <label
                       class="form-field__label"
                       for="address"
                     >
                       Alamat / lokasi
+
                       <span
                         class="form-field__required"
                         aria-hidden="true"
@@ -434,18 +542,48 @@ const jsonLd = {
                       </span>
                     </label>
 
-                    <input
-                      id="address"
-                      name="address"
-                      class="form-field__input"
-                      type="text"
-                      placeholder="Contoh: Jalan Raya Kerobokan, dekat pasar..."
-                      minlength="5"
-                      maxlength="300"
-                      required
-                      aria-describedby="address-error"
-                      autocomplete="street-address"
-                    />
+                    <p
+                      id="address-hint"
+                      class="form-field__hint"
+                    >
+                      Alamat akan terisi otomatis berdasarkan posisi marker pada peta.
+                    </p>
+
+                    <div class="auto-address-field">
+
+                      <div
+                        class="auto-address-field__icon"
+                        aria-hidden="true"
+                      >
+                        <MapPin
+                          size={17}
+                          stroke-width={2}
+                        />
+                      </div>
+
+                      <input
+                        id="address"
+                        name="address"
+                        class="form-field__input auto-address-field__input"
+                        type="text"
+                        placeholder="Pilih titik pada peta..."
+                        minlength="5"
+                        maxlength="300"
+                        required
+                        readonly
+                        aria-readonly="true"
+                        aria-describedby="address-hint address-error"
+                        autocomplete="street-address"
+                      />
+
+                      <span
+                        class="auto-address-field__badge"
+                        aria-hidden="true"
+                      >
+                        OTOMATIS
+                      </span>
+
+                    </div>
 
                     <p
                       id="address-error"
@@ -453,71 +591,172 @@ const jsonLd = {
                       data-field-error="address"
                       hidden
                     ></p>
+
                   </div>
 
-                  <div class="form-field">
-                    <label
-                      class="form-field__label"
-                      for="latitude"
-                    >
-                      Latitude
-                    </label>
-
-                    <input
-                      id="latitude"
-                      name="latitude"
-                      class="form-field__input"
-                      type="number"
-                      inputmode="decimal"
-                      step="any"
-                      min="-90"
-                      max="90"
-                      placeholder="-8.650000"
-                      aria-describedby="coordinates-hint"
-                    />
-                  </div>
-
-                  <div class="form-field">
-                    <label
-                      class="form-field__label"
-                      for="longitude"
-                    >
-                      Longitude
-                    </label>
-
-                    <input
-                      id="longitude"
-                      name="longitude"
-                      class="form-field__input"
-                      type="number"
-                      inputmode="decimal"
-                      step="any"
-                      min="-180"
-                      max="180"
-                      placeholder="115.216667"
-                      aria-describedby="coordinates-hint"
-                    />
-                  </div>
+                  <!-- LOCATION PICKER -->
 
                   <div class="form-field form-field--full">
-                    <p
-                      id="coordinates-hint"
-                      class="form-field__hint form-field__hint--standalone"
+
+                    <div class="location-picker-header">
+
+                      <div>
+                        <label class="form-field__label">
+                          Tandai lokasi pada peta
+                        </label>
+
+                        <p class="form-field__hint">
+                          Klik peta atau geser titik merah ke lokasi kejadian.
+                        </p>
+                      </div>
+
+                      <button
+                        type="button"
+                        class="location-picker__locate"
+                        data-use-current-location
+                      >
+                        <LocateFixed
+                          size={15}
+                          stroke-width={2}
+                          aria-hidden="true"
+                        />
+
+                        <span>
+                          Gunakan lokasi saya
+                        </span>
+                      </button>
+
+                    </div>
+
+                    <div
+                      class="location-picker"
+                      data-location-picker
                     >
-                      Koordinat bersifat opsional. Pastikan nilainya benar apabila
-                      Anda mengisinya.
-                    </p>
+
+                      <div
+                        class="location-picker__map"
+                        data-location-map
+                        aria-label="Pilih lokasi kejadian pada peta"
+                      ></div>
+
+                    </div>
+
+                    <!-- READONLY COORDINATES -->
+
+                    <div class="coordinates-grid">
+
+                      <div class="form-field">
+
+                        <label
+                          class="form-field__label"
+                          for="latitude"
+                        >
+                          Latitude
+                        </label>
+
+                        <div class="coordinate-field">
+
+                          <span class="coordinate-field__prefix">
+                            LAT
+                          </span>
+
+                          <input
+                            id="latitude"
+                            name="latitude"
+                            class="form-field__input coordinate-field__input"
+                            type="text"
+                            readonly
+                            aria-readonly="true"
+                            placeholder="-8.550000"
+                            aria-describedby="latitude-hint latitude-error"
+                          />
+
+                        </div>
+
+                        <p
+                          id="latitude-hint"
+                          class="form-field__hint"
+                        >
+                          Diatur otomatis dari titik peta.
+                        </p>
+
+                        <p
+                          id="latitude-error"
+                          class="form-field__error"
+                          data-field-error="latitude"
+                          hidden
+                        ></p>
+
+                      </div>
+
+                      <div class="form-field">
+
+                        <label
+                          class="form-field__label"
+                          for="longitude"
+                        >
+                          Longitude
+                        </label>
+
+                        <div class="coordinate-field">
+
+                          <span class="coordinate-field__prefix">
+                            LNG
+                          </span>
+
+                          <input
+                            id="longitude"
+                            name="longitude"
+                            class="form-field__input coordinate-field__input"
+                            type="text"
+                            readonly
+                            aria-readonly="true"
+                            placeholder="115.180000"
+                            aria-describedby="longitude-hint longitude-error"
+                          />
+
+                        </div>
+
+                        <p
+                          id="longitude-hint"
+                          class="form-field__hint"
+                        >
+                          Diatur otomatis dari titik peta.
+                        </p>
+
+                        <p
+                          id="longitude-error"
+                          class="form-field__error"
+                          data-field-error="longitude"
+                          hidden
+                        ></p>
+
+                      </div>
+
+                    </div>
+
                   </div>
+
                 </div>
               </section>
 
+              <!-- =========================================================
+                   03
+                   ====================================================== -->
+
               <section class="form-section">
-                <div class="form-section__header">
-                  <div class="form-section__number">
+
+                <header class="form-section__header">
+
+                  <span class="form-section__number">
                     03
-                  </div>
+                  </span>
 
                   <div>
+                    <span class="form-section__eyebrow">
+                      BUKTI & KONTAK
+                    </span>
+
                     <h2 class="form-section__title">
                       Bukti dan pelapor
                     </h2>
@@ -526,10 +765,13 @@ const jsonLd = {
                       Tambahkan bukti visual dan informasi kontak seperlunya.
                     </p>
                   </div>
-                </div>
+
+                </header>
 
                 <div class="form-grid">
+
                   <div class="form-field form-field--full">
+
                     <label
                       class="form-field__label"
                       for="image"
@@ -538,6 +780,7 @@ const jsonLd = {
                     </label>
 
                     <div class="file-field">
+
                       <input
                         id="image"
                         name="image"
@@ -551,8 +794,9 @@ const jsonLd = {
                         class="file-field__label"
                         for="image"
                       >
+
                         <span class="file-field__icon">
-                          <Image
+                          <ImageIcon
                             size={20}
                             stroke-width={1.9}
                             aria-hidden="true"
@@ -560,18 +804,21 @@ const jsonLd = {
                         </span>
 
                         <span class="file-field__copy">
+
                           <strong>
                             Pilih foto
                           </strong>
 
                           <small>
-                            JPG, PNG, atau WebP
+                            JPG, PNG, atau WebP · Maks. 5 MB
                           </small>
+
                         </span>
 
                         <span class="file-field__button">
                           Pilih file
                         </span>
+
                       </label>
 
                       <p
@@ -579,10 +826,19 @@ const jsonLd = {
                         data-image-name
                         hidden
                       ></p>
+
+                      <p
+                        class="form-field__error"
+                        data-field-error="image"
+                        hidden
+                      ></p>
+
                     </div>
+
                   </div>
 
                   <div class="form-field">
+
                     <label
                       class="form-field__label"
                       for="reporterName"
@@ -603,9 +859,11 @@ const jsonLd = {
                     <p class="form-field__hint">
                       Nama dapat dikosongkan.
                     </p>
+
                   </div>
 
                   <div class="form-field">
+
                     <label
                       class="form-field__label"
                       for="reporterContact"
@@ -626,9 +884,11 @@ const jsonLd = {
                     <p class="form-field__hint">
                       Kontak bersifat opsional.
                     </p>
+
                   </div>
 
                   <div class="form-field form-field--full">
+
                     <label
                       class="form-field__label"
                       for="notes"
@@ -639,17 +899,25 @@ const jsonLd = {
                     <textarea
                       id="notes"
                       name="notes"
-                      class="form-field__textarea"
+                      class="form-field__textarea form-field__textarea--small"
                       rows="4"
                       maxlength="1000"
                       placeholder="Informasi lain yang menurut Anda penting..."
                     ></textarea>
+
                   </div>
+
                 </div>
               </section>
 
+              <!-- =========================================================
+                   CONFIRMATION
+                   ====================================================== -->
+
               <section class="form-section form-section--confirmation">
+
                 <div class="confirmation-box">
+
                   <div class="confirmation-box__icon">
                     <ShieldCheck
                       size={22}
@@ -659,18 +927,26 @@ const jsonLd = {
                   </div>
 
                   <div class="confirmation-box__content">
+
+                    <span class="confirmation-box__eyebrow">
+                      KONFIRMASI
+                    </span>
+
                     <h2 class="confirmation-box__title">
                       Kirim laporan dengan informasi yang akurat
                     </h2>
 
                     <p class="confirmation-box__description">
-                      Pastikan informasi yang Anda masukkan sesuai dengan kondisi
-                      yang benar-benar Anda temukan di lapangan.
+                      Pastikan informasi yang Anda masukkan sesuai dengan
+                      kondisi yang benar-benar Anda temukan di lapangan.
                     </p>
+
                   </div>
+
                 </div>
 
                 <label class="consent-field">
+
                   <input
                     type="checkbox"
                     name="confirmation"
@@ -679,13 +955,17 @@ const jsonLd = {
                     data-report-confirmation
                   />
 
-                  <span class="consent-field__box"></span>
+                  <span
+                    class="consent-field__box"
+                    aria-hidden="true"
+                  ></span>
 
                   <span class="consent-field__text">
                     Saya memastikan informasi laporan ini dibuat berdasarkan
                     kondisi yang saya temukan dan bukan informasi yang
                     disengaja untuk menyesatkan.
                   </span>
+
                 </label>
 
                 <p
@@ -695,6 +975,7 @@ const jsonLd = {
                 ></p>
 
                 <div class="form-actions">
+
                   <a
                     class="form-actions__back"
                     href="/reports"
@@ -725,48 +1006,92 @@ const jsonLd = {
                       Kirim laporan
                     </span>
                   </button>
+
                 </div>
 
                 <p class="form-actions__note">
                   Laporan akan dipersiapkan untuk proses verifikasi.
                 </p>
+
               </section>
+
             </form>
+
+            <!-- ===========================================================
+                 SUCCESS
+                 ======================================================== -->
 
             <div
               class="report-success"
               data-report-success
               hidden
             >
-              <div class="report-success__icon">
-                <CircleCheck
-                  size={34}
-                  stroke-width={1.8}
-                  aria-hidden="true"
-                />
+
+              <div class="report-success__top">
+
+                <span class="report-success__icon">
+                  <CircleCheck
+                    size={31}
+                    stroke-width={2}
+                    aria-hidden="true"
+                  />
+                </span>
+
+                <div>
+
+                  <span class="report-success__eyebrow">
+                    LAPORAN SIAP DIPROSES
+                  </span>
+
+                  <h2 class="report-success__title">
+                    Laporan berhasil dipersiapkan
+                  </h2>
+
+                </div>
+
               </div>
-
-              <span class="report-success__eyebrow">
-                LAPORAN SIAP DIPROSES
-              </span>
-
-              <h2 class="report-success__title">
-                Laporan berhasil dipersiapkan
-              </h2>
 
               <p class="report-success__description">
                 Data laporan telah lolos pemeriksaan dasar di browser.
-                Sistem dapat meneruskannya ke proses penyimpanan atau verifikasi
-                berikutnya.
+                Sistem dapat meneruskannya ke proses penyimpanan atau
+                verifikasi berikutnya.
               </p>
 
+              <div class="report-success__summary">
+
+                <div>
+                  <span>
+                    Status
+                  </span>
+
+                  <strong>
+                    Siap diverifikasi
+                  </strong>
+                </div>
+
+                <div>
+                  <span>
+                    Data
+                  </span>
+
+                  <strong>
+                    Terisi & tervalidasi
+                  </strong>
+                </div>
+
+              </div>
+
               <div class="report-success__actions">
+
                 <a
                   class="report-success__primary"
                   href="/reports"
                 >
-                  Lihat laporan
-                  <ArrowLeft
+                  <span>
+                    Lihat laporan
+                  </span>
+
+                  <ArrowRight
                     size={17}
                     stroke-width={2}
                     aria-hidden="true"
@@ -780,18 +1105,38 @@ const jsonLd = {
                 >
                   Buat laporan lain
                 </button>
+
               </div>
+
             </div>
+
           </div>
 
-          <aside class="report-create-sidebar">
-            <div class="sidebar-card sidebar-card--highlight">
-              <div class="sidebar-card__icon">
-                <Info
-                  size={20}
-                  stroke-width={2}
-                  aria-hidden="true"
-                />
+          <!-- =============================================================
+               SIDEBAR
+               ========================================================== -->
+
+          <aside
+            class="report-create-sidebar"
+            aria-label="Panduan membuat laporan"
+          >
+
+            <div class="sidebar-card sidebar-card--dark">
+
+              <div class="sidebar-card__top">
+
+                <span class="sidebar-card__icon">
+                  <Info
+                    size={19}
+                    stroke-width={2}
+                    aria-hidden="true"
+                  />
+                </span>
+
+                <span class="sidebar-card__eyebrow">
+                  PANDUAN
+                </span>
+
               </div>
 
               <h2 class="sidebar-card__title">
@@ -804,12 +1149,14 @@ const jsonLd = {
               </p>
 
               <div class="sidebar-check-list">
+
                 <div class="sidebar-check-item">
                   <CircleCheck
                     size={16}
                     stroke-width={2}
                     aria-hidden="true"
                   />
+
                   <span>
                     Judul yang jelas
                   </span>
@@ -821,6 +1168,7 @@ const jsonLd = {
                     stroke-width={2}
                     aria-hidden="true"
                   />
+
                   <span>
                     Deskripsi kondisi
                   </span>
@@ -832,6 +1180,7 @@ const jsonLd = {
                     stroke-width={2}
                     aria-hidden="true"
                   />
+
                   <span>
                     Lokasi yang mudah ditemukan
                   </span>
@@ -843,20 +1192,32 @@ const jsonLd = {
                     stroke-width={2}
                     aria-hidden="true"
                   />
+
                   <span>
                     Foto apabila tersedia
                   </span>
                 </div>
+
               </div>
+
             </div>
 
             <div class="sidebar-card">
-              <div class="sidebar-card__icon sidebar-card__icon--warning">
-                <TriangleAlert
-                  size={20}
-                  stroke-width={2}
-                  aria-hidden="true"
-                />
+
+              <div class="sidebar-card__top">
+
+                <span class="sidebar-card__icon sidebar-card__icon--warning">
+                  <TriangleAlert
+                    size={19}
+                    stroke-width={2}
+                    aria-hidden="true"
+                  />
+                </span>
+
+                <span class="sidebar-card__eyebrow sidebar-card__eyebrow--dark">
+                  AKURASI
+                </span>
+
               </div>
 
               <h2 class="sidebar-card__title">
@@ -867,15 +1228,25 @@ const jsonLd = {
                 Jangan menambahkan dugaan sebagai fakta. Tulis apa yang benar-benar
                 Anda amati di lokasi.
               </p>
+
             </div>
 
             <div class="sidebar-card">
-              <div class="sidebar-card__icon sidebar-card__icon--location">
-                <MapPin
-                  size={20}
-                  stroke-width={2}
-                  aria-hidden="true"
-                />
+
+              <div class="sidebar-card__top">
+
+                <span class="sidebar-card__icon sidebar-card__icon--location">
+                  <MapPin
+                    size={19}
+                    stroke-width={2}
+                    aria-hidden="true"
+                  />
+                </span>
+
+                <span class="sidebar-card__eyebrow sidebar-card__eyebrow--dark">
+                  LOKASI
+                </span>
+
               </div>
 
               <h2 class="sidebar-card__title">
@@ -886,56 +1257,442 @@ const jsonLd = {
                 Area, alamat, dan koordinat yang akurat membantu laporan
                 dipahami secara spasial.
               </p>
+
             </div>
 
             <div class="sidebar-card sidebar-card--link">
-              <FileText
-                size={19}
-                stroke-width={2}
-                aria-hidden="true"
-              />
+
+              <span class="sidebar-card__link-icon">
+                <FileText
+                  size={19}
+                  stroke-width={2}
+                  aria-hidden="true"
+                />
+              </span>
 
               <div>
+
                 <strong>
                   Sudah pernah melapor?
                 </strong>
 
                 <a href="/reports">
                   Lihat laporan masyarakat
+
+                  <ArrowRight
+                    size={14}
+                    stroke-width={2}
+                    aria-hidden="true"
+                  />
                 </a>
+
               </div>
+
             </div>
+
           </aside>
+
         </div>
       </div>
     </section>
+
   </main>
 </PublicLayout>
 
 <style>
+  /* ==========================================================================
+     BINSIGHT REPORT CREATE
+     ========================================================================== */
+
+  .report-create-page,
+  .report-create-page *,
+  .report-create-page *::before,
+  .report-create-page *::after {
+    box-sizing: border-box;
+  }
+
   .report-create-page {
+    --acid: #dfff00;
+    --acid-soft: #efff70;
+
+    --ink: #090a08;
+    --ink-2: #11130f;
+    --ink-3: #1b1f18;
+
+    --paper: #f2f0e6;
+    --paper-2: #e4e1d4;
+    --paper-3: #cfcabd;
+
+    --white: #fffef8;
+    --muted: #6c7068;
+
+    --warning: #ff6a00;
+
     min-height: 100vh;
-    background: var(--color-background);
+
+    color: var(--ink);
+
+    background:
+      repeating-linear-gradient(
+        135deg,
+        rgba(9, 10, 8, 0.025) 0 1px,
+        transparent 1px 9px
+      ),
+      var(--paper);
+
+    font-family:
+      Inter,
+      ui-sans-serif,
+      system-ui,
+      -apple-system,
+      BlinkMacSystemFont,
+      "Segoe UI",
+      sans-serif;
+
+    -webkit-font-smoothing: antialiased;
+    text-rendering: geometricPrecision;
   }
 
-  .report-create-page__content {
-    padding: var(--space-10) 0 var(--space-14);
+  .report-create-page h1,
+  .report-create-page h2,
+  .report-create-page h3,
+  .report-create-page p {
+    overflow-wrap: anywhere;
   }
 
-  .report-create-page__container {
+  .report-create-page a {
+    color: inherit;
+  }
+
+  .report-create-page button,
+  .report-create-page input,
+  .report-create-page select,
+  .report-create-page textarea {
+    font: inherit;
+  }
+
+  .report-create-page svg {
+    flex: 0 0 auto;
+  }
+
+  /* ==========================================================================
+     HERO
+     ========================================================================== */
+
+  .report-hero {
+    display: grid;
+
+    grid-template-columns:
+      minmax(0, 1fr)
+      320px;
+
+    width: min(
+      1320px,
+      calc(100% - 40px)
+    );
+
+    margin:
+      24px
+      auto
+      0;
+
+    color: var(--white);
+
+    background: var(--ink);
+
+    border: 4px solid var(--ink);
+
+    box-shadow:
+      14px 14px 0
+      var(--warning);
+
+    overflow: hidden;
+  }
+
+  .report-hero__main {
+    min-width: 0;
+
+    padding:
+      clamp(
+        40px,
+        5vw,
+        68px
+      );
+  }
+
+  .report-label {
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    width: fit-content;
+
+    min-height: 30px;
+
+    padding: 7px 10px;
+
+    color: var(--ink);
+
+    background: var(--acid);
+
+    border: 3px solid var(--ink);
+
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+
+    font-size: 8px;
+
+    font-weight: 900;
+
+    line-height: 1;
+
+    letter-spacing: 0.08em;
+
+    text-transform: uppercase;
+  }
+
+  .report-label span {
+    color: var(--ink);
+  }
+
+  .report-label svg {
+    color: var(--ink);
+    stroke: var(--ink);
+  }
+
+  .report-hero__crumbs {
+    display: flex;
+
+    align-items: center;
+
+    flex-wrap: wrap;
+
+    gap: 7px;
+
+    margin-top: 25px;
+
+    color: #9ba198;
+
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+
+    font-size: 7px;
+
+    font-weight: 700;
+
+    line-height: 1.5;
+
+    letter-spacing: 0.05em;
+
+    text-transform: uppercase;
+  }
+
+  .report-hero__crumbs a {
+    color: #c5c9c0;
+
+    text-decoration: none;
+  }
+
+  .report-hero__crumbs a:hover {
+    color: var(--acid);
+  }
+
+  .report-hero__crumbs span:last-child {
+    color: var(--acid);
+  }
+
+  .report-hero h1 {
+    max-width: 920px;
+
+    margin: 30px 0 0;
+
+    color: var(--white);
+
+    font-family:
+      Sora,
+      Inter,
+      ui-sans-serif,
+      system-ui,
+      sans-serif;
+
+    font-size:
+      clamp(
+        46px,
+        6vw,
+        82px
+      );
+
+    font-weight: 900;
+
+    line-height: 0.88;
+
+    letter-spacing: -0.09em;
+
+    text-transform: uppercase;
+  }
+
+  .report-hero__description {
+    max-width: 660px;
+
+    margin: 35px 0 0;
+
+    padding:
+      6px
+      0
+      6px
+      17px;
+
+    color: #d4d8cf;
+
+    border-left:
+      7px solid
+      var(--acid);
+
+    font-size: 13px;
+
+    line-height: 1.8;
+  }
+
+  .report-hero__side {
+    display: flex;
+
+    flex-direction: column;
+
+    justify-content: flex-end;
+
+    min-width: 0;
+
+    padding: 27px;
+
+    color: var(--ink);
+
+    background: var(--acid);
+
+    border-left:
+      4px solid
+      var(--ink);
+  }
+
+  .report-hero__side-mark {
+    display: grid;
+
+    width: 58px;
+    height: 58px;
+
+    place-items: center;
+
+    margin-bottom: auto;
+
+    color: var(--acid);
+
+    background: var(--ink);
+
+    border: 3px solid var(--ink);
+
+    box-shadow:
+      7px 7px 0
+      var(--warning);
+  }
+
+  .report-hero__side-mark svg {
+    color: var(--acid);
+    stroke: var(--acid);
+  }
+
+  .report-hero__side-label {
+    display: block;
+
+    margin-bottom: 8px;
+
+    color: #3d443b;
+
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+
+    font-size: 7px;
+
+    font-weight: 900;
+
+    line-height: 1;
+
+    letter-spacing: 0.08em;
+
+    text-transform: uppercase;
+  }
+
+  .report-hero__side strong {
+    display: block;
+
+    color: var(--ink);
+
+    font-family:
+      Sora,
+      Inter,
+      sans-serif;
+
+    font-size: 24px;
+
+    font-weight: 900;
+
+    line-height: 0.95;
+
+    letter-spacing: -0.055em;
+
+    text-transform: uppercase;
+  }
+
+  .report-hero__side p {
+    max-width: 250px;
+
+    margin: 10px 0 0;
+
+    color: #3d443b;
+
+    font-size: 10px;
+
+    line-height: 1.65;
+  }
+
+  /* ==========================================================================
+     CONTENT
+     ========================================================================== */
+
+  .report-create-content {
+    padding:
+      110px
+      0
+      120px;
+  }
+
+  .report-create-container {
     width: min(
       1180px,
       calc(100% - 40px)
     );
+
     margin-inline: auto;
   }
 
   .report-create-layout {
     display: grid;
+
     grid-template-columns:
       minmax(0, 1fr)
-      320px;
-    gap: var(--space-7);
+      310px;
+
+    gap: 24px;
+
     align-items: start;
   }
 
@@ -945,60 +1702,167 @@ const jsonLd = {
 
   .report-form {
     display: grid;
-    gap: var(--space-5);
+
+    gap: 18px;
   }
 
+  /* ==========================================================================
+     FORM SECTION
+     ========================================================================== */
+
   .form-section {
-    padding: var(--space-7);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-xl);
-    background: var(--color-surface);
-    box-shadow: var(--shadow-xs);
+    min-width: 0;
+
+    padding: 27px;
+
+    background: var(--white);
+
+    border: 3px solid var(--ink);
+
+    box-shadow:
+      7px 7px 0
+      var(--ink);
+  }
+
+  .form-section--confirmation {
+    padding-bottom: 25px;
+
+    background: var(--ink);
+
+    box-shadow:
+      8px 8px 0
+      var(--acid);
   }
 
   .form-section__header {
     display: flex;
+
     align-items: flex-start;
-    gap: var(--space-4);
-    padding-bottom: var(--space-6);
-    border-bottom: 1px solid var(--color-border);
+
+    gap: 15px;
+
+    padding-bottom: 22px;
+
+    border-bottom:
+      3px solid
+      var(--ink);
   }
 
   .form-section__number {
-    display: inline-flex;
-    flex: 0 0 auto;
-    align-items: center;
-    justify-content: center;
-    width: 40px;
-    height: 40px;
-    border-radius: var(--radius-md);
-    background: var(--color-primary-soft);
-    color: var(--color-primary-dark);
-    font-size: var(--font-size-xs);
-    font-weight: 850;
-    letter-spacing: 0.04em;
+    display: grid;
+
+    width: 43px;
+    height: 43px;
+
+    flex: 0 0 43px;
+
+    place-items: center;
+
+    color: var(--acid);
+
+    background: var(--ink);
+
+    border: 2px solid var(--ink);
+
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+
+    font-size: 8px;
+
+    font-weight: 900;
+
+    line-height: 1;
+  }
+
+  .form-section__eyebrow {
+    display: block;
+
+    margin-bottom: 8px;
+
+    color: var(--warning);
+
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+
+    font-size: 7px;
+
+    font-weight: 900;
+
+    line-height: 1;
+
+    letter-spacing: 0.08em;
+
+    text-transform: uppercase;
+  }
+
+  .form-section--confirmation
+    .form-section__eyebrow {
+    color: var(--acid);
   }
 
   .form-section__title {
     margin: 0;
-    color: var(--color-text-strong);
-    font-size: 1.08rem;
-    font-weight: 800;
+
+    color: var(--ink);
+
+    font-family:
+      Sora,
+      Inter,
+      sans-serif;
+
+    font-size: 24px;
+
+    font-weight: 900;
+
+    line-height: 0.98;
+
+    letter-spacing: -0.05em;
+
+    text-transform: uppercase;
+  }
+
+  .form-section--confirmation
+    .form-section__title {
+    color: var(--white);
   }
 
   .form-section__description {
-    margin: 5px 0 0;
-    color: var(--color-text-muted);
-    font-size: var(--font-size-sm);
-    line-height: 1.55;
+    margin: 8px 0 0;
+
+    color: var(--muted);
+
+    font-size: 10px;
+
+    line-height: 1.65;
   }
+
+  .form-section--confirmation
+    .form-section__description {
+    color: #aeb5ab;
+  }
+
+  /* ==========================================================================
+     FORM GRID
+     ========================================================================== */
 
   .form-grid {
     display: grid;
+
     grid-template-columns:
-      repeat(2, minmax(0, 1fr));
-    gap: var(--space-5);
-    padding-top: var(--space-6);
+      repeat(
+        2,
+        minmax(0, 1fr)
+      );
+
+    gap: 21px;
+
+    padding-top: 24px;
   }
 
   .form-field {
@@ -1011,103 +1875,395 @@ const jsonLd = {
 
   .form-field__label {
     display: inline-flex;
+
     align-items: center;
+
     gap: 4px;
-    margin-bottom: var(--space-2);
-    color: var(--color-text-strong);
-    font-size: var(--font-size-sm);
-    font-weight: 750;
+
+    margin-bottom: 7px;
+
+    color: var(--ink);
+
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+
+    font-size: 8px;
+
+    font-weight: 900;
+
+    line-height: 1.3;
+
+    letter-spacing: 0.06em;
+
+    text-transform: uppercase;
   }
 
   .form-field__required {
-    color: var(--color-danger);
+    color: var(--warning);
   }
 
   .form-field__hint {
-    margin: 0 0 var(--space-2);
-    color: var(--color-text-faint);
-    font-size: var(--font-size-xs);
-    line-height: 1.5;
-  }
+    margin: 0 0 8px;
 
-  .form-field__hint--standalone {
-    margin-top: calc(var(--space-3) * -1);
-    margin-bottom: 0;
+    color: var(--muted);
+
+    font-size: 9px;
+
+    line-height: 1.6;
   }
 
   .form-field__input,
   .form-field__textarea,
   .form-field__select {
-    width: 100%;
-    min-height: 44px;
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    background: var(--color-surface);
-    color: var(--color-text-strong);
-    font: inherit;
-    font-size: var(--font-size-sm);
-    transition:
-      border-color 160ms ease,
-      box-shadow 160ms ease,
-      background 160ms ease;
-  }
+    display: block;
 
-  .form-field__input,
-  .form-field__select {
-    padding: 0 13px;
+    width: 100%;
+
+    min-width: 0;
+
+    min-height: 47px;
+
+    padding: 0 12px;
+
+    color: var(--ink);
+
+    background: var(--paper);
+
+    border: 3px solid var(--ink);
+
+    border-radius: 0;
+
+    outline: none;
+
+    font-family:
+      Inter,
+      ui-sans-serif,
+      system-ui,
+      sans-serif;
+
+    font-size: 11px;
+
+    line-height: 1.5;
+
+    transition:
+      background 120ms linear,
+      border-color 120ms linear,
+      box-shadow 120ms linear;
   }
 
   .form-field__textarea {
-    min-height: 128px;
+    min-height: 150px;
+
+    padding: 12px;
+
     resize: vertical;
-    padding: 12px 13px;
-    line-height: 1.6;
   }
 
-  .form-field__input::placeholder,
-  .form-field__textarea::placeholder {
-    color: var(--color-text-faint);
+  .form-field__textarea--small {
+    min-height: 106px;
   }
 
   .form-field__input:hover,
   .form-field__textarea:hover,
   .form-field__select:hover {
-    border-color: var(--color-border-strong);
+    background: #ebe8dd;
+
+    border-color: #000;
   }
 
   .form-field__input:focus,
   .form-field__textarea:focus,
   .form-field__select:focus {
-    border-color: var(--color-primary);
-    outline: none;
+    background: var(--white);
+
+    border-color: var(--ink);
+
     box-shadow:
-      0 0 0 3px var(--color-primary-ring);
+      5px 5px 0
+      var(--acid);
+  }
+
+  .form-field__input::placeholder,
+  .form-field__textarea::placeholder {
+    color: #848a81;
+
+    opacity: 1;
   }
 
   .form-field__input[aria-invalid="true"],
   .form-field__textarea[aria-invalid="true"],
   .form-field__select[aria-invalid="true"] {
-    border-color: var(--color-danger);
+    border-color: var(--warning);
+
+    box-shadow:
+      4px 4px 0
+      var(--warning);
   }
 
-  .form-field__footer {
+  /* ==========================================================================
+     AUTO ADDRESS
+     ========================================================================== */
+
+  .auto-address-field {
+    position: relative;
+  }
+
+  .auto-address-field__icon {
+    position: absolute;
+
+    top: 50%;
+    left: 12px;
+
+    z-index: 2;
+
+    display: grid;
+
+    width: 31px;
+    height: 31px;
+
+    place-items: center;
+
+    color: var(--acid);
+
+    background: var(--ink);
+
+    border:
+      2px solid
+      var(--ink);
+
+    transform:
+      translateY(-50%);
+
+    pointer-events: none;
+  }
+
+  .auto-address-field__icon svg {
+    color: var(--acid);
+    stroke: var(--acid);
+  }
+
+  .auto-address-field__input {
+    min-height: 56px;
+
+    padding:
+      0
+      92px
+      0
+      53px !important;
+
+    color: var(--ink);
+
+    background: var(--paper-2) !important;
+
+    border:
+      3px solid
+      var(--ink);
+
+    cursor: default;
+
+    font-size: 11px;
+
+    font-weight: 700;
+
+    letter-spacing: -0.01em;
+
+    user-select: none;
+  }
+
+  .auto-address-field__input::placeholder {
+    color: #737b71;
+
+    font-weight: 600;
+  }
+
+  .auto-address-field__input:hover {
+    background: var(--paper-2) !important;
+
+    border-color: var(--ink) !important;
+  }
+
+  .auto-address-field__input:focus {
+    background: var(--paper-2) !important;
+
+    border-color: var(--ink) !important;
+
+    box-shadow:
+      5px 5px 0
+      var(--acid) !important;
+
+    outline: none;
+  }
+
+  .auto-address-field__badge {
+    position: absolute;
+
+    top: 50%;
+    right: 11px;
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    min-height: 25px;
+
+    padding:
+      0
+      7px;
+
+    color: var(--ink);
+
+    background: var(--acid);
+
+    border:
+      2px solid
+      var(--ink);
+
+    transform:
+      translateY(-50%);
+
+    pointer-events: none;
+
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+
+    font-size: 6px;
+
+    font-weight: 900;
+
+    line-height: 1;
+
+    letter-spacing: 0.06em;
+
+    text-transform: uppercase;
+  }
+
+  /* ==========================================================================
+     READONLY COORDINATES
+     ========================================================================== */
+
+  .coordinate-field {
+    position: relative;
+  }
+
+  .coordinate-field__prefix {
+    position: absolute;
+
+    top: 50%;
+    left: 10px;
+
+    z-index: 2;
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    min-width: 31px;
+
+    height: 23px;
+
+    padding: 0 6px;
+
+    color: var(--acid);
+
+    background: var(--ink);
+
+    border:
+      2px solid
+      var(--ink);
+
+    transform:
+      translateY(-50%);
+
+    pointer-events: none;
+
+    font-family:
+      "DM Mono",
+      monospace;
+
+    font-size: 6px;
+
+    font-weight: 900;
+
+    line-height: 1;
+
+    letter-spacing: 0.05em;
+  }
+
+  .coordinate-field__input {
+    padding-left: 52px !important;
+
+    cursor: not-allowed;
+
+    color: #51594f;
+
+    background: var(--paper-2);
+
+    border-color: var(--ink);
+
+    box-shadow: none !important;
+
+    user-select: none;
+  }
+
+  .coordinate-field__input:hover {
+    background: var(--paper-2);
+
+    border-color: var(--ink);
+  }
+
+  .coordinate-field__input:focus {
+    background: var(--paper-2);
+
+    border-color: var(--ink);
+
+    box-shadow: none !important;
+
+    outline:
+      3px solid
+      var(--acid);
+
+    outline-offset: 2px;
+  }
+
+  .coordinate-field__input::placeholder {
+    color: #70786e;
+  }
+
+  /* ==========================================================================
+     FIELD META
+     ========================================================================== */
+
+  .field-meta {
     display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: var(--space-3);
-    margin-top: var(--space-2);
-  }
 
-  .form-field__counter {
-    flex: 0 0 auto;
-    color: var(--color-text-faint);
-    font-size: var(--font-size-xs);
+    align-items: flex-start;
+
+    justify-content: space-between;
+
+    gap: 12px;
+
+    margin-top: 6px;
   }
 
   .form-field__error {
-    margin: var(--space-2) 0 0;
-    color: var(--color-danger-text);
-    font-size: var(--font-size-xs);
+    margin: 0;
+
+    color: #b54100;
+
+    font-size: 8px;
+
+    font-weight: 800;
+
     line-height: 1.5;
   }
 
@@ -1115,134 +2271,554 @@ const jsonLd = {
     display: none;
   }
 
-  .type-explainer {
-    min-height: 40px;
-    margin-top: var(--space-2);
-    padding: 9px 11px;
-    border-radius: var(--radius-md);
-    background: var(--color-surface-soft);
-    color: var(--color-text-muted);
-    font-size: var(--font-size-xs);
-    line-height: 1.5;
+  .field-meta__counter,
+  .field-counter {
+    flex: 0 0 auto;
+
+    color: #7d8479;
+
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+
+    font-size: 7px;
+
+    font-weight: 800;
+
+    line-height: 1.4;
+
+    letter-spacing: 0.04em;
+
+    text-transform: uppercase;
   }
 
+  .field-meta__counter {
+    margin-left: auto;
+  }
+
+  .type-explainer {
+    min-height: 40px;
+
+    margin-top: 7px;
+
+    padding: 9px 10px;
+
+    color: #596057;
+
+    background: var(--paper-2);
+
+    border-left:
+      4px solid
+      var(--acid);
+
+    font-size: 8px;
+
+    line-height: 1.55;
+  }
+
+  /* ==========================================================================
+     LOCATION NOTICE
+     ========================================================================== */
+
   .location-notice {
-    display: flex;
-    align-items: flex-start;
-    gap: var(--space-3);
-    margin-top: var(--space-6);
-    padding: var(--space-4);
-    border: 1px solid var(--color-info-soft);
-    border-radius: var(--radius-lg);
-    background: var(--color-info-soft);
+    display: grid;
+
+    grid-template-columns:
+      43px
+      minmax(0, 1fr);
+
+    gap: 12px;
+
+    margin-top: 22px;
+
+    padding: 14px;
+
+    color: var(--ink);
+
+    background: var(--acid);
+
+    border: 3px solid var(--ink);
+
+    box-shadow:
+      5px 5px 0
+      var(--warning);
   }
 
   .location-notice__icon {
-    display: inline-flex;
-    flex: 0 0 auto;
-    align-items: center;
-    justify-content: center;
-    width: 38px;
-    height: 38px;
-    border-radius: var(--radius-md);
-    background: var(--color-surface);
-    color: var(--color-info);
+    display: grid;
+
+    width: 43px;
+    height: 43px;
+
+    place-items: center;
+
+    color: var(--acid);
+
+    background: var(--ink);
+
+    border: 2px solid var(--ink);
+  }
+
+  .location-notice__icon svg {
+    color: var(--acid);
+    stroke: var(--acid);
   }
 
   .location-notice strong {
     display: block;
-    margin-bottom: 3px;
-    color: var(--color-text-strong);
-    font-size: var(--font-size-sm);
+
+    color: var(--ink);
+
+    font-family:
+      Sora,
+      Inter,
+      sans-serif;
+
+    font-size: 11px;
+
+    font-weight: 900;
+
+    line-height: 1.1;
+
+    text-transform: uppercase;
   }
 
   .location-notice p {
-    margin: 0;
-    color: var(--color-text-muted);
-    font-size: var(--font-size-xs);
-    line-height: 1.55;
+    margin: 5px 0 0;
+
+    color: #495046;
+
+    font-size: 9px;
+
+    line-height: 1.6;
   }
 
-  .file-field {
-    width: 100%;
+  /* ==========================================================================
+     LOCATION PICKER
+     ========================================================================== */
+
+  .location-picker-header {
+    display: flex;
+
+    align-items: flex-end;
+
+    justify-content: space-between;
+
+    gap: 18px;
+
+    margin-bottom: 12px;
   }
+
+  .location-picker__locate {
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 7px;
+
+    min-height: 40px;
+
+    padding: 0 11px;
+
+    flex: 0 0 auto;
+
+    color: var(--ink);
+
+    background: var(--acid);
+
+    border: 3px solid var(--ink);
+
+    border-radius: 0;
+
+    box-shadow:
+      4px 4px 0
+      var(--warning);
+
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+
+    font-size: 7px;
+
+    font-weight: 900;
+
+    line-height: 1;
+
+    letter-spacing: 0.05em;
+
+    text-transform: uppercase;
+
+    cursor: pointer;
+
+    transition:
+      transform 120ms steps(2, end),
+      box-shadow 120ms steps(2, end),
+      background 120ms linear;
+  }
+
+  .location-picker__locate svg {
+    color: var(--ink);
+    stroke: var(--ink);
+  }
+
+  .location-picker__locate:hover:not(:disabled) {
+    background: var(--acid-soft);
+
+    transform:
+      translate(
+        -1px,
+        -1px
+      );
+
+    box-shadow:
+      5px 5px 0
+      var(--ink);
+  }
+
+  .location-picker__locate:active:not(:disabled) {
+    transform:
+      translate(
+        2px,
+        2px
+      );
+
+    box-shadow:
+      2px 2px 0
+      var(--ink);
+  }
+
+  .location-picker__locate:disabled {
+    opacity: 0.6;
+
+    cursor: wait;
+  }
+
+  .location-picker {
+    position: relative;
+
+    width: 100%;
+
+    overflow: hidden;
+
+    background: #253021;
+
+    border: 3px solid var(--ink);
+
+    box-shadow:
+      6px 6px 0
+      var(--warning);
+  }
+
+  .location-picker__map {
+    width: 100%;
+
+    height: 390px;
+
+    background: #253021;
+
+    overflow: hidden;
+  }
+
+  .location-picker__map :global(.leaflet-container) {
+    width: 100%;
+
+    height: 100%;
+
+    background: #253021;
+
+    font-family:
+      Inter,
+      ui-sans-serif,
+      system-ui,
+      sans-serif;
+
+    outline: none;
+  }
+
+  .location-picker__map
+    :global(.leaflet-control-attribution) {
+    display: none !important;
+  }
+
+  .location-picker__map
+    :global(.leaflet-control-zoom) {
+    margin-top: 12px !important;
+
+    margin-right: 12px !important;
+  }
+
+  .location-picker__map
+    :global(.leaflet-control-zoom a) {
+    width: 34px;
+
+    height: 34px;
+
+    color: var(--ink) !important;
+
+    background: var(--acid) !important;
+
+    border:
+      2px solid
+      var(--ink);
+
+    border-radius: 0 !important;
+
+    font-family:
+      "DM Mono",
+      monospace;
+
+    font-size: 18px;
+
+    font-weight: 900;
+
+    line-height: 29px;
+
+    box-shadow:
+      3px 3px 0
+      var(--warning);
+  }
+
+  .location-picker__map
+    :global(.leaflet-control-zoom a:hover) {
+    color: var(--ink) !important;
+
+    background: var(--acid-soft) !important;
+  }
+
+  :global(.binsight-location-marker-wrapper) {
+    background: transparent !important;
+
+    border: 0 !important;
+  }
+
+  :global(.binsight-location-marker) {
+    position: relative;
+
+    display: block;
+
+    width: 30px;
+
+    height: 38px;
+
+    background: var(--warning);
+
+    border:
+      3px solid
+      var(--ink);
+
+    box-shadow:
+      4px 4px 0
+      var(--acid);
+
+    transform:
+      rotate(-45deg);
+  }
+
+  :global(.binsight-location-marker::after) {
+    position: absolute;
+
+    top: 6px;
+
+    left: 6px;
+
+    width: 11px;
+
+    height: 11px;
+
+    background: var(--white);
+
+    border:
+      2px solid
+      var(--ink);
+
+    content: "";
+  }
+
+  .coordinates-grid {
+    display: grid;
+
+    grid-template-columns:
+      repeat(
+        2,
+        minmax(0, 1fr)
+      );
+
+    gap: 15px;
+
+    margin-top: 18px;
+  }
+
+  /* ==========================================================================
+     FILE
+     ========================================================================== */
 
   .file-field__input {
     position: absolute;
+
     width: 1px;
+
     height: 1px;
+
     opacity: 0;
+
     pointer-events: none;
   }
 
   .file-field__label {
-    display: flex;
+    display: grid;
+
+    grid-template-columns:
+      44px
+      minmax(0, 1fr)
+      auto;
+
     align-items: center;
-    gap: var(--space-3);
-    min-height: 72px;
-    padding: var(--space-3);
-    border: 1px dashed var(--color-border-strong);
-    border-radius: var(--radius-lg);
-    background: var(--color-surface-soft);
+
+    gap: 12px;
+
+    min-height: 76px;
+
+    padding: 11px;
+
+    color: var(--ink);
+
+    background: var(--paper);
+
+    border:
+      3px
+      dashed
+      var(--ink);
+
     cursor: pointer;
+
     transition:
-      border-color 160ms ease,
-      background 160ms ease;
+      background 120ms linear,
+      box-shadow 120ms linear;
   }
 
   .file-field__label:hover {
-    border-color: var(--color-primary);
-    background: var(--color-primary-soft);
+    background: var(--acid-soft);
+
+    box-shadow:
+      5px 5px 0
+      var(--warning);
   }
 
   .file-field__icon {
-    display: inline-flex;
-    flex: 0 0 auto;
-    align-items: center;
-    justify-content: center;
-    width: 42px;
-    height: 42px;
-    border-radius: var(--radius-md);
-    background: var(--color-surface);
-    color: var(--color-primary);
+    display: grid;
+
+    width: 44px;
+
+    height: 44px;
+
+    place-items: center;
+
+    color: var(--acid);
+
+    background: var(--ink);
+
+    border:
+      2px solid
+      var(--ink);
+  }
+
+  .file-field__icon svg {
+    color: var(--acid);
+    stroke: var(--acid);
   }
 
   .file-field__copy {
-    display: flex;
-    flex: 1;
-    flex-direction: column;
+    display: grid;
+
+    gap: 4px;
+
     min-width: 0;
   }
 
   .file-field__copy strong {
-    color: var(--color-text-strong);
-    font-size: var(--font-size-sm);
+    color: var(--ink);
+
+    font-family:
+      Sora,
+      Inter,
+      sans-serif;
+
+    font-size: 10px;
+
+    font-weight: 900;
+
+    line-height: 1;
+
+    text-transform: uppercase;
   }
 
   .file-field__copy small {
-    margin-top: 2px;
-    color: var(--color-text-faint);
-    font-size: var(--font-size-xs);
+    color: #687067;
+
+    font-size: 8px;
+
+    line-height: 1.4;
   }
 
   .file-field__button {
-    flex: 0 0 auto;
-    padding: 8px 11px;
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    background: var(--color-surface);
-    color: var(--color-text-strong);
-    font-size: var(--font-size-xs);
-    font-weight: 750;
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    min-height: 34px;
+
+    padding: 0 10px;
+
+    color: var(--ink);
+
+    background: var(--white);
+
+    border:
+      2px solid
+      var(--ink);
+
+    font-family:
+      "DM Mono",
+      monospace;
+
+    font-size: 7px;
+
+    font-weight: 900;
+
+    letter-spacing: 0.06em;
+
+    text-transform: uppercase;
   }
 
   .file-field__filename {
-    margin: var(--space-2) 0 0;
-    padding: 9px 11px;
-    border-radius: var(--radius-md);
-    background: var(--color-primary-soft);
-    color: var(--color-primary-dark);
-    font-size: var(--font-size-xs);
+    margin: 7px 0 0;
+
+    padding: 9px 10px;
+
+    color: var(--ink);
+
+    background: var(--acid-soft);
+
+    border:
+      2px solid
+      var(--ink);
+
+    font-family:
+      "DM Mono",
+      monospace;
+
+    font-size: 7px;
+
+    font-weight: 800;
+
     line-height: 1.5;
   }
 
@@ -1250,403 +2826,1033 @@ const jsonLd = {
     display: none;
   }
 
-  .form-section--confirmation {
-    padding-bottom: var(--space-6);
+  .file-field
+    [data-field-error="image"] {
+    margin-top: 7px;
   }
 
+  /* ==========================================================================
+     CONFIRMATION
+     ========================================================================== */
+
   .confirmation-box {
-    display: flex;
-    align-items: flex-start;
-    gap: var(--space-3);
-    padding: var(--space-4);
-    border: 1px solid var(--color-primary-soft);
-    border-radius: var(--radius-lg);
-    background: var(--color-primary-soft);
+    display: grid;
+
+    grid-template-columns:
+      47px
+      minmax(0, 1fr);
+
+    gap: 13px;
+
+    padding: 15px;
+
+    background: var(--ink-2);
+
+    border:
+      2px solid
+      #343932;
   }
 
   .confirmation-box__icon {
-    display: inline-flex;
-    flex: 0 0 auto;
-    align-items: center;
-    justify-content: center;
-    width: 42px;
-    height: 42px;
-    border-radius: var(--radius-md);
-    background: var(--color-surface);
-    color: var(--color-primary);
+    display: grid;
+
+    width: 47px;
+
+    height: 47px;
+
+    place-items: center;
+
+    color: var(--ink);
+
+    background: var(--acid);
+
+    border:
+      2px solid
+      var(--white);
+  }
+
+  .confirmation-box__icon svg {
+    color: var(--ink);
+    stroke: var(--ink);
+  }
+
+  .confirmation-box__eyebrow {
+    display: block;
+
+    margin-bottom: 7px;
+
+    color: var(--acid);
+
+    font-family:
+      "DM Mono",
+      monospace;
+
+    font-size: 7px;
+
+    font-weight: 900;
+
+    line-height: 1;
+
+    letter-spacing: 0.08em;
   }
 
   .confirmation-box__title {
     margin: 0;
-    color: var(--color-text-strong);
-    font-size: var(--font-size-sm);
-    font-weight: 800;
+
+    color: var(--white);
+
+    font-family:
+      Sora,
+      Inter,
+      sans-serif;
+
+    font-size: 14px;
+
+    font-weight: 900;
+
+    line-height: 1.05;
+
+    letter-spacing: -0.03em;
+
+    text-transform: uppercase;
   }
 
   .confirmation-box__description {
-    margin: 4px 0 0;
-    color: var(--color-text-muted);
-    font-size: var(--font-size-xs);
-    line-height: 1.6;
+    margin: 7px 0 0;
+
+    color: #bfc5bb;
+
+    font-size: 9px;
+
+    line-height: 1.65;
   }
 
   .consent-field {
     position: relative;
-    display: flex;
-    align-items: flex-start;
-    gap: var(--space-3);
-    margin-top: var(--space-5);
+
+    display: grid;
+
+    grid-template-columns:
+      22px
+      minmax(0, 1fr);
+
+    align-items: start;
+
+    gap: 10px;
+
+    margin-top: 18px;
+
     cursor: pointer;
   }
 
   .consent-field input {
     position: absolute;
+
     width: 1px;
+
     height: 1px;
+
     opacity: 0;
+
     pointer-events: none;
   }
 
   .consent-field__box {
-    display: inline-flex;
-    flex: 0 0 auto;
-    align-items: center;
-    justify-content: center;
-    width: 20px;
-    height: 20px;
+    display: grid;
+
+    width: 22px;
+
+    height: 22px;
+
+    place-items: center;
+
     margin-top: 1px;
-    border: 1px solid var(--color-border-strong);
-    border-radius: 5px;
-    background: var(--color-surface);
-    transition:
-      background 160ms ease,
-      border-color 160ms ease;
+
+    background: var(--white);
+
+    border:
+      3px solid
+      var(--white);
   }
 
   .consent-field input:checked
     + .consent-field__box {
-    border-color: var(--color-primary);
-    background: var(--color-primary);
+    background: var(--acid);
+
+    border-color:
+      var(--acid);
   }
 
   .consent-field input:checked
     + .consent-field__box::after {
     width: 6px;
-    height: 10px;
-    border-right: 2px solid var(--color-white);
-    border-bottom: 2px solid var(--color-white);
-    transform: rotate(45deg) translate(-1px, -1px);
+
+    height: 11px;
+
+    border-right:
+      3px solid
+      var(--ink);
+
+    border-bottom:
+      3px solid
+      var(--ink);
+
+    transform:
+      rotate(45deg)
+      translate(
+        -1px,
+        -1px
+      );
+
     content: "";
   }
 
   .consent-field input:focus-visible
     + .consent-field__box {
-    outline: 3px solid var(--color-primary-ring);
-    outline-offset: 2px;
+    outline:
+      3px solid
+      var(--acid);
+
+    outline-offset: 3px;
   }
 
   .consent-field__text {
-    color: var(--color-text-muted);
-    font-size: var(--font-size-xs);
-    line-height: 1.65;
+    color: #bcc2b8;
+
+    font-size: 8px;
+
+    line-height: 1.7;
   }
 
   .form-field__error--confirmation {
-    margin-left: calc(20px + var(--space-3));
+    margin:
+      7px
+      0
+      0
+      32px;
   }
+
+  /* ==========================================================================
+     ACTIONS
+     ========================================================================== */
 
   .form-actions {
     display: flex;
+
     align-items: center;
+
     justify-content: space-between;
-    gap: var(--space-4);
-    margin-top: var(--space-6);
-    padding-top: var(--space-5);
-    border-top: 1px solid var(--color-border);
+
+    gap: 15px;
+
+    margin-top: 23px;
+
+    padding-top: 20px;
+
+    border-top:
+      2px solid
+      #343932;
   }
 
   .form-actions__back {
     display: inline-flex;
+
     align-items: center;
+
     gap: 7px;
-    color: var(--color-text-muted);
-    font-size: var(--font-size-sm);
-    font-weight: 700;
+
+    min-height: 45px;
+
+    padding: 0 12px;
+
+    color: var(--white);
+
+    border:
+      2px solid
+      #545b51;
+
+    font-family:
+      "DM Mono",
+      monospace;
+
+    font-size: 7px;
+
+    font-weight: 900;
+
+    line-height: 1;
+
+    letter-spacing: 0.06em;
+
     text-decoration: none;
+
+    text-transform: uppercase;
+  }
+
+  .form-actions__back svg {
+    color: var(--acid);
+    stroke: var(--acid);
   }
 
   .form-actions__back:hover {
-    color: var(--color-text-strong);
+    color: var(--ink);
+
+    background: var(--white);
+
+    border-color: var(--white);
+  }
+
+  .form-actions__back:hover svg {
+    color: var(--ink);
+    stroke: var(--ink);
   }
 
   .form-actions__submit {
     display: inline-flex;
+
     align-items: center;
+
     justify-content: center;
-    gap: 8px;
-    min-height: 46px;
-    padding: 0 var(--space-5);
-    border: 1px solid var(--color-primary);
-    border-radius: var(--radius-md);
-    background: var(--color-primary);
-    color: var(--color-white);
+
+    gap: 9px;
+
+    min-width: 175px;
+
+    min-height: 50px;
+
+    padding: 0 16px;
+
+    color: var(--ink);
+
+    background: var(--acid);
+
+    border:
+      3px solid
+      var(--white);
+
+    border-radius: 0;
+
+    box-shadow:
+      6px 6px 0
+      var(--warning);
+
+    font-family:
+      "DM Mono",
+      monospace;
+
+    font-size: 8px;
+
+    font-weight: 900;
+
+    line-height: 1;
+
+    letter-spacing: 0.07em;
+
+    text-transform: uppercase;
+
     cursor: pointer;
-    font: inherit;
-    font-size: var(--font-size-sm);
-    font-weight: 800;
-    box-shadow: var(--shadow-sm);
+
     transition:
-      transform 160ms ease,
-      background 160ms ease,
-      box-shadow 160ms ease;
+      transform 120ms steps(2, end),
+      box-shadow 120ms steps(2, end),
+      background 120ms linear;
+  }
+
+  .form-actions__submit svg {
+    color: var(--ink);
+    stroke: var(--ink);
   }
 
   .form-actions__submit:hover:not(:disabled) {
-    transform: translateY(-1px);
-    background: var(--color-primary-dark);
-    box-shadow: var(--shadow-md);
+    background: var(--acid-soft);
+
+    transform:
+      translate(
+        -2px,
+        -2px
+      );
+
+    box-shadow:
+      8px 8px 0
+      var(--white);
   }
 
-  .form-actions__submit:focus-visible,
-  .form-actions__back:focus-visible,
-  .report-success__primary:focus-visible,
-  .report-success__secondary:focus-visible {
-    outline: 3px solid var(--color-primary-ring);
-    outline-offset: 3px;
+  .form-actions__submit:active:not(:disabled) {
+    transform:
+      translate(
+        2px,
+        2px
+      );
+
+    box-shadow:
+      2px 2px 0
+      var(--white);
   }
 
   .form-actions__submit:disabled {
-    opacity: 0.65;
+    opacity: 0.58;
+
     cursor: wait;
   }
 
   .form-actions__note {
-    margin: var(--space-3) 0 0;
+    margin: 11px 0 0;
+
+    color: #777f75;
+
+    font-family:
+      "DM Mono",
+      monospace;
+
+    font-size: 7px;
+
+    font-weight: 700;
+
+    line-height: 1.5;
+
     text-align: right;
-    color: var(--color-text-faint);
-    font-size: var(--font-size-xs);
+
+    text-transform: uppercase;
   }
+
+  /* ==========================================================================
+     SIDEBAR
+     ========================================================================== */
 
   .report-create-sidebar {
     position: sticky;
-    top: var(--space-6);
+
+    top: 24px;
+
     display: grid;
-    gap: var(--space-4);
+
+    gap: 15px;
+
+    min-width: 0;
   }
 
   .sidebar-card {
-    padding: var(--space-5);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-xl);
-    background: var(--color-surface);
-    box-shadow: var(--shadow-xs);
+    min-width: 0;
+
+    padding: 19px;
+
+    color: var(--ink);
+
+    background: var(--white);
+
+    border:
+      3px solid
+      var(--ink);
+
+    box-shadow:
+      6px 6px 0
+      var(--ink);
   }
 
-  .sidebar-card--highlight {
-    background:
-      linear-gradient(
-        145deg,
-        var(--color-primary-soft),
-        var(--color-surface)
-      );
+  .sidebar-card--dark {
+    color: var(--white);
+
+    background: var(--ink);
+
+    box-shadow:
+      7px 7px 0
+      var(--acid);
+  }
+
+  .sidebar-card--link {
+    display: grid;
+
+    grid-template-columns:
+      42px
+      minmax(0, 1fr);
+
+    gap: 11px;
+
+    align-items: start;
+  }
+
+  .sidebar-card__top {
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 10px;
+
+    margin-bottom: 13px;
   }
 
   .sidebar-card__icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 40px;
-    height: 40px;
-    margin-bottom: var(--space-3);
-    border-radius: var(--radius-md);
-    background: var(--color-primary-soft);
-    color: var(--color-primary);
+    display: grid;
+
+    width: 42px;
+
+    height: 42px;
+
+    place-items: center;
+
+    color: var(--ink);
+
+    background: var(--acid);
+
+    border:
+      2px solid
+      var(--ink);
+  }
+
+  .sidebar-card__icon svg {
+    color: var(--ink);
+    stroke: var(--ink);
   }
 
   .sidebar-card__icon--warning {
-    background: var(--color-warning-soft);
-    color: var(--color-warning-text);
+    color: var(--ink);
+    background: var(--warning);
   }
 
   .sidebar-card__icon--location {
-    background: var(--color-info-soft);
-    color: var(--color-info);
+    color: var(--ink);
+    background: var(--acid);
+  }
+
+  .sidebar-card__eyebrow {
+    color: var(--acid);
+
+    font-family:
+      "DM Mono",
+      monospace;
+
+    font-size: 7px;
+
+    font-weight: 900;
+
+    line-height: 1;
+
+    letter-spacing: 0.08em;
+
+    text-transform: uppercase;
+  }
+
+  .sidebar-card__eyebrow--dark {
+    color: #727a70;
   }
 
   .sidebar-card__title {
     margin: 0;
-    color: var(--color-text-strong);
-    font-size: var(--font-size-sm);
-    font-weight: 800;
-    line-height: 1.4;
+
+    color: var(--ink);
+
+    font-family:
+      Sora,
+      Inter,
+      sans-serif;
+
+    font-size: 17px;
+
+    font-weight: 900;
+
+    line-height: 1;
+
+    letter-spacing: -0.045em;
+
+    text-transform: uppercase;
+  }
+
+  .sidebar-card--dark
+    .sidebar-card__title {
+    color: var(--white);
   }
 
   .sidebar-card__description {
-    margin: 6px 0 0;
-    color: var(--color-text-muted);
-    font-size: var(--font-size-xs);
-    line-height: 1.65;
+    margin: 10px 0 0;
+
+    color: var(--muted);
+
+    font-size: 9px;
+
+    line-height: 1.68;
+  }
+
+  .sidebar-card--dark
+    .sidebar-card__description {
+    color: #aeb6ac;
   }
 
   .sidebar-check-list {
     display: grid;
-    gap: var(--space-3);
-    margin-top: var(--space-5);
+
+    gap: 10px;
+
+    margin-top: 18px;
+
+    padding-top: 15px;
+
+    border-top:
+      2px solid
+      rgba(
+        255,
+        255,
+        255,
+        0.15
+      );
   }
 
   .sidebar-check-item {
-    display: flex;
-    align-items: flex-start;
+    display: grid;
+
+    grid-template-columns:
+      17px
+      minmax(0, 1fr);
+
     gap: 8px;
-    color: var(--color-text-muted);
-    font-size: var(--font-size-xs);
+
+    align-items: start;
+
+    color: #c4c9c0;
+
+    font-size: 8px;
+
     line-height: 1.5;
   }
 
   .sidebar-check-item svg {
-    flex: 0 0 auto;
+    color: var(--acid);
+    stroke: var(--acid);
+
     margin-top: 1px;
-    color: var(--color-primary);
   }
 
-  .sidebar-card--link {
-    display: flex;
-    align-items: flex-start;
-    gap: var(--space-3);
-    color: var(--color-primary);
+  .sidebar-card__link-icon {
+    display: grid;
+
+    width: 42px;
+
+    height: 42px;
+
+    place-items: center;
+
+    color: var(--acid);
+
+    background: var(--ink);
+
+    border:
+      2px solid
+      var(--ink);
   }
 
-  .sidebar-card--link > svg {
-    flex: 0 0 auto;
-    margin-top: 1px;
+  .sidebar-card__link-icon svg {
+    color: var(--acid);
+    stroke: var(--acid);
   }
 
   .sidebar-card--link strong {
     display: block;
-    color: var(--color-text-strong);
-    font-size: var(--font-size-xs);
+
+    color: var(--ink);
+
+    font-family:
+      Sora,
+      Inter,
+      sans-serif;
+
+    font-size: 10px;
+
+    font-weight: 900;
+
+    line-height: 1.15;
+
+    text-transform: uppercase;
   }
 
   .sidebar-card--link a {
     display: inline-flex;
-    margin-top: 4px;
-    color: var(--color-primary);
-    font-size: var(--font-size-xs);
-    font-weight: 750;
+
+    align-items: center;
+
+    gap: 6px;
+
+    margin-top: 7px;
+
+    color: #586057;
+
+    font-family:
+      "DM Mono",
+      monospace;
+
+    font-size: 7px;
+
+    font-weight: 900;
+
+    line-height: 1.4;
+
+    letter-spacing: 0.04em;
+
     text-decoration: none;
+
+    text-transform: uppercase;
+  }
+
+  .sidebar-card--link a svg {
+    color: var(--warning);
+    stroke: var(--warning);
   }
 
   .sidebar-card--link a:hover {
-    color: var(--color-primary-dark);
+    color: var(--ink);
   }
 
+  /* ==========================================================================
+     SUCCESS
+     ========================================================================== */
+
   .report-success {
-    padding: var(--space-10);
-    border: 1px solid var(--color-primary-soft);
-    border-radius: var(--radius-xl);
-    background:
-      linear-gradient(
-        145deg,
-        var(--color-primary-soft),
-        var(--color-surface)
-      );
-    box-shadow: var(--shadow-sm);
-    text-align: center;
+    padding: 30px;
+
+    color: var(--white);
+
+    background: var(--ink);
+
+    border:
+      4px solid
+      var(--ink);
+
+    box-shadow:
+      9px 9px 0
+      var(--acid);
   }
 
   .report-success[hidden] {
     display: none;
   }
 
-  .report-success__icon {
-    display: inline-flex;
+  .report-success__top {
+    display: grid;
+
+    grid-template-columns:
+      58px
+      minmax(0, 1fr);
+
+    gap: 14px;
+
     align-items: center;
-    justify-content: center;
-    width: 70px;
-    height: 70px;
-    margin-bottom: var(--space-4);
-    border-radius: 50%;
-    background: var(--color-surface);
-    color: var(--color-primary);
+  }
+
+  .report-success__icon {
+    display: grid;
+
+    width: 58px;
+
+    height: 58px;
+
+    place-items: center;
+
+    color: var(--ink);
+
+    background: var(--acid);
+
+    border:
+      3px solid
+      var(--white);
+  }
+
+  .report-success__icon svg {
+    color: var(--ink);
+    stroke: var(--ink);
   }
 
   .report-success__eyebrow {
     display: block;
-    color: var(--color-primary-dark);
-    font-size: var(--font-size-xs);
-    font-weight: 850;
-    letter-spacing: 0.09em;
+
+    margin-bottom: 8px;
+
+    color: var(--acid);
+
+    font-family:
+      "DM Mono",
+      monospace;
+
+    font-size: 7px;
+
+    font-weight: 900;
+
+    line-height: 1;
+
+    letter-spacing: 0.08em;
+
+    text-transform: uppercase;
   }
 
   .report-success__title {
-    margin: var(--space-2) 0 0;
-    color: var(--color-text-strong);
-    font-size: clamp(
-      1.45rem,
-      3vw,
-      2rem
-    );
-    letter-spacing: -0.025em;
+    margin: 0;
+
+    color: var(--white);
+
+    font-family:
+      Sora,
+      Inter,
+      sans-serif;
+
+    font-size:
+      clamp(
+        26px,
+        4vw,
+        44px
+      );
+
+    font-weight: 900;
+
+    line-height: 0.94;
+
+    letter-spacing: -0.065em;
+
+    text-transform: uppercase;
   }
 
   .report-success__description {
-    max-width: 650px;
-    margin: var(--space-3) auto 0;
-    color: var(--color-text-muted);
-    font-size: var(--font-size-sm);
-    line-height: 1.7;
+    max-width: 670px;
+
+    margin: 17px 0 0;
+
+    color: #c3c8bf;
+
+    font-size: 10px;
+
+    line-height: 1.75;
+  }
+
+  .report-success__summary {
+    display: grid;
+
+    grid-template-columns:
+      repeat(
+        2,
+        minmax(0, 1fr)
+      );
+
+    gap: 12px;
+
+    margin-top: 22px;
+  }
+
+  .report-success__summary > div {
+    padding: 12px;
+
+    background: var(--ink-2);
+
+    border:
+      2px solid
+      #383f35;
+  }
+
+  .report-success__summary span {
+    display: block;
+
+    color: #8e968c;
+
+    font-family:
+      "DM Mono",
+      monospace;
+
+    font-size: 7px;
+
+    font-weight: 900;
+
+    line-height: 1;
+
+    letter-spacing: 0.06em;
+
+    text-transform: uppercase;
+  }
+
+  .report-success__summary strong {
+    display: block;
+
+    margin-top: 7px;
+
+    color: var(--acid);
+
+    font-family:
+      Sora,
+      Inter,
+      sans-serif;
+
+    font-size: 12px;
+
+    font-weight: 900;
+
+    line-height: 1;
+
+    text-transform: uppercase;
   }
 
   .report-success__actions {
     display: flex;
+
     align-items: center;
-    justify-content: center;
+
     flex-wrap: wrap;
-    gap: var(--space-3);
-    margin-top: var(--space-6);
+
+    gap: 10px;
+
+    margin-top: 24px;
   }
 
   .report-success__primary,
   .report-success__secondary {
     display: inline-flex;
+
     align-items: center;
+
     justify-content: center;
-    gap: 7px;
-    min-height: 44px;
-    padding: 0 var(--space-4);
-    border-radius: var(--radius-md);
-    font: inherit;
-    font-size: var(--font-size-sm);
-    font-weight: 750;
+
+    gap: 8px;
+
+    min-height: 45px;
+
+    padding: 0 13px;
+
+    border:
+      3px solid
+      var(--white);
+
+    border-radius: 0;
+
+    font-family:
+      "DM Mono",
+      monospace;
+
+    font-size: 7px;
+
+    font-weight: 900;
+
+    line-height: 1;
+
+    letter-spacing: 0.06em;
+
     text-decoration: none;
+
+    text-transform: uppercase;
   }
 
   .report-success__primary {
-    flex-direction: row-reverse;
-    border: 1px solid var(--color-primary);
-    background: var(--color-primary);
-    color: var(--color-white);
+    color: var(--ink);
+
+    background: var(--acid);
+
+    box-shadow:
+      5px 5px 0
+      var(--warning);
+  }
+
+  .report-success__primary span {
+    color: var(--ink);
+  }
+
+  .report-success__primary svg {
+    color: var(--ink);
+    stroke: var(--ink);
+  }
+
+  .report-success__primary:hover {
+    background: var(--acid-soft);
   }
 
   .report-success__secondary {
-    border: 1px solid var(--color-border);
-    background: var(--color-surface);
-    color: var(--color-text-strong);
+    color: var(--white);
+
+    background: transparent;
+
     cursor: pointer;
   }
 
-  @media (max-width: 980px) {
+  .report-success__secondary:hover {
+    color: var(--ink);
+
+    background: var(--white);
+  }
+
+  /* ==========================================================================
+     ACCESSIBILITY
+     ========================================================================== */
+
+  .report-create-page a:focus-visible,
+  .report-create-page button:focus-visible,
+  .report-create-page input:focus-visible,
+  .report-create-page select:focus-visible,
+  .report-create-page textarea:focus-visible {
+    outline:
+      4px solid
+      var(--acid) !important;
+
+    outline-offset: 4px;
+  }
+
+  /* ==========================================================================
+     TABLET
+     ========================================================================== */
+
+  @media (max-width: 1020px) {
+    .report-hero {
+      grid-template-columns:
+        minmax(0, 1fr)
+        275px;
+    }
+
+    .report-create-layout {
+      grid-template-columns:
+        minmax(0, 1fr)
+        280px;
+    }
+  }
+
+  @media (max-width: 900px) {
+    .report-hero {
+      grid-template-columns: 1fr;
+    }
+
+    .report-hero__side {
+      display: grid;
+
+      grid-template-columns:
+        58px
+        minmax(0, 1fr);
+
+      align-items: center;
+
+      gap: 14px;
+
+      min-height: 150px;
+
+      border-top:
+        4px solid
+        var(--ink);
+
+      border-left: 0;
+    }
+
+    .report-hero__side-mark {
+      margin-bottom: 0;
+    }
+
     .report-create-layout {
       grid-template-columns: 1fr;
     }
 
     .report-create-sidebar {
       position: static;
+
+      display: grid;
+
       grid-template-columns:
-        repeat(2, minmax(0, 1fr));
+        repeat(
+          2,
+          minmax(0, 1fr)
+        );
+
+      align-items: start;
     }
 
-    .sidebar-card--highlight {
+    .sidebar-card:first-child {
       grid-column: 1 / -1;
     }
 
@@ -1655,48 +3861,260 @@ const jsonLd = {
     }
   }
 
-  @media (max-width: 680px) {
-    .report-create-page__container {
-      width: min(
-        100%,
-        calc(100% - 28px)
-      );
+  /* ==========================================================================
+     MOBILE
+     ========================================================================== */
+
+  @media (max-width: 640px) {
+    .report-hero {
+      width: calc(100% - 24px);
+
+      margin-top: 16px;
+
+      box-shadow:
+        8px 8px 0
+        var(--warning);
     }
 
-    .report-create-page__content {
-      padding-top: var(--space-6);
+    .report-hero__main {
+      padding:
+        31px
+        20px;
+    }
+
+    .report-hero h1 {
+      margin-top: 25px;
+
+      font-size:
+        clamp(
+          39px,
+          12.8vw,
+          61px
+        );
+
+      line-height: 0.84;
+    }
+
+    .report-hero__description {
+      margin-top: 29px;
+
+      padding-left: 12px;
+
+      border-left-width: 5px;
+
+      font-size: 10px;
+
+      line-height: 1.75;
+    }
+
+    .report-hero__side {
+      grid-template-columns:
+        49px
+        minmax(0, 1fr);
+
+      padding: 20px;
+    }
+
+    .report-hero__side-mark {
+      width: 49px;
+
+      height: 49px;
+    }
+
+    .report-hero__side strong {
+      font-size: 20px;
+    }
+
+    .report-create-content {
+      padding:
+        72px
+        0
+        85px;
+    }
+
+    .report-create-container {
+      width: calc(100% - 24px);
+    }
+
+    .report-form {
+      gap: 14px;
     }
 
     .form-section {
-      padding: var(--space-5);
+      padding: 18px;
+
+      box-shadow:
+        5px 5px 0
+        var(--ink);
+    }
+
+    .form-section--confirmation {
+      box-shadow:
+        6px 6px 0
+        var(--acid);
+    }
+
+    .form-section__header {
+      gap: 11px;
+
+      padding-bottom: 18px;
+    }
+
+    .form-section__number {
+      width: 37px;
+
+      height: 37px;
+
+      flex-basis: 37px;
+    }
+
+    .form-section__title {
+      font-size: 20px;
+    }
+
+    .form-section__description {
+      font-size: 9px;
     }
 
     .form-grid {
       grid-template-columns: 1fr;
+
+      gap: 18px;
+
+      padding-top: 20px;
     }
 
     .form-field--full {
       grid-column: auto;
     }
 
-    .form-section__header {
-      gap: var(--space-3);
-      padding-bottom: var(--space-5);
+    .location-notice {
+      grid-template-columns:
+        39px
+        minmax(0, 1fr);
+
+      gap: 10px;
+
+      margin-top: 18px;
+
+      padding: 12px;
     }
 
-    .form-section__number {
-      width: 36px;
-      height: 36px;
+    .location-notice__icon {
+      width: 39px;
+
+      height: 39px;
+    }
+
+    .location-picker-header {
+      align-items: flex-start;
+
+      flex-direction: column;
+
+      gap: 11px;
+    }
+
+    .location-picker__locate {
+      width: 100%;
+    }
+
+    .location-picker__map {
+      height: 320px;
+    }
+
+    .coordinates-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .auto-address-field__input {
+      min-height: 54px;
+
+      padding-right: 84px !important;
+
+      padding-left: 50px !important;
+    }
+
+    .auto-address-field__icon {
+      left: 10px;
+
+      width: 29px;
+      height: 29px;
+    }
+
+    .auto-address-field__badge {
+      right: 9px;
+
+      min-height: 23px;
+
+      padding: 0 6px;
+
+      font-size: 5.5px;
+    }
+
+    .file-field__label {
+      grid-template-columns:
+        40px
+        minmax(0, 1fr);
+
+      min-height: 70px;
+    }
+
+    .file-field__icon {
+      width: 40px;
+
+      height: 40px;
+    }
+
+    .file-field__button {
+      display: none;
+    }
+
+    .confirmation-box {
+      grid-template-columns:
+        42px
+        minmax(0, 1fr);
+
+      gap: 10px;
+
+      padding: 12px;
+    }
+
+    .confirmation-box__icon {
+      width: 42px;
+
+      height: 42px;
+    }
+
+    .confirmation-box__title {
+      font-size: 12px;
+    }
+
+    .confirmation-box__description {
+      font-size: 8px;
+    }
+
+    .consent-field {
+      grid-template-columns:
+        21px
+        minmax(0, 1fr);
+
+      gap: 9px;
+    }
+
+    .consent-field__text {
+      font-size: 8px;
     }
 
     .form-actions {
-      align-items: stretch;
       flex-direction: column-reverse;
+
+      align-items: stretch;
     }
 
-    .form-actions__submit,
-    .form-actions__back {
+    .form-actions__back,
+    .form-actions__submit {
       width: 100%;
+
       justify-content: center;
     }
 
@@ -1708,80 +4126,186 @@ const jsonLd = {
       grid-template-columns: 1fr;
     }
 
-    .sidebar-card--highlight,
+    .sidebar-card:first-child,
     .sidebar-card--link {
       grid-column: auto;
     }
 
-    .file-field__button {
-      display: none;
+    .report-success {
+      padding: 20px;
+
+      box-shadow:
+        6px 6px 0
+        var(--acid);
     }
 
-    .report-success {
-      padding: var(--space-7) var(--space-5);
+    .report-success__top {
+      grid-template-columns:
+        49px
+        minmax(0, 1fr);
+
+      gap: 11px;
+    }
+
+    .report-success__icon {
+      width: 49px;
+
+      height: 49px;
+    }
+
+    .report-success__title {
+      font-size: 26px;
+    }
+
+    .report-success__summary {
+      grid-template-columns: 1fr;
+    }
+
+    .report-success__actions {
+      flex-direction: column;
+
+      align-items: stretch;
+    }
+
+    .report-success__primary,
+    .report-success__secondary {
+      width: 100%;
+    }
+  }
+
+  @media (max-width: 430px) {
+    .report-hero {
+      width: calc(100% - 16px);
+    }
+
+    .report-create-container {
+      width: calc(100% - 16px);
+    }
+
+    .report-hero__main {
+      padding:
+        27px
+        16px;
+    }
+
+    .report-hero__crumbs {
+      font-size: 6px;
+    }
+
+    .report-hero h1 {
+      font-size: 15vw;
+    }
+
+    .report-create-content {
+      padding-top: 62px;
+    }
+
+    .form-section {
+      padding: 16px;
+    }
+
+    .form-field__input,
+    .form-field__textarea,
+    .form-field__select {
+      font-size: 10px;
+    }
+
+    .location-picker__map {
+      height: 285px;
+    }
+
+    .form-actions__submit {
+      min-width: 0;
+    }
+  }
+
+  /* ==========================================================================
+     REDUCED MOTION
+     ========================================================================== */
+
+  @media (prefers-reduced-motion: reduce) {
+    .report-create-page *,
+    .report-create-page *::before,
+    .report-create-page *::after {
+      scroll-behavior: auto !important;
+
+      transition-duration:
+        0.01ms !important;
+
+      animation-duration:
+        0.01ms !important;
+
+      animation-iteration-count: 1 !important;
     }
   }
 </style>
 
 <script>
-// @ts-nocheck
+  import L from "leaflet";
+  import "leaflet/dist/leaflet.css";
 
-  const form =
-    document.querySelector(
-      "[data-report-form]",
-    );
+  type ReportSubmitPayload = {
+    title: string;
+    description: string;
+    type: string;
+    category: string;
 
-  const successPanel =
-    document.querySelector(
-      "[data-report-success]",
-    );
+    location: {
+      address: string;
+      areaId: string;
+      areaName: string;
 
-  const newReportButton =
-    document.querySelector(
-      "[data-new-report]",
-    );
+      coordinates?: {
+        lat: number;
+        lng: number;
+      };
+    };
 
-  const submitButton =
-    document.querySelector(
-      "[data-submit-button]",
-    );
+    reporterName: string;
+    reporterContact: string;
+    notes: string;
+    imageName?: string;
+    createdAt: string;
+  };
 
-  const submitLabel =
-    document.querySelector(
-      "[data-submit-label]",
-    );
+  type NominatimReverseResponse = {
+    display_name?: string;
 
-  const typeSelect =
-    document.querySelector(
-      "[name='type']",
-    );
+    address?: {
+      road?: string;
+      pedestrian?: string;
+      footway?: string;
+      house_number?: string;
 
-  const typeExplainer =
-    document.querySelector(
-      "[data-type-explainer]",
-    );
+      neighbourhood?: string;
+      suburb?: string;
+      village?: string;
+      town?: string;
+      city?: string;
+      city_district?: string;
+      municipality?: string;
+      county?: string;
+      state_district?: string;
 
-  const descriptionField =
-    document.querySelector(
-      "[name='description']",
-    );
+      postcode?: string;
 
-  const descriptionCounter =
-    document.querySelector(
-      "[data-description-counter]",
-    );
+      state?: string;
+      country?: string;
+    };
+  };
 
-  const imageInput =
-    document.querySelector(
-      "[data-report-image]",
-    );
+  const REPORT_IMAGE_MAX_SIZE =
+    5 * 1024 * 1024;
 
-  const imageName =
-    document.querySelector(
-      "[data-image-name]",
-    );
+  const REPORT_IMAGE_TYPES =
+    new Set([
+      "image/jpeg",
+      "image/png",
+      "image/webp",
+    ]);
 
-  const reportTypeDescriptions = {
+  const REPORT_TYPE_DESCRIPTIONS:
+    Record<string, string> = {
     "illegal-dumping":
       "Sampah dibuang di lokasi yang tidak semestinya.",
 
@@ -1801,605 +4325,2023 @@ const jsonLd = {
       "Masalah persampahan lain yang belum masuk kategori di atas.",
   };
 
-  function updateTypeDescription() {
+  /*
+   * Kuta / South Bali focus.
+   * These coordinates are only used as the initial map view
+   * and interaction bounds.
+   */
+  const DEFAULT_LAT =
+    -8.7180;
+
+  const DEFAULT_LNG =
+    115.1740;
+
+  /*
+   * Interaction bounds around Kabupaten Badung.
+   * The map cannot be panned far outside this area.
+   */
+  const BADUNG_BOUNDS =
+    L.latLngBounds(
+      [-8.86, 114.96],
+      [-8.20, 115.32],
+    );
+
+  const normalizeText = (
+    value: unknown,
+  ) => {
+    return String(value ?? "")
+      .normalize("NFD")
+      .replace(
+        /[\u0300-\u036f]/g,
+        "",
+      )
+      .toLowerCase()
+      .replace(
+        /\b(kecamatan|kec\.?|kabupaten|kab\.?)\b/g,
+        " ",
+      )
+      .replace(
+        /[^a-z0-9\s]/g,
+        " ",
+      )
+      .replace(
+        /\s+/g,
+        " ",
+      )
+      .trim();
+  };
+
+  const initializeReportPage = () => {
+    const page =
+      document.querySelector<HTMLElement>(
+        ".report-create-page",
+      );
+
+    const form =
+      document.querySelector<HTMLFormElement>(
+        "[data-report-form]",
+      );
+
+    const successPanel =
+      document.querySelector<HTMLElement>(
+        "[data-report-success]",
+      );
+
     if (
-      !(typeSelect instanceof HTMLSelectElement)
+      !page ||
+      !form ||
+      !successPanel
     ) {
       return;
     }
 
     if (
-      !(typeExplainer instanceof HTMLElement)
+      form.dataset.initialized ===
+      "true"
     ) {
       return;
     }
 
-    const value =
-      typeSelect.value;
+    form.dataset.initialized =
+      "true";
 
-    typeExplainer.textContent =
-      reportTypeDescriptions[value] ??
-      "Pilih kategori yang paling sesuai dengan kondisi lapangan.";
-  }
+    /* ======================================================================
+       ELEMENTS
+       ====================================================================== */
 
-  function updateDescriptionCounter() {
-    if (
-      !(descriptionField instanceof HTMLTextAreaElement) ||
-      !(descriptionCounter instanceof HTMLElement)
-    ) {
-      return;
-    }
+    const submitButton =
+      form.querySelector<HTMLButtonElement>(
+        "[data-submit-button]",
+      );
 
-    descriptionCounter.textContent =
-      `${descriptionField.value.length} / 2000`;
-  }
+    const submitLabel =
+      form.querySelector<HTMLElement>(
+        "[data-submit-label]",
+      );
 
-  function setFieldError(
-    fieldName,
-    message,
-  ) {
-    const field =
-      form?.querySelector(
+    const typeSelect =
+      form.querySelector<HTMLSelectElement>(
+        "[name='type']",
+      );
+
+    const typeExplainer =
+      form.querySelector<HTMLElement>(
+        "[data-type-explainer]",
+      );
+
+    const descriptionField =
+      form.querySelector<HTMLTextAreaElement>(
+        "[name='description']",
+      );
+
+    const descriptionCounter =
+      form.querySelector<HTMLElement>(
+        "[data-description-counter]",
+      );
+
+    const imageInput =
+      form.querySelector<HTMLInputElement>(
+        "[data-report-image]",
+      );
+
+    const imageName =
+      form.querySelector<HTMLElement>(
+        "[data-image-name]",
+      );
+
+    const newReportButton =
+      successPanel.querySelector<HTMLButtonElement>(
+        "[data-new-report]",
+      );
+
+    const latitudeInput =
+      form.querySelector<HTMLInputElement>(
+        "[name='latitude']",
+      );
+
+    const longitudeInput =
+      form.querySelector<HTMLInputElement>(
+        "[name='longitude']",
+      );
+
+    const areaSelect =
+      form.querySelector<HTMLSelectElement>(
+        "[name='areaId']",
+      );
+
+    const addressInput =
+      form.querySelector<HTMLInputElement>(
+        "[name='address']",
+      );
+
+    const locationMap =
+      form.querySelector<HTMLElement>(
+        "[data-location-map]",
+      );
+
+    const locateButton =
+      form.querySelector<HTMLButtonElement>(
+        "[data-use-current-location]",
+      );
+
+    /* ======================================================================
+       TYPE
+       ====================================================================== */
+
+    const updateTypeDescription =
+      () => {
+        if (
+          !typeSelect ||
+          !typeExplainer
+        ) {
+          return;
+        }
+
+        typeExplainer.textContent =
+          REPORT_TYPE_DESCRIPTIONS[
+            typeSelect.value
+          ] ??
+          "Pilih kategori yang paling sesuai dengan kondisi lapangan.";
+      };
+
+    /* ======================================================================
+       DESCRIPTION COUNTER
+       ====================================================================== */
+
+    const updateDescriptionCounter =
+      () => {
+        if (
+          !descriptionField ||
+          !descriptionCounter
+        ) {
+          return;
+        }
+
+        descriptionCounter.textContent =
+          `${descriptionField.value.length} / 2000`;
+      };
+
+    /* ======================================================================
+       ERRORS
+       ====================================================================== */
+
+    const getField = (
+      fieldName: string,
+    ) =>
+      form.querySelector<HTMLElement>(
         `[name="${fieldName}"]`,
       );
 
-    const error =
-      form?.querySelector(
+    const getError = (
+      fieldName: string,
+    ) =>
+      form.querySelector<HTMLElement>(
         `[data-field-error="${fieldName}"]`,
       );
 
-    if (
-      field instanceof HTMLElement
-    ) {
-      field.setAttribute(
+    const setFieldError = (
+      fieldName: string,
+      message: string,
+    ) => {
+      const field =
+        getField(fieldName);
+
+      const error =
+        getError(fieldName);
+
+      field?.setAttribute(
         "aria-invalid",
         "true",
       );
-    }
 
-    if (
-      error instanceof HTMLElement
-    ) {
-      error.textContent =
-        message;
+      if (error) {
+        error.textContent =
+          message;
 
-      error.hidden = false;
-    }
-  }
+        error.hidden =
+          false;
+      }
+    };
 
-  function clearFieldError(
-    fieldName,
-  ) {
-    const field =
-      form?.querySelector(
-        `[name="${fieldName}"]`,
-      );
+    const clearFieldError = (
+      fieldName: string,
+    ) => {
+      const field =
+        getField(fieldName);
 
-    const error =
-      form?.querySelector(
-        `[data-field-error="${fieldName}"]`,
-      );
+      const error =
+        getError(fieldName);
 
-    if (
-      field instanceof HTMLElement
-    ) {
-      field.removeAttribute(
+      field?.removeAttribute(
         "aria-invalid",
       );
-    }
 
-    if (
-      error instanceof HTMLElement
-    ) {
-      error.textContent = "";
-      error.hidden = true;
-    }
-  }
+      if (error) {
+        error.textContent = "";
+        error.hidden = true;
+      }
+    };
 
-  function clearAllErrors() {
-    [
-      "title",
-      "description",
-      "type",
-      "areaId",
-      "address",
-      "confirmation",
-    ].forEach(
-      (fieldName) => {
-        clearFieldError(
-          fieldName,
-        );
-      },
-    );
-  }
-
-  function validateReportForm() {
-    if (
-      !(form instanceof HTMLFormElement)
-    ) {
-      return false;
-    }
-
-    clearAllErrors();
-
-    const title =
-      form.elements.namedItem(
+    const clearAllErrors = () => {
+      [
         "title",
-      );
-
-    const description =
-      form.elements.namedItem(
         "description",
-      );
-
-    const type =
-      form.elements.namedItem(
         "type",
-      );
-
-    const area =
-      form.elements.namedItem(
         "areaId",
-      );
-
-    const address =
-      form.elements.namedItem(
         "address",
-      );
-
-    const confirmation =
-      form.elements.namedItem(
+        "latitude",
+        "longitude",
+        "image",
         "confirmation",
+      ].forEach(
+        clearFieldError,
       );
+    };
 
-    let valid = true;
+    const focusFirstInvalid =
+      () => {
+        const firstInvalid =
+          form.querySelector<HTMLElement>(
+            "[aria-invalid='true']",
+          );
 
-    if (
-      !(title instanceof HTMLInputElement) ||
-      title.value.trim().length < 5
-    ) {
-      setFieldError(
-        "title",
-        "Judul laporan minimal 5 karakter.",
-      );
+        if (!firstInvalid) {
+          return;
+        }
 
-      valid = false;
-    }
-
-    if (
-      !(
-        description instanceof
-        HTMLTextAreaElement
-      ) ||
-      description.value.trim().length < 20
-    ) {
-      setFieldError(
-        "description",
-        "Deskripsi laporan minimal 20 karakter.",
-      );
-
-      valid = false;
-    }
-
-    if (
-      !(type instanceof HTMLSelectElement) ||
-      type.value === ""
-    ) {
-      setFieldError(
-        "type",
-        "Silakan pilih jenis laporan.",
-      );
-
-      valid = false;
-    }
-
-    if (
-      !(area instanceof HTMLSelectElement) ||
-      area.value === ""
-    ) {
-      setFieldError(
-        "areaId",
-        "Silakan pilih area atau kecamatan.",
-      );
-
-      valid = false;
-    }
-
-    if (
-      !(address instanceof HTMLInputElement) ||
-      address.value.trim().length < 5
-    ) {
-      setFieldError(
-        "address",
-        "Alamat atau lokasi perlu diisi.",
-      );
-
-      valid = false;
-    }
-
-    if (
-      !(
-        confirmation instanceof
-        HTMLInputElement
-      ) ||
-      !confirmation.checked
-    ) {
-      setFieldError(
-        "confirmation",
-        "Konfirmasi diperlukan sebelum laporan dikirim.",
-      );
-
-      valid = false;
-    }
-
-    if (!valid) {
-      const firstInvalid =
-        form.querySelector(
-          "[aria-invalid='true']",
-        );
-
-      if (
-        firstInvalid instanceof
-        HTMLElement
-      ) {
         firstInvalid.scrollIntoView({
           behavior: "smooth",
           block: "center",
         });
-      }
-    }
 
-    return valid;
-  }
+        window.setTimeout(
+          () => {
+            try {
+              firstInvalid.focus();
+            } catch {}
+          },
+          220,
+        );
+      };
 
-  function buildReportPayload() {
-    if (
-      !(form instanceof HTMLFormElement)
-    ) {
-      return null;
-    }
+    /* ======================================================================
+       LOCATION MAP
+       ====================================================================== */
 
-    const formData =
-      new FormData(form);
+    let locationMapInstance:
+      | L.Map
+      | null = null;
 
-    const latitudeRaw =
-      String(
-        formData.get(
+    let locationMarker:
+      | L.Marker
+      | null = null;
+
+    let reverseGeocodeTimer:
+      | number
+      | null = null;
+
+    let reverseGeocodeRequest =
+      0;
+
+    const createLocationIcon =
+      () =>
+        L.divIcon({
+          className:
+            "binsight-location-marker-wrapper",
+
+          html: `
+            <span
+              class="binsight-location-marker"
+              aria-hidden="true"
+            ></span>
+          `,
+
+          iconSize: [
+            30,
+            38,
+          ],
+
+          iconAnchor: [
+            15,
+            37,
+          ],
+
+          popupAnchor: [
+            0,
+            -35,
+          ],
+        });
+
+    const setCoordinateInputs =
+      (
+        lat: number,
+        lng: number,
+      ) => {
+        if (
+          latitudeInput
+        ) {
+          latitudeInput.value =
+            lat.toFixed(6);
+
+          latitudeInput.setAttribute(
+            "readonly",
+            "true",
+          );
+        }
+
+        if (
+          longitudeInput
+        ) {
+          longitudeInput.value =
+            lng.toFixed(6);
+
+          longitudeInput.setAttribute(
+            "readonly",
+            "true",
+          );
+        }
+
+        clearFieldError(
           "latitude",
-        ) ?? "",
-      ).trim();
+        );
 
-    const longitudeRaw =
-      String(
-        formData.get(
+        clearFieldError(
           "longitude",
-        ) ?? "",
-      ).trim();
+        );
+      };
 
-    const latitude =
-      latitudeRaw !== ""
-        ? Number(latitudeRaw)
-        : undefined;
+    const clampToBadungBounds =
+      (
+        lat: number,
+        lng: number,
+      ) => {
+        const clampedLat =
+          Math.max(
+            BADUNG_BOUNDS.getSouth(),
+            Math.min(
+              BADUNG_BOUNDS.getNorth(),
+              lat,
+            ),
+          );
 
-    const longitude =
-      longitudeRaw !== ""
-        ? Number(longitudeRaw)
-        : undefined;
+        const clampedLng =
+          Math.max(
+            BADUNG_BOUNDS.getWest(),
+            Math.min(
+              BADUNG_BOUNDS.getEast(),
+              lng,
+            ),
+          );
 
-    const image =
-      formData.get("image");
+        return {
+          lat: clampedLat,
+          lng: clampedLng,
+        };
+      };
 
-    const selectedArea =
-      form.elements.namedItem(
-        "areaId",
-      );
+    /* ======================================================================
+       AREA MATCHING
+       ====================================================================== */
 
-    let areaName = "";
+    const matchAreaFromReverseGeocode =
+      (
+        result: NominatimReverseResponse,
+      ) => {
+        if (
+          !areaSelect
+        ) {
+          return null;
+        }
 
-    if (
-      selectedArea instanceof
-      HTMLSelectElement
-    ) {
-      const selectedOption =
-        selectedArea.options[
-          selectedArea.selectedIndex
-        ];
+        const address =
+          result.address ??
+          {};
 
-      areaName =
-        selectedOption?.textContent?.trim() ??
-        "";
-    }
+        const candidates = [
+          address.city_district,
+          address.municipality,
+          address.county,
+          address.town,
+          address.city,
+          address.village,
+          address.suburb,
+          address.neighbourhood,
+          address.state_district,
+        ]
+          .filter(Boolean)
+          .map(
+            normalizeText,
+          )
+          .filter(Boolean);
 
-    return {
-      title:
-        String(
-          formData.get(
-            "title",
-          ) ?? "",
-        ).trim(),
+        const options =
+          Array.from(
+            areaSelect.options,
+          );
 
-      description:
-        String(
-          formData.get(
-            "description",
-          ) ?? "",
-        ).trim(),
+        for (
+          const option of options
+        ) {
+          if (
+            !option.value
+          ) {
+            continue;
+          }
 
-      type:
-        String(
-          formData.get(
-            "type",
-          ) ?? "",
-        ),
+          const areaName =
+            option.dataset.areaName ??
+            option.textContent ??
+            "";
 
-      category:
-        String(
-          formData.get(
-            "category",
-          ) ?? "",
-        ),
+          const normalizedArea =
+            normalizeText(
+              areaName,
+            );
 
-      location: {
-        address:
-          String(
-            formData.get(
-              "address",
-            ) ?? "",
-          ).trim(),
+          if (
+            candidates.includes(
+              normalizedArea,
+            )
+          ) {
+            areaSelect.value =
+              option.value;
 
-        areaId:
-          String(
-            formData.get(
+            clearFieldError(
               "areaId",
-            ) ?? "",
-          ),
+            );
 
-        areaName,
+            return areaName.trim();
+          }
+        }
 
-        coordinates:
-          latitude !== undefined &&
-          longitude !== undefined &&
-          Number.isFinite(latitude) &&
-          Number.isFinite(longitude)
-            ? {
-                lat: latitude,
-                lng: longitude,
+        const displayName =
+          normalizeText(
+            result.display_name,
+          );
+
+        for (
+          const option of options
+        ) {
+          if (
+            !option.value
+          ) {
+            continue;
+          }
+
+          const areaName =
+            option.dataset.areaName ??
+            option.textContent ??
+            "";
+
+          const normalizedArea =
+            normalizeText(
+              areaName,
+            );
+
+          if (
+            normalizedArea &&
+            displayName.includes(
+              normalizedArea,
+            )
+          ) {
+            areaSelect.value =
+              option.value;
+
+            clearFieldError(
+              "areaId",
+            );
+
+            return areaName.trim();
+          }
+        }
+
+        return null;
+      };
+
+    /* ======================================================================
+       ADDRESS
+       ====================================================================== */
+
+    const buildAutomaticAddress =
+      (
+        result: NominatimReverseResponse,
+      ) => {
+        const address =
+          result.address ??
+          {};
+
+        const rawParts = [
+          [
+            address.house_number,
+            address.road ??
+              address.pedestrian ??
+              address.footway,
+          ]
+            .filter(Boolean)
+            .join(" "),
+
+          address.neighbourhood,
+
+          address.suburb,
+
+          address.village,
+
+          address.town,
+
+          address.city_district,
+
+          address.municipality,
+        ]
+          .filter(Boolean)
+          .map(
+            (value) =>
+              String(
+                value,
+              ).trim(),
+          )
+          .filter(Boolean);
+
+        const uniqueParts =
+          Array.from(
+            new Set(
+              rawParts,
+            ),
+          );
+
+        if (
+          uniqueParts.length
+        ) {
+          return uniqueParts.join(
+            ", ",
+          );
+        }
+
+        return String(
+          result.display_name ??
+            "",
+        )
+          .split(",")
+          .slice(
+            0,
+            5,
+          )
+          .join(", ")
+          .trim();
+      };
+
+    /* ======================================================================
+       REVERSE GEOCODING
+       ====================================================================== */
+
+    const reverseGeocode =
+      async (
+        lat: number,
+        lng: number,
+      ) => {
+        const requestId =
+          ++reverseGeocodeRequest;
+
+        try {
+          const url =
+            new URL(
+              "https://nominatim.openstreetmap.org/reverse",
+            );
+
+          url.searchParams.set(
+            "format",
+            "jsonv2",
+          );
+
+          url.searchParams.set(
+            "lat",
+            lat.toFixed(6),
+          );
+
+          url.searchParams.set(
+            "lon",
+            lng.toFixed(6),
+          );
+
+          url.searchParams.set(
+            "zoom",
+            "18",
+          );
+
+          url.searchParams.set(
+            "addressdetails",
+            "1",
+          );
+
+          url.searchParams.set(
+            "layer",
+            "address",
+          );
+
+          url.searchParams.set(
+            "accept-language",
+            "id",
+          );
+
+          const response =
+            await fetch(
+              url.toString(),
+              {
+                headers: {
+                  Accept:
+                    "application/json",
+                },
+              },
+            );
+
+          if (
+            !response.ok
+          ) {
+            throw new Error(
+              `Reverse geocoding failed: ${response.status}`,
+            );
+          }
+
+          const result =
+            (await response.json()) as NominatimReverseResponse;
+
+          if (
+            requestId !==
+            reverseGeocodeRequest
+          ) {
+            return;
+          }
+
+          matchAreaFromReverseGeocode(
+            result,
+          );
+
+          const automaticAddress =
+            buildAutomaticAddress(
+              result,
+            );
+
+          if (
+            addressInput &&
+            automaticAddress
+          ) {
+            addressInput.value =
+              automaticAddress;
+
+            clearFieldError(
+              "address",
+            );
+          }
+        } catch (error) {
+          console.warn(
+            "[BINSIGHT] Reverse geocoding failed:",
+            error,
+          );
+
+          if (
+            requestId !==
+            reverseGeocodeRequest
+          ) {
+            return;
+          }
+        }
+      };
+
+    const scheduleReverseGeocode =
+      (
+        lat: number,
+        lng: number,
+      ) => {
+        if (
+          reverseGeocodeTimer !==
+          null
+        ) {
+          window.clearTimeout(
+            reverseGeocodeTimer,
+          );
+        }
+
+        reverseGeocodeTimer =
+          window.setTimeout(
+            () => {
+              reverseGeocode(
+                lat,
+                lng,
+              );
+            },
+            650,
+          );
+      };
+
+    /* ======================================================================
+       UPDATE MARKER
+       ====================================================================== */
+
+    const updateMarkerPosition =
+      (
+        lat: number,
+        lng: number,
+        source:
+          | "map"
+          | "drag"
+          | "gps",
+      ) => {
+        if (
+          !locationMapInstance
+        ) {
+          return;
+        }
+
+        const clamped =
+          clampToBadungBounds(
+            lat,
+            lng,
+          );
+
+        lat =
+          clamped.lat;
+
+        lng =
+          clamped.lng;
+
+        if (
+          !locationMarker
+        ) {
+          locationMarker =
+            L.marker(
+              [
+                lat,
+                lng,
+              ],
+              {
+                icon:
+                  createLocationIcon(),
+
+                draggable:
+                  true,
+
+                title:
+                  "Geser untuk memilih lokasi",
+
+                autoPan: true,
+              },
+            ).addTo(
+              locationMapInstance,
+            );
+
+          locationMarker.on(
+            "drag",
+            () => {
+              const position =
+                locationMarker?.getLatLng();
+
+              if (
+                !position
+              ) {
+                return;
               }
-            : undefined,
+
+              const bounded =
+                clampToBadungBounds(
+                  position.lat,
+                  position.lng,
+                );
+
+              if (
+                bounded.lat !==
+                  position.lat ||
+                bounded.lng !==
+                  position.lng
+              ) {
+                locationMarker?.setLatLng(
+                  [
+                    bounded.lat,
+                    bounded.lng,
+                  ],
+                );
+              }
+
+              setCoordinateInputs(
+                bounded.lat,
+                bounded.lng,
+              );
+            },
+          );
+
+          locationMarker.on(
+            "dragend",
+            () => {
+              const position =
+                locationMarker?.getLatLng();
+
+              if (
+                !position
+              ) {
+                return;
+              }
+
+              const bounded =
+                clampToBadungBounds(
+                  position.lat,
+                  position.lng,
+                );
+
+              locationMarker?.setLatLng(
+                [
+                  bounded.lat,
+                  bounded.lng,
+                ],
+              );
+
+              setCoordinateInputs(
+                bounded.lat,
+                bounded.lng,
+              );
+
+              scheduleReverseGeocode(
+                bounded.lat,
+                bounded.lng,
+              );
+            },
+          );
+        } else {
+          locationMarker.setLatLng(
+            [
+              lat,
+              lng,
+            ],
+          );
+        }
+
+        setCoordinateInputs(
+          lat,
+          lng,
+        );
+
+        scheduleReverseGeocode(
+          lat,
+          lng,
+        );
+
+        if (
+          source === "gps"
+        ) {
+          locationMapInstance.setView(
+            [
+              lat,
+              lng,
+            ],
+            16,
+            {
+              animate: true,
+            },
+          );
+        }
+      };
+
+    /* ======================================================================
+       MAP INIT
+       ====================================================================== */
+
+    const initializeLocationMap =
+      () => {
+        if (
+          !locationMap ||
+          locationMap.dataset.initialized ===
+            "true"
+        ) {
+          return;
+        }
+
+        locationMap.dataset.initialized =
+          "true";
+
+        try {
+          locationMapInstance =
+            L.map(
+              locationMap,
+              {
+                center: [
+                  DEFAULT_LAT,
+                  DEFAULT_LNG,
+                ],
+
+                zoom: 13,
+
+                minZoom: 11,
+
+                maxZoom: 18,
+
+                maxBounds:
+                  BADUNG_BOUNDS,
+
+                maxBoundsViscosity:
+                  1,
+
+                zoomControl: true,
+
+                attributionControl:
+                  false,
+
+                scrollWheelZoom:
+                  true,
+
+                dragging: true,
+
+                touchZoom: true,
+
+                doubleClickZoom:
+                  true,
+
+                keyboard: true,
+              },
+            );
+
+          L.tileLayer(
+            "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+            {
+              maxZoom: 19,
+
+              attribution:
+                "© OpenStreetMap contributors",
+            },
+          ).addTo(
+            locationMapInstance,
+          );
+
+          if (
+            !locationMarker
+          ) {
+            locationMarker =
+              L.marker(
+                [
+                  DEFAULT_LAT,
+                  DEFAULT_LNG,
+                ],
+                {
+                  icon:
+                    createLocationIcon(),
+
+                  draggable: true,
+
+                  title:
+                    "Geser untuk memilih lokasi",
+
+                  autoPan: true,
+                },
+              ).addTo(
+                locationMapInstance,
+              );
+
+            locationMarker.on(
+              "drag",
+              () => {
+                const position =
+                  locationMarker?.getLatLng();
+
+                if (
+                  !position
+                ) {
+                  return;
+                }
+
+                const bounded =
+                  clampToBadungBounds(
+                    position.lat,
+                    position.lng,
+                  );
+
+                if (
+                  bounded.lat !==
+                    position.lat ||
+                  bounded.lng !==
+                    position.lng
+                ) {
+                  locationMarker?.setLatLng(
+                    [
+                      bounded.lat,
+                      bounded.lng,
+                    ],
+                  );
+                }
+
+                setCoordinateInputs(
+                  bounded.lat,
+                  bounded.lng,
+                );
+              },
+            );
+
+            locationMarker.on(
+              "dragend",
+              () => {
+                const position =
+                  locationMarker?.getLatLng();
+
+                if (
+                  !position
+                ) {
+                  return;
+                }
+
+                const bounded =
+                  clampToBadungBounds(
+                    position.lat,
+                    position.lng,
+                  );
+
+                locationMarker?.setLatLng(
+                  [
+                    bounded.lat,
+                    bounded.lng,
+                  ],
+                );
+
+                setCoordinateInputs(
+                  bounded.lat,
+                  bounded.lng,
+                );
+
+                scheduleReverseGeocode(
+                  bounded.lat,
+                  bounded.lng,
+                );
+              },
+            );
+          }
+
+          locationMapInstance.on(
+            "click",
+            (
+              event: L.LeafletMouseEvent,
+            ) => {
+              const bounded =
+                clampToBadungBounds(
+                  event.latlng.lat,
+                  event.latlng.lng,
+                );
+
+              updateMarkerPosition(
+                bounded.lat,
+                bounded.lng,
+                "map",
+              );
+
+              locationMapInstance?.panTo(
+                [
+                  bounded.lat,
+                  bounded.lng,
+                ],
+                {
+                  animate: true,
+                },
+              );
+            },
+          );
+
+          setCoordinateInputs(
+            DEFAULT_LAT,
+            DEFAULT_LNG,
+          );
+
+          requestAnimationFrame(
+            () => {
+              locationMapInstance?.invalidateSize();
+            },
+          );
+
+          window.setTimeout(
+            () => {
+              locationMapInstance?.invalidateSize();
+            },
+            200,
+          );
+        } catch (error) {
+          console.error(
+            "[BINSIGHT] Failed to initialize report location map:",
+            error,
+          );
+        }
+      };
+
+    initializeLocationMap();
+
+    /* ======================================================================
+       CURRENT LOCATION
+       ====================================================================== */
+
+    locateButton?.addEventListener(
+      "click",
+      () => {
+        if (
+          !navigator.geolocation
+        ) {
+          return;
+        }
+
+        locateButton.disabled =
+          true;
+
+        const label =
+          locateButton.querySelector<HTMLElement>(
+            "span",
+          );
+
+        if (label) {
+          label.textContent =
+            "Mencari lokasi...";
+        }
+
+        navigator.geolocation.getCurrentPosition(
+          (
+            position,
+          ) => {
+            const lat =
+              position.coords
+                .latitude;
+
+            const lng =
+              position.coords
+                .longitude;
+
+            /*
+             * Keep report map focused on Badung.
+             * Ignore GPS positions outside the
+             * map interaction area.
+             */
+            if (
+              !BADUNG_BOUNDS.contains([
+                lat,
+                lng,
+              ])
+            ) {
+              locateButton.disabled =
+                false;
+
+              if (label) {
+                label.textContent =
+                  "Gunakan lokasi saya";
+              }
+
+              return;
+            }
+
+            updateMarkerPosition(
+              lat,
+              lng,
+              "gps",
+            );
+
+            locateButton.disabled =
+              false;
+
+            if (label) {
+              label.textContent =
+                "Gunakan lokasi saya";
+            }
+          },
+
+          () => {
+            locateButton.disabled =
+              false;
+
+            if (label) {
+              label.textContent =
+                "Gunakan lokasi saya";
+            }
+          },
+
+          {
+            enableHighAccuracy:
+              true,
+
+            timeout:
+              12000,
+
+            maximumAge:
+              60000,
+          },
+        );
       },
-
-      reporterName:
-        String(
-          formData.get(
-            "reporterName",
-          ) ?? "",
-        ).trim(),
-
-      reporterContact:
-        String(
-          formData.get(
-            "reporterContact",
-          ) ?? "",
-        ).trim(),
-
-      notes:
-        String(
-          formData.get(
-            "notes",
-          ) ?? "",
-        ).trim(),
-
-      imageName:
-        image instanceof File &&
-        image.size > 0
-          ? image.name
-          : undefined,
-
-      createdAt:
-        new Date().toISOString(),
-    };
-  }
-
-  async function handleSubmit(
-    event,
-  ) {
-    event.preventDefault();
-
-    if (
-      !(form instanceof HTMLFormElement)
-    ) {
-      return;
-    }
-
-    if (!validateReportForm()) {
-      return;
-    }
-
-    const payload =
-      buildReportPayload();
-
-    if (!payload) {
-      return;
-    }
-
-    if (
-      submitButton instanceof
-      HTMLButtonElement
-    ) {
-      submitButton.disabled = true;
-    }
-
-    if (
-      submitLabel instanceof HTMLElement
-    ) {
-      submitLabel.textContent =
-        "Menyiapkan laporan...";
-    }
-
-    await Promise.resolve();
-
-    window.dispatchEvent(
-      new CustomEvent(
-        "binsight:report-submit",
-        {
-          detail: payload,
-        },
-      ),
     );
 
-    form.hidden = true;
+    /* ======================================================================
+       VALIDATION
+       ====================================================================== */
 
-    if (
-      successPanel instanceof HTMLElement
-    ) {
-      successPanel.hidden = false;
+    const validateCoordinates =
+      (): boolean => {
+        const latitudeValue =
+          latitudeInput?.value.trim() ??
+          "";
 
-      successPanel.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      });
-    }
-  }
+        const longitudeValue =
+          longitudeInput?.value.trim() ??
+          "";
 
-  function resetReportForm() {
-    if (
-      !(form instanceof HTMLFormElement)
-    ) {
-      return;
-    }
+        if (
+          !latitudeValue ||
+          !longitudeValue
+        ) {
+          setFieldError(
+            "latitude",
+            "Pilih lokasi pada peta terlebih dahulu.",
+          );
 
-    form.reset();
+          setFieldError(
+            "longitude",
+            "Pilih lokasi pada peta terlebih dahulu.",
+          );
 
-    clearAllErrors();
+          return false;
+        }
 
-    form.hidden = false;
+        const lat =
+          Number(
+            latitudeValue,
+          );
 
-    if (
-      successPanel instanceof HTMLElement
-    ) {
-      successPanel.hidden = true;
-    }
+        const lng =
+          Number(
+            longitudeValue,
+          );
 
-    if (
-      submitButton instanceof
-      HTMLButtonElement
-    ) {
-      submitButton.disabled = false;
-    }
+        let valid = true;
 
-    if (
-      submitLabel instanceof HTMLElement
-    ) {
-      submitLabel.textContent =
-        "Kirim laporan";
-    }
+        if (
+          !Number.isFinite(
+            lat,
+          ) ||
+          lat < -90 ||
+          lat > 90
+        ) {
+          setFieldError(
+            "latitude",
+            "Latitude lokasi tidak valid.",
+          );
 
-    if (
-      imageName instanceof HTMLElement
-    ) {
-      imageName.textContent = "";
-      imageName.hidden = true;
-    }
+          valid = false;
+        }
+
+        if (
+          !Number.isFinite(
+            lng,
+          ) ||
+          lng < -180 ||
+          lng > 180
+        ) {
+          setFieldError(
+            "longitude",
+            "Longitude lokasi tidak valid.",
+          );
+
+          valid = false;
+        }
+
+        if (
+          valid &&
+          !BADUNG_BOUNDS.contains([
+            lat,
+            lng,
+          ])
+        ) {
+          setFieldError(
+            "latitude",
+            "Lokasi harus berada dalam area fokus Kabupaten Badung.",
+          );
+
+          setFieldError(
+            "longitude",
+            "Lokasi harus berada dalam area fokus Kabupaten Badung.",
+          );
+
+          valid = false;
+        }
+
+        return valid;
+      };
+
+    const validateImage =
+      (): boolean => {
+        if (
+          !imageInput
+        ) {
+          return true;
+        }
+
+        const file =
+          imageInput.files?.[0];
+
+        if (!file) {
+          return true;
+        }
+
+        if (
+          !REPORT_IMAGE_TYPES.has(
+            file.type,
+          )
+        ) {
+          setFieldError(
+            "image",
+            "Gunakan file JPG, PNG, atau WebP.",
+          );
+
+          return false;
+        }
+
+        if (
+          file.size >
+          REPORT_IMAGE_MAX_SIZE
+        ) {
+          setFieldError(
+            "image",
+            "Ukuran foto maksimal 5 MB.",
+          );
+
+          return false;
+        }
+
+        return true;
+      };
+
+    const validateReportForm =
+      (): boolean => {
+        clearAllErrors();
+
+        const title =
+          form.elements.namedItem(
+            "title",
+          );
+
+        const description =
+          form.elements.namedItem(
+            "description",
+          );
+
+        const type =
+          form.elements.namedItem(
+            "type",
+          );
+
+        const area =
+          form.elements.namedItem(
+            "areaId",
+          );
+
+        const address =
+          form.elements.namedItem(
+            "address",
+          );
+
+        const confirmation =
+          form.elements.namedItem(
+            "confirmation",
+          );
+
+        let valid = true;
+
+        if (
+          !(
+            title instanceof
+            HTMLInputElement
+          ) ||
+          title.value.trim()
+            .length < 5
+        ) {
+          setFieldError(
+            "title",
+            "Judul laporan minimal 5 karakter.",
+          );
+
+          valid = false;
+        }
+
+        if (
+          !(
+            description instanceof
+            HTMLTextAreaElement
+          ) ||
+          description.value.trim()
+            .length < 20
+        ) {
+          setFieldError(
+            "description",
+            "Deskripsi laporan minimal 20 karakter.",
+          );
+
+          valid = false;
+        }
+
+        if (
+          !(
+            type instanceof
+            HTMLSelectElement
+          ) ||
+          !type.value
+        ) {
+          setFieldError(
+            "type",
+            "Silakan pilih jenis laporan.",
+          );
+
+          valid = false;
+        }
+
+        if (
+          !(
+            area instanceof
+            HTMLSelectElement
+          ) ||
+          !area.value
+        ) {
+          setFieldError(
+            "areaId",
+            "Silakan pilih area atau kecamatan.",
+          );
+
+          valid = false;
+        }
+
+        if (
+          !(
+            address instanceof
+            HTMLInputElement
+          ) ||
+          address.value.trim()
+            .length < 5
+        ) {
+          setFieldError(
+            "address",
+            "Pilih lokasi pada peta agar alamat terisi otomatis.",
+          );
+
+          valid = false;
+        }
+
+        if (
+          !(
+            confirmation instanceof
+            HTMLInputElement
+          ) ||
+          !confirmation.checked
+        ) {
+          setFieldError(
+            "confirmation",
+            "Konfirmasi diperlukan sebelum laporan dikirim.",
+          );
+
+          valid = false;
+        }
+
+        if (
+          !validateCoordinates()
+        ) {
+          valid = false;
+        }
+
+        if (
+          !validateImage()
+        ) {
+          valid = false;
+        }
+
+        if (!valid) {
+          focusFirstInvalid();
+        }
+
+        return valid;
+      };
+
+    /* ======================================================================
+       PAYLOAD
+       ====================================================================== */
+
+    const buildReportPayload =
+      (): ReportSubmitPayload | null => {
+        const formData =
+          new FormData(form);
+
+        const latitude =
+          Number(
+            String(
+              formData.get(
+                "latitude",
+              ) ?? "",
+            ).trim(),
+          );
+
+        const longitude =
+          Number(
+            String(
+              formData.get(
+                "longitude",
+              ) ?? "",
+            ).trim(),
+          );
+
+        const areaField =
+          form.elements.namedItem(
+            "areaId",
+          );
+
+        let areaName = "";
+
+        if (
+          areaField instanceof
+          HTMLSelectElement
+        ) {
+          const selectedOption =
+            areaField.options[
+              areaField.selectedIndex
+            ];
+
+          areaName =
+            selectedOption
+              ?.dataset.areaName ??
+            selectedOption
+              ?.textContent
+              ?.trim() ??
+            "";
+        }
+
+        const image =
+          formData.get("image");
+
+        return {
+          title:
+            String(
+              formData.get(
+                "title",
+              ) ?? "",
+            ).trim(),
+
+          description:
+            String(
+              formData.get(
+                "description",
+              ) ?? "",
+            ).trim(),
+
+          type:
+            String(
+              formData.get(
+                "type",
+              ) ?? "",
+            ),
+
+          category:
+            String(
+              formData.get(
+                "category",
+              ) ?? "",
+            ),
+
+          location: {
+            address:
+              String(
+                formData.get(
+                  "address",
+                ) ?? "",
+              ).trim(),
+
+            areaId:
+              String(
+                formData.get(
+                  "areaId",
+                ) ?? "",
+              ),
+
+            areaName,
+
+            coordinates: {
+              lat: latitude,
+              lng: longitude,
+            },
+          },
+
+          reporterName:
+            String(
+              formData.get(
+                "reporterName",
+              ) ?? "",
+            ).trim(),
+
+          reporterContact:
+            String(
+              formData.get(
+                "reporterContact",
+              ) ?? "",
+            ).trim(),
+
+          notes:
+            String(
+              formData.get(
+                "notes",
+              ) ?? "",
+            ).trim(),
+
+          imageName:
+            image instanceof File &&
+            image.size > 0
+              ? image.name
+              : undefined,
+
+          createdAt:
+            new Date().toISOString(),
+        };
+      };
+
+    /* ======================================================================
+       SUBMIT
+       ====================================================================== */
+
+    const setSubmitting =
+      (
+        submitting: boolean,
+      ) => {
+        if (
+          submitButton
+        ) {
+          submitButton.disabled =
+            submitting;
+        }
+
+        if (
+          submitLabel
+        ) {
+          submitLabel.textContent =
+            submitting
+              ? "Menyiapkan laporan..."
+              : "Kirim laporan";
+        }
+      };
+
+    const showSuccess =
+      () => {
+        form.hidden =
+          true;
+
+        successPanel.hidden =
+          false;
+
+        successPanel.setAttribute(
+          "tabindex",
+          "-1",
+        );
+
+        successPanel.scrollIntoView({
+          behavior:
+            "smooth",
+
+          block:
+            "start",
+        });
+
+        window.setTimeout(
+          () => {
+            successPanel.focus({
+              preventScroll:
+                true,
+            });
+          },
+          300,
+        );
+      };
+
+    /* ======================================================================
+       RESET
+       ====================================================================== */
+
+    const resetReportForm =
+      () => {
+        form.reset();
+
+        clearAllErrors();
+
+        form.hidden =
+          false;
+
+        successPanel.hidden =
+          true;
+
+        setSubmitting(
+          false,
+        );
+
+        updateTypeDescription();
+
+        updateDescriptionCounter();
+
+        if (
+          imageName
+        ) {
+          imageName.textContent =
+            "";
+
+          imageName.hidden =
+            true;
+        }
+
+        if (
+          addressInput
+        ) {
+          addressInput.value =
+            "";
+        }
+
+        if (
+          areaSelect
+        ) {
+          areaSelect.value =
+            "";
+        }
+
+        if (
+          locationMapInstance
+        ) {
+          locationMapInstance.setView(
+            [
+              DEFAULT_LAT,
+              DEFAULT_LNG,
+            ],
+            13,
+            {
+              animate: false,
+            },
+          );
+
+          locationMarker?.setLatLng(
+            [
+              DEFAULT_LAT,
+              DEFAULT_LNG,
+            ],
+          );
+
+          setCoordinateInputs(
+            DEFAULT_LAT,
+            DEFAULT_LNG,
+          );
+        }
+
+        const title =
+          form.elements.namedItem(
+            "title",
+          );
+
+        if (
+          title instanceof
+          HTMLInputElement
+        ) {
+          window.setTimeout(
+            () => {
+              title.focus();
+            },
+            50,
+          );
+        }
+      };
+
+    /* ======================================================================
+       EVENTS
+       ====================================================================== */
+
+    typeSelect?.addEventListener(
+      "change",
+      updateTypeDescription,
+    );
+
+    descriptionField?.addEventListener(
+      "input",
+      updateDescriptionCounter,
+    );
+
+    imageInput?.addEventListener(
+      "change",
+      () => {
+        clearFieldError(
+          "image",
+        );
+
+        const file =
+          imageInput.files?.[0];
+
+        if (!file) {
+          if (
+            imageName
+          ) {
+            imageName.textContent =
+              "";
+
+            imageName.hidden =
+              true;
+          }
+
+          return;
+        }
+
+        if (
+          !REPORT_IMAGE_TYPES.has(
+            file.type,
+          )
+        ) {
+          setFieldError(
+            "image",
+            "Gunakan file JPG, PNG, atau WebP.",
+          );
+
+          imageInput.value =
+            "";
+
+          return;
+        }
+
+        if (
+          file.size >
+          REPORT_IMAGE_MAX_SIZE
+        ) {
+          setFieldError(
+            "image",
+            "Ukuran foto maksimal 5 MB.",
+          );
+
+          imageInput.value =
+            "";
+
+          return;
+        }
+
+        if (
+          imageName
+        ) {
+          imageName.textContent =
+            `${file.name} · ${(file.size / 1024 / 1024).toFixed(2)} MB`;
+
+          imageName.hidden =
+            false;
+        }
+      },
+    );
+
+    form.addEventListener(
+      "submit",
+      async (
+        event: SubmitEvent,
+      ) => {
+        event.preventDefault();
+
+        if (
+          submitButton?.disabled
+        ) {
+          return;
+        }
+
+        if (
+          !validateReportForm()
+        ) {
+          return;
+        }
+
+        const payload =
+          buildReportPayload();
+
+        if (!payload) {
+          return;
+        }
+
+        setSubmitting(
+          true,
+        );
+
+        await new Promise<void>(
+          (resolve) => {
+            window.setTimeout(
+              resolve,
+              80,
+            );
+          },
+        );
+
+        window.dispatchEvent(
+          new CustomEvent<ReportSubmitPayload>(
+            "binsight:report-submit",
+            {
+              detail:
+                payload,
+            },
+          ),
+        );
+
+        showSuccess();
+      },
+    );
+
+    newReportButton?.addEventListener(
+      "click",
+      resetReportForm,
+    );
+
+    form
+      .querySelectorAll<
+        HTMLInputElement |
+        HTMLTextAreaElement |
+        HTMLSelectElement
+      >(
+        "input, textarea, select",
+      )
+      .forEach(
+        (field) => {
+          if (
+            field.name ===
+              "latitude" ||
+            field.name ===
+              "longitude" ||
+            field.name ===
+              "address"
+          ) {
+            return;
+          }
+
+          field.addEventListener(
+            "input",
+            () => {
+              clearFieldError(
+                field.name,
+              );
+            },
+          );
+
+          field.addEventListener(
+            "change",
+            () => {
+              clearFieldError(
+                field.name,
+              );
+            },
+          );
+        },
+      );
 
     updateTypeDescription();
+
     updateDescriptionCounter();
+  };
 
-    const title =
-      form.elements.namedItem(
-        "title",
-      );
-
-    if (
-      title instanceof HTMLInputElement
-    ) {
-      title.focus();
-    }
+  if (
+    document.readyState ===
+    "loading"
+  ) {
+    document.addEventListener(
+      "DOMContentLoaded",
+      initializeReportPage,
+      {
+        once: true,
+      },
+    );
+  } else {
+    initializeReportPage();
   }
 
-  typeSelect?.addEventListener(
-    "change",
-    updateTypeDescription,
+  document.addEventListener(
+    "astro:page-load",
+    initializeReportPage,
   );
-
-  descriptionField?.addEventListener(
-    "input",
-    updateDescriptionCounter,
-  );
-
-  imageInput?.addEventListener(
-    "change",
-    () => {
-      if (
-        !(imageInput instanceof HTMLInputElement) ||
-        !(imageName instanceof HTMLElement)
-      ) {
-        return;
-      }
-
-      const file =
-        imageInput.files?.[0];
-
-      if (!file) {
-        imageName.textContent = "";
-        imageName.hidden = true;
-        return;
-      }
-
-      imageName.textContent =
-        `${file.name} · ${(file.size / 1024 / 1024).toFixed(2)} MB`;
-
-      imageName.hidden = false;
-    },
-  );
-
-  form?.addEventListener(
-    "submit",
-    handleSubmit,
-  );
-
-  newReportButton?.addEventListener(
-    "click",
-    resetReportForm,
-  );
-
-  form?.querySelectorAll(
-    "input, textarea, select",
-  ).forEach(
-    (field) => {
-      field.addEventListener(
-        "input",
-        () => {
-          const name =
-            field.getAttribute(
-              "name",
-            );
-
-          if (name) {
-            clearFieldError(
-              name,
-            );
-          }
-        },
-      );
-
-      field.addEventListener(
-        "change",
-        () => {
-          const name =
-            field.getAttribute(
-              "name",
-            );
-
-          if (name) {
-            clearFieldError(
-              name,
-            );
-          }
-        },
-      );
-    },
-  );
-
-  updateTypeDescription();
-  updateDescriptionCounter();
 </script>
