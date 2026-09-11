@@ -5,7 +5,6 @@ import {
   Map,
   MapPin,
   Recycle,
-  Search,
   SlidersHorizontal,
   TriangleAlert,
 } from "@lucide/astro";
@@ -152,7 +151,10 @@ const organizations: Organization[] =
    LOCATION / AREA SUMMARY
    ========================================================================== */
 
-const locationsByArea: Record<string, number> = {};
+const locationsByArea: Record<
+  string,
+  number
+> = {};
 
 for (const location of activeLocations) {
   if (!location.areaId) {
@@ -166,7 +168,8 @@ for (const location of activeLocations) {
 const areaSummaries = activeAreas
   .map((area) => ({
     area,
-    count: locationsByArea[area.id] ?? 0,
+    count:
+      locationsByArea[area.id] ?? 0,
   }))
   .sort(
     (first, second) =>
@@ -177,7 +180,10 @@ const areaSummaries = activeAreas
    LOCATION TYPE SUMMARY
    ========================================================================== */
 
-const locationTypeLabels: Record<string, string> = {
+const locationTypeLabels: Record<
+  string,
+  string
+> = {
   "collection-point":
     "Titik Pengumpulan",
 
@@ -197,8 +203,10 @@ const locationTypeLabels: Record<string, string> = {
     "Lokasi Lainnya",
 };
 
-const locationTypeCounts: Record<string, number> =
-  {};
+const locationTypeCounts: Record<
+  string,
+  number
+> = {};
 
 for (const location of activeLocations) {
   if (!location.type) {
@@ -209,19 +217,23 @@ for (const location of activeLocations) {
     (locationTypeCounts[location.type] ?? 0) + 1;
 }
 
-const locationTypeSummary = Object.entries(
-  locationTypeCounts,
-)
-  .map(([type, count]) => ({
-    type,
-    label:
-      locationTypeLabels[type] ?? type,
-    count,
-  }))
-  .sort(
-    (first, second) =>
-      second.count - first.count,
-  );
+const locationTypeSummary =
+  Object.entries(
+    locationTypeCounts,
+  )
+    .map(([type, count]) => ({
+      type,
+
+      label:
+        locationTypeLabels[type] ??
+        type,
+
+      count,
+    }))
+    .sort(
+      (first, second) =>
+        second.count - first.count,
+    );
 
 /* ==========================================================================
    METRICS
@@ -333,7 +345,6 @@ const pageDescription =
 
       </div>
 
-
       <!-- HERO METRICS -->
 
       <div
@@ -363,7 +374,6 @@ const pageDescription =
 
         </div>
 
-
         <div class="hero-stat">
 
           <span class="hero-stat__icon">
@@ -385,7 +395,6 @@ const pageDescription =
           </div>
 
         </div>
-
 
         <div class="hero-stat">
 
@@ -411,7 +420,6 @@ const pageDescription =
 
       </div>
     </section>
-
 
     <!-- =====================================================================
          EXPLORER
@@ -457,29 +465,9 @@ const pageDescription =
 
       </div>
 
-
-      <!-- SEARCH -->
+      <!-- FILTER TOOLBAR -->
 
       <div class="map-toolbar">
-
-        <label
-          class="search-box"
-          for="map-search-input"
-        >
-          <Search
-            size={18}
-            stroke-width={2}
-            aria-hidden="true"
-          />
-
-          <input
-            id="map-search-input"
-            type="search"
-            placeholder="Cari lokasi, alamat, atau area..."
-            autocomplete="off"
-          />
-        </label>
-
 
         <button
           type="button"
@@ -489,7 +477,7 @@ const pageDescription =
           aria-controls="map-filter-panel"
         >
           <SlidersHorizontal
-            size={17}
+            size={15}
             stroke-width={2}
             aria-hidden="true"
           />
@@ -500,7 +488,6 @@ const pageDescription =
         </button>
 
       </div>
-
 
       <!-- FILTER -->
 
@@ -535,7 +522,6 @@ const pageDescription =
         />
 
       </div>
-
 
       <!-- MAP -->
 
@@ -606,7 +592,6 @@ const pageDescription =
 
           </div>
 
-
           <!-- HOW TO -->
 
           <div class="info-card">
@@ -664,7 +649,6 @@ const pageDescription =
 
           </div>
 
-
           <!-- REPORT -->
 
           <a
@@ -701,7 +685,6 @@ const pageDescription =
           </a>
 
         </aside>
-
 
         <!-- MAP FRAME -->
 
@@ -755,7 +738,6 @@ const pageDescription =
 
     </section>
 
-
     <!-- =====================================================================
          AREAS
          ================================================================== -->
@@ -800,7 +782,6 @@ const pageDescription =
         </a>
 
       </div>
-
 
       {
         areaSummaries.length > 0 ? (
@@ -871,7 +852,6 @@ const pageDescription =
 
     </section>
 
-
     <!-- =====================================================================
          TYPES
          ================================================================== -->
@@ -883,7 +863,9 @@ const pageDescription =
           aria-labelledby="types-title"
         >
 
-          <div class="section-header section-header--single">
+          <div
+            class="section-header section-header--single"
+          >
 
             <div class="section-header__content">
 
@@ -904,16 +886,20 @@ const pageDescription =
 
           </div>
 
-
           <div class="type-grid">
 
             {locationTypeSummary.map(
-              ({ label, count, type }) => {
-
+              ({
+                label,
+                count,
+                type,
+              }) => {
                 const percentage =
                   locationCount > 0
                     ? Math.round(
-                        (count / locationCount) * 100,
+                        (count /
+                          locationCount) *
+                          100,
                       )
                     : 0;
 
@@ -959,7 +945,6 @@ const pageDescription =
 
                     </div>
 
-
                     <div
                       class="type-card__bar"
                       aria-hidden="true"
@@ -968,7 +953,6 @@ const pageDescription =
                         style={`width:${barWidth}%`}
                       />
                     </div>
-
 
                     <div class="type-card__footer">
 
@@ -993,7 +977,6 @@ const pageDescription =
       )
     }
 
-
     <!-- =====================================================================
          CTA
          ================================================================== -->
@@ -1010,7 +993,6 @@ const pageDescription =
           aria-hidden="true"
         />
       </div>
-
 
       <div class="map-cta__content">
 
@@ -1029,7 +1011,6 @@ const pageDescription =
         </p>
 
       </div>
-
 
       <a
         href="/reports/create"
@@ -1051,100 +1032,120 @@ const pageDescription =
   </main>
 </PublicLayout>
 
-
 <script>
-  /* ==========================================================================
-     SEARCH
-     ========================================================================== */
-
-  const searchInput =
-    document.querySelector<HTMLInputElement>(
-      "#map-search-input",
-    );
-
-  const searchableElements =
-    document.querySelectorAll<HTMLElement>(
-      "[data-map-location], [data-location-card], [data-area-card]",
-    );
-
-  searchInput?.addEventListener(
-    "input",
-    () => {
-      const query =
-        searchInput.value
-          .trim()
-          .toLowerCase();
-
-      searchableElements.forEach(
-        (element) => {
-          const content =
-            element.textContent
-              ?.toLowerCase() ?? "";
-
-          const matches =
-            query.length === 0 ||
-            content.includes(query);
-
-          element.hidden =
-            !matches;
-        },
-      );
-    },
-  );
-
-
   /* ==========================================================================
      FILTER TOGGLE
      ========================================================================== */
 
-  const filterToggle =
-    document.querySelector<HTMLButtonElement>(
-      "#map-filter-toggle",
-    );
-
-  const filterPanel =
-    document.querySelector<HTMLElement>(
-      "#map-filter-panel",
-    );
-
-  filterToggle?.addEventListener(
-    "click",
+  const initializeMapFilterToggle =
     () => {
-      if (!filterPanel) {
+      const filterToggle =
+        document.querySelector<HTMLButtonElement>(
+          "#map-filter-toggle",
+        );
+
+      const filterPanel =
+        document.querySelector<HTMLElement>(
+          "#map-filter-panel",
+        );
+
+      if (
+        !filterToggle ||
+        !filterPanel
+      ) {
         return;
       }
 
-      const isExpanded =
-        filterToggle.getAttribute(
+      /*
+       * Prevent duplicate listeners
+       * during Astro page transitions.
+       */
+      if (
+        filterToggle.dataset.initialized ===
+        "true"
+      ) {
+        return;
+      }
+
+      filterToggle.dataset.initialized =
+        "true";
+
+      const openFilterPanel = () => {
+        filterToggle.setAttribute(
           "aria-expanded",
-        ) === "true";
+          "true",
+        );
 
-      const nextState =
-        !isExpanded;
+        filterPanel.toggleAttribute(
+          "data-open",
+          true,
+        );
 
-      filterToggle.setAttribute(
-        "aria-expanded",
-        String(nextState),
+        filterPanel.setAttribute(
+          "aria-hidden",
+          "false",
+        );
+      };
+
+      const closeFilterPanel = () => {
+        filterToggle.setAttribute(
+          "aria-expanded",
+          "false",
+        );
+
+        filterPanel.removeAttribute(
+          "data-open",
+        );
+
+        filterPanel.setAttribute(
+          "aria-hidden",
+          "true",
+        );
+      };
+
+      filterToggle.addEventListener(
+        "click",
+        (event) => {
+          event.preventDefault();
+
+          const isExpanded =
+            filterToggle.getAttribute(
+              "aria-expanded",
+            ) === "true";
+
+          if (isExpanded) {
+            closeFilterPanel();
+          } else {
+            openFilterPanel();
+          }
+        },
       );
+    };
 
-      filterPanel.toggleAttribute(
-        "data-open",
-        nextState,
-      );
+  if (
+    document.readyState ===
+    "loading"
+  ) {
+    document.addEventListener(
+      "DOMContentLoaded",
+      initializeMapFilterToggle,
+      {
+        once: true,
+      },
+    );
+  } else {
+    initializeMapFilterToggle();
+  }
 
-      filterPanel.setAttribute(
-        "aria-hidden",
-        String(!nextState),
-      );
-    },
+  document.addEventListener(
+    "astro:page-load",
+    initializeMapFilterToggle,
   );
 </script>
-
 
 <style>
   /* ==========================================================================
      BINSIGHT MAP
-     Explicit local contrast — no inherited colors
      ========================================================================== */
 
   .map-page,
@@ -1200,7 +1201,11 @@ const pageDescription =
   }
 
   .map-page > * {
-    width: min(1320px, calc(100% - 40px));
+    width: min(
+      1320px,
+      calc(100% - 40px)
+    );
+
     margin-inline: auto;
   }
 
@@ -1224,13 +1229,13 @@ const pageDescription =
     flex: 0 0 auto;
   }
 
-
   /* ==========================================================================
      LABELS
      ========================================================================== */
 
   .map-page .map-label {
     display: inline-flex;
+
     align-items: center;
     gap: 8px;
 
@@ -1307,7 +1312,6 @@ const pageDescription =
     color: var(--ink) !important;
   }
 
-
   /* ==========================================================================
      BUTTONS
      ========================================================================== */
@@ -1348,8 +1352,6 @@ const pageDescription =
     text-transform: uppercase;
   }
 
-  /* LIME BUTTON = BLACK CONTENT */
-
   .map-page a.button.button--primary {
     color: var(--ink) !important;
 
@@ -1357,7 +1359,9 @@ const pageDescription =
 
     border-color: var(--ink) !important;
 
-    box-shadow: 7px 7px 0 var(--warning);
+    box-shadow:
+      7px 7px 0
+      var(--warning);
   }
 
   .map-page a.button.button--primary span {
@@ -1375,8 +1379,6 @@ const pageDescription =
 
     background: var(--acid-soft) !important;
   }
-
-  /* DARK BUTTON = WHITE CONTENT */
 
   .map-page a.button.button--secondary {
     color: var(--white) !important;
@@ -1412,7 +1414,9 @@ const pageDescription =
 
     border-color: var(--white) !important;
 
-    box-shadow: 10px 10px 0 var(--acid);
+    box-shadow:
+      10px 10px 0
+      var(--acid);
   }
 
   .map-page a.button.button--secondary:hover span {
@@ -1424,7 +1428,6 @@ const pageDescription =
 
     stroke: var(--ink) !important;
   }
-
 
   /* ==========================================================================
      HERO
@@ -1447,7 +1450,9 @@ const pageDescription =
 
     border: 4px solid var(--ink);
 
-    box-shadow: 14px 14px 0 var(--warning);
+    box-shadow:
+      14px 14px 0
+      var(--warning);
 
     overflow: hidden;
 
@@ -1549,8 +1554,9 @@ const pageDescription =
     margin-top: 36px;
   }
 
-
-  /* HERO STATS */
+  /* ==========================================================================
+     HERO STATS
+     ========================================================================== */
 
   .map-page .map-hero__stats {
     display: flex;
@@ -1656,7 +1662,6 @@ const pageDescription =
     text-transform: uppercase;
   }
 
-
   /* ==========================================================================
      SECTIONS
      ========================================================================== */
@@ -1735,9 +1740,6 @@ const pageDescription =
     line-height: 1.78;
   }
 
-
-  /* COUNTER */
-
   .map-page .section-counter {
     display: inline-flex;
 
@@ -1755,7 +1757,9 @@ const pageDescription =
 
     border: 3px solid var(--ink);
 
-    box-shadow: 5px 5px 0 var(--warning);
+    box-shadow:
+      5px 5px 0
+      var(--warning);
 
     font-family:
       "DM Mono",
@@ -1789,7 +1793,6 @@ const pageDescription =
     color: var(--white) !important;
   }
 
-
   /* ==========================================================================
      TEXT ACTION
      ========================================================================== */
@@ -1811,7 +1814,9 @@ const pageDescription =
 
     border: 2px solid var(--ink);
 
-    box-shadow: 5px 5px 0 var(--warning);
+    box-shadow:
+      5px 5px 0
+      var(--warning);
 
     font-family:
       "DM Mono",
@@ -1842,100 +1847,38 @@ const pageDescription =
     stroke: var(--ink) !important;
   }
 
-
   /* ==========================================================================
-     SEARCH
+     FILTER TOOLBAR
      ========================================================================== */
 
   .map-page .map-toolbar {
-    display: grid;
-
-    grid-template-columns:
-      minmax(0, 1fr)
-      auto;
-
-    gap: 12px;
-
-    margin-bottom: 18px;
-  }
-
-  .map-page .search-box {
     display: flex;
 
     align-items: center;
 
-    gap: 11px;
+    justify-content: flex-start;
 
-    min-width: 0;
-
-    min-height: 58px;
-
-    padding: 0 16px;
-
-    color: var(--warning) !important;
-
-    background: var(--white) !important;
-
-    border: 3px solid var(--ink);
-
-    box-shadow: 6px 6px 0 var(--ink);
+    margin-bottom: 18px;
   }
-
-  .map-page .search-box > svg {
-    color: var(--warning) !important;
-
-    stroke: var(--warning) !important;
-  }
-
-  .map-page .search-box input {
-    width: 100%;
-
-    min-width: 0;
-
-    color: var(--ink) !important;
-
-    background: transparent !important;
-
-    border: 0;
-
-    outline: 0;
-
-    font-family:
-      "DM Mono",
-      "SFMono-Regular",
-      Consolas,
-      monospace;
-
-    font-size: 10px;
-
-    font-weight: 700;
-  }
-
-  .map-page .search-box input::placeholder {
-    color: #777d74 !important;
-
-    opacity: 1;
-  }
-
-
-  /* ==========================================================================
-     FILTER BUTTON
-     ========================================================================== */
 
   .map-page .filter-button {
+    appearance: none;
+
     display: inline-flex;
 
     align-items: center;
 
     justify-content: center;
 
-    gap: 8px;
+    gap: 7px;
 
-    min-width: 150px;
+    width: auto;
 
-    min-height: 58px;
+    min-width: 0;
 
-    padding: 0 17px;
+    min-height: 42px;
+
+    padding: 0 12px;
 
     color: var(--ink) !important;
 
@@ -1943,7 +1886,11 @@ const pageDescription =
 
     border: 3px solid var(--ink);
 
-    box-shadow: 6px 6px 0 var(--warning);
+    border-radius: 0;
+
+    box-shadow:
+      4px 4px 0
+      var(--warning);
 
     font-family:
       "DM Mono",
@@ -1951,7 +1898,7 @@ const pageDescription =
       Consolas,
       monospace;
 
-    font-size: 8px;
+    font-size: 7px;
 
     font-weight: 900;
 
@@ -1969,15 +1916,29 @@ const pageDescription =
   }
 
   .map-page .filter-button svg {
+    width: 15px;
+    height: 15px;
+
     color: var(--ink) !important;
 
     stroke: var(--ink) !important;
+
+    pointer-events: none;
   }
 
   .map-page .filter-button:hover {
     color: var(--ink) !important;
 
     background: var(--acid-soft) !important;
+  }
+
+  .map-page .filter-button:active {
+    transform:
+      translate(2px, 2px);
+
+    box-shadow:
+      2px 2px 0
+      var(--ink);
   }
 
   .map-page .filter-button[aria-expanded="true"] {
@@ -1996,7 +1957,6 @@ const pageDescription =
     stroke: var(--acid) !important;
   }
 
-
   /* ==========================================================================
      FILTER PANEL
      ========================================================================== */
@@ -2014,7 +1974,9 @@ const pageDescription =
 
     border: 3px solid var(--ink);
 
-    box-shadow: 8px 8px 0 var(--warning);
+    box-shadow:
+      8px 8px 0
+      var(--warning);
   }
 
   .map-page .filter-panel[data-open] {
@@ -2080,7 +2042,6 @@ const pageDescription =
     text-transform: uppercase;
   }
 
-
   /* ==========================================================================
      MAP SHELL
      ========================================================================== */
@@ -2107,7 +2068,6 @@ const pageDescription =
     min-width: 0;
   }
 
-
   /* ==========================================================================
      INFO CARDS
      ========================================================================== */
@@ -2123,7 +2083,9 @@ const pageDescription =
 
     border: 3px solid var(--ink);
 
-    box-shadow: 6px 6px 0 var(--ink);
+    box-shadow:
+      6px 6px 0
+      var(--ink);
   }
 
   .map-page .info-card--dark {
@@ -2131,7 +2093,9 @@ const pageDescription =
 
     background: var(--ink) !important;
 
-    box-shadow: 7px 7px 0 var(--acid);
+    box-shadow:
+      7px 7px 0
+      var(--acid);
   }
 
   .map-page .info-card__header {
@@ -2195,18 +2159,21 @@ const pageDescription =
     stroke: var(--acid) !important;
   }
 
-
-  /* STATS */
+  /* ==========================================================================
+     STATS
+     ========================================================================== */
 
   .map-page .stats-list {
     margin-top: 18px;
 
-    border-top: 3px solid rgba(
-      255,
-      255,
-      255,
-      0.17
-    );
+    border-top:
+      3px solid
+      rgba(
+        255,
+        255,
+        255,
+        0.17
+      );
   }
 
   .map-page .stats-row {
@@ -2220,12 +2187,14 @@ const pageDescription =
 
     padding: 12px 0;
 
-    border-bottom: 1px solid rgba(
-      255,
-      255,
-      255,
-      0.1
-    );
+    border-bottom:
+      1px solid
+      rgba(
+        255,
+        255,
+        255,
+        0.1
+      );
   }
 
   .map-page .stats-row span {
@@ -2265,8 +2234,9 @@ const pageDescription =
     letter-spacing: -0.06em;
   }
 
-
-  /* INFO CARD TITLE */
+  /* ==========================================================================
+     INFO CARD TITLE
+     ========================================================================== */
 
   .map-page .info-card__title {
     display: flex;
@@ -2310,7 +2280,6 @@ const pageDescription =
     stroke: var(--warning) !important;
   }
 
-
   /* ==========================================================================
      USAGE
      ========================================================================== */
@@ -2340,7 +2309,9 @@ const pageDescription =
 
     padding: 14px 0;
 
-    border-bottom: 2px solid var(--paper-3);
+    border-bottom:
+      2px solid
+      var(--paper-3);
   }
 
   .map-page .usage-list li:last-child {
@@ -2386,7 +2357,6 @@ const pageDescription =
     line-height: 1.6;
   }
 
-
   /* ==========================================================================
      REPORT CARD
      ========================================================================== */
@@ -2413,7 +2383,9 @@ const pageDescription =
 
     border: 3px solid var(--ink);
 
-    box-shadow: 6px 6px 0 var(--warning);
+    box-shadow:
+      6px 6px 0
+      var(--warning);
 
     text-decoration: none;
   }
@@ -2423,9 +2395,12 @@ const pageDescription =
 
     background: var(--acid-soft) !important;
 
-    transform: translate(-3px, -3px);
+    transform:
+      translate(-3px, -3px);
 
-    box-shadow: 9px 9px 0 var(--ink);
+    box-shadow:
+      9px 9px 0
+      var(--ink);
   }
 
   .map-page .report-card__icon {
@@ -2488,7 +2463,6 @@ const pageDescription =
     stroke: var(--ink) !important;
   }
 
-
   /* ==========================================================================
      MAP
      ========================================================================== */
@@ -2508,7 +2482,9 @@ const pageDescription =
 
     border: 4px solid var(--ink);
 
-    box-shadow: 9px 9px 0 var(--warning);
+    box-shadow:
+      9px 9px 0
+      var(--warning);
   }
 
   .map-page .map-frame__inner {
@@ -2538,7 +2514,6 @@ const pageDescription =
     height: 100% !important;
   }
 
-
   /* ==========================================================================
      EMPTY MAP
      ========================================================================== */
@@ -2561,12 +2536,24 @@ const pageDescription =
 
     background:
       linear-gradient(
-        rgba(223, 255, 0, 0.09) 2px,
+        rgba(
+          223,
+          255,
+          0,
+          0.09
+        )
+          2px,
         transparent 2px
       ),
       linear-gradient(
         90deg,
-        rgba(223, 255, 0, 0.09) 2px,
+        rgba(
+          223,
+          255,
+          0,
+          0.09
+        )
+          2px,
         transparent 2px
       ),
       #253021 !important;
@@ -2590,7 +2577,9 @@ const pageDescription =
 
     border: 3px solid var(--ink);
 
-    box-shadow: 7px 7px 0 var(--warning);
+    box-shadow:
+      7px 7px 0
+      var(--warning);
   }
 
   .map-page .map-empty__icon svg {
@@ -2654,7 +2643,6 @@ const pageDescription =
     line-height: 1.72;
   }
 
-
   /* ==========================================================================
      AREA
      ========================================================================== */
@@ -2695,7 +2683,9 @@ const pageDescription =
 
     border: 3px solid var(--ink);
 
-    box-shadow: 7px 7px 0 var(--ink);
+    box-shadow:
+      7px 7px 0
+      var(--ink);
 
     text-decoration: none;
   }
@@ -2705,9 +2695,12 @@ const pageDescription =
 
     background: var(--acid) !important;
 
-    transform: translate(-4px, -4px);
+    transform:
+      translate(-4px, -4px);
 
-    box-shadow: 11px 11px 0 var(--warning);
+    box-shadow:
+      11px 11px 0
+      var(--warning);
   }
 
   .map-page .area-card__index {
@@ -2811,7 +2804,6 @@ const pageDescription =
     stroke: var(--ink) !important;
   }
 
-
   /* ==========================================================================
      TYPE CARDS
      ========================================================================== */
@@ -2839,7 +2831,9 @@ const pageDescription =
 
     border: 3px solid var(--ink);
 
-    box-shadow: 7px 7px 0 var(--acid);
+    box-shadow:
+      7px 7px 0
+      var(--acid);
   }
 
   .map-page .type-card__top {
@@ -2951,12 +2945,14 @@ const pageDescription =
 
     background: var(--ink-3) !important;
 
-    border: 2px solid rgba(
-      255,
-      255,
-      255,
-      0.18
-    );
+    border:
+      2px solid
+      rgba(
+        255,
+        255,
+        255,
+        0.18
+      );
   }
 
   .map-page .type-card__bar span {
@@ -3001,7 +2997,6 @@ const pageDescription =
     color: #8f998f !important;
   }
 
-
   /* ==========================================================================
      EMPTY PANEL
      ========================================================================== */
@@ -3019,7 +3014,9 @@ const pageDescription =
 
     border: 3px solid var(--ink);
 
-    box-shadow: 7px 7px 0 var(--ink);
+    box-shadow:
+      7px 7px 0
+      var(--ink);
 
     text-align: center;
   }
@@ -3063,7 +3060,6 @@ const pageDescription =
     line-height: 1.65;
   }
 
-
   /* ==========================================================================
      CTA
      ========================================================================== */
@@ -3092,7 +3088,9 @@ const pageDescription =
 
     border: 4px solid var(--ink);
 
-    box-shadow: 11px 11px 0 var(--acid);
+    box-shadow:
+      11px 11px 0
+      var(--acid);
 
     overflow: hidden;
   }
@@ -3115,7 +3113,9 @@ const pageDescription =
 
     border: 3px solid var(--white);
 
-    box-shadow: 6px 6px 0 var(--warning);
+    box-shadow:
+      6px 6px 0
+      var(--warning);
   }
 
   .map-page .map-cta__mark svg {
@@ -3225,7 +3225,9 @@ const pageDescription =
 
     border: 3px solid var(--white);
 
-    box-shadow: 7px 7px 0 var(--warning);
+    box-shadow:
+      7px 7px 0
+      var(--warning);
 
     font-family:
       "DM Mono",
@@ -3262,7 +3264,6 @@ const pageDescription =
     background: var(--acid-soft) !important;
   }
 
-
   /* ==========================================================================
      ACCESSIBILITY
      ========================================================================== */
@@ -3270,10 +3271,12 @@ const pageDescription =
   .map-page a:focus-visible,
   .map-page button:focus-visible,
   .map-page input:focus-visible {
-    outline: 4px solid var(--acid) !important;
+    outline:
+      4px solid
+      var(--acid) !important;
+
     outline-offset: 4px;
   }
-
 
   /* ==========================================================================
      TABLET
@@ -3307,7 +3310,6 @@ const pageDescription =
         );
     }
   }
-
 
   /* ==========================================================================
      SMALL TABLET
@@ -3382,7 +3384,6 @@ const pageDescription =
     }
   }
 
-
   /* ==========================================================================
      MOBILE
      ========================================================================== */
@@ -3399,7 +3400,9 @@ const pageDescription =
     .map-page .map-hero {
       margin-top: 16px;
 
-      box-shadow: 8px 8px 0 var(--warning);
+      box-shadow:
+        8px 8px 0
+        var(--warning);
     }
 
     .map-page .map-hero__main {
@@ -3456,7 +3459,9 @@ const pageDescription =
 
       border-right: 0;
 
-      border-bottom: 3px solid var(--ink);
+      border-bottom:
+        3px solid
+        var(--ink);
     }
 
     .map-page .hero-stat:last-child {
@@ -3494,12 +3499,27 @@ const pageDescription =
       line-height: 1.72;
     }
 
+    /*
+     * Compact filter button on mobile.
+     */
     .map-page .map-toolbar {
-      grid-template-columns: 1fr;
+      display: flex;
+
+      align-items: center;
+
+      justify-content: flex-start;
+
+      margin-bottom: 15px;
     }
 
     .map-page .filter-button {
-      width: 100%;
+      width: auto;
+
+      min-height: 40px;
+
+      padding-inline: 11px;
+
+      font-size: 7px;
     }
 
     .map-page .filter-panel {
@@ -3521,7 +3541,9 @@ const pageDescription =
     .map-page .map-frame {
       height: 470px;
 
-      box-shadow: 6px 6px 0 var(--warning);
+      box-shadow:
+        6px 6px 0
+        var(--warning);
     }
 
     .map-page .area-grid,
@@ -3544,7 +3566,9 @@ const pageDescription =
 
       padding: 21px;
 
-      box-shadow: 7px 7px 0 var(--acid);
+      box-shadow:
+        7px 7px 0
+        var(--acid);
     }
 
     .map-page .map-cta__mark {
@@ -3575,7 +3599,6 @@ const pageDescription =
       line-height: 1.72;
     }
   }
-
 
   /* ==========================================================================
      SMALL MOBILE
@@ -3665,8 +3688,17 @@ const pageDescription =
     .map-page .map-cta h2 {
       font-size: 28px;
     }
-  }
 
+    .map-page .filter-button {
+      min-height: 38px;
+
+      padding-inline: 10px;
+
+      box-shadow:
+        3px 3px 0
+        var(--warning);
+    }
+  }
 
   /* ==========================================================================
      REDUCED MOTION
@@ -3678,9 +3710,11 @@ const pageDescription =
     .map-page *::after {
       scroll-behavior: auto !important;
 
-      transition-duration: 0.01ms !important;
+      transition-duration:
+        0.01ms !important;
 
-      animation-duration: 0.01ms !important;
+      animation-duration:
+        0.01ms !important;
 
       animation-iteration-count: 1 !important;
     }
