@@ -13,8 +13,7 @@ import {
   UserRound,
 } from "@lucide/astro";
 
-import OrganizationLayout from "../../layouts/OrganizationLayout.astro";
-import PageHeader from "../../components/layout/PageHeader.astro";
+import OrganizationLayout from "@layouts/OrganizationLayout.astro";
 ---
 
 <OrganizationLayout
@@ -22,42 +21,63 @@ import PageHeader from "../../components/layout/PageHeader.astro";
   description="Kelola informasi profil organisasi yang ditampilkan melalui BINSIGHT."
 >
   <main class="organization-profile-page">
-    <PageHeader
-      eyebrow="PORTAL ORGANISASI"
-      title="Profil organisasi"
-      description="Lengkapi informasi organisasi agar masyarakat dapat mengenali identitas, lokasi, dan peran organisasi Anda dalam ekosistem persampahan Badung."
-      icon="organization"
-      tone="green"
-      breadcrumbs={[
-        {
-          label: "Beranda",
-          href: "/",
-        },
-        {
-          label: "Portal Organisasi",
-          href: "/organization",
-        },
-        {
-          label: "Profil",
-          href: "/organization/profile",
-        },
-      ]}
-    />
-
     <section class="profile-content">
       <div class="profile-container">
+        <!-- ============================================================
+             PAGE INTRO
+        ============================================================= -->
+        <section class="profile-intro">
+          <div class="profile-intro__main">
+            <span class="profile-intro__eyebrow">
+              ORGANIZATION / PROFILE
+            </span>
+
+            <h1 class="profile-intro__title">
+              Lengkapi profil organisasi
+            </h1>
+
+            <p class="profile-intro__description">
+              Isi informasi utama organisasi agar masyarakat dapat mengenali
+              identitas, lokasi, kontak, dan peran organisasi Anda dalam
+              ekosistem persampahan Badung.
+            </p>
+          </div>
+
+          <div class="profile-intro__status">
+            <div class="profile-intro__status-icon">
+              <ShieldCheck
+                size={19}
+                stroke-width={2}
+                aria-hidden="true"
+              />
+            </div>
+
+            <div>
+              <span>STATUS PROFIL</span>
+              <strong>MENUNGGU VERIFIKASI</strong>
+            </div>
+          </div>
+        </section>
+
         <div class="profile-layout">
+          <!-- ==========================================================
+               MAIN CONTENT
+          =========================================================== -->
           <div class="profile-main">
             <form
               class="profile-form"
               id="organization-profile-form"
               data-profile-form
+              novalidate
             >
+              <!-- ======================================================
+                   IDENTITY
+              ======================================================= -->
               <section class="profile-card">
-                <div class="profile-card__header">
+                <header class="profile-card__header">
                   <div>
                     <span class="profile-card__eyebrow">
-                      IDENTITAS
+                      01 / IDENTITAS
                     </span>
 
                     <h2 class="profile-card__title">
@@ -72,12 +92,12 @@ import PageHeader from "../../components/layout/PageHeader.astro";
 
                   <div class="profile-card__icon">
                     <Building2
-                      size={22}
+                      size={21}
                       stroke-width={1.9}
                       aria-hidden="true"
                     />
                   </div>
-                </div>
+                </header>
 
                 <div class="profile-grid">
                   <div class="field field--full">
@@ -98,7 +118,8 @@ import PageHeader from "../../components/layout/PageHeader.astro";
                       class="field__hint"
                       id="organizationNameHint"
                     >
-                      Nama resmi organisasi yang akan ditampilkan kepada publik.
+                      Nama resmi organisasi yang akan ditampilkan kepada
+                      publik.
                     </p>
 
                     <input
@@ -189,29 +210,25 @@ import PageHeader from "../../components/layout/PageHeader.astro";
                   </div>
 
                   <div class="field">
-                    <label
-                      class="field__label"
-                      for="organizationStatus"
-                    >
+                    <span class="field__label">
                       Status profil
-                    </label>
+                    </span>
 
                     <div class="status-control">
                       <div class="status-control__icon">
                         <ShieldCheck
-                          size={18}
+                          size={17}
                           stroke-width={2}
                           aria-hidden="true"
                         />
                       </div>
 
                       <div>
-                        <strong>
-                          Menunggu verifikasi
-                        </strong>
+                        <strong>Menunggu verifikasi</strong>
 
                         <span>
-                          Status dapat berubah setelah peninjauan administrator.
+                          Status dapat berubah setelah peninjauan
+                          administrator.
                         </span>
                       </div>
                     </div>
@@ -263,11 +280,14 @@ import PageHeader from "../../components/layout/PageHeader.astro";
                 </div>
               </section>
 
+              <!-- ======================================================
+                   LOCATION
+              ======================================================= -->
               <section class="profile-card">
-                <div class="profile-card__header">
+                <header class="profile-card__header">
                   <div>
                     <span class="profile-card__eyebrow">
-                      LOKASI
+                      02 / LOKASI
                     </span>
 
                     <h2 class="profile-card__title">
@@ -282,12 +302,12 @@ import PageHeader from "../../components/layout/PageHeader.astro";
 
                   <div class="profile-card__icon">
                     <MapPin
-                      size={22}
+                      size={21}
                       stroke-width={1.9}
                       aria-hidden="true"
                     />
                   </div>
-                </div>
+                </header>
 
                 <div class="profile-grid">
                   <div class="field">
@@ -401,7 +421,7 @@ import PageHeader from "../../components/layout/PageHeader.astro";
                       max="90"
                       step="any"
                       placeholder="-8.650000"
-                      aria-describedby="coordinatesHint"
+                      aria-describedby="coordinatesHint coordinateError"
                     />
                   </div>
 
@@ -423,7 +443,7 @@ import PageHeader from "../../components/layout/PageHeader.astro";
                       max="180"
                       step="any"
                       placeholder="115.216667"
-                      aria-describedby="coordinatesHint"
+                      aria-describedby="coordinatesHint coordinateError"
                     />
                   </div>
 
@@ -443,15 +463,25 @@ import PageHeader from "../../components/layout/PageHeader.astro";
                         koordinat organisasi tersedia dan telah diperiksa.
                       </span>
                     </div>
+
+                    <p
+                      id="coordinateError"
+                      class="field__error field__error--coordinate"
+                      data-coordinate-error
+                      hidden
+                    ></p>
                   </div>
                 </div>
               </section>
 
+              <!-- ======================================================
+                   CONTACT
+              ======================================================= -->
               <section class="profile-card">
-                <div class="profile-card__header">
+                <header class="profile-card__header">
                   <div>
                     <span class="profile-card__eyebrow">
-                      KONTAK
+                      03 / KONTAK
                     </span>
 
                     <h2 class="profile-card__title">
@@ -466,12 +496,12 @@ import PageHeader from "../../components/layout/PageHeader.astro";
 
                   <div class="profile-card__icon">
                     <Phone
-                      size={22}
+                      size={21}
                       stroke-width={1.9}
                       aria-hidden="true"
                     />
                   </div>
-                </div>
+                </header>
 
                 <div class="profile-grid">
                   <div class="field">
@@ -584,6 +614,9 @@ import PageHeader from "../../components/layout/PageHeader.astro";
                 </div>
               </section>
 
+              <!-- ======================================================
+                   PUBLISH
+              ======================================================= -->
               <section class="profile-card profile-card--publish">
                 <div class="publish-box">
                   <div class="publish-box__icon">
@@ -595,6 +628,10 @@ import PageHeader from "../../components/layout/PageHeader.astro";
                   </div>
 
                   <div class="publish-box__content">
+                    <span class="publish-box__eyebrow">
+                      READY FOR REVIEW
+                    </span>
+
                     <h2>
                       Siap untuk ditinjau
                     </h2>
@@ -618,9 +655,7 @@ import PageHeader from "../../components/layout/PageHeader.astro";
                       aria-hidden="true"
                     />
 
-                    <span>
-                      Kembali
-                    </span>
+                    <span>Kembali</span>
                   </a>
 
                   <button
@@ -648,6 +683,9 @@ import PageHeader from "../../components/layout/PageHeader.astro";
               </section>
             </form>
 
+            <!-- ========================================================
+                 SUCCESS
+            ========================================================= -->
             <div
               class="save-success"
               data-save-success
@@ -662,7 +700,7 @@ import PageHeader from "../../components/layout/PageHeader.astro";
               </div>
 
               <span class="save-success__eyebrow">
-                PROFIL DIPERSIAPKAN
+                PROFILE READY
               </span>
 
               <h2>
@@ -670,8 +708,8 @@ import PageHeader from "../../components/layout/PageHeader.astro";
               </h2>
 
               <p>
-                Perubahan telah melalui pemeriksaan dasar pada browser dan
-                siap diteruskan ke proses penyimpanan serta verifikasi.
+                Pemeriksaan dasar pada browser telah selesai. Data siap
+                diteruskan ke proses penyimpanan dan verifikasi.
               </p>
 
               <div class="save-success__actions">
@@ -679,7 +717,7 @@ import PageHeader from "../../components/layout/PageHeader.astro";
                   class="form-actions__submit"
                   href="/organization"
                 >
-                  Kembali ke portal
+                  <span>Kembali ke portal</span>
 
                   <ArrowRight
                     size={17}
@@ -698,156 +736,6 @@ import PageHeader from "../../components/layout/PageHeader.astro";
               </div>
             </div>
           </div>
-
-          <aside class="profile-sidebar">
-            <div class="sidebar-card sidebar-card--status">
-              <div class="sidebar-status__header">
-                <div class="sidebar-status__icon">
-                  <ShieldCheck
-                    size={19}
-                    stroke-width={2}
-                    aria-hidden="true"
-                  />
-                </div>
-
-                <div>
-                  <span>
-                    STATUS PROFIL
-                  </span>
-
-                  <strong>
-                    Menunggu verifikasi
-                  </strong>
-                </div>
-              </div>
-
-              <p>
-                Lengkapi informasi organisasi dengan akurat agar proses
-                peninjauan dapat dilakukan dengan lebih baik.
-              </p>
-            </div>
-
-            <div class="sidebar-card">
-              <span class="sidebar-card__eyebrow">
-                CHECKLIST
-              </span>
-
-              <h2>
-                Profil yang baik
-              </h2>
-
-              <div class="sidebar-check-list">
-                <div class="sidebar-check">
-                  <CircleCheck
-                    size={16}
-                    stroke-width={2}
-                    aria-hidden="true"
-                  />
-
-                  <span>
-                    Nama organisasi jelas
-                  </span>
-                </div>
-
-                <div class="sidebar-check">
-                  <CircleCheck
-                    size={16}
-                    stroke-width={2}
-                    aria-hidden="true"
-                  />
-
-                  <span>
-                    Deskripsi mudah dipahami
-                  </span>
-                </div>
-
-                <div class="sidebar-check">
-                  <CircleCheck
-                    size={16}
-                    stroke-width={2}
-                    aria-hidden="true"
-                  />
-
-                  <span>
-                    Lokasi dapat ditemukan
-                  </span>
-                </div>
-
-                <div class="sidebar-check">
-                  <CircleCheck
-                    size={16}
-                    stroke-width={2}
-                    aria-hidden="true"
-                  />
-
-                  <span>
-                    Kontak yang relevan
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <div class="sidebar-card sidebar-card--tip">
-              <div class="sidebar-tip__icon">
-                <MapPin
-                  size={18}
-                  stroke-width={2}
-                  aria-hidden="true"
-                />
-              </div>
-
-              <div>
-                <strong>
-                  Prioritaskan lokasi
-                </strong>
-
-                <p>
-                  Lokasi yang akurat akan membuat organisasi lebih mudah
-                  dihubungkan dengan peta dan informasi wilayah BINSIGHT.
-                </p>
-              </div>
-            </div>
-
-            <div class="sidebar-card sidebar-card--next">
-              <span class="sidebar-card__eyebrow">
-                LANGKAH BERIKUTNYA
-              </span>
-
-              <h2>
-                Setelah profil selesai
-              </h2>
-
-              <a href="/organization/waste">
-                Kelola sampah
-
-                <ArrowRight
-                  size={16}
-                  stroke-width={2}
-                  aria-hidden="true"
-                />
-              </a>
-
-              <a href="/organization/process">
-                Kelola proses
-
-                <ArrowRight
-                  size={16}
-                  stroke-width={2}
-                  aria-hidden="true"
-                />
-              </a>
-
-              <a href="/organization/products">
-                Kelola produk
-
-                <ArrowRight
-                  size={16}
-                  stroke-width={2}
-                  aria-hidden="true"
-                />
-              </a>
-            </div>
-          </aside>
         </div>
       </div>
     </section>
@@ -855,100 +743,302 @@ import PageHeader from "../../components/layout/PageHeader.astro";
 </OrganizationLayout>
 
 <style>
-  .organization-profile-page {
-    min-height: 100vh;
-    background: var(--color-background);
+  /* ================================================================
+     REMOVE ORGANIZATION WORKSPACE CHROME ON THIS PAGE
+  ================================================================= */
+
+  :global(.organization-layout__header) {
+    display: none !important;
   }
 
+  :global(.organization-layout__sidebar) {
+    display: none !important;
+  }
+
+  :global(.organization-layout__mobile-topbar) {
+    display: none !important;
+  }
+
+  :global(.organization-layout__main) {
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    grid-column: 1 / -1 !important;
+  }
+
+  :global(.organization-layout__main-container) {
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /*
+   * Beberapa versi OrganizationLayout menggunakan parent grid/flex
+   * yang tetap menyimpan kolom sidebar walaupun sidebar di-hide.
+   * Rule :has() memastikan profile mengambil seluruh lebar workspace.
+   */
+  :global(.organization-layout:has(.organization-profile-page)) {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  :global(.organization-layout:has(.organization-profile-page)) .organization-layout__main {
+    grid-column: 1 / -1 !important;
+    width: 100% !important;
+  }
+
+  /* ================================================================
+     PAGE
+  ================================================================= */
+
+  .organization-profile-page {
+    --acid: #dfff00;
+    --acid-soft: #efff70;
+    --ink: #090a08;
+    --ink-2: #11130f;
+    --ink-3: #1b1f18;
+    --paper: #f2f0e6;
+    --paper-2: #e4e1d4;
+    --paper-3: #cfcabd;
+    --white: #fffef8;
+    --muted: #6c7068;
+    --orange: #ff6a00;
+    --green: #87b800;
+
+    width: 100%;
+    min-height: 100%;
+    background: var(--paper);
+    color: var(--ink);
+  }
+
+  .organization-profile-page *,
+  .organization-profile-page *::before,
+  .organization-profile-page *::after {
+    box-sizing: border-box;
+  }
+
+  .organization-profile-page a,
+  .organization-profile-page button,
+  .organization-profile-page input,
+  .organization-profile-page select,
+  .organization-profile-page textarea {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* ================================================================
+     CONTENT
+  ================================================================= */
+
   .profile-content {
-    padding: var(--space-10) 0 var(--space-14);
+    width: 100%;
+    padding: 34px 0 80px;
+    border-bottom: 2px solid var(--ink);
+    background:
+      radial-gradient(
+        circle at 92% 0%,
+        rgb(223 255 0 / 9%),
+        transparent 23%
+      ),
+      var(--paper-2);
   }
 
   .profile-container {
-    width: min(1180px, calc(100% - 40px));
+    width: min(1240px, calc(100% - 40px));
     margin-inline: auto;
   }
 
+  /* ================================================================
+     INTRO
+  ================================================================= */
+
+  .profile-intro {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 40px;
+    padding: 22px 0 34px;
+    border-bottom: 2px solid var(--ink);
+  }
+
+  .profile-intro__main {
+    min-width: 0;
+  }
+
+  .profile-intro__eyebrow,
+  .profile-card__eyebrow,
+  .save-success__eyebrow {
+    display: block;
+    color: var(--orange);
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+    font-size: 0.57rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    line-height: 1.2;
+    text-transform: uppercase;
+  }
+
+  .profile-intro__title {
+    max-width: 900px;
+    margin: 12px 0 0;
+    color: var(--ink);
+    font-family:
+      Sora,
+      Inter,
+      system-ui,
+      sans-serif;
+    font-size: clamp(2.3rem, 4.4vw, 4.4rem);
+    font-weight: 800;
+    letter-spacing: -0.065em;
+    line-height: 0.94;
+    text-transform: uppercase;
+  }
+
+  .profile-intro__description {
+    max-width: 720px;
+    margin: 17px 0 0;
+    color: #4e534b;
+    font-size: 0.92rem;
+    line-height: 1.72;
+  }
+
+  .profile-intro__status {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 11px;
+    min-width: 245px;
+    padding: 13px 15px;
+    border: 2px solid var(--ink);
+    background: var(--white);
+    box-shadow: 5px 5px 0 var(--acid);
+  }
+
+  .profile-intro__status-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    background: var(--acid);
+    color: var(--ink);
+  }
+
+  .profile-intro__status span,
+  .profile-intro__status strong {
+    display: block;
+  }
+
+  .profile-intro__status span {
+    color: var(--muted);
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+    font-size: 0.49rem;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+  }
+
+  .profile-intro__status strong {
+    margin-top: 4px;
+    color: var(--ink);
+    font-size: 0.68rem;
+    font-weight: 800;
+  }
+
+  /* ================================================================
+     LAYOUT
+  ================================================================= */
+
   .profile-layout {
-    display: grid;
-    grid-template-columns:
-      minmax(0, 1fr)
-      320px;
-    gap: var(--space-7);
-    align-items: start;
+    display: block;
+    width: 100%;
+    padding-top: 24px;
   }
 
   .profile-main {
+    width: min(100%, 1100px);
     min-width: 0;
+    margin-inline: auto;
   }
 
   .profile-form {
     display: grid;
-    gap: var(--space-5);
+    gap: 16px;
   }
 
+  /* ================================================================
+     CARDS
+  ================================================================= */
+
   .profile-card {
-    padding: var(--space-7);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-xl);
-    background: var(--color-surface);
-    box-shadow: var(--shadow-xs);
+    overflow: hidden;
+    border: 2px solid var(--ink);
+    background: var(--white);
+    box-shadow: 5px 5px 0 rgb(9 10 8 / 9%);
   }
 
   .profile-card__header {
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
-    gap: var(--space-5);
-    padding-bottom: var(--space-6);
-    border-bottom: 1px solid var(--color-border);
-  }
-
-  .profile-card__eyebrow,
-  .sidebar-card__eyebrow,
-  .profile-card__eyebrow {
-    display: block;
-    color: var(--color-primary-dark);
-    font-size: 0.65rem;
-    font-weight: 850;
-    letter-spacing: 0.11em;
+    gap: 20px;
+    padding: 22px 24px;
+    border-bottom: 2px solid var(--ink);
   }
 
   .profile-card__title {
-    margin: var(--space-2) 0 0;
-    color: var(--color-text-strong);
-    font-size: 1.08rem;
-    font-weight: 850;
-    line-height: 1.3;
+    margin: 8px 0 0;
+    color: var(--ink);
+    font-family:
+      Sora,
+      Inter,
+      system-ui,
+      sans-serif;
+    font-size: 1.18rem;
+    font-weight: 800;
+    letter-spacing: -0.035em;
+    line-height: 1.2;
   }
 
   .profile-card__description {
-    max-width: 680px;
-    margin: 5px 0 0;
-    color: var(--color-text-muted);
-    font-size: var(--font-size-sm);
-    line-height: 1.6;
+    max-width: 690px;
+    margin: 6px 0 0;
+    color: var(--muted);
+    font-size: 0.77rem;
+    line-height: 1.65;
   }
 
   .profile-card__icon {
-    display: inline-flex;
+    display: flex;
     flex: 0 0 auto;
     align-items: center;
     justify-content: center;
-    width: 44px;
-    height: 44px;
-    border-radius: 13px;
-    background: var(--color-primary-soft);
-    color: var(--color-primary);
+    width: 43px;
+    height: 43px;
+    border: 2px solid var(--ink);
+    background: var(--acid);
+    color: var(--ink);
   }
 
   .profile-grid {
     display: grid;
-    grid-template-columns:
-      repeat(2, minmax(0, 1fr));
-    gap: var(--space-5);
-    padding-top: var(--space-6);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+    padding: 24px;
   }
+
+  /* ================================================================
+     FIELDS
+  ================================================================= */
 
   .field {
     min-width: 0;
@@ -962,20 +1052,21 @@ import PageHeader from "../../components/layout/PageHeader.astro";
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    margin-bottom: var(--space-2);
-    color: var(--color-text-strong);
-    font-size: var(--font-size-sm);
-    font-weight: 750;
+    margin-bottom: 7px;
+    color: var(--ink);
+    font-size: 0.73rem;
+    font-weight: 800;
   }
 
   .field__required {
-    color: var(--color-danger);
+    color: var(--orange);
   }
 
   .field__hint {
-    margin: 0 0 var(--space-2);
-    color: var(--color-text-faint);
-    font-size: var(--font-size-xs);
+    max-width: 680px;
+    margin: 0 0 8px;
+    color: var(--muted);
+    font-size: 0.64rem;
     line-height: 1.5;
   }
 
@@ -983,55 +1074,55 @@ import PageHeader from "../../components/layout/PageHeader.astro";
   .field__select,
   .field__textarea {
     width: 100%;
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    background: var(--color-surface);
-    color: var(--color-text-strong);
+    border: 2px solid #bfc0b7;
+    border-radius: 0;
+    background: var(--white);
+    color: var(--ink);
     font: inherit;
-    font-size: var(--font-size-sm);
+    font-size: 0.76rem;
     transition:
-      border-color 160ms ease,
-      box-shadow 160ms ease,
-      background 160ms ease;
+      border-color 150ms ease,
+      background 150ms ease,
+      box-shadow 150ms ease;
   }
 
   .field__input,
   .field__select {
-    min-height: 45px;
-    padding: 0 13px;
+    min-height: 46px;
+    padding: 0 12px;
   }
 
   .field__textarea {
-    min-height: 142px;
-    padding: 12px 13px;
+    min-height: 150px;
+    padding: 12px;
     resize: vertical;
     line-height: 1.65;
-  }
-
-  .field__input::placeholder,
-  .field__textarea::placeholder {
-    color: var(--color-text-faint);
   }
 
   .field__input:hover,
   .field__select:hover,
   .field__textarea:hover {
-    border-color: var(--color-border-strong);
+    border-color: #767a70;
   }
 
   .field__input:focus,
   .field__select:focus,
   .field__textarea:focus {
-    border-color: var(--color-primary);
+    border-color: var(--ink);
     outline: none;
-    box-shadow:
-      0 0 0 3px var(--color-primary-ring);
+    box-shadow: 4px 4px 0 var(--acid);
+  }
+
+  .field__input::placeholder,
+  .field__textarea::placeholder {
+    color: #999d93;
   }
 
   .field__input[aria-invalid="true"],
   .field__select[aria-invalid="true"],
   .field__textarea[aria-invalid="true"] {
-    border-color: var(--color-danger);
+    border-color: var(--orange);
+    box-shadow: 3px 3px 0 rgb(255 106 0 / 15%);
   }
 
   .field__input-wrap {
@@ -1041,9 +1132,9 @@ import PageHeader from "../../components/layout/PageHeader.astro";
   .field__input-wrap > svg {
     position: absolute;
     top: 50%;
-    left: 13px;
+    left: 12px;
     z-index: 1;
-    color: var(--color-text-faint);
+    color: var(--muted);
     transform: translateY(-50%);
     pointer-events: none;
   }
@@ -1056,13 +1147,18 @@ import PageHeader from "../../components/layout/PageHeader.astro";
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
-    gap: var(--space-3);
+    gap: 12px;
   }
 
   .field__error {
-    margin: var(--space-2) 0 0;
-    color: var(--color-danger-text);
-    font-size: var(--font-size-xs);
+    margin: 7px 0 0;
+    color: #b43d00;
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+    font-size: 0.57rem;
     line-height: 1.5;
   }
 
@@ -1070,34 +1166,45 @@ import PageHeader from "../../components/layout/PageHeader.astro";
     display: none;
   }
 
+  .field__error--coordinate {
+    padding-left: 2px;
+  }
+
   .field__counter {
     flex: 0 0 auto;
-    margin-top: var(--space-2);
-    color: var(--color-text-faint);
-    font-size: var(--font-size-xs);
+    margin-top: 7px;
+    color: #8b8e86;
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+    font-size: 0.55rem;
   }
+
+  /* ================================================================
+     STATUS
+  ================================================================= */
 
   .status-control {
     display: flex;
     align-items: flex-start;
-    gap: var(--space-3);
-    min-height: 45px;
-    padding: 10px 12px;
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    background: var(--color-surface-soft);
+    gap: 10px;
+    min-height: 46px;
+    padding: 8px 10px;
+    border: 2px solid #cfd1c7;
+    background: var(--paper);
   }
 
   .status-control__icon {
-    display: inline-flex;
+    display: flex;
     flex: 0 0 auto;
     align-items: center;
     justify-content: center;
-    width: 31px;
-    height: 31px;
-    border-radius: 9px;
-    background: var(--color-warning-soft);
-    color: var(--color-warning-text);
+    width: 29px;
+    height: 29px;
+    background: var(--acid);
+    color: var(--ink);
   }
 
   .status-control strong,
@@ -1106,71 +1213,93 @@ import PageHeader from "../../components/layout/PageHeader.astro";
   }
 
   .status-control strong {
-    color: var(--color-text-strong);
-    font-size: var(--font-size-xs);
+    color: var(--ink);
+    font-size: 0.7rem;
+    font-weight: 800;
   }
 
   .status-control span {
-    margin-top: 2px;
-    color: var(--color-text-muted);
-    font-size: 0.68rem;
+    margin-top: 3px;
+    color: var(--muted);
+    font-size: 0.57rem;
     line-height: 1.45;
   }
+
+  /* ================================================================
+     COORDINATES
+  ================================================================= */
 
   .coordinates-notice {
     display: flex;
     align-items: flex-start;
     gap: 9px;
     padding: 11px 12px;
-    border-radius: var(--radius-md);
-    background: var(--color-info-soft);
-    color: var(--color-info);
-    font-size: var(--font-size-xs);
-    line-height: 1.55;
+    border: 1px solid #cdd1bf;
+    background: #f8f9e9;
+    color: #51563b;
+    font-size: 0.63rem;
+    line-height: 1.6;
   }
 
   .coordinates-notice svg {
     flex: 0 0 auto;
     margin-top: 1px;
+    color: var(--orange);
   }
 
+  /* ================================================================
+     PUBLISH
+  ================================================================= */
+
   .profile-card--publish {
-    padding-top: var(--space-6);
+    padding: 20px;
   }
 
   .publish-box {
     display: flex;
     align-items: flex-start;
-    gap: var(--space-3);
-    padding: var(--space-4);
-    border: 1px solid var(--color-primary-soft);
-    border-radius: var(--radius-lg);
-    background: var(--color-primary-soft);
+    gap: 12px;
+    padding: 14px;
+    border: 1px solid #cbd39d;
+    background: #f7f9df;
   }
 
   .publish-box__icon {
-    display: inline-flex;
+    display: flex;
     flex: 0 0 auto;
     align-items: center;
     justify-content: center;
-    width: 40px;
-    height: 40px;
-    border-radius: 11px;
-    background: var(--color-surface);
-    color: var(--color-primary);
+    width: 39px;
+    height: 39px;
+    background: var(--ink);
+    color: var(--acid);
+  }
+
+  .publish-box__eyebrow {
+    display: block;
+    color: var(--orange);
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+    font-size: 0.51rem;
+    font-weight: 700;
+    letter-spacing: 0.09em;
   }
 
   .publish-box__content h2 {
-    margin: 1px 0 0;
-    color: var(--color-text-strong);
-    font-size: var(--font-size-sm);
+    margin: 4px 0 0;
+    color: var(--ink);
+    font-size: 0.8rem;
     font-weight: 800;
   }
 
   .publish-box__content p {
+    max-width: 650px;
     margin: 4px 0 0;
-    color: var(--color-text-muted);
-    font-size: var(--font-size-xs);
+    color: var(--muted);
+    font-size: 0.63rem;
     line-height: 1.6;
   }
 
@@ -1178,80 +1307,77 @@ import PageHeader from "../../components/layout/PageHeader.astro";
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: var(--space-4);
-    margin-top: var(--space-6);
-    padding-top: var(--space-5);
-    border-top: 1px solid var(--color-border);
+    gap: 12px;
+    margin-top: 18px;
+    padding-top: 17px;
+    border-top: 2px solid var(--ink);
   }
 
-  .form-actions__back {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 7px;
-    min-height: 44px;
-    padding: 0 13px;
-    border: 1px solid transparent;
-    border-radius: var(--radius-md);
-    background: transparent;
-    color: var(--color-text-muted);
-    cursor: pointer;
-    font: inherit;
-    font-size: var(--font-size-sm);
-    font-weight: 700;
-    text-decoration: none;
-  }
-
-  .form-actions__back:hover {
-    color: var(--color-text-strong);
-    background: var(--color-surface-soft);
-  }
-
+  .form-actions__back,
   .form-actions__submit {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
-    min-height: 45px;
-    padding: 0 var(--space-5);
-    border: 1px solid var(--color-primary);
-    border-radius: var(--radius-md);
-    background: var(--color-primary);
-    color: var(--color-white);
-    cursor: pointer;
+    min-height: 44px;
+    padding: 0 14px;
+    border: 2px solid var(--ink);
+    border-radius: 0;
     font: inherit;
-    font-size: var(--font-size-sm);
+    font-size: 0.64rem;
     font-weight: 800;
     text-decoration: none;
-    box-shadow: var(--shadow-sm);
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+
+  .form-actions__back {
+    background: transparent;
+    color: var(--ink);
+  }
+
+  .form-actions__back:hover {
+    background: var(--white);
+    box-shadow: 4px 4px 0 var(--paper-3);
+  }
+
+  .form-actions__submit {
+    background: var(--ink);
+    color: var(--acid);
+    box-shadow: 5px 5px 0 var(--acid);
     transition:
-      background 160ms ease,
-      transform 160ms ease,
-      box-shadow 160ms ease;
+      transform 150ms ease,
+      box-shadow 150ms ease,
+      background 150ms ease;
   }
 
   .form-actions__submit:hover {
-    background: var(--color-primary-dark);
-    transform: translateY(-1px);
-    box-shadow: var(--shadow-md);
-  }
-
-  .form-actions__submit:focus-visible,
-  .form-actions__back:focus-visible {
-    outline: 3px solid var(--color-primary-ring);
-    outline-offset: 3px;
+    background: var(--ink-3);
+    transform: translate(-2px, -2px);
+    box-shadow: 7px 7px 0 var(--acid);
   }
 
   .form-actions__submit:disabled {
-    opacity: 0.65;
+    opacity: 0.55;
     cursor: wait;
     transform: none;
   }
 
+  .form-actions__submit:focus-visible,
+  .form-actions__back:focus-visible {
+    outline: 3px solid var(--orange);
+    outline-offset: 3px;
+  }
+
   .save-message {
-    margin: var(--space-3) 0 0;
-    color: var(--color-text-muted);
-    font-size: var(--font-size-xs);
+    margin: 10px 0 0;
+    color: var(--muted);
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+    font-size: 0.57rem;
     line-height: 1.5;
     text-align: right;
   }
@@ -1261,163 +1387,20 @@ import PageHeader from "../../components/layout/PageHeader.astro";
     display: none;
   }
 
-  .profile-sidebar {
-    position: sticky;
-    top: var(--space-6);
-    display: grid;
-    gap: var(--space-4);
-  }
-
-  .sidebar-card {
-    padding: var(--space-5);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-xl);
-    background: var(--color-surface);
-    box-shadow: var(--shadow-xs);
-  }
-
-  .sidebar-card--status {
-    background:
-      linear-gradient(
-        145deg,
-        var(--color-primary-soft),
-        var(--color-surface)
-      );
-  }
-
-  .sidebar-status__header {
-    display: flex;
-    align-items: center;
-    gap: 11px;
-  }
-
-  .sidebar-status__icon {
-    display: inline-flex;
-    flex: 0 0 auto;
-    align-items: center;
-    justify-content: center;
-    width: 40px;
-    height: 40px;
-    border-radius: 12px;
-    background: var(--color-surface);
-    color: var(--color-primary);
-  }
-
-  .sidebar-status__header span,
-  .sidebar-status__header strong {
-    display: block;
-  }
-
-  .sidebar-status__header span {
-    color: var(--color-text-faint);
-    font-size: 0.57rem;
-    font-weight: 850;
-    letter-spacing: 0.09em;
-  }
-
-  .sidebar-status__header strong {
-    margin-top: 3px;
-    color: var(--color-text-strong);
-    font-size: var(--font-size-sm);
-  }
-
-  .sidebar-card > p {
-    margin: var(--space-4) 0 0;
-    color: var(--color-text-muted);
-    font-size: var(--font-size-xs);
-    line-height: 1.65;
-  }
-
-  .sidebar-card > h2 {
-    margin: var(--space-2) 0 0;
-    color: var(--color-text-strong);
-    font-size: 1rem;
-    font-weight: 800;
-  }
-
-  .sidebar-check-list {
-    display: grid;
-    gap: 12px;
-    margin-top: var(--space-5);
-  }
-
-  .sidebar-check {
-    display: flex;
-    align-items: flex-start;
-    gap: 8px;
-    color: var(--color-text-muted);
-    font-size: var(--font-size-xs);
-    line-height: 1.5;
-  }
-
-  .sidebar-check svg {
-    flex: 0 0 auto;
-    margin-top: 1px;
-    color: var(--color-primary);
-  }
-
-  .sidebar-card--tip {
-    display: flex;
-    align-items: flex-start;
-    gap: var(--space-3);
-  }
-
-  .sidebar-tip__icon {
-    display: inline-flex;
-    flex: 0 0 auto;
-    align-items: center;
-    justify-content: center;
-    width: 38px;
-    height: 38px;
-    border-radius: 11px;
-    background: var(--color-info-soft);
-    color: var(--color-info);
-  }
-
-  .sidebar-card--tip strong {
-    display: block;
-    color: var(--color-text-strong);
-    font-size: var(--font-size-sm);
-  }
-
-  .sidebar-card--tip p {
-    margin-top: 4px;
-  }
-
-  .sidebar-card--next {
-    display: grid;
-    gap: 0;
-  }
-
-  .sidebar-card--next a {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--space-3);
-    margin-top: 10px;
-    padding: 10px 0;
-    border-top: 1px solid var(--color-border);
-    color: var(--color-primary);
-    font-size: var(--font-size-xs);
-    font-weight: 750;
-    text-decoration: none;
-  }
-
-  .sidebar-card--next a:hover {
-    color: var(--color-primary-dark);
-  }
+  /* ================================================================
+     SUCCESS
+  ================================================================= */
 
   .save-success {
-    padding: var(--space-10);
-    border: 1px solid var(--color-primary-soft);
-    border-radius: var(--radius-xl);
+    padding: 48px 28px;
+    border: 2px solid var(--ink);
     background:
       linear-gradient(
         145deg,
-        var(--color-primary-soft),
-        var(--color-surface)
+        var(--acid),
+        var(--paper)
       );
-    box-shadow: var(--shadow-sm);
+    box-shadow: 8px 8px 0 var(--ink);
     text-align: center;
   }
 
@@ -1425,86 +1408,62 @@ import PageHeader from "../../components/layout/PageHeader.astro";
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 66px;
-    height: 66px;
-    border-radius: 50%;
-    background: var(--color-surface);
-    color: var(--color-primary);
+    width: 70px;
+    height: 70px;
+    border: 2px solid var(--ink);
+    background: var(--ink);
+    color: var(--acid);
   }
 
   .save-success__eyebrow {
-    display: block;
-    margin-top: var(--space-4);
-    color: var(--color-primary-dark);
-    font-size: 0.64rem;
-    font-weight: 850;
-    letter-spacing: 0.11em;
+    margin-top: 18px;
   }
 
   .save-success h2 {
-    margin: var(--space-2) 0 0;
-    color: var(--color-text-strong);
-    font-size: clamp(1.45rem, 3vw, 2rem);
-    letter-spacing: -0.025em;
+    margin: 8px 0 0;
+    color: var(--ink);
+    font-family:
+      Sora,
+      Inter,
+      system-ui,
+      sans-serif;
+    font-size: clamp(1.5rem, 3vw, 2.35rem);
+    font-weight: 800;
+    letter-spacing: -0.045em;
+    line-height: 1.05;
+    text-transform: uppercase;
   }
 
   .save-success p {
     max-width: 650px;
-    margin: var(--space-3) auto 0;
-    color: var(--color-text-muted);
-    font-size: var(--font-size-sm);
+    margin: 12px auto 0;
+    color: #4d533c;
+    font-size: 0.75rem;
     line-height: 1.7;
   }
 
   .save-success__actions {
     display: flex;
+    align-items: center;
     justify-content: center;
     flex-wrap: wrap;
-    gap: var(--space-3);
-    margin-top: var(--space-6);
+    gap: 10px;
+    margin-top: 24px;
   }
 
-  @media (max-width: 980px) {
-    .profile-layout {
-      grid-template-columns: 1fr;
+  /* ================================================================
+     RESPONSIVE
+  ================================================================= */
+
+  @media (max-width: 760px) {
+    .profile-intro {
+      align-items: flex-start;
+      flex-direction: column;
+      gap: 24px;
     }
 
-    .profile-sidebar {
-      position: static;
-      grid-template-columns:
-        repeat(2, minmax(0, 1fr));
-    }
-
-    .sidebar-card--status,
-    .sidebar-card--next {
-      grid-column: 1 / -1;
-    }
-  }
-
-  @media (max-width: 680px) {
-    .profile-container {
-      width: min(
-        100%,
-        calc(100% - 28px)
-      );
-    }
-
-    .profile-content {
-      padding-top: var(--space-6);
-    }
-
-    .profile-card {
-      padding: var(--space-5);
-    }
-
-    .profile-card__header {
-      gap: var(--space-3);
-      padding-bottom: var(--space-5);
-    }
-
-    .profile-card__icon {
-      width: 39px;
-      height: 39px;
+    .profile-intro__status {
+      width: 100%;
     }
 
     .profile-grid {
@@ -1513,6 +1472,62 @@ import PageHeader from "../../components/layout/PageHeader.astro";
 
     .field--full {
       grid-column: auto;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .profile-content {
+      padding: 20px 0 54px;
+    }
+
+    .profile-container {
+      width: min(100%, calc(100% - 28px));
+    }
+
+    .profile-intro {
+      padding: 10px 0 25px;
+    }
+
+    .profile-intro__title {
+      font-size: clamp(2rem, 10vw, 3rem);
+    }
+
+    .profile-intro__description {
+      font-size: 0.77rem;
+    }
+
+    .profile-layout {
+      padding-top: 14px;
+    }
+
+    .profile-form {
+      gap: 14px;
+    }
+
+    .profile-card__header {
+      padding: 18px;
+    }
+
+    .profile-card__title {
+      font-size: 1rem;
+    }
+
+    .profile-card__description {
+      font-size: 0.64rem;
+    }
+
+    .profile-card__icon {
+      width: 38px;
+      height: 38px;
+    }
+
+    .profile-grid {
+      gap: 16px;
+      padding: 18px;
+    }
+
+    .profile-card--publish {
+      padding: 17px;
     }
 
     .form-actions {
@@ -1529,579 +1544,631 @@ import PageHeader from "../../components/layout/PageHeader.astro";
       text-align: center;
     }
 
-    .profile-sidebar {
-      grid-template-columns: 1fr;
-    }
-
-    .sidebar-card--status,
-    .sidebar-card--next {
-      grid-column: auto;
-    }
-
     .save-success {
-      padding: var(--space-7) var(--space-5);
+      padding: 36px 18px;
+      box-shadow: 5px 5px 0 var(--ink);
+    }
+
+    .save-success__actions {
+      flex-direction: column;
+    }
+
+    .save-success__actions .form-actions__submit,
+    .save-success__actions .form-actions__back {
+      width: 100%;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .field__input,
+    .field__select,
+    .field__textarea,
+    .form-actions__submit {
+      transition: none;
+    }
+
+    .form-actions__submit:hover {
+      transform: none;
     }
   }
 </style>
 
 <script>
-// @ts-nocheck
-
-  const form =
-    document.querySelector(
-      "[data-profile-form]",
-    );
-
-  const successPanel =
-    document.querySelector(
-      "[data-save-success]",
-    );
-
-  const editProfileButton =
-    document.querySelector(
-      "[data-edit-profile]",
-    );
-
-  const saveButton =
-    document.querySelector(
-      "[data-save-button]",
-    );
-
-  const saveLabel =
-    document.querySelector(
-      "[data-save-label]",
-    );
-
-  const saveMessage =
-    document.querySelector(
-      "[data-save-message]",
-    );
-
-  const descriptionField =
-    document.querySelector(
-      "[name='description']",
-    );
-
-  const descriptionCounter =
-    document.querySelector(
-      "[data-description-counter]",
-    );
-
-  function setFieldError(
-    fieldName,
-    message,
-  ) {
-    const field =
-      form?.querySelector(
-        `[name="${fieldName}"]`,
+  const initializeOrganizationProfilePage = () => {
+    const form =
+      document.querySelector<HTMLFormElement>(
+        "[data-profile-form]",
       );
 
-    const error =
-      form?.querySelector(
-        `[data-field-error="${fieldName}"]`,
+    const successPanel =
+      document.querySelector<HTMLElement>(
+        "[data-save-success]",
+      );
+
+    const editProfileButton =
+      document.querySelector<HTMLButtonElement>(
+        "[data-edit-profile]",
+      );
+
+    const saveButton =
+      document.querySelector<HTMLButtonElement>(
+        "[data-save-button]",
+      );
+
+    const saveLabel =
+      document.querySelector<HTMLElement>(
+        "[data-save-label]",
+      );
+
+    const saveMessage =
+      document.querySelector<HTMLElement>(
+        "[data-save-message]",
+      );
+
+    const descriptionField =
+      document.querySelector<HTMLTextAreaElement>(
+        "[name='description']",
+      );
+
+    const descriptionCounter =
+      document.querySelector<HTMLElement>(
+        "[data-description-counter]",
       );
 
     if (
-      field instanceof HTMLElement
-    ) {
-      field.setAttribute(
-        "aria-invalid",
-        "true",
-      );
-    }
-
-    if (
-      error instanceof HTMLElement
-    ) {
-      error.textContent =
-        message;
-
-      error.hidden = false;
-    }
-  }
-
-  function clearFieldError(
-    fieldName,
-  ) {
-    const field =
-      form?.querySelector(
-        `[name="${fieldName}"]`,
-      );
-
-    const error =
-      form?.querySelector(
-        `[data-field-error="${fieldName}"]`,
-      );
-
-    if (
-      field instanceof HTMLElement
-    ) {
-      field.removeAttribute(
-        "aria-invalid",
-      );
-    }
-
-    if (
-      error instanceof HTMLElement
-    ) {
-      error.textContent = "";
-      error.hidden = true;
-    }
-  }
-
-  function clearAllErrors() {
-    [
-      "organizationName",
-      "organizationType",
-      "area",
-      "address",
-      "description",
-    ].forEach(
-      (fieldName) => {
-        clearFieldError(
-          fieldName,
-        );
-      },
-    );
-  }
-
-  function updateDescriptionCounter() {
-    if (
-      !(descriptionField instanceof HTMLTextAreaElement) ||
-      !(descriptionCounter instanceof HTMLElement)
+      !form ||
+      form.dataset.initialized === "true"
     ) {
       return;
     }
 
-    descriptionCounter.textContent =
-      `${descriptionField.value.length} / 1500`;
-  }
+    form.dataset.initialized = "true";
 
-  function validateProfileForm() {
-    if (
-      !(form instanceof HTMLFormElement)
-    ) {
-      return false;
-    }
+    const setFieldError = (
+      fieldName: string,
+      message: string,
+    ) => {
+      const field =
+        form.querySelector<
+          HTMLInputElement |
+          HTMLSelectElement |
+          HTMLTextAreaElement
+        >(`[name="${fieldName}"]`);
 
-    clearAllErrors();
-
-    const organizationName =
-      form.elements.namedItem(
-        "organizationName",
-      );
-
-    const organizationType =
-      form.elements.namedItem(
-        "organizationType",
-      );
-
-    const area =
-      form.elements.namedItem(
-        "area",
-      );
-
-    const address =
-      form.elements.namedItem(
-        "address",
-      );
-
-    const description =
-      form.elements.namedItem(
-        "description",
-      );
-
-    let valid = true;
-
-    if (
-      !(
-        organizationName instanceof
-        HTMLInputElement
-      ) ||
-      organizationName.value.trim().length < 2
-    ) {
-      setFieldError(
-        "organizationName",
-        "Nama organisasi minimal 2 karakter.",
-      );
-
-      valid = false;
-    }
-
-    if (
-      !(
-        organizationType instanceof
-        HTMLSelectElement
-      ) ||
-      organizationType.value === ""
-    ) {
-      setFieldError(
-        "organizationType",
-        "Silakan pilih jenis organisasi.",
-      );
-
-      valid = false;
-    }
-
-    if (
-      !(area instanceof HTMLSelectElement) ||
-      area.value === ""
-    ) {
-      setFieldError(
-        "area",
-        "Silakan pilih area atau kecamatan.",
-      );
-
-      valid = false;
-    }
-
-    if (
-      !(address instanceof HTMLInputElement) ||
-      address.value.trim().length < 5
-    ) {
-      setFieldError(
-        "address",
-        "Alamat organisasi perlu diisi.",
-      );
-
-      valid = false;
-    }
-
-    if (
-      description instanceof HTMLTextAreaElement &&
-      description.value.trim().length > 0 &&
-      description.value.trim().length < 20
-    ) {
-      setFieldError(
-        "description",
-        "Deskripsi yang diisi minimal 20 karakter.",
-      );
-
-      valid = false;
-    }
-
-    if (!valid) {
-      const firstInvalid =
-        form.querySelector(
-          "[aria-invalid='true']",
+      const error =
+        form.querySelector<HTMLElement>(
+          `[data-field-error="${fieldName}"]`,
         );
 
+      if (field) {
+        field.setAttribute(
+          "aria-invalid",
+          "true",
+        );
+      }
+
+      if (error) {
+        error.textContent = message;
+        error.hidden = false;
+      }
+    };
+
+    const clearFieldError = (
+      fieldName: string,
+    ) => {
+      const field =
+        form.querySelector<
+          HTMLInputElement |
+          HTMLSelectElement |
+          HTMLTextAreaElement
+        >(`[name="${fieldName}"]`);
+
+      const error =
+        form.querySelector<HTMLElement>(
+          `[data-field-error="${fieldName}"]`,
+        );
+
+      if (field) {
+        field.removeAttribute(
+          "aria-invalid",
+        );
+      }
+
+      if (error) {
+        error.textContent = "";
+        error.hidden = true;
+      }
+    };
+
+    const clearAllErrors = () => {
+      [
+        "organizationName",
+        "organizationType",
+        "area",
+        "address",
+        "description",
+      ].forEach(clearFieldError);
+
+      const coordinateError =
+        form.querySelector<HTMLElement>(
+          "[data-coordinate-error]",
+        );
+
+      if (coordinateError) {
+        coordinateError.textContent = "";
+        coordinateError.hidden = true;
+      }
+
+      const latitude =
+        form.elements.namedItem(
+          "latitude",
+        ) as HTMLInputElement | null;
+
+      const longitude =
+        form.elements.namedItem(
+          "longitude",
+        ) as HTMLInputElement | null;
+
+      latitude?.removeAttribute("aria-invalid");
+      longitude?.removeAttribute("aria-invalid");
+    };
+
+    const updateDescriptionCounter = () => {
       if (
-        firstInvalid instanceof HTMLElement
+        !descriptionField ||
+        !descriptionCounter
       ) {
-        firstInvalid.scrollIntoView({
+        return;
+      }
+
+      descriptionCounter.textContent =
+        `${descriptionField.value.length} / 1500`;
+    };
+
+    const showSaveMessage = (
+      message: string,
+    ) => {
+      if (!saveMessage) {
+        return;
+      }
+
+      saveMessage.textContent = message;
+      saveMessage.hidden = false;
+    };
+
+    const clearSaveMessage = () => {
+      if (!saveMessage) {
+        return;
+      }
+
+      saveMessage.textContent = "";
+      saveMessage.hidden = true;
+    };
+
+    const validateCoordinates = () => {
+      const latitude =
+        form.elements.namedItem(
+          "latitude",
+        ) as HTMLInputElement | null;
+
+      const longitude =
+        form.elements.namedItem(
+          "longitude",
+        ) as HTMLInputElement | null;
+
+      const latitudeValue =
+        latitude?.value.trim() ?? "";
+
+      const longitudeValue =
+        longitude?.value.trim() ?? "";
+
+      if (
+        latitudeValue === "" &&
+        longitudeValue === ""
+      ) {
+        return true;
+      }
+
+      if (
+        latitudeValue === "" ||
+        longitudeValue === ""
+      ) {
+        return false;
+      }
+
+      const lat = Number(latitudeValue);
+      const lng = Number(longitudeValue);
+
+      return (
+        Number.isFinite(lat) &&
+        Number.isFinite(lng) &&
+        lat >= -90 &&
+        lat <= 90 &&
+        lng >= -180 &&
+        lng <= 180
+      );
+    };
+
+    const validateProfileForm = () => {
+      clearAllErrors();
+
+      const organizationName =
+        form.elements.namedItem(
+          "organizationName",
+        ) as HTMLInputElement | null;
+
+      const organizationType =
+        form.elements.namedItem(
+          "organizationType",
+        ) as HTMLSelectElement | null;
+
+      const area =
+        form.elements.namedItem(
+          "area",
+        ) as HTMLSelectElement | null;
+
+      const address =
+        form.elements.namedItem(
+          "address",
+        ) as HTMLInputElement | null;
+
+      let valid = true;
+
+      if (
+        !organizationName ||
+        organizationName.value.trim().length < 2
+      ) {
+        setFieldError(
+          "organizationName",
+          "Nama organisasi minimal 2 karakter.",
+        );
+
+        valid = false;
+      }
+
+      if (
+        !organizationType ||
+        organizationType.value === ""
+      ) {
+        setFieldError(
+          "organizationType",
+          "Silakan pilih jenis organisasi.",
+        );
+
+        valid = false;
+      }
+
+      if (
+        !area ||
+        area.value === ""
+      ) {
+        setFieldError(
+          "area",
+          "Silakan pilih area atau kecamatan.",
+        );
+
+        valid = false;
+      }
+
+      if (
+        !address ||
+        address.value.trim().length < 5
+      ) {
+        setFieldError(
+          "address",
+          "Alamat organisasi perlu diisi.",
+        );
+
+        valid = false;
+      }
+
+      if (
+        descriptionField &&
+        descriptionField.value.trim().length > 0 &&
+        descriptionField.value.trim().length < 20
+      ) {
+        setFieldError(
+          "description",
+          "Deskripsi yang diisi minimal 20 karakter.",
+        );
+
+        valid = false;
+      }
+
+      if (!validateCoordinates()) {
+        const latitude =
+          form.elements.namedItem(
+            "latitude",
+          ) as HTMLInputElement | null;
+
+        const longitude =
+          form.elements.namedItem(
+            "longitude",
+          ) as HTMLInputElement | null;
+
+        latitude?.setAttribute(
+          "aria-invalid",
+          "true",
+        );
+
+        longitude?.setAttribute(
+          "aria-invalid",
+          "true",
+        );
+
+        const coordinateError =
+          form.querySelector<HTMLElement>(
+            "[data-coordinate-error]",
+          );
+
+        if (coordinateError) {
+          coordinateError.textContent =
+            "Latitude dan longitude harus diisi berpasangan dan berada dalam rentang yang valid.";
+
+          coordinateError.hidden = false;
+        }
+
+        valid = false;
+      }
+
+      if (!valid) {
+        const firstInvalid =
+          form.querySelector<HTMLElement>(
+            "[aria-invalid='true']",
+          );
+
+        firstInvalid?.scrollIntoView({
           behavior: "smooth",
           block: "center",
         });
 
-        firstInvalid.focus();
+        firstInvalid?.focus();
       }
-    }
 
-    return valid;
-  }
+      return valid;
+    };
 
-  function buildProfilePayload() {
-    if (
-      !(form instanceof HTMLFormElement)
-    ) {
-      return null;
-    }
+    const buildProfilePayload = () => {
+      const formData =
+        new FormData(form);
 
-    const formData =
-      new FormData(form);
-
-    const latitudeRaw =
-      String(
-        formData.get(
-          "latitude",
-        ) ?? "",
-      ).trim();
-
-    const longitudeRaw =
-      String(
-        formData.get(
-          "longitude",
-        ) ?? "",
-      ).trim();
-
-    const latitude =
-      latitudeRaw !== ""
-        ? Number(latitudeRaw)
-        : undefined;
-
-    const longitude =
-      longitudeRaw !== ""
-        ? Number(longitudeRaw)
-        : undefined;
-
-    return {
-      name:
+      const latitudeRaw =
         String(
-          formData.get(
-            "organizationName",
-          ) ?? "",
+          formData.get("latitude") ?? "",
+        ).trim();
+
+      const longitudeRaw =
+        String(
+          formData.get("longitude") ?? "",
+        ).trim();
+
+      const latitude =
+        latitudeRaw !== ""
+          ? Number(latitudeRaw)
+          : undefined;
+
+      const longitude =
+        longitudeRaw !== ""
+          ? Number(longitudeRaw)
+          : undefined;
+
+      return {
+        name: String(
+          formData.get("organizationName") ?? "",
         ).trim(),
 
-      type:
-        String(
-          formData.get(
-            "organizationType",
-          ) ?? "",
+        type: String(
+          formData.get("organizationType") ?? "",
         ),
 
-      description:
-        String(
-          formData.get(
-            "description",
-          ) ?? "",
+        description: String(
+          formData.get("description") ?? "",
         ).trim(),
 
-      location: {
-        area:
-          String(
-            formData.get(
-              "area",
-            ) ?? "",
+        location: {
+          area: String(
+            formData.get("area") ?? "",
           ),
 
-        address:
-          String(
-            formData.get(
-              "address",
-            ) ?? "",
+          address: String(
+            formData.get("address") ?? "",
           ).trim(),
 
-        latitude:
-          latitude !== undefined &&
-          Number.isFinite(latitude)
-            ? latitude
-            : undefined,
+          latitude:
+            latitude !== undefined &&
+            Number.isFinite(latitude)
+              ? latitude
+              : undefined,
 
-        longitude:
-          longitude !== undefined &&
-          Number.isFinite(longitude)
-            ? longitude
-            : undefined,
-      },
-
-      contact: {
-        name:
-          String(
-            formData.get(
-              "contactName",
-            ) ?? "",
-          ).trim(),
-
-        phone:
-          String(
-            formData.get(
-              "phone",
-            ) ?? "",
-          ).trim(),
-
-        email:
-          String(
-            formData.get(
-              "email",
-            ) ?? "",
-          ).trim(),
-
-        website:
-          String(
-            formData.get(
-              "website",
-            ) ?? "",
-          ).trim(),
-      },
-
-      updatedAt:
-        new Date().toISOString(),
-    };
-  }
-
-  function showSaveMessage(
-    message,
-  ) {
-    if (
-      !(saveMessage instanceof HTMLElement)
-    ) {
-      return;
-    }
-
-    saveMessage.textContent =
-      message;
-
-    saveMessage.hidden = false;
-  }
-
-  function clearSaveMessage() {
-    if (
-      !(saveMessage instanceof HTMLElement)
-    ) {
-      return;
-    }
-
-    saveMessage.textContent = "";
-    saveMessage.hidden = true;
-  }
-
-  async function handleSubmit(
-    event,
-  ) {
-    event.preventDefault();
-
-    if (
-      !(form instanceof HTMLFormElement)
-    ) {
-      return;
-    }
-
-    clearSaveMessage();
-
-    if (!validateProfileForm()) {
-      return;
-    }
-
-    const payload =
-      buildProfilePayload();
-
-    if (!payload) {
-      return;
-    }
-
-    if (
-      saveButton instanceof HTMLButtonElement
-    ) {
-      saveButton.disabled = true;
-    }
-
-    if (
-      saveLabel instanceof HTMLElement
-    ) {
-      saveLabel.textContent =
-        "Menyiapkan...";
-    }
-
-    showSaveMessage(
-      "Memeriksa informasi profil...",
-    );
-
-    await Promise.resolve();
-
-    window.dispatchEvent(
-      new CustomEvent(
-        "binsight:organization-profile-save",
-        {
-          detail: payload,
+          longitude:
+            longitude !== undefined &&
+            Number.isFinite(longitude)
+              ? longitude
+              : undefined,
         },
-      ),
-    );
 
-    form.hidden = true;
+        contact: {
+          name: String(
+            formData.get("contactName") ?? "",
+          ).trim(),
 
-    if (
-      successPanel instanceof HTMLElement
-    ) {
-      successPanel.hidden = false;
+          phone: String(
+            formData.get("phone") ?? "",
+          ).trim(),
 
-      successPanel.scrollIntoView({
+          email: String(
+            formData.get("email") ?? "",
+          ).trim(),
+
+          website: String(
+            formData.get("website") ?? "",
+          ).trim(),
+        },
+
+        updatedAt:
+          new Date().toISOString(),
+      };
+    };
+
+    const handleSubmit = async (
+      event: SubmitEvent,
+    ) => {
+      event.preventDefault();
+
+      clearSaveMessage();
+
+      if (!validateProfileForm()) {
+        return;
+      }
+
+      const payload =
+        buildProfilePayload();
+
+      if (saveButton) {
+        saveButton.disabled = true;
+      }
+
+      if (saveLabel) {
+        saveLabel.textContent =
+          "Menyiapkan...";
+      }
+
+      showSaveMessage(
+        "Memeriksa informasi profil...",
+      );
+
+      await Promise.resolve();
+
+      window.dispatchEvent(
+        new CustomEvent(
+          "binsight:organization-profile-save",
+          {
+            detail: payload,
+          },
+        ),
+      );
+
+      form.hidden = true;
+
+      if (successPanel) {
+        successPanel.hidden = false;
+
+        successPanel.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      }
+
+      clearSaveMessage();
+    };
+
+    const showEditForm = () => {
+      form.hidden = false;
+
+      if (successPanel) {
+        successPanel.hidden = true;
+      }
+
+      if (saveButton) {
+        saveButton.disabled = false;
+      }
+
+      if (saveLabel) {
+        saveLabel.textContent =
+          "Simpan profil";
+      }
+
+      clearSaveMessage();
+
+      form.scrollIntoView({
         behavior: "smooth",
         block: "start",
       });
-    }
+    };
 
-    clearSaveMessage();
-  }
+    form.addEventListener(
+      "submit",
+      handleSubmit,
+    );
 
-  function showEditForm() {
-    if (
-      !(form instanceof HTMLFormElement)
-    ) {
-      return;
-    }
+    editProfileButton?.addEventListener(
+      "click",
+      showEditForm,
+    );
 
-    form.hidden = false;
+    descriptionField?.addEventListener(
+      "input",
+      updateDescriptionCounter,
+    );
 
-    if (
-      successPanel instanceof HTMLElement
-    ) {
-      successPanel.hidden = true;
-    }
-
-    if (
-      saveButton instanceof HTMLButtonElement
-    ) {
-      saveButton.disabled = false;
-    }
-
-    if (
-      saveLabel instanceof HTMLElement
-    ) {
-      saveLabel.textContent =
-        "Simpan profil";
-    }
-
-    clearSaveMessage();
-
-    form.scrollIntoView({
-      behavior: "smooth",
-      block: "start",
-    });
-  }
-
-  form?.addEventListener(
-    "submit",
-    handleSubmit,
-  );
-
-  editProfileButton?.addEventListener(
-    "click",
-    showEditForm,
-  );
-
-  descriptionField?.addEventListener(
-    "input",
-    updateDescriptionCounter,
-  );
-
-  form?.querySelectorAll(
-    "input, textarea, select",
-  ).forEach(
-    (field) => {
-      field.addEventListener(
-        "input",
-        () => {
+    form
+      .querySelectorAll<
+        HTMLInputElement |
+        HTMLTextAreaElement |
+        HTMLSelectElement
+      >(
+        "input, textarea, select",
+      )
+      .forEach((field) => {
+        const clearError = () => {
           const name =
             field.getAttribute(
               "name",
             );
 
           if (name) {
-            clearFieldError(
-              name,
-            );
+            clearFieldError(name);
           }
-        },
-      );
 
-      field.addEventListener(
-        "change",
-        () => {
-          const name =
-            field.getAttribute(
-              "name",
+          if (
+            name === "latitude" ||
+            name === "longitude"
+          ) {
+            field.removeAttribute(
+              "aria-invalid",
             );
 
-          if (name) {
-            clearFieldError(
-              name,
-            );
+            const coordinateError =
+              form.querySelector<HTMLElement>(
+                "[data-coordinate-error]",
+              );
+
+            if (coordinateError) {
+              coordinateError.textContent = "";
+              coordinateError.hidden = true;
+            }
           }
-        },
-      );
-    },
+        };
+
+        field.addEventListener(
+          "input",
+          clearError,
+        );
+
+        field.addEventListener(
+          "change",
+          clearError,
+        );
+      });
+
+    updateDescriptionCounter();
+  };
+
+  if (
+    document.readyState ===
+    "loading"
+  ) {
+    document.addEventListener(
+      "DOMContentLoaded",
+      initializeOrganizationProfilePage,
+      { once: true },
+    );
+  } else {
+    initializeOrganizationProfilePage();
+  }
+
+  document.addEventListener(
+    "astro:page-load",
+    initializeOrganizationProfilePage,
   );
-
-  updateDescriptionCounter();
 </script>
