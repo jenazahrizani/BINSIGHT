@@ -23,17 +23,21 @@ interface Props {
   class?: string;
 }
 
-const {
-  areas = [],
-  selectedArea = "",
-  selectedType = "",
-  search = "",
-  showSearch = true,
-  showArea = true,
-  showType = true,
-  compact = false,
-  class: className = "",
-} = Astro.props;
+const props = Astro.props as Props;
+
+const areas = props.areas ?? [];
+const selectedArea = props.selectedArea ?? "";
+const selectedType = props.selectedType ?? "";
+const search = props.search ?? "";
+const showSearch = props.showSearch ?? true;
+const showArea = props.showArea ?? true;
+const showType = props.showType ?? true;
+const compact = props.compact ?? false;
+const className = props.class ?? "";
+
+const activeAreas = areas.filter(
+  (area) => area.status === "active",
+);
 
 const locationTypeOptions: Array<{
   value: LocationType;
@@ -65,35 +69,25 @@ const locationTypeOptions: Array<{
   },
 ];
 
-const activeAreas = areas.filter(
-  (area) => area.status === "active",
-);
-
-const filterId = `map-filter-${Math.random()
-  .toString(36)
-  .slice(2, 10)}`;
+const filterId =
+  "map-filter-" +
+  Math.random()
+    .toString(36)
+    .slice(2, 10);
 ---
 
 <form
   id={filterId}
   class:list={[
     "map-filter",
-    {
-      "map-filter--compact": compact,
-    },
+    compact ? "map-filter--compact" : "",
     className,
   ]}
   data-map-filter
   novalidate
 >
-  <!-- =======================================================================
-       HEADER
-       ==================================================================== -->
-
   <div class="map-filter__heading">
-
-    <div class="map-filter__title-wrap">
-
+    <div class="map-filter__heading-main">
       <span
         class="map-filter__title-icon"
         aria-hidden="true"
@@ -105,20 +99,24 @@ const filterId = `map-filter-${Math.random()
       </span>
 
       <div class="map-filter__title-copy">
+        <span class="map-filter__eyebrow">
+          FILTER PETA
+        </span>
 
         <h2 class="map-filter__title">
           Filter peta
         </h2>
 
-        <p class="map-filter__subtitle">
-          Temukan lokasi pengelolaan berdasarkan
-          area dan jenis.
-        </p>
-
+        {
+          !compact && (
+            <p class="map-filter__subtitle">
+              Temukan lokasi pengelolaan berdasarkan area
+              dan jenis.
+            </p>
+          )
+        }
       </div>
-
     </div>
-
 
     <button
       type="button"
@@ -132,24 +130,18 @@ const filterId = `map-filter-${Math.random()
         aria-hidden="true"
       />
 
-      <span>
-        Reset
-      </span>
+      {
+        !compact && (
+          <span>Reset</span>
+        )
+      }
     </button>
-
   </div>
 
-
-  <!-- =======================================================================
-       FIELDS
-       ==================================================================== -->
-
   <div class="map-filter__fields">
-
     {
       showSearch && (
         <div class="map-filter__field map-filter__field--search">
-
           <label
             class="map-filter__label"
             for={`${filterId}-search`}
@@ -157,11 +149,10 @@ const filterId = `map-filter-${Math.random()
             Cari
           </label>
 
-          <div class="map-filter__input-wrap">
-
+          <div class="map-filter__control">
             <Search
-              class="map-filter__input-icon"
-              size={16}
+              class="map-filter__control-icon"
+              size={15}
               stroke-width={2}
               aria-hidden="true"
             />
@@ -172,23 +163,19 @@ const filterId = `map-filter-${Math.random()
               type="search"
               name="search"
               value={search}
-              placeholder="Nama lokasi, area, atau alamat..."
+              placeholder="Nama lokasi atau alamat..."
               autocomplete="off"
               spellcheck="false"
               data-map-filter-search
             />
-
           </div>
-
         </div>
       )
     }
 
-
     {
       showArea && (
         <div class="map-filter__field">
-
           <label
             class="map-filter__label"
             for={`${filterId}-area`}
@@ -196,11 +183,10 @@ const filterId = `map-filter-${Math.random()
             Area
           </label>
 
-          <div class="map-filter__select-wrap">
-
+          <div class="map-filter__control">
             <MapPin
-              class="map-filter__select-icon"
-              size={16}
+              class="map-filter__control-icon"
+              size={15}
               stroke-width={2}
               aria-hidden="true"
             />
@@ -219,33 +205,29 @@ const filterId = `map-filter-${Math.random()
               </option>
 
               {
-                activeAreas.map(
-                  (area) => (
-                    <option
-                      value={area.id}
-                      selected={
-                        selectedArea ===
-                        area.id
-                      }
-                    >
-                      {area.name}
-                    </option>
-                  ),
-                )
+                activeAreas.map((area) => (
+                  <option
+                    value={area.id}
+                    selected={selectedArea === area.id}
+                  >
+                    {area.name}
+                  </option>
+                ))
               }
             </select>
 
+            <span
+              class="map-filter__select-arrow"
+              aria-hidden="true"
+            />
           </div>
-
         </div>
       )
     }
 
-
     {
       showType && (
         <div class="map-filter__field">
-
           <label
             class="map-filter__label"
             for={`${filterId}-type`}
@@ -253,11 +235,10 @@ const filterId = `map-filter-${Math.random()
             Jenis lokasi
           </label>
 
-          <div class="map-filter__select-wrap">
-
+          <div class="map-filter__control">
             <ListFilter
-              class="map-filter__select-icon"
-              size={16}
+              class="map-filter__control-icon"
+              size={15}
               stroke-width={2}
               aria-hidden="true"
             />
@@ -276,202 +257,169 @@ const filterId = `map-filter-${Math.random()
               </option>
 
               {
-                locationTypeOptions.map(
-                  (option) => (
-                    <option
-                      value={option.value}
-                      selected={
-                        selectedType ===
-                        option.value
-                      }
-                    >
-                      {option.label}
-                    </option>
-                  ),
-                )
+                locationTypeOptions.map((option) => (
+                  <option
+                    value={option.value}
+                    selected={selectedType === option.value}
+                  >
+                    {option.label}
+                  </option>
+                ))
               }
             </select>
 
+            <span
+              class="map-filter__select-arrow"
+              aria-hidden="true"
+            />
           </div>
-
         </div>
       )
     }
-
   </div>
 
+  {
+    !compact && (
+      <div
+        class="map-filter__footer"
+        aria-live="polite"
+      >
+        <span
+          class="map-filter__summary-icon"
+          aria-hidden="true"
+        >
+          <MapPin
+            size={13}
+            stroke-width={2}
+          />
+        </span>
 
-  <!-- =======================================================================
-       SUMMARY
-       ==================================================================== -->
-
-  <div
-    class="map-filter__footer"
-    data-map-filter-summary
-    aria-live="polite"
-  >
-
-    <span
-      class="map-filter__summary-icon"
-      aria-hidden="true"
-    >
-      <MapPin
-        size={14}
-        stroke-width={2}
-      />
-    </span>
-
-    <span data-map-filter-summary-text>
-      Semua lokasi ditampilkan
-    </span>
-
-  </div>
-
+        <span data-map-filter-summary-text>
+          Semua lokasi ditampilkan
+        </span>
+      </div>
+    )
+  }
 </form>
 
-
-<script is:inline>
+<script>
   (() => {
-    const form =
-      document.currentScript
-        ?.previousElementSibling;
+    const script = document.currentScript;
+
+    if (!script) {
+      return;
+    }
+
+    const form = script.previousElementSibling;
 
     if (
       !(form instanceof HTMLFormElement) ||
-      !form.matches(
-        "[data-map-filter]",
-      )
+      !form.hasAttribute("data-map-filter")
     ) {
       return;
     }
 
-    if (
-      form.dataset.initialized ===
-      "true"
-    ) {
+    if (form.dataset.initialized === "true") {
       return;
     }
 
     form.dataset.initialized = "true";
 
     const searchInput =
-      form.querySelector(
+      form.querySelector<HTMLInputElement>(
         "[data-map-filter-search]",
       );
 
     const areaSelect =
-      form.querySelector(
+      form.querySelector<HTMLSelectElement>(
         "[data-map-filter-area]",
       );
 
     const typeSelect =
-      form.querySelector(
+      form.querySelector<HTMLSelectElement>(
         "[data-map-filter-type]",
       );
 
     const resetButton =
-      form.querySelector(
+      form.querySelector<HTMLButtonElement>(
         "[data-map-filter-reset]",
       );
 
     const summary =
-      form.querySelector(
+      form.querySelector<HTMLElement>(
         "[data-map-filter-summary-text]",
       );
 
-    const normalizeValue = (
-      value,
-    ) =>
-      typeof value === "string"
-        ? value.trim()
-        : "";
+    const normalize = (value: string) => {
+      return value.trim();
+    };
 
-    const getFilterState = () => ({
-      search:
-        searchInput instanceof
-        HTMLInputElement
-          ? normalizeValue(
-              searchInput.value,
-            )
+    const getState = () => {
+      return {
+        search: searchInput
+          ? normalize(searchInput.value)
           : "",
 
-      area:
-        areaSelect instanceof
-        HTMLSelectElement
-          ? normalizeValue(
-              areaSelect.value,
-            )
+        area: areaSelect
+          ? normalize(areaSelect.value)
           : "",
 
-      type:
-        typeSelect instanceof
-        HTMLSelectElement
-          ? normalizeValue(
-              typeSelect.value,
-            )
+        type: typeSelect
+          ? normalize(typeSelect.value)
           : "",
-    });
+      };
+    };
 
-    const updateSummary = (
-      state,
-    ) => {
-      if (
-        !(summary instanceof
-        HTMLElement)
-      ) {
+    const updateSummary = () => {
+      if (!summary) {
         return;
       }
 
-      const activeCount =
-        [
-          state.search,
-          state.area,
-          state.type,
-        ].filter(Boolean).length;
+      const state = getState();
 
-      if (activeCount === 0) {
+      const count = [
+        state.search,
+        state.area,
+        state.type,
+      ].filter(Boolean).length;
+
+      if (count === 0) {
         summary.textContent =
           "Semua lokasi ditampilkan";
-
         return;
       }
 
-      if (activeCount === 1) {
+      if (count === 1) {
         summary.textContent =
           "1 filter aktif";
-
         return;
       }
 
       summary.textContent =
-        `${activeCount} filter aktif`;
+        `${count} filter aktif`;
     };
 
     const emit = () => {
-      const state =
-        getFilterState();
+      const state = getState();
 
-      updateSummary(state);
+      updateSummary();
 
-      form.dispatchEvent(
+      const event =
         new CustomEvent(
           "binsight-map-filter",
           {
             bubbles: true,
-            detail: {
-              ...state,
-            },
+            detail: state,
           },
-        ),
-      );
+        );
+
+      form.dispatchEvent(event);
 
       window.dispatchEvent(
         new CustomEvent(
           "binsight-map-filter",
           {
-            detail: {
-              ...state,
-            },
+            detail: state,
           },
         ),
       );
@@ -495,24 +443,15 @@ const filterId = `map-filter-${Math.random()
     resetButton?.addEventListener(
       "click",
       () => {
-        if (
-          searchInput instanceof
-          HTMLInputElement
-        ) {
+        if (searchInput) {
           searchInput.value = "";
         }
 
-        if (
-          areaSelect instanceof
-          HTMLSelectElement
-        ) {
+        if (areaSelect) {
           areaSelect.value = "";
         }
 
-        if (
-          typeSelect instanceof
-          HTMLSelectElement
-        ) {
+        if (typeSelect) {
           typeSelect.value = "";
         }
 
@@ -528,17 +467,12 @@ const filterId = `map-filter-${Math.random()
       },
     );
 
+    updateSummary();
     emit();
   })();
 </script>
 
-
 <style>
-  /* ==========================================================================
-     BINSIGHT MAP FILTER
-     Shared visual language with homepage / map page
-     ========================================================================== */
-
   .map-filter,
   .map-filter *,
   .map-filter *::before,
@@ -549,177 +483,94 @@ const filterId = `map-filter-${Math.random()
   .map-filter {
     --acid: #dfff00;
     --acid-soft: #efff70;
-
     --ink: #090a08;
     --ink-2: #11130f;
-    --ink-3: #1b1f18;
-
-    --paper: #f2f0e6;
-    --paper-2: #e4e1d4;
-    --paper-3: #cfcabd;
-
     --white: #fffef8;
     --muted: #6c7068;
-
     --warning: #ff6a00;
+    --line-dark: rgba(255, 254, 248, 0.18);
+
+    display: block;
 
     width: 100%;
+    max-width: 100%;
     min-width: 0;
 
-    padding: 20px;
+    margin: 0;
+    padding: 0;
 
-    color: var(--white) !important;
+    overflow: hidden;
 
-    background:
-      linear-gradient(
-        rgba(255, 255, 255, 0.035) 1px,
-        transparent 1px
-      ),
-      linear-gradient(
-        90deg,
-        rgba(255, 255, 255, 0.035) 1px,
-        transparent 1px
-      ),
-      var(--ink) !important;
-
-    background-size: 24px 24px;
-
-    border: 3px solid var(--ink);
-
-    box-shadow: 7px 7px 0 var(--warning);
+    color: var(--white);
+    background: transparent;
 
     font-family:
-      Inter,
+      "Inter",
       ui-sans-serif,
       system-ui,
       -apple-system,
       BlinkMacSystemFont,
       "Segoe UI",
       sans-serif;
-
-    -webkit-font-smoothing: antialiased;
   }
 
-
-  /* ==========================================================================
-     HEADER
-     ========================================================================== */
+  /* HEADER --------------------------------------------------------------- */
 
   .map-filter__heading {
-    display: flex;
+    display: grid;
 
-    align-items: flex-start;
+    grid-template-columns:
+      minmax(0, 1fr)
+      auto;
 
-    justify-content: space-between;
+    align-items: start;
 
-    gap: 20px;
+    gap: 0.65rem;
 
-    margin-bottom: 20px;
+    width: 100%;
+    min-width: 0;
+
+    margin-bottom: 1rem;
   }
 
-  .map-filter__title-wrap {
-    display: flex;
+  .map-filter__heading-main {
+    display: grid;
 
-    align-items: flex-start;
+    grid-template-columns:
+      2.5rem
+      minmax(0, 1fr);
 
-    gap: 12px;
+    align-items: start;
+
+    gap: 0.65rem;
 
     min-width: 0;
   }
 
   .map-filter__title-icon {
-    display: inline-flex;
+    display: grid;
 
-    align-items: center;
+    width: 2.5rem;
+    height: 2.5rem;
 
-    justify-content: center;
+    place-items: center;
 
-    width: 46px;
-    height: 46px;
-
-    flex: 0 0 46px;
-
-    color: var(--ink) !important;
-
-    background: var(--acid) !important;
+    color: var(--ink);
+    background: var(--acid);
 
     border: 2px solid var(--ink);
-
-    box-shadow: 4px 4px 0 var(--warning);
-  }
-
-  .map-filter__title-icon svg {
-    color: var(--ink) !important;
-
-    stroke: var(--ink) !important;
   }
 
   .map-filter__title-copy {
     min-width: 0;
   }
 
-  .map-filter__title {
-    margin: 2px 0 0;
+  .map-filter__eyebrow {
+    display: block;
 
-    color: var(--white) !important;
+    margin-bottom: 0.2rem;
 
-    font-family:
-      Sora,
-      Inter,
-      ui-sans-serif,
-      system-ui,
-      sans-serif;
-
-    font-size: 20px;
-
-    font-weight: 900;
-
-    line-height: 0.95;
-
-    letter-spacing: -0.055em;
-
-    text-transform: uppercase;
-  }
-
-  .map-filter__subtitle {
-    max-width: 560px;
-
-    margin: 8px 0 0;
-
-    color: #c4c8bd !important;
-
-    font-size: 10px;
-
-    line-height: 1.65;
-  }
-
-
-  /* ==========================================================================
-     RESET
-     ========================================================================== */
-
-  .map-filter__reset {
-    display: inline-flex;
-
-    align-items: center;
-
-    justify-content: center;
-
-    gap: 7px;
-
-    min-height: 38px;
-
-    flex: 0 0 auto;
-
-    padding: 0 11px;
-
-    color: var(--ink) !important;
-
-    background: var(--acid) !important;
-
-    border: 2px solid var(--ink);
-
-    box-shadow: 4px 4px 0 var(--warning);
+    color: rgba(255, 254, 248, 0.45);
 
     font-family:
       "DM Mono",
@@ -727,72 +578,129 @@ const filterId = `map-filter-${Math.random()
       Consolas,
       monospace;
 
-    font-size: 8px;
+    font-size: 0.43rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    line-height: 1.2;
+  }
 
+  .map-filter__title {
+    margin: 0;
+
+    color: var(--white);
+
+    font-family:
+      "Sora",
+      "Inter",
+      system-ui,
+      sans-serif;
+
+    font-size: 0.98rem;
     font-weight: 900;
 
+    line-height: 1.02;
+    letter-spacing: -0.04em;
+
+    text-transform: uppercase;
+
+    overflow-wrap: anywhere;
+  }
+
+  .map-filter__subtitle {
+    margin: 0.35rem 0 0;
+
+    color: rgba(255, 254, 248, 0.58);
+
+    font-size: 0.56rem;
+    line-height: 1.55;
+  }
+
+  /* RESET ---------------------------------------------------------------- */
+
+  .map-filter__reset {
+    display: inline-flex;
+
+    align-items: center;
+    justify-content: center;
+
+    gap: 0.35rem;
+
+    flex: 0 0 auto;
+
+    min-width: 2.25rem;
+    min-height: 2.25rem;
+
+    padding: 0 0.55rem;
+
+    border: 2px solid var(--ink);
+
+    background: var(--acid);
+    color: var(--ink);
+
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+
+    font-size: 0.46rem;
+    font-weight: 700;
     line-height: 1;
 
-    letter-spacing: 0.07em;
+    letter-spacing: 0.04em;
 
     text-transform: uppercase;
 
     cursor: pointer;
 
     transition:
-      transform 120ms steps(2, end),
-      box-shadow 120ms steps(2, end),
-      background 120ms linear;
-  }
-
-  .map-filter__reset span {
-    color: var(--ink) !important;
-  }
-
-  .map-filter__reset svg {
-    color: var(--ink) !important;
-
-    stroke: var(--ink) !important;
+      transform 120ms ease,
+      box-shadow 120ms ease,
+      background 120ms ease;
   }
 
   .map-filter__reset:hover {
-    color: var(--ink) !important;
+    background: var(--acid-soft);
 
-    background: var(--acid-soft) !important;
+    transform:
+      translate(-2px, -2px);
 
-    transform: translate(-2px, -2px);
-
-    box-shadow: 6px 6px 0 var(--white);
+    box-shadow:
+      4px 4px 0 var(--warning);
   }
 
+  .map-filter__reset svg {
+    flex: 0 0 auto;
+  }
 
-  /* ==========================================================================
-     FIELDS
-     ========================================================================== */
+  /* FIELDS ---------------------------------------------------------------- */
 
   .map-filter__fields {
     display: grid;
 
-    grid-template-columns:
-      minmax(15rem, 1.5fr)
-      repeat(
-        2,
-        minmax(10rem, 1fr)
-      );
+    grid-template-columns: 1fr;
 
-    gap: 13px;
+    gap: 0.75rem;
+
+    width: 100%;
+    min-width: 0;
   }
 
   .map-filter__field {
+    display: grid;
+
+    gap: 0.35rem;
+
+    width: 100%;
     min-width: 0;
   }
 
   .map-filter__label {
     display: block;
 
-    margin: 0 0 8px;
+    margin: 0;
 
-    color: var(--acid) !important;
+    color: var(--acid);
 
     font-family:
       "DM Mono",
@@ -800,64 +708,73 @@ const filterId = `map-filter-${Math.random()
       Consolas,
       monospace;
 
-    font-size: 8px;
-
-    font-weight: 900;
-
-    line-height: 1;
-
-    letter-spacing: 0.08em;
+    font-size: 0.46rem;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    line-height: 1.2;
 
     text-transform: uppercase;
   }
 
+  /* CONTROL --------------------------------------------------------------- */
 
-  /* ==========================================================================
-     INPUT / SELECT WRAPPERS
-     ========================================================================== */
-
-  .map-filter__input-wrap,
-  .map-filter__select-wrap {
+  .map-filter__control {
     position: relative;
 
     display: flex;
-
     align-items: center;
 
+    width: 100%;
     min-width: 0;
+    min-height: 2.85rem;
+
+    overflow: hidden;
+
+    border: 2px solid var(--ink);
+
+    background: var(--white);
+    color: var(--ink);
   }
 
+  .map-filter__control:focus-within {
+    box-shadow:
+      4px 4px 0 var(--acid);
+  }
 
-  /* ==========================================================================
-     INPUT
-     ========================================================================== */
+  .map-filter__control-icon {
+    position: absolute;
+
+    left: 0.7rem;
+
+    z-index: 2;
+
+    flex: 0 0 auto;
+
+    color: var(--warning);
+
+    pointer-events: none;
+  }
+
+  /* INPUT ----------------------------------------------------------------- */
 
   .map-filter__input {
     display: block;
 
     width: 100%;
-
     min-width: 0;
-
-    min-height: 50px;
+    min-height: 2.85rem;
 
     padding:
-      0
-      42px
-      0
-      43px;
+      0.55rem
+      0.7rem
+      0.55rem
+      2.35rem;
 
-    color: var(--ink) !important;
-
-    background: var(--white) !important;
-
-    border: 3px solid var(--ink);
-
-    border-radius: 0;
-
+    border: 0;
     outline: 0;
 
-    box-shadow: 5px 5px 0 var(--ink);
+    background: var(--white);
+    color: var(--ink);
 
     font-family:
       "DM Mono",
@@ -865,77 +782,36 @@ const filterId = `map-filter-${Math.random()
       Consolas,
       monospace;
 
-    font-size: 9px;
-
+    font-size: 0.54rem;
     font-weight: 700;
-
-    line-height: 1;
-
-    transition:
-      transform 120ms steps(2, end),
-      box-shadow 120ms steps(2, end),
-      border-color 120ms linear;
+    line-height: 1.2;
   }
 
   .map-filter__input::placeholder {
-    color: #727970 !important;
-
+    color: #858a82;
     opacity: 1;
   }
 
-  .map-filter__input:focus {
-    border-color: var(--ink);
-
-    transform: translate(-2px, -2px);
-
-    box-shadow: 7px 7px 0 var(--acid);
-  }
-
-  .map-filter__input-icon {
-    position: absolute;
-
-    left: 15px;
-
-    z-index: 2;
-
-    color: var(--warning) !important;
-
-    stroke: var(--warning) !important;
-
-    pointer-events: none;
-  }
-
-
-  /* ==========================================================================
-     SELECT
-     ========================================================================== */
+  /* SELECT ---------------------------------------------------------------- */
 
   .map-filter__select {
     display: block;
 
     width: 100%;
-
     min-width: 0;
-
-    min-height: 50px;
+    min-height: 2.85rem;
 
     padding:
-      0
-      42px
-      0
-      43px;
+      0.55rem
+      2.25rem
+      0.55rem
+      2.35rem;
 
-    color: var(--ink) !important;
-
-    background: var(--white) !important;
-
-    border: 3px solid var(--ink);
-
-    border-radius: 0;
-
+    border: 0;
     outline: 0;
 
-    box-shadow: 5px 5px 0 var(--ink);
+    background: var(--white);
+    color: var(--ink);
 
     font-family:
       "DM Mono",
@@ -943,73 +819,17 @@ const filterId = `map-filter-${Math.random()
       Consolas,
       monospace;
 
-    font-size: 9px;
-
+    font-size: 0.54rem;
     font-weight: 700;
-
-    line-height: 1;
+    line-height: 1.2;
 
     appearance: none;
 
     cursor: pointer;
-
-    transition:
-      transform 120ms steps(2, end),
-      box-shadow 120ms steps(2, end),
-      border-color 120ms linear;
   }
-
-  .map-filter__select:focus {
-    border-color: var(--ink);
-
-    transform: translate(-2px, -2px);
-
-    box-shadow: 7px 7px 0 var(--acid);
-  }
-
-  .map-filter__select-icon {
-    position: absolute;
-
-    left: 15px;
-
-    z-index: 2;
-
-    color: var(--warning) !important;
-
-    stroke: var(--warning) !important;
-
-    pointer-events: none;
-  }
-
-  .map-filter__select-wrap::after {
-    position: absolute;
-
-    right: 16px;
-
-    width: 9px;
-    height: 9px;
-
-    content: "";
-
-    border-right: 3px solid var(--ink);
-
-    border-bottom: 3px solid var(--ink);
-
-    transform:
-      rotate(45deg)
-      translateY(-3px);
-
-    pointer-events: none;
-  }
-
-
-  /* ==========================================================================
-     OPTION
-     ========================================================================== */
 
   .map-filter__select option {
     color: var(--ink);
-
     background: var(--white);
 
     font-family:
@@ -1019,34 +839,47 @@ const filterId = `map-filter-${Math.random()
       sans-serif;
   }
 
+  .map-filter__select-arrow {
+    position: absolute;
 
-  /* ==========================================================================
-     FOOTER
-     ========================================================================== */
+    top: 50%;
+    right: 0.7rem;
+
+    width: 0.45rem;
+    height: 0.45rem;
+
+    border-right:
+      2px solid var(--ink);
+
+    border-bottom:
+      2px solid var(--ink);
+
+    pointer-events: none;
+
+    transform:
+      translateY(-70%)
+      rotate(45deg);
+  }
+
+  /* FOOTER ---------------------------------------------------------------- */
 
   .map-filter__footer {
     display: flex;
 
     align-items: center;
 
-    gap: 9px;
+    gap: 0.5rem;
 
-    min-height: 34px;
+    width: 100%;
+    min-width: 0;
 
-    margin-top: 17px;
-
-    padding-top: 13px;
-
-    color: #aeb5aa !important;
+    margin-top: 0.85rem;
+    padding-top: 0.7rem;
 
     border-top:
-      2px solid
-      rgba(
-        255,
-        255,
-        255,
-        0.16
-      );
+      1px solid var(--line-dark);
+
+    color: rgba(255, 254, 248, 0.58);
 
     font-family:
       "DM Mono",
@@ -1054,250 +887,179 @@ const filterId = `map-filter-${Math.random()
       Consolas,
       monospace;
 
-    font-size: 8px;
+    font-size: 0.45rem;
+    font-weight: 700;
 
-    font-weight: 900;
+    line-height: 1.35;
 
-    line-height: 1.3;
-
-    letter-spacing: 0.06em;
+    letter-spacing: 0.04em;
 
     text-transform: uppercase;
   }
 
   .map-filter__summary-icon {
-    display: inline-flex;
+    display: grid;
 
-    align-items: center;
+    width: 1.65rem;
+    height: 1.65rem;
 
-    justify-content: center;
+    flex: 0 0 1.65rem;
 
-    width: 28px;
-    height: 28px;
-
-    flex: 0 0 28px;
-
-    color: var(--ink) !important;
-
-    background: var(--acid) !important;
+    place-items: center;
 
     border: 2px solid var(--ink);
+
+    background: var(--acid);
+    color: var(--ink);
   }
 
-  .map-filter__summary-icon svg {
-    color: var(--ink) !important;
+  .map-filter__summary-text {
+    min-width: 0;
 
-    stroke: var(--ink) !important;
+    overflow-wrap: anywhere;
+
+    color: rgba(255, 254, 248, 0.62);
   }
 
-  .map-filter__footer
-    [data-map-filter-summary-text] {
-    color: #aeb5aa !important;
-  }
-
-
-  /* ==========================================================================
-     COMPACT
-     ========================================================================== */
+  /* COMPACT --------------------------------------------------------------- */
 
   .map-filter--compact {
-    padding: 15px;
+    padding: 0;
   }
 
   .map-filter--compact
-    .map-filter__title {
-    font-size: 17px;
-  }
-
-  .map-filter--compact
-    .map-filter__title-icon {
-    width: 40px;
-    height: 40px;
-    flex-basis: 40px;
-  }
-
-  .map-filter--compact
-    .map-filter__heading {
-    margin-bottom: 15px;
-  }
-
-  .map-filter--compact
-    .map-filter__subtitle {
-    display: none;
-  }
-
-  .map-filter--compact
-    .map-filter__footer {
-    display: none;
+    .map-filter__fields {
+    gap: 0.55rem;
   }
 
   .map-filter--compact
     .map-filter__input,
   .map-filter--compact
-    .map-filter__select {
-    min-height: 46px;
+    .map-filter__select,
+  .map-filter--compact
+    .map-filter__control {
+    min-height: 2.6rem;
   }
 
+  /* WIDE ------------------------------------------------------------------ */
 
-  /* ==========================================================================
-     FOCUS
-     ========================================================================== */
-
-  .map-filter__reset:focus-visible,
-  .map-filter__input:focus-visible,
-  .map-filter__select:focus-visible {
-    outline: 4px solid var(--acid);
-
-    outline-offset: 4px;
-  }
-
-
-  /* ==========================================================================
-     TABLET
-     ========================================================================== */
-
-  @media (max-width: 900px) {
-    .map-filter__fields {
+  @media (min-width: 900px) {
+    .map-filter:not(.map-filter--compact)
+      .map-filter__fields {
       grid-template-columns:
-        minmax(0, 1fr)
-        minmax(0, 1fr);
+        repeat(
+          2,
+          minmax(0, 1fr)
+        );
     }
 
-    .map-filter__field--search {
+    .map-filter:not(.map-filter--compact)
+      .map-filter__field--search {
       grid-column: 1 / -1;
     }
   }
 
+  /* SIDEBAR SAFE ---------------------------------------------------------- */
 
-  /* ==========================================================================
-     MOBILE
-     ========================================================================== */
+  @media (min-width: 900px) and (max-width: 1250px) {
+    .map-filter__fields {
+      grid-template-columns: 1fr !important;
+    }
+
+    .map-filter__field--search {
+      grid-column: auto !important;
+    }
+  }
+
+  /* MOBILE ---------------------------------------------------------------- */
 
   @media (max-width: 640px) {
-    .map-filter {
-      padding: 17px;
+    .map-filter__fields {
+      grid-template-columns: 1fr;
     }
 
-    .map-filter__heading {
-      align-items: flex-start;
-
-      gap: 12px;
-
-      margin-bottom: 17px;
-    }
-
-    .map-filter__title-wrap {
-      gap: 10px;
+    .map-filter__heading-main {
+      grid-template-columns:
+        2.25rem
+        minmax(0, 1fr);
     }
 
     .map-filter__title-icon {
-      width: 42px;
-      height: 42px;
-      flex-basis: 42px;
-    }
-
-    .map-filter__title {
-      font-size: 17px;
+      width: 2.25rem;
+      height: 2.25rem;
     }
 
     .map-filter__subtitle {
       display: none;
     }
-
-    .map-filter__fields {
-      grid-template-columns: 1fr;
-    }
-
-    .map-filter__field--search {
-      grid-column: auto;
-    }
-
-    .map-filter__reset {
-      width: 38px;
-      min-width: 38px;
-
-      padding: 0;
-    }
-
-    .map-filter__reset span {
-      display: none;
-    }
-
-    .map-filter__input,
-    .map-filter__select {
-      min-height: 50px;
-    }
-
-    .map-filter__footer {
-      margin-top: 15px;
-      padding-top: 12px;
-    }
   }
 
+  /* SMALL ----------------------------------------------------------------- */
 
-  /* ==========================================================================
-     SMALL MOBILE
-     ========================================================================== */
-
-  @media (max-width: 430px) {
-    .map-filter {
-      padding: 15px;
+  @media (max-width: 380px) {
+    .map-filter__heading {
+      gap: 0.45rem;
     }
 
-    .map-filter__heading {
-      gap: 10px;
+    .map-filter__heading-main {
+      gap: 0.5rem;
+
+      grid-template-columns:
+        2.1rem
+        minmax(0, 1fr);
     }
 
     .map-filter__title-icon {
-      width: 40px;
-      height: 40px;
-      flex-basis: 40px;
+      width: 2.1rem;
+      height: 2.1rem;
     }
 
     .map-filter__title {
-      font-size: 16px;
-    }
-
-    .map-filter__label {
-      font-size: 7px;
+      font-size: 0.88rem;
     }
 
     .map-filter__input,
     .map-filter__select {
-      min-height: 48px;
-      font-size: 8px;
+      font-size: 0.51rem;
+    }
+
+    .map-filter__control-icon {
+      left: 0.6rem;
     }
 
     .map-filter__input {
-      padding-left: 39px;
+      padding-left: 2.15rem;
     }
 
     .map-filter__select {
-      padding-left: 39px;
+      padding-left: 2.15rem;
     }
 
-    .map-filter__input-icon,
-    .map-filter__select-icon {
-      left: 13px;
-    }
-
-    .map-filter__select-wrap::after {
-      right: 13px;
+    .map-filter__select-arrow {
+      right: 0.6rem;
     }
   }
 
+  /* ACCESSIBILITY --------------------------------------------------------- */
 
-  /* ==========================================================================
-     REDUCED MOTION
-     ========================================================================== */
+  .map-filter__reset:focus-visible,
+  .map-filter__input:focus-visible,
+  .map-filter__select:focus-visible {
+    outline:
+      3px solid var(--acid);
+
+    outline-offset:
+      3px;
+  }
+
+  /* REDUCED MOTION -------------------------------------------------------- */
 
   @media (prefers-reduced-motion: reduce) {
     .map-filter *,
     .map-filter *::before,
     .map-filter *::after {
-      transition-duration: 0.01ms !important;
-      animation-duration: 0.01ms !important;
-      animation-iteration-count: 1 !important;
+      transition: none !important;
+      animation: none !important;
     }
   }
 </style>
