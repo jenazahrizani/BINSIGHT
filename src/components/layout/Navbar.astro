@@ -1,6 +1,6 @@
 ---
 /**
- * BINSIGHT â€” NAVBAR
+ * BINSIGHT — NAVBAR
  * --------------------------------------------------------------------------
  * Primary navigation for the public-facing BINSIGHT platform.
  *
@@ -8,7 +8,7 @@
  * - Brand / logo
  * - Primary navigation
  * - Explore dropdown
- * - Report CTA
+ * - Sign In CTA
  * - Mobile navigation
  * - Current route highlighting
  * - Accessible keyboard / screen-reader behavior
@@ -21,7 +21,18 @@
  * --------------------------------------------------------------------------
  */
 
-import { Menu, X, ChevronDown, Map, ChartColumn, Building2, Recycle, TriangleAlert, Info } from "@lucide/astro";
+import {
+  Menu,
+  X,
+  ChevronDown,
+  Map,
+  ChartColumn,
+  Building2,
+  Recycle,
+  TriangleAlert,
+  Info,
+  LogIn,
+} from "@lucide/astro";
 
 interface NavItem {
   label: string;
@@ -109,12 +120,13 @@ const isExploreActive = exploreItems.some((item) =>
     <a
       class="navbar__brand"
       href="/"
-      aria-label="BINSIGHT â€” Badung Waste Intelligence, kembali ke beranda"
+      aria-label="BINSIGHT — Badung Waste Intelligence, kembali ke beranda"
     >
-
       <span class="navbar__brand-copy">
         <span class="navbar__brand-name">BINSIGHT</span>
-        <span class="navbar__brand-tagline">Badung Waste Intelligence</span>
+        <span class="navbar__brand-tagline">
+          Badung Waste Intelligence
+        </span>
       </span>
     </a>
 
@@ -241,14 +253,17 @@ const isExploreActive = exploreItems.some((item) =>
       </div>
 
       <div class="navbar__actions">
-        <a class="navbar__report-button" href="/reports/create">
-          <TriangleAlert
+        <a
+          class="navbar__report-button"
+          href="/auth/sign-in"
+        >
+          <LogIn
             size={17}
             stroke-width={2}
             aria-hidden="true"
           />
 
-          <span>Laporkan</span>
+          <span>Sign In</span>
         </a>
       </div>
     </div>
@@ -256,10 +271,10 @@ const isExploreActive = exploreItems.some((item) =>
     <div class="navbar__mobile-actions">
       <a
         class="navbar__mobile-report"
-        href="/reports/create"
-        aria-label="Buat laporan persampahan"
+        href="/auth/sign-in"
+        aria-label="Masuk ke akun BINSIGHT"
       >
-        <TriangleAlert
+        <LogIn
           size={18}
           stroke-width={2}
           aria-hidden="true"
@@ -332,7 +347,9 @@ const isExploreActive = exploreItems.some((item) =>
       </div>
 
       <div class="navbar__mobile-section">
-        <p class="navbar__mobile-label">Eksplorasi</p>
+        <p class="navbar__mobile-label">
+          Eksplorasi
+        </p>
 
         <div class="navbar__mobile-explore">
           {
@@ -374,10 +391,10 @@ const isExploreActive = exploreItems.some((item) =>
       <div class="navbar__mobile-cta">
         <a
           class="navbar__mobile-report-button"
-          href="/reports/create"
+          href="/auth/sign-in"
         >
           <span class="navbar__mobile-report-icon">
-            <TriangleAlert
+            <LogIn
               size={19}
               stroke-width={2}
               aria-hidden="true"
@@ -385,9 +402,10 @@ const isExploreActive = exploreItems.some((item) =>
           </span>
 
           <span>
-            <strong>Laporkan Masalah</strong>
+            <strong>Sign In</strong>
+
             <small>
-              Bantu melaporkan persoalan persampahan di Badung
+              Masuk ke akun BINSIGHT
             </small>
           </span>
         </a>
@@ -415,7 +433,10 @@ const isExploreActive = exploreItems.some((item) =>
    * - Keyboard accessibility
    */
 
-  const navbar = document.querySelector<HTMLElement>("[data-navbar]");
+  const navbar =
+    document.querySelector<HTMLElement>(
+      "[data-navbar]"
+    );
 
   if (navbar) {
     const toggle =
@@ -446,18 +467,29 @@ const isExploreActive = exploreItems.some((item) =>
     const openMobileMenu = () => {
       if (!toggle || !mobileMenu) return;
 
-      toggle.setAttribute("aria-expanded", "true");
+      toggle.setAttribute(
+        "aria-expanded",
+        "true"
+      );
+
       toggle.setAttribute(
         "aria-label",
         "Tutup menu navigasi"
       );
 
-      mobileMenu.setAttribute("aria-hidden", "false");
-      navbar.classList.add("navbar--mobile-open");
+      mobileMenu.setAttribute(
+        "aria-hidden",
+        "false"
+      );
+
+      navbar.classList.add(
+        "navbar--mobile-open"
+      );
 
       document.documentElement.classList.add(
         "navbar-scroll-locked"
       );
+
       document.body.classList.add(
         "navbar-scroll-locked"
       );
@@ -466,51 +498,80 @@ const isExploreActive = exploreItems.some((item) =>
     const closeMobileMenu = () => {
       if (!toggle || !mobileMenu) return;
 
-      toggle.setAttribute("aria-expanded", "false");
+      toggle.setAttribute(
+        "aria-expanded",
+        "false"
+      );
+
       toggle.setAttribute(
         "aria-label",
         "Buka menu navigasi"
       );
 
-      mobileMenu.setAttribute("aria-hidden", "true");
-      navbar.classList.remove("navbar--mobile-open");
+      mobileMenu.setAttribute(
+        "aria-hidden",
+        "true"
+      );
+
+      navbar.classList.remove(
+        "navbar--mobile-open"
+      );
 
       document.documentElement.classList.remove(
         "navbar-scroll-locked"
       );
+
       document.body.classList.remove(
         "navbar-scroll-locked"
       );
     };
 
     const openDropdown = () => {
-      if (!dropdown || !dropdownTrigger || !dropdownMenu) {
+      if (
+        !dropdown ||
+        !dropdownTrigger ||
+        !dropdownMenu
+      ) {
         return;
       }
 
-      dropdown.classList.add("navbar__dropdown--open");
+      dropdown.classList.add(
+        "navbar__dropdown--open"
+      );
 
       dropdownTrigger.setAttribute(
         "aria-expanded",
         "true"
       );
 
-      dropdownMenu.setAttribute("aria-hidden", "false");
+      dropdownMenu.setAttribute(
+        "aria-hidden",
+        "false"
+      );
     };
 
     const closeDropdown = () => {
-      if (!dropdown || !dropdownTrigger || !dropdownMenu) {
+      if (
+        !dropdown ||
+        !dropdownTrigger ||
+        !dropdownMenu
+      ) {
         return;
       }
 
-      dropdown.classList.remove("navbar__dropdown--open");
+      dropdown.classList.remove(
+        "navbar__dropdown--open"
+      );
 
       dropdownTrigger.setAttribute(
         "aria-expanded",
         "false"
       );
 
-      dropdownMenu.setAttribute("aria-hidden", "true");
+      dropdownMenu.setAttribute(
+        "aria-hidden",
+        "true"
+      );
     };
 
     const toggleDropdown = () => {
@@ -528,16 +589,21 @@ const isExploreActive = exploreItems.some((item) =>
       }
     };
 
-    toggle?.addEventListener("click", () => {
-      const expanded =
-        toggle.getAttribute("aria-expanded") === "true";
+    toggle?.addEventListener(
+      "click",
+      () => {
+        const expanded =
+          toggle.getAttribute(
+            "aria-expanded"
+          ) === "true";
 
-      if (expanded) {
-        closeMobileMenu();
-      } else {
-        openMobileMenu();
+        if (expanded) {
+          closeMobileMenu();
+        } else {
+          openMobileMenu();
+        }
       }
-    });
+    );
 
     dropdownTrigger?.addEventListener(
       "click",
@@ -549,6 +615,7 @@ const isExploreActive = exploreItems.some((item) =>
       (event) => {
         if (event.key === "ArrowDown") {
           event.preventDefault();
+
           openDropdown();
 
           const firstItem =
@@ -561,6 +628,7 @@ const isExploreActive = exploreItems.some((item) =>
 
         if (event.key === "Escape") {
           event.preventDefault();
+
           closeDropdown();
           dropdownTrigger.focus();
         }
@@ -607,6 +675,7 @@ const isExploreActive = exploreItems.some((item) =>
 
         if (event.key === "Escape") {
           event.preventDefault();
+
           closeDropdown();
           dropdownTrigger?.focus();
         }
@@ -617,56 +686,77 @@ const isExploreActive = exploreItems.some((item) =>
       }
     );
 
-    document.addEventListener("click", (event) => {
-      const target = event.target;
+    document.addEventListener(
+      "click",
+      (event) => {
+        const target = event.target;
 
-      if (!(target instanceof Node)) return;
+        if (!(target instanceof Node)) {
+          return;
+        }
 
-      if (
-        dropdown &&
-        !dropdown.contains(target)
-      ) {
+        if (
+          dropdown &&
+          !dropdown.contains(target)
+        ) {
+          closeDropdown();
+        }
+
+        if (
+          navbar &&
+          !navbar.contains(target)
+        ) {
+          closeMobileMenu();
+        }
+      }
+    );
+
+    document.addEventListener(
+      "keydown",
+      (event) => {
+        if (event.key !== "Escape") return;
+
         closeDropdown();
-      }
-
-      if (
-        navbar &&
-        !navbar.contains(target)
-      ) {
         closeMobileMenu();
       }
-    });
+    );
 
-    document.addEventListener("keydown", (event) => {
-      if (event.key !== "Escape") return;
-
-      closeDropdown();
-      closeMobileMenu();
-    });
-
-    mobileMenu?.querySelectorAll("a").forEach((link) => {
-      link.addEventListener("click", () => {
-        closeMobileMenu();
+    mobileMenu
+      ?.querySelectorAll("a")
+      .forEach((link) => {
+        link.addEventListener(
+          "click",
+          () => {
+            closeMobileMenu();
+          }
+        );
       });
-    });
 
-    window.addEventListener("resize", () => {
-      if (window.innerWidth > 1024) {
-        closeMobileMenu();
+    window.addEventListener(
+      "resize",
+      () => {
+        if (window.innerWidth > 1024) {
+          closeMobileMenu();
+        }
       }
-    });
+    );
 
     let lastScrollY = window.scrollY;
 
     window.addEventListener(
       "scroll",
       () => {
-        const currentScrollY = window.scrollY;
+        const currentScrollY =
+          window.scrollY;
 
         if (currentScrollY > 12) {
-          navbar.classList.add("navbar--scrolled");
+          navbar.classList.add(
+            "navbar--scrolled"
+          );
         } else {
-          navbar.classList.remove("navbar--scrolled");
+          navbar.classList.remove(
+            "navbar--scrolled"
+          );
         }
 
         if (
@@ -734,15 +824,23 @@ const isExploreActive = exploreItems.some((item) =>
     content: "";
     opacity: 0.18;
     background:
-      linear-gradient(rgba(255,255,255,.08) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255,255,255,.08) 1px, transparent 1px);
+      linear-gradient(
+        rgba(255, 255, 255, 0.08) 1px,
+        transparent 1px
+      ),
+      linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0.08) 1px,
+        transparent 1px
+      );
     background-size: 24px 24px;
   }
 
   .navbar--scrolled {
     background: rgba(9, 10, 8, 0.98);
     border-color: var(--acid);
-    box-shadow: 0 10px 0 rgba(255, 106, 0, 0.18);
+    box-shadow:
+      0 10px 0 rgba(255, 106, 0, 0.18);
   }
 
   .navbar--scroll-down {
@@ -773,25 +871,6 @@ const isExploreActive = exploreItems.some((item) =>
     text-decoration: none;
   }
 
-  .navbar__brand-mark {
-    width: 40px;
-    height: 40px;
-    display: grid;
-    place-items: center;
-    flex-shrink: 0;
-    background: var(--acid);
-    border: 3px solid var(--white);
-    box-shadow: 5px 5px 0 var(--warning);
-  }
-
-  .navbar__brand-mark img {
-    display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    filter: contrast(1.05);
-  }
-
   .navbar__brand-copy {
     min-width: 0;
     display: flex;
@@ -801,7 +880,12 @@ const isExploreActive = exploreItems.some((item) =>
 
   .navbar__brand-name {
     color: var(--acid);
-    font-family: Sora, Inter, ui-sans-serif, system-ui, sans-serif;
+    font-family:
+      Sora,
+      Inter,
+      ui-sans-serif,
+      system-ui,
+      sans-serif;
     font-size: 1.08rem;
     font-weight: 900;
     letter-spacing: 0.08em;
@@ -810,7 +894,11 @@ const isExploreActive = exploreItems.some((item) =>
   .navbar__brand-tagline {
     margin-top: 5px;
     color: #c7c9c0;
-    font-family: "DM Mono", "SFMono-Regular", Consolas, monospace;
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
     font-size: 0.55rem;
     font-weight: 800;
     letter-spacing: 0.08em;
@@ -846,7 +934,11 @@ const isExploreActive = exploreItems.some((item) =>
     background: transparent;
     border: 2px solid transparent;
     border-radius: 0;
-    font-family: "DM Mono", "SFMono-Regular", Consolas, monospace;
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
     font-size: 0.66rem;
     font-weight: 900;
     letter-spacing: 0.08em;
@@ -902,10 +994,12 @@ const isExploreActive = exploreItems.some((item) =>
 
   .navbar__dropdown-icon {
     flex-shrink: 0;
-    transition: transform 120ms steps(2, end);
+    transition:
+      transform 120ms steps(2, end);
   }
 
-  .navbar__dropdown--open .navbar__dropdown-icon {
+  .navbar__dropdown--open
+    .navbar__dropdown-icon {
     transform: rotate(180deg);
   }
 
@@ -941,7 +1035,8 @@ const isExploreActive = exploreItems.some((item) =>
     transform: translateX(-50%) rotate(45deg);
   }
 
-  .navbar__dropdown--open .navbar__dropdown-menu {
+  .navbar__dropdown--open
+    .navbar__dropdown-menu {
     opacity: 1;
     visibility: visible;
     pointer-events: auto;
@@ -1001,7 +1096,12 @@ const isExploreActive = exploreItems.some((item) =>
   }
 
   .navbar__dropdown-item-copy strong {
-    font-family: Sora, Inter, ui-sans-serif, system-ui, sans-serif;
+    font-family:
+      Sora,
+      Inter,
+      ui-sans-serif,
+      system-ui,
+      sans-serif;
     font-size: 0.76rem;
     font-weight: 900;
     line-height: 1.2;
@@ -1011,14 +1111,22 @@ const isExploreActive = exploreItems.some((item) =>
 
   .navbar__dropdown-item-copy small {
     color: #aeb2a8;
-    font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+    font-family:
+      Inter,
+      ui-sans-serif,
+      system-ui,
+      sans-serif;
     font-size: 0.69rem;
     font-weight: 500;
     line-height: 1.35;
   }
 
-  .navbar__dropdown-item:hover .navbar__dropdown-item-copy small,
-  .navbar__dropdown-item--active .navbar__dropdown-item-copy small {
+  .navbar__dropdown-item:hover
+    .navbar__dropdown-item-copy
+    small,
+  .navbar__dropdown-item--active
+    .navbar__dropdown-item-copy
+    small {
     color: #30322d;
   }
 
@@ -1040,7 +1148,11 @@ const isExploreActive = exploreItems.some((item) =>
     border: 3px solid var(--ink);
     border-radius: 0;
     box-shadow: 6px 6px 0 var(--white);
-    font-family: "DM Mono", "SFMono-Regular", Consolas, monospace;
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
     font-size: 0.66rem;
     font-weight: 900;
     letter-spacing: 0.08em;
@@ -1064,14 +1176,29 @@ const isExploreActive = exploreItems.some((item) =>
   }
 
   @media (max-width: 1100px) {
-    .navbar__desktop { gap: 12px; }
-    .navbar__links { gap: 1px; }
-    .navbar__link { padding-inline: 9px; font-size: 0.6rem; }
-    .navbar__report-button { padding-inline: 12px; font-size: 0.6rem; }
+    .navbar__desktop {
+      gap: 12px;
+    }
+
+    .navbar__links {
+      gap: 1px;
+    }
+
+    .navbar__link {
+      padding-inline: 9px;
+      font-size: 0.6rem;
+    }
+
+    .navbar__report-button {
+      padding-inline: 12px;
+      font-size: 0.6rem;
+    }
   }
 
   @media (max-width: 900px) {
-    .navbar__desktop { display: none; }
+    .navbar__desktop {
+      display: none;
+    }
 
     .navbar__mobile-actions {
       display: flex;
@@ -1119,15 +1246,17 @@ const isExploreActive = exploreItems.some((item) =>
 
     .navbar__menu-icon--close {
       opacity: 0;
-      transform: rotate(-45deg) scale(.7);
+      transform: rotate(-45deg) scale(0.7);
     }
 
-    .navbar--mobile-open .navbar__menu-icon--open {
+    .navbar--mobile-open
+      .navbar__menu-icon--open {
       opacity: 0;
-      transform: rotate(45deg) scale(.7);
+      transform: rotate(45deg) scale(0.7);
     }
 
-    .navbar--mobile-open .navbar__menu-icon--close {
+    .navbar--mobile-open
+      .navbar__menu-icon--close {
       opacity: 1;
       transform: rotate(0) scale(1);
     }
@@ -1159,14 +1288,22 @@ const isExploreActive = exploreItems.some((item) =>
       inset: 0;
       pointer-events: none;
       content: "";
-      opacity: .14;
+      opacity: 0.14;
       background:
-        linear-gradient(rgba(255,255,255,.08) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,.08) 1px, transparent 1px);
+        linear-gradient(
+          rgba(255, 255, 255, 0.08) 1px,
+          transparent 1px
+        ),
+        linear-gradient(
+          90deg,
+          rgba(255, 255, 255, 0.08) 1px,
+          transparent 1px
+        );
       background-size: 24px 24px;
     }
 
-    .navbar--mobile-open .navbar__mobile-menu {
+    .navbar--mobile-open
+      .navbar__mobile-menu {
       opacity: 1;
       visibility: visible;
       pointer-events: auto;
@@ -1175,7 +1312,10 @@ const isExploreActive = exploreItems.some((item) =>
 
     .navbar__mobile-inner {
       position: relative;
-      width: min(calc(100% - 32px), 680px);
+      width: min(
+        calc(100% - 32px),
+        680px
+      );
       margin-inline: auto;
       padding: 22px 0 36px;
     }
@@ -1197,7 +1337,11 @@ const isExploreActive = exploreItems.some((item) =>
       border: 3px solid #31352b;
       border-radius: 0;
       text-decoration: none;
-      font-family: "DM Mono", "SFMono-Regular", Consolas, monospace;
+      font-family:
+        "DM Mono",
+        "SFMono-Regular",
+        Consolas,
+        monospace;
       font-size: 0.68rem;
       font-weight: 900;
       letter-spacing: 0.07em;
@@ -1240,7 +1384,11 @@ const isExploreActive = exploreItems.some((item) =>
       margin: 0 0 10px;
       padding-inline: 2px;
       color: var(--acid);
-      font-family: "DM Mono", "SFMono-Regular", Consolas, monospace;
+      font-family:
+        "DM Mono",
+        "SFMono-Regular",
+        Consolas,
+        monospace;
       font-size: 0.58rem;
       font-weight: 900;
       letter-spacing: 0.12em;
@@ -1281,7 +1429,8 @@ const isExploreActive = exploreItems.some((item) =>
       border-radius: 0;
     }
 
-    .navbar__mobile-report-button > span:last-child {
+    .navbar__mobile-report-button
+      > span:last-child {
       min-width: 0;
       display: flex;
       flex-direction: column;
@@ -1289,7 +1438,10 @@ const isExploreActive = exploreItems.some((item) =>
     }
 
     .navbar__mobile-report-button strong {
-      font-family: Sora, Inter, sans-serif;
+      font-family:
+        Sora,
+        Inter,
+        sans-serif;
       font-size: 0.78rem;
       font-weight: 900;
       line-height: 1.25;
@@ -1298,7 +1450,9 @@ const isExploreActive = exploreItems.some((item) =>
 
     .navbar__mobile-report-button small {
       color: #3f4339;
-      font-family: Inter, sans-serif;
+      font-family:
+        Inter,
+        sans-serif;
       font-size: 0.68rem;
       line-height: 1.4;
     }
@@ -1312,7 +1466,11 @@ const isExploreActive = exploreItems.some((item) =>
       padding: 16px 2px 0;
       border-top: 3px solid var(--white);
       color: #aeb2a8;
-      font-family: "DM Mono", "SFMono-Regular", Consolas, monospace;
+      font-family:
+        "DM Mono",
+        "SFMono-Regular",
+        Consolas,
+        monospace;
       font-size: 0.58rem;
       font-weight: 800;
       letter-spacing: 0.06em;
@@ -1327,13 +1485,11 @@ const isExploreActive = exploreItems.some((item) =>
 
   @media (max-width: 560px) {
     .navbar__container {
-      width: min(calc(100% - 24px), 680px);
+      width: min(
+        calc(100% - 24px),
+        680px
+      );
       min-height: 70px;
-    }
-
-    .navbar__brand-mark {
-      width: 36px;
-      height: 36px;
     }
 
     .navbar__brand-name {
@@ -1355,7 +1511,10 @@ const isExploreActive = exploreItems.some((item) =>
     }
 
     .navbar__mobile-inner {
-      width: min(calc(100% - 24px), 680px);
+      width: min(
+        calc(100% - 24px),
+        680px
+      );
       padding-bottom: 28px;
     }
 

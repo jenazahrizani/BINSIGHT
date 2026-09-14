@@ -1,0 +1,313 @@
+---
+import AuthLayout from "../../layouts/AuthLayout.astro";
+import AuthCard from "../../components/auth/AuthCard.astro";
+import AuthInput from "../../components/auth/AuthInput.astro";
+import AuthPasswordInput from "../../components/auth/AuthPasswordInput.astro";
+---
+
+<AuthLayout
+  title="Masuk"
+  description="Masuk ke akun BINSIGHT untuk melanjutkan."
+  eyebrow="BADUNG WASTE INTELLIGENCE"
+  heading="ACCOUNT ACCESS"
+  showBackLink={true}
+  backHref="/"
+  backLabel="Kembali ke BINSIGHT"
+>
+  <Fragment slot="head">
+    <meta
+      name="robots"
+      content="noindex,nofollow"
+    />
+  </Fragment>
+
+  <AuthCard
+    eyebrow="RETURNING USER"
+    title="Masuk ke BINSIGHT"
+    description="Gunakan akun yang sudah terdaftar untuk melanjutkan ke ekosistem BINSIGHT."
+    actionLabel="Masuk"
+    secondaryLabel="Lupa password?"
+    secondaryHref="/auth/forgot-password"
+    footerText="Belum punya akun?"
+    footerLabel="Daftar"
+    footerHref="/auth/sign-up"
+  >
+    <AuthInput
+      label="Email"
+      name="email"
+      id="signin-email"
+      type="email"
+      placeholder="nama@email.com"
+      autocomplete="email"
+      inputmode="email"
+      required
+    />
+
+    <AuthPasswordInput
+      label="Password"
+      name="password"
+      id="signin-password"
+      placeholder="Masukkan password"
+      autocomplete="current-password"
+      required
+    />
+
+    <div class="sign-in__options">
+      <label class="sign-in__remember">
+        <input
+          type="checkbox"
+          name="remember"
+          value="true"
+        />
+
+        <span
+          class="sign-in__checkbox"
+          aria-hidden="true"
+        ></span>
+
+        <span>
+          Ingat saya
+        </span>
+      </label>
+
+      <span class="sign-in__security">
+        SECURE ACCESS
+      </span>
+    </div>
+  </AuthCard>
+
+  <div class="sign-in__after">
+    <div
+      class="sign-in__after-line"
+      aria-hidden="true"
+    ></div>
+
+    <div class="sign-in__after-grid">
+      <div>
+        <span class="sign-in__after-label">
+          ACCESS
+        </span>
+
+        <strong>
+          BINSIGHT
+        </strong>
+      </div>
+
+      <div>
+        <span class="sign-in__after-label">
+          PLATFORM
+        </span>
+
+        <strong>
+          PUBLIC DATA
+        </strong>
+      </div>
+
+      <div>
+        <span class="sign-in__after-label">
+          REGION
+        </span>
+
+        <strong>
+          BADUNG / BALI
+        </strong>
+      </div>
+    </div>
+  </div>
+</AuthLayout>
+
+<style>
+  .sign-in__options {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    min-width: 0;
+    margin-top: -1px;
+  }
+
+  .sign-in__remember {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    color: #5d6259;
+    cursor: pointer;
+    font-size: 0.67rem;
+    line-height: 1.4;
+    user-select: none;
+  }
+
+  .sign-in__remember input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .sign-in__checkbox {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    flex: 0 0 auto;
+    border: 2px solid #090a08;
+    background: #fffef8;
+    box-shadow: 2px 2px 0 #090a08;
+    transition:
+      background 120ms ease,
+      transform 120ms ease,
+      box-shadow 120ms ease;
+  }
+
+  .sign-in__checkbox::after {
+    width: 8px;
+    height: 4px;
+    border-bottom: 2px solid #090a08;
+    border-left: 2px solid #090a08;
+    content: "";
+    opacity: 0;
+    transform: rotate(-45deg) translateY(-1px);
+    transition: opacity 120ms ease;
+  }
+
+  .sign-in__remember input:checked
+    + .sign-in__checkbox {
+    background: #dfff00;
+  }
+
+  .sign-in__remember input:checked
+    + .sign-in__checkbox::after {
+    opacity: 1;
+  }
+
+  .sign-in__remember:hover .sign-in__checkbox {
+    transform: translate(1px, 1px);
+    box-shadow: 1px 1px 0 #090a08;
+  }
+
+  .sign-in__remember input:focus-visible
+    + .sign-in__checkbox {
+    outline: 3px solid #dfff00;
+    outline-offset: 3px;
+  }
+
+  .sign-in__security {
+    flex: 0 0 auto;
+    color: #888d84;
+    font-family:
+      "DM Mono",
+      ui-monospace,
+      SFMono-Regular,
+      Menlo,
+      Monaco,
+      Consolas,
+      monospace;
+    font-size: 0.5rem;
+    font-weight: 800;
+    letter-spacing: 0.07em;
+    line-height: 1.2;
+  }
+
+  .sign-in__after {
+    margin-top: 28px;
+  }
+
+  .sign-in__after-line {
+    width: 100%;
+    height: 2px;
+    background: #090a08;
+  }
+
+  .sign-in__after-grid {
+    display: grid;
+    grid-template-columns:
+      repeat(3, minmax(0, 1fr));
+    gap: 18px;
+    padding-top: 13px;
+  }
+
+  .sign-in__after-grid > div {
+    display: grid;
+    gap: 3px;
+    min-width: 0;
+  }
+
+  .sign-in__after-label {
+    color: #858a81;
+    font-family:
+      "DM Mono",
+      ui-monospace,
+      SFMono-Regular,
+      Menlo,
+      Monaco,
+      Consolas,
+      monospace;
+    font-size: 0.5rem;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    line-height: 1.3;
+  }
+
+  .sign-in__after-grid strong {
+    overflow: hidden;
+    color: #090a08;
+    font-family:
+      "DM Mono",
+      ui-monospace,
+      SFMono-Regular,
+      Menlo,
+      Monaco,
+      Consolas,
+      monospace;
+    font-size: 0.57rem;
+    font-weight: 800;
+    line-height: 1.35;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  @media (max-width: 600px) {
+    .sign-in__options {
+      align-items: flex-start;
+      flex-direction: column;
+      gap: 9px;
+    }
+
+    .sign-in__security {
+      padding-left: 26px;
+    }
+
+    .sign-in__after {
+      margin-top: 24px;
+    }
+
+    .sign-in__after-grid {
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+
+    .sign-in__after-grid > div {
+      grid-template-columns: 90px minmax(0, 1fr);
+      align-items: center;
+      gap: 10px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .sign-in__checkbox {
+      transition: none;
+    }
+
+    .sign-in__checkbox::after {
+      transition: none;
+    }
+  }
+</style>

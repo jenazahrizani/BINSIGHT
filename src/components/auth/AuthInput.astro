@@ -1,0 +1,435 @@
+---
+interface Props {
+  label: string;
+  name: string;
+  type?: "text" | "email" | "search" | "tel" | "url";
+  id?: string;
+  placeholder?: string;
+  value?: string;
+  autocomplete?: string;
+  required?: boolean;
+  disabled?: boolean;
+  readonly?: boolean;
+  autofocus?: boolean;
+  maxlength?: number;
+  minlength?: number;
+  inputmode?:
+    | "none"
+    | "text"
+    | "decimal"
+    | "numeric"
+    | "tel"
+    | "search"
+    | "email"
+    | "url";
+  error?: string;
+  hint?: string;
+  ariaLabel?: string;
+}
+
+const {
+  label,
+  name,
+  type = "text",
+  id = name,
+  placeholder = "",
+  value = "",
+  autocomplete,
+  required = false,
+  disabled = false,
+  readonly = false,
+  autofocus = false,
+  maxlength,
+  minlength,
+  inputmode,
+  error,
+  hint,
+  ariaLabel,
+} = Astro.props;
+
+const hasError = Boolean(error);
+const descriptionId = hint ? `${id}-hint` : undefined;
+const errorId = hasError ? `${id}-error` : undefined;
+
+const describedBy = [
+  descriptionId,
+  errorId,
+]
+  .filter(Boolean)
+  .join(" ") || undefined;
+---
+
+<div
+  class:list={[
+    "auth-input",
+    {
+      "auth-input--error": hasError,
+      "auth-input--disabled": disabled,
+    },
+  ]}
+>
+  <label
+    class="auth-input__label"
+    for={id}
+  >
+    <span class="auth-input__label-text">
+      {label}
+    </span>
+
+    {
+      required ? (
+        <span
+          class="auth-input__required"
+          aria-hidden="true"
+        >
+          *
+        </span>
+      ) : (
+        <span class="auth-input__optional">
+          OPSIONAL
+        </span>
+      )
+    }
+  </label>
+
+  <div class="auth-input__field-wrap">
+    {
+      Astro.slots.has("prefix") ? (
+        <span
+          class="auth-input__slot auth-input__slot--prefix"
+          aria-hidden="true"
+        >
+          <slot name="prefix" />
+        </span>
+      ) : null
+    }
+
+    <input
+      class:list={[
+        "auth-input__field",
+        {
+          "auth-input__field--with-prefix":
+            Astro.slots.has("prefix"),
+        },
+        {
+          "auth-input__field--with-suffix":
+            Astro.slots.has("suffix"),
+        },
+      ]}
+      id={id}
+      name={name}
+      type={type}
+      value={value}
+      placeholder={placeholder}
+      autocomplete={autocomplete}
+      required={required}
+      disabled={disabled}
+      readonly={readonly}
+      autofocus={autofocus}
+      maxlength={maxlength}
+      minlength={minlength}
+      inputmode={inputmode}
+      aria-invalid={hasError ? "true" : undefined}
+      aria-describedby={describedBy}
+      aria-label={ariaLabel}
+    />
+
+    {
+      Astro.slots.has("suffix") ? (
+        <span class="auth-input__slot auth-input__slot--suffix">
+          <slot name="suffix" />
+        </span>
+      ) : null
+    }
+  </div>
+
+  {
+    hint ? (
+      <p
+        class="auth-input__hint"
+        id={descriptionId}
+      >
+        {hint}
+      </p>
+    ) : null
+  }
+
+  {
+    hasError ? (
+      <p
+        class="auth-input__error"
+        id={errorId}
+        role="alert"
+      >
+        <span
+          class="auth-input__error-mark"
+          aria-hidden="true"
+        >
+          !
+        </span>
+
+        <span>{error}</span>
+      </p>
+    ) : null
+  }
+</div>
+
+<style>
+  .auth-input {
+    display: grid;
+    gap: 8px;
+    min-width: 0;
+  }
+
+  .auth-input__label {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    min-width: 0;
+    cursor: pointer;
+  }
+
+  .auth-input__label-text {
+    min-width: 0;
+    color: #090a08;
+    font-family:
+      "DM Mono",
+      ui-monospace,
+      SFMono-Regular,
+      Menlo,
+      Monaco,
+      Consolas,
+      monospace;
+    font-size: 0.64rem;
+    font-weight: 800;
+    letter-spacing: 0.065em;
+    line-height: 1.35;
+    text-transform: uppercase;
+  }
+
+  .auth-input__required {
+    flex: 0 0 auto;
+    color: #ff6a00;
+    font-family:
+      "DM Mono",
+      ui-monospace,
+      SFMono-Regular,
+      Menlo,
+      Monaco,
+      Consolas,
+      monospace;
+    font-size: 0.68rem;
+    font-weight: 900;
+    line-height: 1;
+  }
+
+  .auth-input__optional {
+    flex: 0 0 auto;
+    color: #7a7f76;
+    font-family:
+      "DM Mono",
+      ui-monospace,
+      SFMono-Regular,
+      Menlo,
+      Monaco,
+      Consolas,
+      monospace;
+    font-size: 0.5rem;
+    font-weight: 700;
+    letter-spacing: 0.055em;
+    line-height: 1;
+  }
+
+  .auth-input__field-wrap {
+    position: relative;
+    display: flex;
+    align-items: stretch;
+    min-width: 0;
+  }
+
+  .auth-input__field {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    min-height: 48px;
+    padding: 12px 13px;
+    border: 2px solid #090a08;
+    border-radius: 0;
+    outline: 0;
+    background: #fffef8;
+    color: #090a08;
+    font-family:
+      Inter,
+      ui-sans-serif,
+      system-ui,
+      -apple-system,
+      BlinkMacSystemFont,
+      "Segoe UI",
+      sans-serif;
+    font-size: 0.82rem;
+    font-weight: 500;
+    line-height: 1.4;
+    caret-color: #090a08;
+    box-shadow: 3px 3px 0 #090a08;
+    transition:
+      background 120ms ease,
+      border-color 120ms ease,
+      box-shadow 120ms ease,
+      transform 120ms ease;
+  }
+
+  .auth-input__field::placeholder {
+    color: #9a9f95;
+    opacity: 1;
+  }
+
+  .auth-input__field:hover {
+    background: #f8f6ec;
+  }
+
+  .auth-input__field:focus {
+    background: #ffffff;
+    border-color: #090a08;
+    box-shadow:
+      5px 5px 0 #090a08,
+      0 0 0 3px #dfff00;
+  }
+
+  .auth-input__field:focus-visible {
+    outline: 0;
+  }
+
+  .auth-input__field:disabled {
+    cursor: not-allowed;
+    background: #e4e1d4;
+    color: #888d84;
+    box-shadow: 2px 2px 0 #6c7068;
+  }
+
+  .auth-input__field[readonly] {
+    background: #f2f0e6;
+  }
+
+  .auth-input__field--with-prefix {
+    padding-left: 47px;
+  }
+
+  .auth-input__field--with-suffix {
+    padding-right: 47px;
+  }
+
+  .auth-input__field--with-prefix.auth-input__field--with-suffix {
+    padding-right: 47px;
+  }
+
+  .auth-input__slot {
+    position: absolute;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    color: #6c7068;
+    pointer-events: none;
+  }
+
+  .auth-input__slot--prefix {
+    top: 2px;
+    bottom: 2px;
+    left: 2px;
+  }
+
+  .auth-input__slot--suffix {
+    top: 2px;
+    right: 2px;
+    bottom: 2px;
+  }
+
+  .auth-input__hint {
+    margin: 0;
+    color: #70756c;
+    font-size: 0.65rem;
+    line-height: 1.55;
+  }
+
+  .auth-input__error {
+    display: flex;
+    align-items: flex-start;
+    gap: 7px;
+    margin: 0;
+    color: #7a2117;
+    font-size: 0.65rem;
+    line-height: 1.55;
+  }
+
+  .auth-input__error-mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    flex: 0 0 auto;
+    margin-top: 1px;
+    border: 1px solid #090a08;
+    background: #ff6a00;
+    color: #fffef8;
+    font-family:
+      "DM Mono",
+      ui-monospace,
+      SFMono-Regular,
+      Menlo,
+      Monaco,
+      Consolas,
+      monospace;
+    font-size: 0.56rem;
+    font-weight: 900;
+    line-height: 1;
+  }
+
+  .auth-input--error .auth-input__field {
+    border-color: #090a08;
+    background: #fff4ef;
+    box-shadow: 3px 3px 0 #ff6a00;
+  }
+
+  .auth-input--error .auth-input__field:focus {
+    box-shadow:
+      5px 5px 0 #ff6a00,
+      0 0 0 3px #dfff00;
+  }
+
+  .auth-input--disabled .auth-input__label {
+    cursor: not-allowed;
+  }
+
+  .auth-input--disabled .auth-input__label-text {
+    color: #898e84;
+  }
+
+  @media (max-width: 600px) {
+    .auth-input__field {
+      min-height: 46px;
+      padding: 11px 12px;
+      font-size: 0.8rem;
+    }
+
+    .auth-input__field:focus {
+      box-shadow:
+        4px 4px 0 #090a08,
+        0 0 0 3px #dfff00;
+    }
+
+    .auth-input--error .auth-input__field:focus {
+      box-shadow:
+        4px 4px 0 #ff6a00,
+        0 0 0 3px #dfff00;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .auth-input__field {
+      transition: none;
+    }
+  }
+</style>
