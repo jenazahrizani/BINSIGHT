@@ -2,48 +2,50 @@
 /**
  * BINSIGHT — ORGANIZATION LAYOUT
  * --------------------------------------------------------------------------
- * Workspace layout for registered / verified waste-management organizations.
+ * Registered / verified organization workspace for BINSIGHT.
  *
- * Responsibilities:
- * - Organization workspace shell
- * - Public Navbar
- * - Workspace sidebar
- * - Organization context
- * - Breadcrumbs
- * - Page title / description
- * - Action slot
- * - Mobile workspace navigation
- * - Footer
- * - Lightweight client-side navigation behavior
+ * Architecture:
+ * - Global Navbar
+ * - Persistent desktop sidebar
+ * - Independent desktop sidebar scrolling
+ * - Independent main-content scrolling
+ * - Mobile sidebar drawer
+ * - Page-owned main content
+ * - Independent footer
  *
- * Intended pages:
- * - /organization
- * - /organization/profile
- * - /organization/waste
- * - /organization/process
- * - /organization/products
+ * IMPORTANT:
+ * - Visual / structural baseline intentionally mirrors AdminLayout.
+ * - No page-level organization header is rendered by the layout.
+ * - Pages own their own visual hierarchy.
+ * - Main content has no wrapper/card imposed by this layout.
+ * - Footer is structurally separated from workspace.
+ * - Layout must never create horizontal page overflow.
+ * - Desktop sidebar and main content scroll independently.
  *
- * Important:
- * - This layout does NOT fetch Firebase data.
- * - This layout does NOT perform authorization itself.
- * - Authentication / authorization belongs to src/lib/auth/*
+ * Security note:
+ * - This layout is UI infrastructure only.
+ * - It does NOT replace authentication / authorization.
+ * - Access control belongs to src/lib/auth/*
  * - Organization data belongs to src/lib/data/organizations.ts
+ * - Firebase Security Rules remain authoritative.
  * --------------------------------------------------------------------------
  */
 
 import {
+  Activity,
   ArrowLeft,
   Building2,
   CircleCheck,
-  ChevronRight,
   ExternalLink,
   FileText,
   LayoutDashboard,
+  LockKeyhole,
   Menu,
   PackageCheck,
   Recycle,
   Settings2,
   ShieldCheck,
+  Users,
   X,
 } from "@lucide/astro";
 
@@ -57,13 +59,6 @@ type OrganizationSection =
   | "process"
   | "products";
 
-type OrganizationNavIcon =
-  | "dashboard"
-  | "building"
-  | "recycle"
-  | "settings"
-  | "package";
-
 interface Breadcrumb {
   label: string;
   href?: string;
@@ -75,29 +70,32 @@ interface Props {
   breadcrumbs?: Breadcrumb[];
   activeSection?: OrganizationSection;
   organizationName?: string;
-  organizationStatus?: "verified" | "pending" | "unverified";
   organizationInitials?: string;
+  organizationStatus?:
+    | "verified"
+    | "pending"
+    | "unverified";
   bodyClass?: string;
   noindex?: boolean;
 }
 
 const {
-  title = "Workspace Organisasi",
+  title = "Organization Dashboard",
   description =
-    "Kelola informasi organisasi dan tampilkan aktivitas pengelolaan sampah di BINSIGHT.",
+    "Kelola profil, material, proses, dan hasil pengelolaan organisasi di BINSIGHT.",
   breadcrumbs = [
     {
       label: "Organisasi",
       href: "/organization",
     },
     {
-      label: "Workspace",
+      label: "Dashboard",
     },
   ],
   activeSection = "overview",
   organizationName = "Organisasi Anda",
-  organizationStatus = "verified",
   organizationInitials = "OA",
+  organizationStatus = "verified",
   bodyClass = "",
   noindex = true,
 } = Astro.props;
@@ -112,7 +110,7 @@ const appName =
   "BINSIGHT";
 
 const absoluteUrl = (
-  value: string
+  value: string,
 ): string => {
   if (
     value.startsWith("http://") ||
@@ -125,12 +123,12 @@ const absoluteUrl = (
     value.startsWith("/")
       ? value
       : `/${value}`,
-    siteUrl
+    siteUrl,
   ).toString();
 };
 
 const canonicalUrl = absoluteUrl(
-  Astro.url.pathname
+  Astro.url.pathname,
 );
 
 const fullTitle =
@@ -142,68 +140,82 @@ const robotsContent = noindex
   ? "noindex, nofollow"
   : "index, follow";
 
-const statusLabel =
+const organizationStatusLabel =
   organizationStatus === "verified"
     ? "Terverifikasi"
     : organizationStatus === "pending"
       ? "Menunggu verifikasi"
       : "Belum terverifikasi";
 
-const statusIconClass =
+const organizationStatusClass =
   organizationStatus === "verified"
-    ? "organization-layout__status-icon--verified"
+    ? "organization-layout__organization-status--verified"
     : organizationStatus === "pending"
-      ? "organization-layout__status-icon--pending"
-      : "organization-layout__status-icon--unverified";
+      ? "organization-layout__organization-status--pending"
+      : "organization-layout__organization-status--unverified";
 
 const navItems: Array<{
   id: OrganizationSection;
   label: string;
   description: string;
   href: string;
-  icon: OrganizationNavIcon;
+  icon: typeof LayoutDashboard;
 }> = [
   {
     id: "overview",
     label: "Ringkasan",
-    description: "Gambaran workspace",
+    description: "Overview organisasi",
     href: "/organization",
-    icon: "dashboard",
+    icon: LayoutDashboard,
   },
   {
     id: "profile",
-    label: "Profil Organisasi",
+    label: "Profil",
     description: "Identitas & informasi",
     href: "/organization/profile",
-    icon: "building",
+    icon: Building2,
   },
   {
     id: "waste",
     label: "Sampah Dikelola",
     description: "Kategori & material",
     href: "/organization/waste",
-    icon: "recycle",
+    icon: Recycle,
   },
   {
     id: "process",
-    label: "Proses Pengelolaan",
+    label: "Proses",
     description: "Alur & metode",
     href: "/organization/process",
-    icon: "settings",
+    icon: Settings2,
   },
   {
     id: "products",
     label: "Produk / Hasil",
     description: "Hasil pengelolaan",
     href: "/organization/products",
-    icon: "package",
+    icon: PackageCheck,
+  },
+];
+
+const managementLinks = [
+  {
+    label: "Halaman Publik",
+    href: "/organizations",
+    icon: ExternalLink,
+  },
+  {
+    label: "Lihat Peta",
+    href: "/map",
+    icon: ExternalLink,
   },
 ];
 
 const isActive = (
-  section: OrganizationSection
-): boolean =>
-  activeSection === section;
+  section: OrganizationSection,
+): boolean => {
+  return activeSection === section;
+};
 ---
 
 <!doctype html>
@@ -218,7 +230,7 @@ const isActive = (
 
     <meta
       name="theme-color"
-      content="#14532D"
+      content="#090A08"
     />
 
     <meta
@@ -259,11 +271,6 @@ const isActive = (
       type="image/svg+xml"
     />
 
-    <link
-      rel="apple-touch-icon"
-      href="/images/logo.svg"
-    />
-
     <meta
       property="og:type"
       content="website"
@@ -295,11 +302,6 @@ const isActive = (
     />
 
     <meta
-      property="og:image"
-      content={absoluteUrl("/images/logo.svg")}
-    />
-
-    <meta
       property="og:image:alt"
       content={fullTitle}
     />
@@ -317,11 +319,6 @@ const isActive = (
     <meta
       name="twitter:description"
       content={description}
-    />
-
-    <meta
-      name="twitter:image"
-      content={absoluteUrl("/images/logo.svg")}
     />
 
     <script
@@ -361,7 +358,14 @@ const isActive = (
     <div class="organization-layout__shell">
       <Navbar />
 
+      <!-- ============================================================
+           WORKSPACE
+           Sidebar + main content have independent vertical scrolling.
+      ============================================================= -->
       <div class="organization-layout__workspace">
+        <!-- ==========================================================
+             SIDEBAR
+        =========================================================== -->
         <aside
           id="organization-sidebar"
           class="organization-layout__sidebar"
@@ -369,17 +373,23 @@ const isActive = (
           aria-label="Navigasi workspace organisasi"
         >
           <div class="organization-layout__sidebar-inner">
-            <div class="organization-layout__workspace-label">
-              <span class="organization-layout__workspace-label-icon">
-                <Building2
-                  size={16}
-                  stroke-width={2}
-                  aria-hidden="true"
-                />
-              </span>
+            <div class="organization-layout__system-heading">
+              <div class="organization-layout__system-title">
+                <span class="organization-layout__system-icon">
+                  <Building2
+                    size={17}
+                    stroke-width={2}
+                    aria-hidden="true"
+                  />
+                </span>
 
-              <span>
-                Workspace Organisasi
+                <span>
+                  Organization BINSIGHT
+                </span>
+              </div>
+
+              <span class="organization-layout__system-badge">
+                WORKSPACE
               </span>
             </div>
 
@@ -398,34 +408,33 @@ const isActive = (
 
                 <span
                   class:list={[
-                    "organization-layout__status",
-                    statusIconClass,
+                    "organization-layout__organization-status",
+                    organizationStatusClass,
                   ]}
                 >
                   <ShieldCheck
-                    size={13}
+                    size={12}
                     stroke-width={2}
                     aria-hidden="true"
                   />
 
-                  {statusLabel}
+                  {organizationStatusLabel}
                 </span>
               </div>
             </div>
 
             <nav
               class="organization-layout__nav"
-              aria-label="Navigasi workspace organisasi"
+              aria-label="Menu organisasi"
             >
               <p class="organization-layout__nav-label">
-                Kelola organisasi
+                Manajemen organisasi
               </p>
 
               {
                 navItems.map((item) => {
-                  const active = isActive(
-                    item.id
-                  );
+                  const active =
+                    isActive(item.id);
 
                   return (
                     <a
@@ -444,60 +453,11 @@ const isActive = (
                       }
                     >
                       <span class="organization-layout__nav-icon">
-                        {
-                          item.icon ===
-                            "dashboard" && (
-                            <LayoutDashboard
-                              size={17}
-                              stroke-width={1.9}
-                              aria-hidden="true"
-                            />
-                          )
-                        }
-
-                        {
-                          item.icon ===
-                            "building" && (
-                            <Building2
-                              size={17}
-                              stroke-width={1.9}
-                              aria-hidden="true"
-                            />
-                          )
-                        }
-
-                        {
-                          item.icon ===
-                            "recycle" && (
-                            <Recycle
-                              size={17}
-                              stroke-width={1.9}
-                              aria-hidden="true"
-                            />
-                          )
-                        }
-
-                        {
-                          item.icon ===
-                            "settings" && (
-                            <Settings2
-                              size={17}
-                              stroke-width={1.9}
-                              aria-hidden="true"
-                            />
-                          )
-                        }
-
-                        {
-                          item.icon ===
-                            "package" && (
-                            <PackageCheck
-                              size={17}
-                              stroke-width={1.9}
-                              aria-hidden="true"
-                            />
-                          )
-                        }
+                        <item.icon
+                          size={17}
+                          stroke-width={1.9}
+                          aria-hidden="true"
+                        />
                       </span>
 
                       <span class="organization-layout__nav-copy">
@@ -515,32 +475,77 @@ const isActive = (
               }
             </nav>
 
-            <div class="organization-layout__sidebar-divider"></div>
+            <div class="organization-layout__divider"></div>
 
-            <div class="organization-layout__visibility">
-              <div class="organization-layout__visibility-header">
-                <span class="organization-layout__visibility-icon">
+            <div class="organization-layout__verification">
+              <div class="organization-layout__verification-header">
+                <span class="organization-layout__verification-icon">
                   <CircleCheck
-                    size={15}
+                    size={14}
                     stroke-width={2}
                     aria-hidden="true"
                   />
                 </span>
 
                 <span>
-                  Visibilitas publik
+                  Status organisasi
+                </span>
+              </div>
+
+              <div class="organization-layout__verification-row">
+                <span
+                  class:list={[
+                    "organization-layout__verification-dot",
+                    organizationStatusClass,
+                  ]}
+                ></span>
+
+                <span>
+                  {organizationStatusLabel}
                 </span>
               </div>
 
               <p>
-                Informasi organisasi yang telah
-                diverifikasi dapat ditampilkan kepada
-                masyarakat melalui BINSIGHT.
+                Informasi yang telah diverifikasi dapat
+                ditampilkan pada ekosistem publik BINSIGHT.
               </p>
             </div>
 
-            <div class="organization-layout__sidebar-links">
-              <a href="/organizations">
+            <div class="organization-layout__divider"></div>
+
+            <nav
+              class="organization-layout__secondary-nav"
+              aria-label="Akses cepat organisasi"
+            >
+              <p class="organization-layout__nav-label">
+                Akses cepat
+              </p>
+
+              {
+                managementLinks.map(
+                  (item) => (
+                    <a
+                      href={item.href}
+                      class="organization-layout__secondary-link"
+                    >
+                      <span>
+                        <item.icon
+                          size={15}
+                          stroke-width={1.9}
+                          aria-hidden="true"
+                        />
+                      </span>
+
+                      {item.label}
+                    </a>
+                  ),
+                )
+              }
+
+              <a
+                href="/organizations"
+                class="organization-layout__secondary-link"
+              >
                 <span>
                   <ArrowLeft
                     size={15}
@@ -549,172 +554,91 @@ const isActive = (
                   />
                 </span>
 
-                Kembali ke organisasi publik
+                Organisasi publik
               </a>
+            </nav>
 
-              <a href="/company">
-                <span>
-                  <FileText
-                    size={15}
-                    stroke-width={1.9}
-                    aria-hidden="true"
-                  />
-                </span>
+            <div class="organization-layout__security-note">
+              <span class="organization-layout__security-icon">
+                <LockKeyhole
+                  size={14}
+                  stroke-width={2}
+                  aria-hidden="true"
+                />
+              </span>
 
-                Tentang BINSIGHT
-              </a>
+              <div>
+                <strong>
+                  Area organisasi
+                </strong>
+
+                <p>
+                  Data workspace hanya dapat dikelola
+                  oleh akun organisasi dengan hak akses
+                  yang sesuai.
+                </p>
+              </div>
             </div>
           </div>
         </aside>
 
+        <!-- ==========================================================
+             CONTENT WORKSPACE
+        =========================================================== -->
         <div class="organization-layout__content">
-          <header class="organization-layout__header">
-            <div class="organization-layout__header-container">
-              <div class="organization-layout__mobile-topbar">
-                <button
-                  type="button"
-                  class="organization-layout__mobile-toggle"
-                  data-organization-sidebar-toggle
-                  aria-controls="organization-sidebar"
-                  aria-expanded="false"
-                  aria-label="Buka navigasi organisasi"
-                >
-                  <Menu
-                    class="organization-layout__mobile-menu-icon"
-                    size={20}
-                    stroke-width={2}
-                    aria-hidden="true"
-                  />
+          <!--
+            IMPORTANT:
+            Tidak menggunakan page header.
+            Ini hanya mobile navigation utility.
+          -->
+          <div class="organization-layout__mobile-bar">
+            <button
+              type="button"
+              class="organization-layout__mobile-toggle"
+              data-organization-sidebar-toggle
+              aria-controls="organization-sidebar"
+              aria-expanded="false"
+              aria-label="Buka navigasi organisasi"
+            >
+              <Menu
+                class="organization-layout__mobile-menu-icon"
+                size={20}
+                stroke-width={2}
+                aria-hidden="true"
+              />
 
-                  <X
-                    class="organization-layout__mobile-close-icon"
-                    size={20}
-                    stroke-width={2}
-                    aria-hidden="true"
-                  />
-                </button>
+              <X
+                class="organization-layout__mobile-close-icon"
+                size={20}
+                stroke-width={2}
+                aria-hidden="true"
+              />
+            </button>
 
-                <div class="organization-layout__mobile-context">
-                  <span>
-                    Workspace
-                  </span>
+            <div class="organization-layout__mobile-context">
+              <span>
+                Organization BINSIGHT
+              </span>
 
-                  <strong>
-                    {organizationName}
-                  </strong>
-                </div>
-
-                <a
-                  href="/organizations"
-                  class="organization-layout__mobile-public-link"
-                  aria-label="Lihat organisasi publik"
-                  title="Lihat organisasi publik"
-                >
-                  <ExternalLink
-                    size={18}
-                    stroke-width={1.9}
-                    aria-hidden="true"
-                  />
-                </a>
-              </div>
-
-              <nav
-                class="organization-layout__breadcrumbs"
-                aria-label="Breadcrumb workspace organisasi"
-              >
-                <ol class="organization-layout__breadcrumb-list">
-                  {
-                    breadcrumbs.map(
-                      (breadcrumb, index) => {
-                        const isLast =
-                          index ===
-                          breadcrumbs.length - 1;
-
-                        return (
-                          <li class="organization-layout__breadcrumb-item">
-                            {
-                              breadcrumb.href &&
-                              !isLast ? (
-                                <a
-                                  href={
-                                    breadcrumb.href
-                                  }
-                                  class="organization-layout__breadcrumb-link"
-                                >
-                                  {
-                                    breadcrumb.label
-                                  }
-                                </a>
-                              ) : (
-                                <span
-                                  class="organization-layout__breadcrumb-current"
-                                  aria-current={
-                                    isLast
-                                      ? "page"
-                                      : undefined
-                                  }
-                                >
-                                  {
-                                    breadcrumb.label
-                                  }
-                                </span>
-                              )
-                            }
-
-                            {
-                              !isLast && (
-                                <ChevronRight
-                                  size={13}
-                                  stroke-width={1.8}
-                                  aria-hidden="true"
-                                />
-                              )
-                            }
-                          </li>
-                        );
-                      }
-                    )
-                  }
-                </ol>
-              </nav>
-
-              <div class="organization-layout__title-row">
-                <div class="organization-layout__heading">
-                  <p class="organization-layout__eyebrow">
-                    ORGANIZATION WORKSPACE
-                  </p>
-
-                  <h1 class="organization-layout__title">
-                    {title}
-                  </h1>
-
-                  <p class="organization-layout__description">
-                    {description}
-                  </p>
-                </div>
-
-                <div class="organization-layout__actions">
-                  <a
-                    href="/organizations"
-                    class="organization-layout__public-button"
-                  >
-                    <ExternalLink
-                      size={16}
-                      stroke-width={1.9}
-                      aria-hidden="true"
-                    />
-
-                    <span>
-                      Lihat halaman publik
-                    </span>
-                  </a>
-
-                  <slot name="actions" />
-                </div>
-              </div>
+              <strong>
+                {title}
+              </strong>
             </div>
-          </header>
 
+            <div
+              class="organization-layout__mobile-status"
+              aria-hidden="true"
+            >
+              <CircleCheck
+                size={17}
+                stroke-width={2}
+              />
+            </div>
+          </div>
+
+          <!-- ========================================================
+               PAGE-OWNED CONTENT
+          ========================================================= -->
           <main
             id="organization-main-content"
             class="organization-layout__main"
@@ -724,9 +648,14 @@ const isActive = (
               <slot />
             </div>
           </main>
-
-          <Footer />
         </div>
+      </div>
+
+      <!-- ============================================================
+           INDEPENDENT FOOTER
+      ============================================================= -->
+      <div class="organization-layout__footer">
+        <Footer />
       </div>
     </div>
 
@@ -736,160 +665,108 @@ const isActive = (
       aria-hidden="true"
     ></div>
 
-    <div
-      class="organization-layout__progress"
-      data-organization-progress
-      aria-hidden="true"
-    ></div>
-
     <script>
       const organizationRoot =
         document.querySelector(
-          ".organization-layout"
+          ".organization-layout",
         );
 
-      if (
-        organizationRoot instanceof HTMLElement
-      ) {
+      if (organizationRoot) {
         const sidebar =
           organizationRoot.querySelector(
-            "[data-organization-sidebar]"
+            "[data-organization-sidebar]",
           );
 
-        const sidebarToggle =
+        const toggle =
           organizationRoot.querySelector(
-            "[data-organization-sidebar-toggle]"
+            "[data-organization-sidebar-toggle]",
           );
 
         const backdrop =
           organizationRoot.querySelector(
-            "[data-organization-backdrop]"
+            "[data-organization-backdrop]",
           );
-
-        const progress =
-          organizationRoot.querySelector(
-            "[data-organization-progress]"
-          );
-
-        const updateProgress = () => {
-          if (
-            !(progress instanceof HTMLElement)
-          ) {
-            return;
-          }
-
-          const scrollableHeight =
-            document.documentElement
-              .scrollHeight -
-            window.innerHeight;
-
-          if (scrollableHeight <= 0) {
-            progress.style.transform =
-              "scaleX(0)";
-
-            return;
-          }
-
-          const ratio = Math.min(
-            Math.max(
-              window.scrollY /
-                scrollableHeight,
-              0
-            ),
-            1
-          );
-
-          progress.style.transform =
-            `scaleX(${ratio})`;
-        };
 
         const openSidebar = () => {
           if (
             !(sidebar instanceof HTMLElement) ||
-            !(
-              sidebarToggle instanceof
-              HTMLButtonElement
-            )
+            !(toggle instanceof HTMLButtonElement)
           ) {
             return;
           }
 
           sidebar.classList.add(
-            "organization-layout__sidebar--open"
+            "organization-layout__sidebar--open",
           );
 
           organizationRoot.classList.add(
-            "organization-layout--sidebar-open"
+            "organization-layout--sidebar-open",
           );
 
-          sidebarToggle.setAttribute(
+          toggle.setAttribute(
             "aria-expanded",
-            "true"
+            "true",
           );
 
-          sidebarToggle.setAttribute(
+          toggle.setAttribute(
             "aria-label",
-            "Tutup navigasi organisasi"
+            "Tutup navigasi organisasi",
           );
 
           document.documentElement.classList.add(
-            "organization-scroll-locked"
+            "organization-scroll-locked",
           );
 
           document.body.classList.add(
-            "organization-scroll-locked"
+            "organization-scroll-locked",
           );
         };
 
         const closeSidebar = () => {
           if (
             !(sidebar instanceof HTMLElement) ||
-            !(
-              sidebarToggle instanceof
-              HTMLButtonElement
-            )
+            !(toggle instanceof HTMLButtonElement)
           ) {
             return;
           }
 
           sidebar.classList.remove(
-            "organization-layout__sidebar--open"
+            "organization-layout__sidebar--open",
           );
 
           organizationRoot.classList.remove(
-            "organization-layout--sidebar-open"
+            "organization-layout--sidebar-open",
           );
 
-          sidebarToggle.setAttribute(
+          toggle.setAttribute(
             "aria-expanded",
-            "false"
+            "false",
           );
 
-          sidebarToggle.setAttribute(
+          toggle.setAttribute(
             "aria-label",
-            "Buka navigasi organisasi"
+            "Buka navigasi organisasi",
           );
 
           document.documentElement.classList.remove(
-            "organization-scroll-locked"
+            "organization-scroll-locked",
           );
 
           document.body.classList.remove(
-            "organization-scroll-locked"
+            "organization-scroll-locked",
           );
         };
 
         if (
-          sidebarToggle instanceof
-          HTMLButtonElement
+          toggle instanceof HTMLButtonElement
         ) {
-          sidebarToggle.addEventListener(
+          toggle.addEventListener(
             "click",
             () => {
               const isOpen =
                 sidebar instanceof HTMLElement &&
                 sidebar.classList.contains(
-                  "organization-layout__sidebar--open"
+                  "organization-layout__sidebar--open",
                 );
 
               if (isOpen) {
@@ -897,7 +774,7 @@ const isActive = (
               } else {
                 openSidebar();
               }
-            }
+            },
           );
         }
 
@@ -906,7 +783,7 @@ const isActive = (
         ) {
           backdrop.addEventListener(
             "click",
-            closeSidebar
+            closeSidebar,
           );
         }
 
@@ -918,7 +795,7 @@ const isActive = (
             .forEach((link) => {
               link.addEventListener(
                 "click",
-                closeSidebar
+                closeSidebar,
               );
             });
         }
@@ -929,7 +806,7 @@ const isActive = (
             if (event.key === "Escape") {
               closeSidebar();
             }
-          }
+          },
         );
 
         window.addEventListener(
@@ -938,128 +815,306 @@ const isActive = (
             if (window.innerWidth > 1000) {
               closeSidebar();
             }
-
-            updateProgress();
           },
-          { passive: true }
         );
-
-        window.addEventListener(
-          "scroll",
-          updateProgress,
-          { passive: true }
-        );
-
-        updateProgress();
       }
     </script>
   </body>
 </html>
 
 <style>
-  .organization-layout {
-    min-height: 100vh;
+  /* ================================================================
+     GLOBAL BOX MODEL / OVERFLOW SAFETY
+  ================================================================= */
+
+  :global(*) {
+    box-sizing: border-box;
+  }
+
+  :global(html) {
+    width: 100%;
+    max-width: 100%;
+
     margin: 0;
-    color: var(--color-text);
-    background: var(--color-background);
+    padding: 0;
+
+    overflow-x: hidden;
+  }
+
+  :global(body) {
+    width: 100%;
+    max-width: 100%;
+
+    margin: 0;
+    padding: 0;
+
+    overflow-x: hidden;
+  }
+
+  /* ================================================================
+     ROOT
+  ================================================================= */
+
+  .organization-layout {
+    --acid: #dfff00;
+    --acid-soft: #efff70;
+    --ink: #090a08;
+    --ink-2: #11130f;
+    --ink-3: #1b1f18;
+    --paper: #f2f0e6;
+    --paper-2: #e4e1d4;
+    --paper-3: #cfcabd;
+    --white: #fffef8;
+    --muted: #6c7068;
+    --orange: #ff6a00;
+    --green: #87b800;
+
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+
+    min-height: 100vh;
+
+    margin: 0;
+
+    overflow-x: hidden;
+
+    color: var(--ink);
+    background: var(--paper);
   }
 
   .organization-layout__shell {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+
     min-height: 100vh;
+
     display: flex;
     flex-direction: column;
+
+    overflow-x: hidden;
+
+    background: var(--paper);
   }
+
+  /* ================================================================
+     WORKSPACE
+  ================================================================= */
 
   .organization-layout__workspace {
-    min-height: 0;
-    flex: 1 1 auto;
-    display: flex;
-    align-items: stretch;
-  }
-
-  /* -----------------------------------------------------------------------
-   * SIDEBAR
-   * --------------------------------------------------------------------- */
-
-  .organization-layout__sidebar {
-    position: sticky;
-    top: 76px;
-
-    width: 278px;
-    min-width: 278px;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
 
     height: calc(100vh - 76px);
+    min-height: 0;
 
-    align-self: flex-start;
+    display: flex;
+    align-items: stretch;
 
+    overflow: hidden;
+
+    background: var(--paper);
+  }
+
+  /* ================================================================
+     SIDEBAR — DESKTOP INDEPENDENT SCROLL
+  ================================================================= */
+
+  .organization-layout__sidebar {
+    position: relative;
+
+    flex:
+      0 0
+      292px;
+
+    width: 292px;
+    max-width: 292px;
+    min-width: 292px;
+
+    height: 100%;
+    min-height: 0;
+
+    overflow-x: hidden;
     overflow-y: auto;
 
-    border-right: 1px solid var(--color-border);
+    overscroll-behavior: contain;
+
+    border-right: 2px solid var(--ink);
 
     background:
       linear-gradient(
         180deg,
-        #ffffff 0%,
-        #f8fafc 100%
+        var(--paper) 0%,
+        var(--paper-2) 100%
       );
+
+    color: var(--ink);
+
+    scrollbar-width: thin;
+    scrollbar-color:
+      #aaaD9f
+      transparent;
+  }
+
+  .organization-layout__sidebar::-webkit-scrollbar {
+    width: 7px;
+  }
+
+  .organization-layout__sidebar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .organization-layout__sidebar::-webkit-scrollbar-thumb {
+    background: #aaaD9f;
   }
 
   .organization-layout__sidebar-inner {
-    padding: 22px 14px 28px;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+
+    min-height: 100%;
+
+    display: flex;
+    flex-direction: column;
+
+    padding: 20px 14px 22px;
+
+    overflow-x: hidden;
   }
 
-  .organization-layout__workspace-label {
+  /* ================================================================
+     SYSTEM HEADING
+  ================================================================= */
+
+  .organization-layout__system-heading {
     display: flex;
     align-items: center;
-    gap: 8px;
+    justify-content: space-between;
 
-    padding: 2px 8px 14px;
+    gap: 10px;
 
-    color: var(--color-secondary);
+    min-width: 0;
 
-    font-size: 0.63rem;
-    font-weight: 850;
+    padding: 3px 8px 15px;
 
-    letter-spacing: 0.075em;
+    border-bottom: 2px solid var(--ink);
+  }
+
+  .organization-layout__system-title {
+    min-width: 0;
+
+    display: flex;
+    align-items: center;
+
+    gap: 9px;
+
+    color: var(--ink);
+
+    font-family:
+      Sora,
+      Inter,
+      system-ui,
+      sans-serif;
+
+    font-size: 0.7rem;
+    font-weight: 800;
+
+    letter-spacing: -0.015em;
+
     text-transform: uppercase;
   }
 
-  .organization-layout__workspace-label-icon {
-    width: 28px;
-    height: 28px;
+  .organization-layout__system-title
+    > span:last-child {
+    min-width: 0;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .organization-layout__system-icon {
+    width: 30px;
+    height: 30px;
 
     display: grid;
     place-items: center;
 
-    border-radius: 8px;
+    flex-shrink: 0;
 
-    color: var(--color-primary-dark);
-    background: var(--color-primary-light);
+    border: 2px solid var(--ink);
+
+    border-radius: 0;
+
+    color: var(--acid);
+    background: var(--ink);
+
+    box-shadow:
+      3px 3px 0 var(--orange);
   }
 
+  .organization-layout__system-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    flex-shrink: 0;
+
+    min-height: 22px;
+
+    padding: 0 8px;
+
+    border: 1px solid var(--ink);
+    border-radius: 0;
+
+    color: var(--ink);
+    background: var(--acid);
+
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+
+    font-size: 0.48rem;
+    font-weight: 700;
+
+    line-height: 1;
+
+    letter-spacing: 0.08em;
+
+    text-transform: uppercase;
+  }
+
+  /* ================================================================
+     ORGANIZATION IDENTITY
+  ================================================================= */
+
   .organization-layout__organization-card {
+    min-width: 0;
+    max-width: 100%;
+
     display: flex;
     align-items: center;
+
     gap: 11px;
 
-    margin: 0 2px 19px;
+    margin: 16px 2px 21px;
+
     padding: 12px;
 
-    border: 1px solid
-      color-mix(
-        in srgb,
-        var(--color-primary) 10%,
-        var(--color-border)
-      );
+    border: 2px solid var(--ink);
 
-    border-radius: 13px;
+    border-radius: 0;
 
-    background:
-      linear-gradient(
-        145deg,
-        rgba(240, 253, 244, 0.95),
-        rgba(255, 255, 255, 0.98)
-      );
+    background: var(--white);
+
+    box-shadow:
+      4px 4px 0 var(--acid);
   }
 
   .organization-layout__organization-avatar {
@@ -1071,19 +1126,21 @@ const isActive = (
 
     flex-shrink: 0;
 
-    border-radius: 11px;
+    border: 2px solid var(--ink);
 
-    color: #ffffff;
+    border-radius: 0;
 
-    background:
-      linear-gradient(
-        145deg,
-        var(--color-primary),
-        var(--color-primary-dark)
-      );
+    color: var(--acid);
+    background: var(--ink);
 
-    font-size: 0.72rem;
-    font-weight: 900;
+    font-family:
+      Sora,
+      Inter,
+      system-ui,
+      sans-serif;
+
+    font-size: 0.68rem;
+    font-weight: 800;
 
     letter-spacing: 0.04em;
   }
@@ -1093,541 +1150,625 @@ const isActive = (
 
     display: flex;
     flex-direction: column;
-    gap: 5px;
+
+    gap: 4px;
   }
 
-  .organization-layout__organization-copy > strong {
+  .organization-layout__organization-copy strong {
+    min-width: 0;
+
     overflow: hidden;
 
-    color: var(--color-text);
+    color: var(--ink);
 
-    font-size: 0.77rem;
-    font-weight: 850;
+    font-family:
+      Sora,
+      Inter,
+      system-ui,
+      sans-serif;
+
+    font-size: 0.7rem;
+    font-weight: 800;
+
     line-height: 1.25;
 
     text-overflow: ellipsis;
     white-space: nowrap;
   }
 
-  .organization-layout__status {
+  .organization-layout__organization-status {
+    min-width: 0;
+
     display: inline-flex;
     align-items: center;
-    gap: 4px;
 
-    width: fit-content;
+    gap: 5px;
 
-    font-size: 0.61rem;
-    font-weight: 750;
+    color: var(--muted);
+
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+
+    font-size: 0.49rem;
+    font-weight: 700;
+
     line-height: 1.2;
+
+    letter-spacing: 0.04em;
+
+    text-transform: uppercase;
   }
 
-  .organization-layout__status-icon--verified {
-    color: var(--color-primary);
+  .organization-layout__organization-status--verified {
+    color: var(--green);
   }
 
-  .organization-layout__status-icon--pending {
-    color: var(--color-warning);
+  .organization-layout__organization-status--pending {
+    color: var(--orange);
   }
 
-  .organization-layout__status-icon--unverified {
-    color: var(--color-danger);
+  .organization-layout__organization-status--unverified {
+    color: #b42525;
   }
+
+  /* ================================================================
+     NAVIGATION
+  ================================================================= */
 
   .organization-layout__nav {
+    min-width: 0;
+
     display: grid;
-    gap: 3px;
+    gap: 5px;
   }
 
   .organization-layout__nav-label {
-    margin: 0 9px 7px;
+    min-width: 0;
 
-    color: #94a3b8;
+    margin: 0 9px 8px;
 
-    font-size: 0.61rem;
-    font-weight: 850;
+    color: var(--orange);
+
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+
+    font-size: 0.51rem;
+    font-weight: 700;
+
     line-height: 1;
 
-    letter-spacing: 0.075em;
+    letter-spacing: 0.1em;
+
     text-transform: uppercase;
   }
 
   .organization-layout__nav-item {
     position: relative;
 
+    min-width: 0;
+    max-width: 100%;
+
     display: flex;
     align-items: center;
+
     gap: 10px;
 
-    min-height: 53px;
+    min-height: 54px;
+
     padding: 7px 9px;
 
-    border: 1px solid transparent;
-    border-radius: 11px;
+    border: 2px solid transparent;
 
-    color: var(--color-secondary);
+    border-radius: 0;
+
+    color: #5f645c;
+
     background: transparent;
 
     text-decoration: none;
 
+    overflow: hidden;
+
     transition:
-      color 160ms ease,
-      background-color 160ms ease,
-      border-color 160ms ease,
-      transform 160ms ease;
+      color 150ms ease,
+      background 150ms ease,
+      border-color 150ms ease,
+      transform 150ms ease;
   }
 
   .organization-layout__nav-item:hover {
-    color: var(--color-primary-dark);
+    color: var(--ink);
 
-    background: var(--color-primary-light);
+    border-color: #bfc1b6;
 
-    transform: translateX(1px);
+    background: var(--white);
+
+    transform: translateX(2px);
   }
 
   .organization-layout__nav-item--active {
-    color: var(--color-primary-dark);
+    color: var(--ink);
 
-    border-color: rgba(
-      22,
-      101,
-      52,
-      0.09
-    );
+    border-color: var(--ink);
 
-    background:
-      linear-gradient(
-        100deg,
-        rgba(220, 252, 231, 0.95),
-        rgba(240, 253, 244, 0.76)
-      );
+    background: var(--acid);
+
+    box-shadow:
+      4px 4px 0 var(--ink);
   }
 
   .organization-layout__nav-item--active::before {
     content: "";
 
     position: absolute;
-    top: 9px;
-    bottom: 9px;
-    left: -14px;
 
-    width: 3px;
+    top: -2px;
+    bottom: -2px;
 
-    border-radius: 0 999px 999px 0;
+    left: -16px;
 
-    background: var(--color-primary);
+    width: 4px;
+
+    background: var(--orange);
   }
 
   .organization-layout__nav-icon {
-    width: 35px;
-    height: 35px;
+    width: 36px;
+    height: 36px;
 
     display: grid;
     place-items: center;
+
     flex-shrink: 0;
 
-    border-radius: 9px;
+    border: 1px solid #c6c8bc;
 
-    color: currentColor;
+    border-radius: 0;
 
-    background:
-      rgba(
-        226,
-        232,
-        240,
-        0.62
-      );
+    color: #5f645c;
+
+    background: #e7e5da;
 
     transition:
-      background-color 160ms ease;
+      background 150ms ease,
+      color 150ms ease,
+      border-color 150ms ease;
+  }
+
+  .organization-layout__nav-item:hover
+    .organization-layout__nav-icon {
+    color: var(--ink);
+
+    border-color: var(--ink);
+
+    background: var(--paper);
   }
 
   .organization-layout__nav-item--active
     .organization-layout__nav-icon {
-    background:
-      rgba(
-        255,
-        255,
-        255,
-        0.85
-      );
+    color: var(--acid);
+
+    border-color: var(--ink);
+
+    background: var(--ink);
   }
 
   .organization-layout__nav-copy {
     min-width: 0;
+    max-width: 100%;
 
     display: flex;
     flex-direction: column;
+
     gap: 3px;
+
+    overflow: hidden;
   }
 
   .organization-layout__nav-copy strong {
-    color: currentColor;
-
-    font-size: 0.75rem;
-    font-weight: 820;
-    line-height: 1.2;
-  }
-
-  .organization-layout__nav-copy small {
-    color: var(--color-secondary);
-
-    font-size: 0.61rem;
-    font-weight: 500;
-    line-height: 1.3;
-  }
-
-  .organization-layout__sidebar-divider {
-    height: 1px;
-
-    margin: 21px 8px;
-
-    background: var(--color-border);
-  }
-
-  .organization-layout__visibility {
-    margin: 0 5px;
-    padding: 12px;
-
-    border: 1px solid
-      rgba(
-        22,
-        101,
-        52,
-        0.08
-      );
-
-    border-radius: 11px;
-
-    background:
-      rgba(
-        220,
-        252,
-        231,
-        0.38
-      );
-  }
-
-  .organization-layout__visibility-header {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-
-    color: var(--color-primary-dark);
-
-    font-size: 0.67rem;
-    font-weight: 850;
-  }
-
-  .organization-layout__visibility-icon {
-    width: 27px;
-    height: 27px;
-
-    display: grid;
-    place-items: center;
-
-    border-radius: 7px;
-
-    background:
-      rgba(
-        255,
-        255,
-        255,
-        0.86
-      );
-  }
-
-  .organization-layout__visibility p {
-    margin: 7px 0 0;
-
-    color: var(--color-secondary);
-
-    font-size: 0.61rem;
-    line-height: 1.55;
-  }
-
-  .organization-layout__sidebar-links {
-    display: grid;
-    gap: 4px;
-
-    margin: 19px 5px 0;
-  }
-
-  .organization-layout__sidebar-links a {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-
-    min-height: 34px;
-    padding: 0 7px;
-
-    color: var(--color-secondary);
-
-    font-size: 0.65rem;
-    font-weight: 650;
-
-    text-decoration: none;
-
-    border-radius: 8px;
-
-    transition:
-      color 160ms ease,
-      background-color 160ms ease;
-  }
-
-  .organization-layout__sidebar-links a:hover {
-    color: var(--color-primary-dark);
-    background: var(--color-primary-light);
-  }
-
-  .organization-layout__sidebar-links a span {
-    width: 26px;
-    height: 26px;
-
-    display: grid;
-    place-items: center;
-
-    border-radius: 7px;
-
-    color: currentColor;
-
-    background:
-      rgba(
-        226,
-        232,
-        240,
-        0.55
-      );
-  }
-
-  /* -----------------------------------------------------------------------
-   * CONTENT
-   * --------------------------------------------------------------------- */
-
-  .organization-layout__content {
     min-width: 0;
-
-    flex: 1 1 auto;
-
-    display: flex;
-    flex-direction: column;
-  }
-
-  .organization-layout__header {
-    position: relative;
-    z-index: 5;
-
-    border-bottom: 1px solid var(--color-border);
-
-    background:
-      radial-gradient(
-        circle at 84% 20%,
-        rgba(
-          132,
-          204,
-          22,
-          0.075
-        ),
-        transparent 27%
-      ),
-      linear-gradient(
-        135deg,
-        rgba(255, 255, 255, 0.99),
-        rgba(248, 250, 252, 0.97)
-      );
-  }
-
-  .organization-layout__header-container {
-    width: min(
-      calc(100% - 48px),
-      var(--container-xl, 1280px)
-    );
-
-    margin-inline: auto;
-
-    padding: 21px 0 27px;
-  }
-
-  .organization-layout__mobile-topbar {
-    display: none;
-  }
-
-  .organization-layout__breadcrumbs {
-    margin-bottom: 15px;
-  }
-
-  .organization-layout__breadcrumb-list {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 3px;
-
-    margin: 0;
-    padding: 0;
-
-    list-style: none;
-  }
-
-  .organization-layout__breadcrumb-item {
-    display: inline-flex;
-    align-items: center;
-    gap: 3px;
-
-    min-width: 0;
-
-    color: var(--color-secondary);
-  }
-
-  .organization-layout__breadcrumb-item svg {
-    flex-shrink: 0;
-    color: #94a3b8;
-  }
-
-  .organization-layout__breadcrumb-link,
-  .organization-layout__breadcrumb-current {
-    max-width: 260px;
 
     overflow: hidden;
 
-    font-size: 0.67rem;
-    font-weight: 650;
-    line-height: 1.35;
+    color: currentColor;
 
-    text-decoration: none;
+    font-family:
+      Sora,
+      Inter,
+      system-ui,
+      sans-serif;
+
+    font-size: 0.68rem;
+    font-weight: 800;
+
+    line-height: 1.2;
+
     text-overflow: ellipsis;
     white-space: nowrap;
   }
 
-  .organization-layout__breadcrumb-link {
-    color: var(--color-secondary);
-
-    transition:
-      color 160ms ease;
-  }
-
-  .organization-layout__breadcrumb-link:hover {
-    color: var(--color-primary-dark);
-  }
-
-  .organization-layout__breadcrumb-current {
-    color: var(--color-text);
-    font-weight: 750;
-  }
-
-  .organization-layout__title-row {
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-
-    gap: 30px;
-  }
-
-  .organization-layout__heading {
+  .organization-layout__nav-copy small {
     min-width: 0;
-    max-width: 800px;
-  }
 
-  .organization-layout__eyebrow {
-    margin: 0 0 8px;
+    overflow: hidden;
 
-    color: var(--color-primary);
+    color: #797d74;
 
-    font-size: 0.61rem;
-    font-weight: 900;
-    line-height: 1;
+    font-family:
+      Inter,
+      system-ui,
+      sans-serif;
 
-    letter-spacing: 0.11em;
-  }
-
-  .organization-layout__title {
-    margin: 0;
-
-    color: var(--color-text);
-
-    font-size: clamp(
-      1.5rem,
-      2.8vw,
-      2.2rem
-    );
-
-    font-weight: 900;
-    line-height: 1.08;
-
-    letter-spacing: -0.03em;
-  }
-
-  .organization-layout__description {
-    max-width: 700px;
-
-    margin: 9px 0 0;
-
-    color: var(--color-secondary);
-
-    font-size: 0.82rem;
+    font-size: 0.57rem;
     font-weight: 500;
-    line-height: 1.65;
+
+    line-height: 1.3;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
-  .organization-layout__actions {
+  .organization-layout__nav-item--active
+    .organization-layout__nav-copy
+    small {
+    color: #4f542f;
+  }
+
+  /* ================================================================
+     DIVIDER
+  ================================================================= */
+
+  .organization-layout__divider {
+    width: calc(100% - 8px);
+    max-width: calc(100% - 8px);
+
+    height: 2px;
+
+    margin: 18px 4px;
+
+    background: var(--ink);
+  }
+
+  /* ================================================================
+     VERIFICATION STATUS
+  ================================================================= */
+
+  .organization-layout__verification {
+    min-width: 0;
+    max-width: 100%;
+
+    padding: 13px;
+
+    border: 2px solid var(--ink);
+
+    border-radius: 0;
+
+    background: var(--white);
+
+    overflow: hidden;
+  }
+
+  .organization-layout__verification-header {
+    min-width: 0;
+
     display: flex;
     align-items: center;
-    justify-content: flex-end;
+
+    gap: 7px;
+
+    color: var(--ink);
+
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+
+    font-size: 0.5rem;
+    font-weight: 700;
+
+    letter-spacing: 0.08em;
+
+    text-transform: uppercase;
+  }
+
+  .organization-layout__verification-header
+    > span:last-child {
+    min-width: 0;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .organization-layout__verification-icon {
+    width: 25px;
+    height: 25px;
+
+    display: grid;
+    place-items: center;
 
     flex-shrink: 0;
 
-    gap: 8px;
+    border: 1px solid var(--ink);
+
+    border-radius: 0;
+
+    color: var(--ink);
+
+    background: var(--acid);
   }
 
-  .organization-layout__public-button {
-    display: inline-flex;
+  .organization-layout__verification-row {
+    display: flex;
     align-items: center;
-    justify-content: center;
+
     gap: 7px;
 
-    min-height: 40px;
-    padding: 0 13px;
+    margin-top: 11px;
 
-    border: 1px solid var(--color-border);
-    border-radius: 9px;
+    color: var(--ink);
 
-    color: var(--color-secondary);
-    background: var(--color-surface);
+    font-size: 0.62rem;
+    font-weight: 800;
+  }
 
-    font-size: 0.72rem;
+  .organization-layout__verification-dot {
+    width: 7px;
+    height: 7px;
+
+    flex-shrink: 0;
+
+    background: var(--green);
+  }
+
+  .organization-layout__verification-dot.organization-layout__organization-status--pending {
+    background: var(--orange);
+  }
+
+  .organization-layout__verification-dot.organization-layout__organization-status--unverified {
+    background: #b42525;
+  }
+
+  .organization-layout__verification p {
+    margin: 9px 0 0;
+
+    color: var(--muted);
+
+    font-size: 0.57rem;
+
+    line-height: 1.55;
+
+    overflow-wrap: anywhere;
+  }
+
+  /* ================================================================
+     SECONDARY NAV
+  ================================================================= */
+
+  .organization-layout__secondary-nav {
+    min-width: 0;
+
+    display: grid;
+    gap: 4px;
+  }
+
+  .organization-layout__secondary-link {
+    min-width: 0;
+    max-width: 100%;
+
+    display: flex;
+    align-items: center;
+
+    gap: 9px;
+
+    min-height: 38px;
+
+    padding: 7px 9px;
+
+    border: 1px solid transparent;
+
+    border-radius: 0;
+
+    color: #5f645c;
+
+    font-size: 0.62rem;
     font-weight: 750;
 
     text-decoration: none;
 
-    box-shadow: var(--shadow-xs);
+    overflow: hidden;
 
     transition:
-      color 160ms ease,
-      border-color 160ms ease,
-      background-color 160ms ease,
-      transform 160ms ease;
+      color 150ms ease,
+      background 150ms ease,
+      border-color 150ms ease;
   }
 
-  .organization-layout__public-button:hover {
-    color: var(--color-primary-dark);
+  .organization-layout__secondary-link > span {
+    width: 28px;
+    height: 28px;
 
-    border-color:
-      rgba(
-        22,
-        101,
-        52,
-        0.25
-      );
+    display: grid;
+    place-items: center;
 
-    background: var(--color-primary-light);
+    flex-shrink: 0;
 
-    transform: translateY(-1px);
+    border: 1px solid #c6c8bc;
+
+    border-radius: 0;
+
+    color: var(--muted);
+
+    background: #e7e5da;
   }
+
+  .organization-layout__secondary-link:hover {
+    color: var(--ink);
+
+    border-color: #bfc1b6;
+
+    background: var(--white);
+  }
+
+  .organization-layout__secondary-link:hover > span {
+    color: var(--ink);
+
+    border-color: var(--ink);
+
+    background: var(--acid);
+  }
+
+  /* ================================================================
+     SECURITY NOTE
+  ================================================================= */
+
+  .organization-layout__security-note {
+    min-width: 0;
+    max-width: 100%;
+
+    display: flex;
+    align-items: flex-start;
+
+    gap: 9px;
+
+    margin-top: auto;
+
+    padding: 12px;
+
+    border:
+      1px solid #c9cbbf;
+
+    border-left:
+      3px solid var(--orange);
+
+    border-radius: 0;
+
+    background: var(--paper-2);
+
+    overflow: hidden;
+  }
+
+  .organization-layout__security-icon {
+    width: 28px;
+    height: 28px;
+
+    display: grid;
+    place-items: center;
+
+    flex-shrink: 0;
+
+    border: 1px solid var(--ink);
+
+    border-radius: 0;
+
+    color: var(--acid);
+
+    background: var(--ink);
+  }
+
+  .organization-layout__security-note > div {
+    min-width: 0;
+  }
+
+  .organization-layout__security-note strong {
+    display: block;
+
+    color: var(--ink);
+
+    font-size: 0.6rem;
+    font-weight: 800;
+
+    text-transform: uppercase;
+  }
+
+  .organization-layout__security-note p {
+    margin: 4px 0 0;
+
+    color: var(--muted);
+
+    font-size: 0.55rem;
+
+    line-height: 1.55;
+
+    overflow-wrap: anywhere;
+  }
+
+  /* ================================================================
+     MAIN CONTENT — INDEPENDENT SCROLL
+  ================================================================= */
+
+  .organization-layout__content {
+    flex:
+      1 1 0;
+
+    width: 0;
+    max-width: calc(100% - 292px);
+
+    min-width: 0;
+    min-height: 0;
+
+    display: flex;
+    flex-direction: column;
+
+    overflow-x: hidden;
+    overflow-y: auto;
+
+    overscroll-behavior: contain;
+
+    background: var(--paper);
+
+    scrollbar-width: thin;
+    scrollbar-color:
+      #aaaD9f
+      transparent;
+  }
+
+  .organization-layout__content::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .organization-layout__content::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .organization-layout__content::-webkit-scrollbar-thumb {
+    background: #aaaD9f;
+  }
+
+  /* ================================================================
+     NO PAGE HEADER
+  ================================================================= */
+
+  .organization-layout__mobile-bar {
+    display: none;
+  }
+
+  /* ================================================================
+     PAGE-OWNED MAIN
+  ================================================================= */
 
   .organization-layout__main {
+    flex:
+      1 0 auto;
+
+    width: 100%;
+    max-width: 100%;
+
     min-width: 0;
 
-    flex: 1 1 auto;
-
     outline: none;
+
+    overflow-x: hidden;
+
+    background: var(--paper);
   }
 
   .organization-layout__main:focus {
@@ -1635,45 +1776,133 @@ const isActive = (
   }
 
   .organization-layout__main-container {
-    width: min(
-      calc(100% - 48px),
-      var(--container-xl, 1280px)
-    );
+    width: 100%;
+    max-width: 100%;
 
-    margin-inline: auto;
+    min-width: 0;
 
-    padding: 30px 0 50px;
+    margin: 0;
+
+    padding: 0;
+
+    overflow-x: hidden;
+
+    background: transparent;
   }
 
-  /* -----------------------------------------------------------------------
-   * MOBILE
-   * --------------------------------------------------------------------- */
+  .organization-layout__main-container > * {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .organization-layout__main-container
+    img,
+  .organization-layout__main-container
+    svg,
+  .organization-layout__main-container
+    video,
+  .organization-layout__main-container
+    canvas,
+  .organization-layout__main-container
+    iframe {
+    max-width: 100%;
+  }
+
+  .organization-layout__main-container
+    :where(
+      p,
+      h1,
+      h2,
+      h3,
+      h4,
+      h5,
+      h6,
+      span,
+      strong,
+      small,
+      a,
+      li,
+      td,
+      th
+    ) {
+    overflow-wrap: anywhere;
+  }
+
+  .organization-layout__main-container
+    table {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .organization-layout__main-container
+    :where(
+      pre,
+      .table-wrapper,
+      [data-table-scroll]
+    ) {
+    max-width: 100%;
+    overflow-x: auto;
+  }
+
+  .organization-layout__main-container
+    :where(
+      [class*="grid"],
+      [class*="row"],
+      [class*="flex"]
+    ) {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .organization-layout__main-container
+    :where(
+      [class*="grid"] > *,
+      [class*="row"] > *,
+      [class*="flex"] > *
+    ) {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  /* ================================================================
+     FOOTER
+  ================================================================= */
+
+  .organization-layout__footer {
+    flex:
+      0 0 auto;
+
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+
+    overflow-x: hidden;
+
+    border-top: 2px solid var(--ink);
+
+    background: var(--ink);
+
+    color: var(--white);
+  }
+
+  /* ================================================================
+     BACKDROP
+  ================================================================= */
 
   .organization-layout__backdrop {
     display: none;
   }
 
-  .organization-layout__progress {
-    position: fixed;
-    top: 0;
-    left: 0;
-    z-index: 2300;
-
-    width: 100%;
-    height: 2px;
-
-    background: var(--color-accent);
-
-    transform: scaleX(0);
-    transform-origin: left center;
-
-    pointer-events: none;
-  }
+  /* ================================================================
+     SKIP LINK
+  ================================================================= */
 
   .organization-layout__skip-link {
     position: fixed;
+
     top: 12px;
     left: 12px;
+
     z-index: 2400;
 
     display: inline-flex;
@@ -1681,17 +1910,28 @@ const isActive = (
     justify-content: center;
 
     min-height: 42px;
+
+    max-width: calc(100vw - 24px);
+
     padding: 0 15px;
 
-    border: 1px solid var(--color-primary);
-    border-radius: 9px;
+    border: 2px solid var(--ink);
 
-    color: #ffffff;
-    background: var(--color-primary);
+    border-radius: 0;
 
-    box-shadow: var(--shadow-lg);
+    color: var(--acid);
 
-    font-size: 0.8rem;
+    background: var(--ink);
+
+    box-shadow:
+      5px 5px 0 var(--orange);
+
+    font-family:
+      Inter,
+      system-ui,
+      sans-serif;
+
+    font-size: 0.72rem;
     font-weight: 800;
 
     text-decoration: none;
@@ -1708,29 +1948,79 @@ const isActive = (
 
   .organization-layout__skip-link:focus {
     opacity: 1;
+
     pointer-events: auto;
+
     transform: translateY(0);
   }
 
+  /* ================================================================
+     MOBILE
+  ================================================================= */
+
   @media (max-width: 1000px) {
+    .organization-layout__workspace {
+      display: block;
+
+      width: 100%;
+      max-width: 100%;
+      min-width: 0;
+
+      height: auto;
+      min-height: 0;
+
+      overflow: visible;
+    }
+
     .organization-layout__sidebar {
       position: fixed;
+
       top: 76px;
       left: 0;
+
       z-index: 1100;
 
-      width: min(
-        310px,
-        calc(100vw - 48px)
-      );
+      flex: none;
+
+      width:
+        min(
+          318px,
+          calc(100vw - 34px)
+        );
+
+      max-width:
+        min(
+          318px,
+          calc(100vw - 34px)
+        );
 
       min-width: 0;
 
-      height: calc(100vh - 76px);
+      height:
+        calc(
+          100vh - 76px
+        );
 
-      box-shadow: var(--shadow-xl);
+      min-height: 0;
 
-      transform: translateX(-102%);
+      overflow-x: hidden;
+      overflow-y: auto;
+
+      border-right:
+        2px solid var(--ink);
+
+      box-shadow:
+        8px 0 0 var(--acid);
+
+      background:
+        linear-gradient(
+          180deg,
+          var(--paper) 0%,
+          var(--paper-2) 100%
+        );
+
+      transform:
+        translateX(-105%);
 
       transition:
         transform 220ms ease;
@@ -1740,43 +2030,43 @@ const isActive = (
       transform: translateX(0);
     }
 
-    .organization-layout__backdrop {
-      position: fixed;
-      inset: 76px 0 0;
-      z-index: 1050;
+    .organization-layout__content {
+      width: 100%;
+      max-width: 100%;
 
-      display: block;
+      min-width: 0;
+      min-height: 0;
 
-      background:
-        rgba(
-          15,
-          23,
-          42,
-          0.35
-        );
+      display: flex;
 
-      opacity: 0;
-      visibility: hidden;
-      pointer-events: none;
+      overflow-x: hidden;
+      overflow-y: visible;
 
-      transition:
-        opacity 180ms ease,
-        visibility 180ms ease;
+      overscroll-behavior: auto;
     }
 
-    .organization-layout--sidebar-open
-      .organization-layout__backdrop {
-      opacity: 1;
-      visibility: visible;
-      pointer-events: auto;
-    }
-
-    .organization-layout__mobile-topbar {
+    .organization-layout__mobile-bar {
       display: flex;
       align-items: center;
+
       gap: 10px;
 
-      margin-bottom: 14px;
+      width: 100%;
+      max-width: 100%;
+      min-width: 0;
+
+      min-height: 70px;
+
+      padding:
+        12px 18px;
+
+      border-bottom:
+        2px solid var(--ink);
+
+      background:
+        var(--white);
+
+      overflow: hidden;
     }
 
     .organization-layout__mobile-toggle {
@@ -1785,41 +2075,47 @@ const isActive = (
 
       display: grid;
       place-items: center;
+
       flex-shrink: 0;
 
-      border: 1px solid var(--color-border);
-      border-radius: 9px;
+      border:
+        2px solid var(--ink);
 
-      color: var(--color-text);
-      background: var(--color-surface);
+      border-radius: 0;
+
+      color: var(--acid);
+
+      background:
+        var(--ink);
 
       cursor: pointer;
 
+      box-shadow:
+        3px 3px 0 var(--orange);
+
       transition:
-        color 160ms ease,
-        background-color 160ms ease,
-        border-color 160ms ease;
+        transform 150ms ease,
+        box-shadow 150ms ease;
     }
 
     .organization-layout__mobile-toggle:hover {
-      color: var(--color-primary-dark);
+      color: var(--ink);
 
-      border-color:
-        var(--color-primary);
+      background: var(--acid);
 
-      background:
-        var(--color-primary-light);
+      transform:
+        translate(-1px, -1px);
+
+      box-shadow:
+        4px 4px 0 var(--orange);
     }
 
     .organization-layout__mobile-toggle:focus-visible {
-      outline: 3px solid
-        color-mix(
-          in srgb,
-          var(--color-primary) 25%,
-          transparent
-        );
+      outline:
+        3px solid var(--orange);
 
-      outline-offset: 2px;
+      outline-offset:
+        3px;
     }
 
     .organization-layout__mobile-menu-icon,
@@ -1859,35 +2155,68 @@ const isActive = (
 
     .organization-layout__mobile-context {
       min-width: 0;
-      flex: 1;
+
+      flex: 1 1 auto;
 
       display: flex;
       flex-direction: column;
+
       gap: 3px;
+
+      overflow: hidden;
     }
 
     .organization-layout__mobile-context span {
-      color: var(--color-secondary);
+      min-width: 0;
 
-      font-size: 0.6rem;
-      font-weight: 650;
-      line-height: 1;
-    }
-
-    .organization-layout__mobile-context strong {
       overflow: hidden;
 
-      color: var(--color-text);
+      color: var(--orange);
 
-      font-size: 0.77rem;
-      font-weight: 800;
-      line-height: 1.25;
+      font-family:
+        "DM Mono",
+        "SFMono-Regular",
+        Consolas,
+        monospace;
+
+      font-size: 0.49rem;
+      font-weight: 700;
+
+      line-height: 1;
+
+      letter-spacing: 0.09em;
+
+      text-transform: uppercase;
 
       text-overflow: ellipsis;
+
       white-space: nowrap;
     }
 
-    .organization-layout__mobile-public-link {
+    .organization-layout__mobile-context strong {
+      min-width: 0;
+
+      overflow: hidden;
+
+      color: var(--ink);
+
+      font-family:
+        Sora,
+        Inter,
+        system-ui,
+        sans-serif;
+
+      font-size: 0.74rem;
+      font-weight: 800;
+
+      line-height: 1.25;
+
+      text-overflow: ellipsis;
+
+      white-space: nowrap;
+    }
+
+    .organization-layout__mobile-status {
       width: 40px;
       height: 40px;
 
@@ -1896,128 +2225,135 @@ const isActive = (
 
       flex-shrink: 0;
 
-      border: 1px solid var(--color-border);
-      border-radius: 9px;
+      border:
+        2px solid var(--ink);
 
-      color: var(--color-secondary);
-      background: var(--color-surface);
+      border-radius: 0;
 
-      text-decoration: none;
-
-      transition:
-        color 160ms ease,
-        background-color 160ms ease,
-        border-color 160ms ease;
-    }
-
-    .organization-layout__mobile-public-link:hover {
-      color: var(--color-primary-dark);
-
-      border-color:
-        var(--color-primary);
+      color: var(--ink);
 
       background:
-        var(--color-primary-light);
+        var(--acid);
     }
 
-    .organization-layout__header-container,
-    .organization-layout__main-container {
-      width: min(
-        calc(100% - 40px),
-        var(--container-xl, 1280px)
-      );
-    }
-  }
-
-  @media (max-width: 720px) {
-    .organization-layout__header-container {
-      padding-block: 18px 22px;
-    }
-
-    .organization-layout__title-row {
-      align-items: flex-start;
-      flex-direction: column;
-
-      gap: 18px;
-    }
-
-    .organization-layout__actions {
-      justify-content: flex-start;
+    .organization-layout__main {
       width: 100%;
+      max-width: 100%;
 
-      flex-wrap: wrap;
+      min-width: 0;
     }
 
     .organization-layout__main-container {
-      padding-top: 24px;
-      padding-bottom: 40px;
+      width: 100%;
+      max-width: 100%;
+
+      min-width: 0;
+
+      overflow-x: hidden;
+    }
+
+    .organization-layout__backdrop {
+      position: fixed;
+
+      inset:
+        76px 0 0;
+
+      z-index: 1050;
+
+      display: block;
+
+      width: 100%;
+      max-width: 100%;
+
+      background:
+        rgb(
+          9 10 8 / 58%
+        );
+
+      opacity: 0;
+
+      visibility: hidden;
+
+      pointer-events: none;
+
+      transition:
+        opacity 180ms ease,
+        visibility 180ms ease;
+    }
+
+    .organization-layout--sidebar-open
+      .organization-layout__backdrop {
+      opacity: 1;
+
+      visibility: visible;
+
+      pointer-events: auto;
     }
   }
+
+  /* ================================================================
+     SMALL MOBILE
+  ================================================================= */
 
   @media (max-width: 560px) {
     .organization-layout__sidebar {
       top: 70px;
-      height: calc(100vh - 70px);
+
+      width:
+        min(
+          300px,
+          calc(100vw - 24px)
+        );
+
+      max-width:
+        min(
+          300px,
+          calc(100vw - 24px)
+        );
+
+      height:
+        calc(
+          100vh - 70px
+        );
     }
 
     .organization-layout__backdrop {
-      inset: 70px 0 0;
+      inset:
+        70px 0 0;
     }
 
-    .organization-layout__header-container,
+    .organization-layout__mobile-bar {
+      min-height: 64px;
+
+      padding:
+        10px 12px;
+    }
+
     .organization-layout__main-container {
-      width: min(
-        calc(100% - 24px),
-        var(--container-xl, 1280px)
-      );
-    }
-
-    .organization-layout__title {
-      font-size: 1.48rem;
-    }
-
-    .organization-layout__description {
-      font-size: 0.77rem;
-    }
-
-    .organization-layout__breadcrumbs {
-      margin-bottom: 11px;
-    }
-
-    .organization-layout__breadcrumb-link,
-    .organization-layout__breadcrumb-current {
-      max-width: 180px;
-
-      font-size: 0.64rem;
-    }
-
-    .organization-layout__public-button {
       width: 100%;
+      max-width: 100%;
+
+      overflow-x: hidden;
     }
   }
 
-  /* -----------------------------------------------------------------------
-   * FOCUS
-   * --------------------------------------------------------------------- */
+  /* ================================================================
+     FOCUS
+  ================================================================= */
 
   .organization-layout__nav-item:focus-visible,
-  .organization-layout__sidebar-links a:focus-visible,
-  .organization-layout__public-button:focus-visible,
-  .organization-layout__mobile-public-link:focus-visible,
+  .organization-layout__secondary-link:focus-visible,
   .organization-layout__mobile-toggle:focus-visible {
-    outline: 3px solid
-      color-mix(
-        in srgb,
-        var(--color-primary) 25%,
-        transparent
-      );
+    outline:
+      3px solid var(--orange);
 
-    outline-offset: 2px;
+    outline-offset:
+      2px;
   }
 
-  /* -----------------------------------------------------------------------
-   * SCROLL LOCK
-   * --------------------------------------------------------------------- */
+  /* ================================================================
+     SCROLL LOCK
+  ================================================================= */
 
   :global(
     html.organization-scroll-locked
@@ -2028,9 +2364,9 @@ const isActive = (
     overflow: hidden;
   }
 
-  /* -----------------------------------------------------------------------
-   * REDUCED MOTION
-   * --------------------------------------------------------------------- */
+  /* ================================================================
+     REDUCED MOTION
+  ================================================================= */
 
   @media (prefers-reduced-motion: reduce) {
     .organization-layout,
