@@ -4,25 +4,22 @@
  * --------------------------------------------------------------------------
  * Internal administration workspace for BINSIGHT.
  *
- * Responsibilities:
- * - Internal admin shell
- * - Admin sidebar navigation
- * - System / verification context
- * - Breadcrumbs
- * - Page title / description
- * - Header actions slot
- * - Responsive mobile navigation
- * - Footer
- * - Lightweight UI behavior
+ * Architecture:
+ * - Global Navbar
+ * - Persistent desktop sidebar
+ * - Independent desktop sidebar scrolling
+ * - Independent main-content scrolling
+ * - Mobile sidebar drawer
+ * - Page-owned main content
+ * - Independent footer
  *
- * Intended pages:
- * - /admin
- * - /admin/organizations
- * - /admin/locations
- * - /admin/waste
- * - /admin/reports
- * - /admin/users
- * - /admin/content
+ * IMPORTANT:
+ * - No page-level admin header is rendered.
+ * - Pages own their own visual hierarchy.
+ * - Main content has no black wrapper/border.
+ * - Footer is structurally separated from workspace.
+ * - Layout must never create horizontal page overflow.
+ * - Desktop sidebar and main content scroll independently.
  *
  * Security note:
  * - This layout is UI infrastructure only.
@@ -34,10 +31,8 @@
 
 import {
   Activity,
-  BellRing,
   Building2,
   ChartColumn,
-  ChevronRight,
   CircleCheck,
   LayoutDashboard,
   LockKeyhole,
@@ -81,7 +76,8 @@ interface Props {
 
 const {
   title = "Admin Dashboard",
-  description = "Kelola data, verifikasi, konten, dan aktivitas platform BINSIGHT.",
+  description =
+    "Kelola data, verifikasi, konten, dan aktivitas platform BINSIGHT.",
   breadcrumbs = [
     {
       label: "Admin",
@@ -108,7 +104,7 @@ const appName =
   "BINSIGHT";
 
 const absoluteUrl = (
-  value: string
+  value: string,
 ): string => {
   if (
     value.startsWith("http://") ||
@@ -121,12 +117,12 @@ const absoluteUrl = (
     value.startsWith("/")
       ? value
       : `/${value}`,
-    siteUrl
+    siteUrl,
   ).toString();
 };
 
 const canonicalUrl = absoluteUrl(
-  Astro.url.pathname
+  Astro.url.pathname,
 );
 
 const fullTitle =
@@ -210,7 +206,7 @@ const managementLinks = [
 ];
 
 const isActive = (
-  section: AdminSection
+  section: AdminSection,
 ): boolean => {
   return activeSection === section;
 };
@@ -228,7 +224,7 @@ const isActive = (
 
     <meta
       name="theme-color"
-      content="#0F172A"
+      content="#090A08"
     />
 
     <meta
@@ -356,7 +352,14 @@ const isActive = (
     <div class="admin-layout__shell">
       <Navbar />
 
+      <!-- ============================================================
+           WORKSPACE
+           Sidebar + main content have independent vertical scrolling.
+      ============================================================= -->
       <div class="admin-layout__workspace">
+        <!-- ============================================================
+             SIDEBAR
+        ============================================================= -->
         <aside
           id="admin-sidebar"
           class="admin-layout__sidebar"
@@ -374,7 +377,9 @@ const isActive = (
                   />
                 </span>
 
-                <span>Admin BINSIGHT</span>
+                <span>
+                  Admin BINSIGHT
+                </span>
               </div>
 
               <span class="admin-layout__system-badge">
@@ -391,7 +396,9 @@ const isActive = (
               </div>
 
               <div class="admin-layout__admin-copy">
-                <strong>{adminName}</strong>
+                <strong>
+                  {adminName}
+                </strong>
 
                 <span>
                   <LockKeyhole
@@ -469,13 +476,17 @@ const isActive = (
                   />
                 </span>
 
-                <span>Status platform</span>
+                <span>
+                  Status platform
+                </span>
               </div>
 
               <div class="admin-layout__status-row">
                 <span class="admin-layout__status-dot"></span>
 
-                <span>Operasional</span>
+                <span>
+                  Operasional
+                </span>
               </div>
 
               <p>
@@ -512,7 +523,7 @@ const isActive = (
 
                       {item.label}
                     </a>
-                  )
+                  ),
                 )
               }
             </nav>
@@ -527,7 +538,9 @@ const isActive = (
               </span>
 
               <div>
-                <strong>Area terbatas</strong>
+                <strong>
+                  Area terbatas
+                </strong>
 
                 <p>
                   Halaman admin hanya untuk pengguna
@@ -538,150 +551,63 @@ const isActive = (
           </div>
         </aside>
 
+        <!-- ============================================================
+             CONTENT WORKSPACE
+        ============================================================= -->
         <div class="admin-layout__content">
-          <header class="admin-layout__header">
-            <div class="admin-layout__header-container">
-              <div class="admin-layout__mobile-topbar">
-                <button
-                  type="button"
-                  class="admin-layout__mobile-toggle"
-                  data-admin-sidebar-toggle
-                  aria-controls="admin-sidebar"
-                  aria-expanded="false"
-                  aria-label="Buka navigasi admin"
-                >
-                  <Menu
-                    class="admin-layout__mobile-menu-icon"
-                    size={20}
-                    stroke-width={2}
-                    aria-hidden="true"
-                  />
+          <!--
+            IMPORTANT:
+            Tidak menggunakan <header>.
+            Ini hanya mobile navigation utility.
+          -->
+          <div class="admin-layout__mobile-bar">
+            <button
+              type="button"
+              class="admin-layout__mobile-toggle"
+              data-admin-sidebar-toggle
+              aria-controls="admin-sidebar"
+              aria-expanded="false"
+              aria-label="Buka navigasi admin"
+            >
+              <Menu
+                class="admin-layout__mobile-menu-icon"
+                size={20}
+                stroke-width={2}
+                aria-hidden="true"
+              />
 
-                  <X
-                    class="admin-layout__mobile-close-icon"
-                    size={20}
-                    stroke-width={2}
-                    aria-hidden="true"
-                  />
-                </button>
+              <X
+                class="admin-layout__mobile-close-icon"
+                size={20}
+                stroke-width={2}
+                aria-hidden="true"
+              />
+            </button>
 
-                <div class="admin-layout__mobile-context">
-                  <span>Admin BINSIGHT</span>
+            <div class="admin-layout__mobile-context">
+              <span>
+                Admin BINSIGHT
+              </span>
 
-                  <strong>{title}</strong>
-                </div>
-
-                <div class="admin-layout__mobile-status">
-                  <CircleCheck
-                    size={17}
-                    stroke-width={2}
-                    aria-hidden="true"
-                  />
-                </div>
-              </div>
-
-              <div class="admin-layout__header-bar">
-                <nav
-                  class="admin-layout__breadcrumbs"
-                  aria-label="Breadcrumb admin"
-                >
-                  <ol class="admin-layout__breadcrumb-list">
-                    {
-                      breadcrumbs.map(
-                        (
-                          breadcrumb,
-                          index
-                        ) => {
-                          const isLast =
-                            index ===
-                            breadcrumbs.length -
-                              1;
-
-                          return (
-                            <li class="admin-layout__breadcrumb-item">
-                              {
-                                breadcrumb.href &&
-                                !isLast ? (
-                                  <a
-                                    href={
-                                      breadcrumb.href
-                                    }
-                                    class="admin-layout__breadcrumb-link"
-                                  >
-                                    {
-                                      breadcrumb.label
-                                    }
-                                  </a>
-                                ) : (
-                                  <span
-                                    class="admin-layout__breadcrumb-current"
-                                    aria-current={
-                                      isLast
-                                        ? "page"
-                                        : undefined
-                                    }
-                                  >
-                                    {
-                                      breadcrumb.label
-                                    }
-                                  </span>
-                                )
-                              }
-
-                              {
-                                !isLast && (
-                                  <ChevronRight
-                                    size={13}
-                                    stroke-width={1.8}
-                                    aria-hidden="true"
-                                  />
-                                )
-                              }
-                            </li>
-                          );
-                        }
-                      )
-                    }
-                  </ol>
-                </nav>
-
-                <div class="admin-layout__header-system">
-                  <span class="admin-layout__header-system-dot"></span>
-
-                  <span>
-                    System operational
-                  </span>
-
-                  <BellRing
-                    size={16}
-                    stroke-width={1.8}
-                    aria-hidden="true"
-                  />
-                </div>
-              </div>
-
-              <div class="admin-layout__title-row">
-                <div class="admin-layout__heading">
-                  <p class="admin-layout__eyebrow">
-                    BINSIGHT ADMINISTRATION
-                  </p>
-
-                  <h1 class="admin-layout__title">
-                    {title}
-                  </h1>
-
-                  <p class="admin-layout__description">
-                    {description}
-                  </p>
-                </div>
-
-                <div class="admin-layout__actions">
-                  <slot name="actions" />
-                </div>
-              </div>
+              <strong>
+                {title}
+              </strong>
             </div>
-          </header>
 
+            <div
+              class="admin-layout__mobile-status"
+              aria-hidden="true"
+            >
+              <CircleCheck
+                size={17}
+                stroke-width={2}
+              />
+            </div>
+          </div>
+
+          <!-- ==========================================================
+               PAGE-OWNED CONTENT
+          =========================================================== -->
           <main
             id="admin-main-content"
             class="admin-layout__main"
@@ -691,9 +617,14 @@ const isActive = (
               <slot />
             </div>
           </main>
-
-          <Footer />
         </div>
+      </div>
+
+      <!-- ============================================================
+           INDEPENDENT FOOTER
+      ============================================================= -->
+      <div class="admin-layout__footer">
+        <Footer />
       </div>
     </div>
 
@@ -703,37 +634,26 @@ const isActive = (
       aria-hidden="true"
     ></div>
 
-    <div
-      class="admin-layout__progress"
-      data-admin-progress
-      aria-hidden="true"
-    ></div>
-
     <script>
       const adminRoot =
         document.querySelector(
-          ".admin-layout"
+          ".admin-layout",
         );
 
       if (adminRoot) {
         const sidebar =
           adminRoot.querySelector(
-            "[data-admin-sidebar]"
+            "[data-admin-sidebar]",
           );
 
         const toggle =
           adminRoot.querySelector(
-            "[data-admin-sidebar-toggle]"
+            "[data-admin-sidebar-toggle]",
           );
 
         const backdrop =
           adminRoot.querySelector(
-            "[data-admin-backdrop]"
-          );
-
-        const progress =
-          adminRoot.querySelector(
-            "[data-admin-progress]"
+            "[data-admin-backdrop]",
           );
 
         const openSidebar = () => {
@@ -745,29 +665,29 @@ const isActive = (
           }
 
           sidebar.classList.add(
-            "admin-layout__sidebar--open"
+            "admin-layout__sidebar--open",
           );
 
           adminRoot.classList.add(
-            "admin-layout--sidebar-open"
+            "admin-layout--sidebar-open",
           );
 
           toggle.setAttribute(
             "aria-expanded",
-            "true"
+            "true",
           );
 
           toggle.setAttribute(
             "aria-label",
-            "Tutup navigasi admin"
+            "Tutup navigasi admin",
           );
 
           document.documentElement.classList.add(
-            "admin-scroll-locked"
+            "admin-scroll-locked",
           );
 
           document.body.classList.add(
-            "admin-scroll-locked"
+            "admin-scroll-locked",
           );
         };
 
@@ -780,29 +700,29 @@ const isActive = (
           }
 
           sidebar.classList.remove(
-            "admin-layout__sidebar--open"
+            "admin-layout__sidebar--open",
           );
 
           adminRoot.classList.remove(
-            "admin-layout--sidebar-open"
+            "admin-layout--sidebar-open",
           );
 
           toggle.setAttribute(
             "aria-expanded",
-            "false"
+            "false",
           );
 
           toggle.setAttribute(
             "aria-label",
-            "Buka navigasi admin"
+            "Buka navigasi admin",
           );
 
           document.documentElement.classList.remove(
-            "admin-scroll-locked"
+            "admin-scroll-locked",
           );
 
           document.body.classList.remove(
-            "admin-scroll-locked"
+            "admin-scroll-locked",
           );
         };
 
@@ -815,7 +735,7 @@ const isActive = (
               const isOpen =
                 sidebar instanceof HTMLElement &&
                 sidebar.classList.contains(
-                  "admin-layout__sidebar--open"
+                  "admin-layout__sidebar--open",
                 );
 
               if (isOpen) {
@@ -823,7 +743,7 @@ const isActive = (
               } else {
                 openSidebar();
               }
-            }
+            },
           );
         }
 
@@ -832,7 +752,7 @@ const isActive = (
         ) {
           backdrop.addEventListener(
             "click",
-            closeSidebar
+            closeSidebar,
           );
         }
 
@@ -844,7 +764,7 @@ const isActive = (
             .forEach((link) => {
               link.addEventListener(
                 "click",
-                closeSidebar
+                closeSidebar,
               );
             });
         }
@@ -855,7 +775,7 @@ const isActive = (
             if (event.key === "Escape") {
               closeSidebar();
             }
-          }
+          },
         );
 
         window.addEventListener(
@@ -864,57 +784,7 @@ const isActive = (
             if (window.innerWidth > 1000) {
               closeSidebar();
             }
-          }
-        );
-
-        const updateProgress = () => {
-          if (
-            !(progress instanceof HTMLElement)
-          ) {
-            return;
-          }
-
-          const height =
-            document.documentElement
-              .scrollHeight -
-            window.innerHeight;
-
-          if (height <= 0) {
-            progress.style.transform =
-              "scaleX(0)";
-
-            return;
-          }
-
-          const ratio =
-            Math.min(
-              Math.max(
-                window.scrollY / height,
-                0
-              ),
-              1
-            );
-
-          progress.style.transform =
-            `scaleX(${ratio})`;
-        };
-
-        updateProgress();
-
-        window.addEventListener(
-          "scroll",
-          updateProgress,
-          {
-            passive: true,
-          }
-        );
-
-        window.addEventListener(
-          "resize",
-          updateProgress,
-          {
-            passive: true,
-          }
+          },
         );
       }
     </script>
@@ -922,59 +792,173 @@ const isActive = (
 </html>
 
 <style>
+  /* ================================================================
+     GLOBAL BOX MODEL / OVERFLOW SAFETY
+  ================================================================= */
+
+  :global(*) {
+    box-sizing: border-box;
+  }
+
+  :global(html) {
+    width: 100%;
+    max-width: 100%;
+
+    margin: 0;
+    padding: 0;
+
+    overflow-x: hidden;
+  }
+
+  :global(body) {
+    width: 100%;
+    max-width: 100%;
+
+    margin: 0;
+    padding: 0;
+
+    overflow-x: hidden;
+  }
+
+  /* ================================================================
+     ROOT
+  ================================================================= */
+
   .admin-layout {
+    --acid: #dfff00;
+    --acid-soft: #efff70;
+    --ink: #090a08;
+    --ink-2: #11130f;
+    --ink-3: #1b1f18;
+    --paper: #f2f0e6;
+    --paper-2: #e4e1d4;
+    --paper-3: #cfcabd;
+    --white: #fffef8;
+    --muted: #6c7068;
+    --orange: #ff6a00;
+    --green: #87b800;
+
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+
     min-height: 100vh;
 
     margin: 0;
 
-    color: var(--color-text);
-    background: var(--color-background);
+    overflow-x: hidden;
+
+    color: var(--ink);
+    background: var(--paper);
   }
 
   .admin-layout__shell {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+
     min-height: 100vh;
 
     display: flex;
     flex-direction: column;
+
+    overflow-x: hidden;
+
+    background: var(--paper);
   }
 
+  /* ================================================================
+     WORKSPACE
+  ================================================================= */
+
   .admin-layout__workspace {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+
+    /*
+     * The workspace itself is a fixed-height viewport region.
+     * Sidebar and content scroll inside it independently.
+     */
+    height: calc(100vh - 76px);
     min-height: 0;
-    flex: 1 1 auto;
 
     display: flex;
     align-items: stretch;
+
+    overflow: hidden;
+
+    background: var(--paper);
   }
 
-  /* -----------------------------------------------------------------------
-   * SIDEBAR
-   * --------------------------------------------------------------------- */
+  /* ================================================================
+     SIDEBAR — DESKTOP INDEPENDENT SCROLL
+  ================================================================= */
 
   .admin-layout__sidebar {
-    position: sticky;
-    top: 76px;
+    position: relative;
 
-    width: 286px;
-    min-width: 286px;
+    flex:
+      0 0
+      292px;
 
-    height: calc(100vh - 76px);
+    width: 292px;
+    max-width: 292px;
+    min-width: 292px;
 
-    align-self: flex-start;
+    height: 100%;
+    min-height: 0;
 
+    /*
+     * Sidebar owns its own vertical scroll.
+     */
+    overflow-x: hidden;
     overflow-y: auto;
 
-    border-right: 1px solid var(--color-border);
+    overscroll-behavior: contain;
+
+    border-right: 2px solid var(--ink);
 
     background:
       linear-gradient(
         180deg,
-        #ffffff 0%,
-        #f8fafc 100%
+        var(--paper) 0%,
+        var(--paper-2) 100%
       );
+
+    color: var(--ink);
+
+    scrollbar-width: thin;
+    scrollbar-color:
+      #aaaD9f
+      transparent;
+  }
+
+  .admin-layout__sidebar::-webkit-scrollbar {
+    width: 7px;
+  }
+
+  .admin-layout__sidebar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .admin-layout__sidebar::-webkit-scrollbar-thumb {
+    background: #aaaD9f;
   }
 
   .admin-layout__sidebar-inner {
-    padding: 22px 14px 28px;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+
+    min-height: 100%;
+
+    display: flex;
+    flex-direction: column;
+
+    padding: 20px 14px 22px;
+
+    overflow-x: hidden;
   }
 
   .admin-layout__system-heading {
@@ -984,83 +968,124 @@ const isActive = (
 
     gap: 10px;
 
-    padding: 2px 8px 14px;
+    min-width: 0;
+
+    padding: 3px 8px 15px;
+
+    border-bottom: 2px solid var(--ink);
   }
 
   .admin-layout__system-title {
+    min-width: 0;
+
     display: flex;
     align-items: center;
 
-    gap: 8px;
+    gap: 9px;
 
+    color: var(--ink);
+
+    font-family:
+      Sora,
+      Inter,
+      system-ui,
+      sans-serif;
+
+    font-size: 0.7rem;
+    font-weight: 800;
+
+    letter-spacing: -0.015em;
+
+    text-transform: uppercase;
+  }
+
+  .admin-layout__system-title > span:last-child {
     min-width: 0;
 
-    color: var(--color-text);
+    overflow: hidden;
 
-    font-size: 0.76rem;
-    font-weight: 900;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .admin-layout__system-icon {
-    width: 29px;
-    height: 29px;
+    width: 30px;
+    height: 30px;
 
     display: grid;
     place-items: center;
 
     flex-shrink: 0;
 
-    border-radius: 8px;
+    border: 2px solid var(--ink);
 
-    color: #ffffff;
+    border-radius: 0;
 
-    background:
-      linear-gradient(
-        145deg,
-        #1e293b,
-        #0f172a
-      );
+    color: var(--acid);
+    background: var(--ink);
+
+    box-shadow:
+      3px 3px 0 var(--orange);
   }
 
   .admin-layout__system-badge {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
 
-    min-height: 21px;
+    flex-shrink: 0;
 
-    padding: 0 7px;
+    min-height: 22px;
 
-    border: 1px solid #cbd5e1;
-    border-radius: 999px;
+    padding: 0 8px;
 
-    color: #475569;
-    background: #f8fafc;
+    border: 1px solid var(--ink);
+    border-radius: 0;
 
-    font-size: 0.54rem;
-    font-weight: 900;
+    color: var(--ink);
+    background: var(--acid);
+
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+
+    font-size: 0.48rem;
+    font-weight: 700;
+
     line-height: 1;
 
     letter-spacing: 0.08em;
+
+    text-transform: uppercase;
   }
 
+  /* ================================================================
+     ADMIN IDENTITY
+  ================================================================= */
+
   .admin-layout__admin-card {
+    min-width: 0;
+    max-width: 100%;
+
     display: flex;
     align-items: center;
 
     gap: 11px;
 
-    margin: 0 2px 19px;
+    margin: 16px 2px 21px;
+
     padding: 12px;
 
-    border: 1px solid #e2e8f0;
-    border-radius: 13px;
+    border: 2px solid var(--ink);
 
-    background:
-      linear-gradient(
-        145deg,
-        #f8fafc,
-        #ffffff
-      );
+    border-radius: 0;
+
+    background: var(--white);
+
+    box-shadow:
+      4px 4px 0 var(--acid);
   }
 
   .admin-layout__admin-avatar {
@@ -1072,19 +1097,21 @@ const isActive = (
 
     flex-shrink: 0;
 
-    border-radius: 11px;
+    border: 2px solid var(--ink);
 
-    color: #ffffff;
+    border-radius: 0;
 
-    background:
-      linear-gradient(
-        145deg,
-        #334155,
-        #0f172a
-      );
+    color: var(--acid);
+    background: var(--ink);
 
-    font-size: 0.71rem;
-    font-weight: 900;
+    font-family:
+      Sora,
+      Inter,
+      system-ui,
+      sans-serif;
+
+    font-size: 0.68rem;
+    font-weight: 800;
 
     letter-spacing: 0.04em;
   }
@@ -1095,16 +1122,25 @@ const isActive = (
     display: flex;
     flex-direction: column;
 
-    gap: 5px;
+    gap: 4px;
   }
 
   .admin-layout__admin-copy strong {
+    min-width: 0;
+
     overflow: hidden;
 
-    color: var(--color-text);
+    color: var(--ink);
 
-    font-size: 0.77rem;
-    font-weight: 850;
+    font-family:
+      Sora,
+      Inter,
+      system-ui,
+      sans-serif;
+
+    font-size: 0.7rem;
+    font-weight: 800;
+
     line-height: 1.25;
 
     text-overflow: ellipsis;
@@ -1112,81 +1148,118 @@ const isActive = (
   }
 
   .admin-layout__admin-copy span {
+    min-width: 0;
+
     display: inline-flex;
     align-items: center;
 
-    gap: 4px;
+    gap: 5px;
 
-    color: #64748b;
+    color: var(--muted);
 
-    font-size: 0.61rem;
-    font-weight: 650;
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+
+    font-size: 0.49rem;
+    font-weight: 700;
+
     line-height: 1.2;
+
+    letter-spacing: 0.04em;
+
+    text-transform: uppercase;
   }
 
+  /* ================================================================
+     NAVIGATION
+  ================================================================= */
+
   .admin-layout__nav {
+    min-width: 0;
+
     display: grid;
-    gap: 3px;
+    gap: 5px;
   }
 
   .admin-layout__nav-label {
-    margin: 0 9px 7px;
+    min-width: 0;
 
-    color: #94a3b8;
+    margin: 0 9px 8px;
 
-    font-size: 0.6rem;
-    font-weight: 900;
+    color: var(--orange);
+
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+
+    font-size: 0.51rem;
+    font-weight: 700;
+
     line-height: 1;
 
-    letter-spacing: 0.075em;
+    letter-spacing: 0.1em;
+
     text-transform: uppercase;
   }
 
   .admin-layout__nav-item {
     position: relative;
 
+    min-width: 0;
+    max-width: 100%;
+
     display: flex;
     align-items: center;
 
     gap: 10px;
 
-    min-height: 53px;
+    min-height: 54px;
 
     padding: 7px 9px;
 
-    border: 1px solid transparent;
-    border-radius: 11px;
+    border: 2px solid transparent;
 
-    color: var(--color-secondary);
+    border-radius: 0;
+
+    color: #5f645c;
+
     background: transparent;
 
     text-decoration: none;
 
+    overflow: hidden;
+
     transition:
-      color 160ms ease,
-      background-color 160ms ease,
-      border-color 160ms ease,
-      transform 160ms ease;
+      color 150ms ease,
+      background 150ms ease,
+      border-color 150ms ease,
+      transform 150ms ease;
   }
 
   .admin-layout__nav-item:hover {
-    color: #1e293b;
-    background: #f1f5f9;
+    color: var(--ink);
 
-    transform: translateX(1px);
+    border-color: #bfc1b6;
+
+    background: var(--white);
+
+    transform: translateX(2px);
   }
 
   .admin-layout__nav-item--active {
-    color: #0f172a;
+    color: var(--ink);
 
-    border-color: #e2e8f0;
+    border-color: var(--ink);
 
-    background:
-      linear-gradient(
-        100deg,
-        #f1f5f9,
-        #f8fafc
-      );
+    background: var(--acid);
+
+    box-shadow:
+      4px 4px 0 var(--ink);
   }
 
   .admin-layout__nav-item--active::before {
@@ -1194,109 +1267,201 @@ const isActive = (
 
     position: absolute;
 
-    top: 9px;
-    bottom: 9px;
-    left: -14px;
+    top: -2px;
+    bottom: -2px;
 
-    width: 3px;
+    left: -16px;
 
-    border-radius: 0 999px 999px 0;
+    width: 4px;
 
-    background: #0f172a;
+    background: var(--orange);
   }
 
   .admin-layout__nav-icon {
-    width: 35px;
-    height: 35px;
+    width: 36px;
+    height: 36px;
 
     display: grid;
     place-items: center;
 
     flex-shrink: 0;
 
-    border-radius: 9px;
+    border: 1px solid #c6c8bc;
 
-    color: currentColor;
-    background: #f1f5f9;
+    border-radius: 0;
+
+    color: #5f645c;
+
+    background: #e7e5da;
 
     transition:
-      background-color 160ms ease,
-      color 160ms ease;
+      background 150ms ease,
+      color 150ms ease,
+      border-color 150ms ease;
+  }
+
+  .admin-layout__nav-item:hover
+    .admin-layout__nav-icon {
+    color: var(--ink);
+
+    border-color: var(--ink);
+
+    background: var(--paper);
   }
 
   .admin-layout__nav-item--active
     .admin-layout__nav-icon {
-    color: #ffffff;
-    background: #1e293b;
+    color: var(--acid);
+
+    border-color: var(--ink);
+
+    background: var(--ink);
   }
 
   .admin-layout__nav-copy {
     min-width: 0;
+    max-width: 100%;
 
     display: flex;
     flex-direction: column;
 
     gap: 3px;
+
+    overflow: hidden;
   }
 
   .admin-layout__nav-copy strong {
+    min-width: 0;
+
+    overflow: hidden;
+
     color: currentColor;
 
-    font-size: 0.75rem;
-    font-weight: 820;
+    font-family:
+      Sora,
+      Inter,
+      system-ui,
+      sans-serif;
+
+    font-size: 0.68rem;
+    font-weight: 800;
+
     line-height: 1.2;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .admin-layout__nav-copy small {
-    color: #64748b;
+    min-width: 0;
 
-    font-size: 0.61rem;
+    overflow: hidden;
+
+    color: #797d74;
+
+    font-family:
+      Inter,
+      system-ui,
+      sans-serif;
+
+    font-size: 0.57rem;
     font-weight: 500;
+
     line-height: 1.3;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
+
+  .admin-layout__nav-item--active
+    .admin-layout__nav-copy
+    small {
+    color: #4f542f;
+  }
+
+  /* ================================================================
+     DIVIDER
+  ================================================================= */
 
   .admin-layout__divider {
-    height: 1px;
+    width: calc(100% - 8px);
+    max-width: calc(100% - 8px);
 
-    margin: 21px 8px;
+    height: 2px;
 
-    background: var(--color-border);
+    margin: 18px 4px;
+
+    background: var(--ink);
   }
 
+  /* ================================================================
+     SYSTEM STATUS
+  ================================================================= */
+
   .admin-layout__system-status {
-    margin: 0 5px;
+    min-width: 0;
+    max-width: 100%;
 
-    padding: 12px;
+    padding: 13px;
 
-    border: 1px solid #e2e8f0;
-    border-radius: 11px;
+    border: 2px solid var(--ink);
 
-    background: #ffffff;
+    border-radius: 0;
+
+    background: var(--white);
+
+    overflow: hidden;
   }
 
   .admin-layout__system-status-header {
+    min-width: 0;
+
     display: flex;
     align-items: center;
 
-    gap: 8px;
+    gap: 7px;
 
-    color: #334155;
+    color: var(--ink);
 
-    font-size: 0.67rem;
-    font-weight: 850;
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+
+    font-size: 0.5rem;
+    font-weight: 700;
+
+    letter-spacing: 0.08em;
+
+    text-transform: uppercase;
+  }
+
+  .admin-layout__system-status-header > span:last-child {
+    min-width: 0;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .admin-layout__system-status-icon {
-    width: 27px;
-    height: 27px;
+    width: 25px;
+    height: 25px;
 
     display: grid;
     place-items: center;
 
-    border-radius: 7px;
+    flex-shrink: 0;
 
-    color: #334155;
-    background: #f1f5f9;
+    border: 1px solid var(--ink);
+
+    border-radius: 0;
+
+    color: var(--ink);
+
+    background: var(--acid);
   }
 
   .admin-layout__status-row {
@@ -1305,12 +1470,12 @@ const isActive = (
 
     gap: 7px;
 
-    margin-top: 10px;
+    margin-top: 11px;
 
-    color: #334155;
+    color: var(--ink);
 
-    font-size: 0.64rem;
-    font-weight: 750;
+    font-size: 0.62rem;
+    font-weight: 800;
   }
 
   .admin-layout__status-dot {
@@ -1319,343 +1484,243 @@ const isActive = (
 
     flex-shrink: 0;
 
-    border-radius: 999px;
-
-    background: #16a34a;
+    background: var(--green);
 
     box-shadow:
-      0 0 0 3px
-      rgba(22, 163, 74, 0.12);
+      0 0 0 3px rgb(135 184 0 / 15%);
   }
 
   .admin-layout__system-status p {
-    margin: 7px 0 0;
+    margin: 9px 0 0;
 
-    color: #64748b;
+    color: var(--muted);
 
-    font-size: 0.6rem;
+    font-size: 0.57rem;
+
     line-height: 1.55;
+
+    overflow-wrap: anywhere;
   }
 
+  /* ================================================================
+     SECONDARY NAV
+  ================================================================= */
+
   .admin-layout__secondary-nav {
+    min-width: 0;
+
     display: grid;
-    gap: 3px;
+    gap: 4px;
   }
 
   .admin-layout__secondary-link {
+    min-width: 0;
+    max-width: 100%;
+
     display: flex;
     align-items: center;
 
-    gap: 8px;
+    gap: 9px;
 
-    min-height: 36px;
+    min-height: 38px;
 
-    padding: 0 7px;
+    padding: 7px 9px;
 
-    border-radius: 8px;
+    border: 1px solid transparent;
 
-    color: #64748b;
+    border-radius: 0;
 
-    font-size: 0.65rem;
-    font-weight: 650;
+    color: #5f645c;
+
+    font-size: 0.62rem;
+    font-weight: 750;
 
     text-decoration: none;
 
-    transition:
-      color 160ms ease,
-      background-color 160ms ease;
-  }
+    overflow: hidden;
 
-  .admin-layout__secondary-link:hover {
-    color: #0f172a;
-    background: #f1f5f9;
+    transition:
+      color 150ms ease,
+      background 150ms ease,
+      border-color 150ms ease;
   }
 
   .admin-layout__secondary-link > span {
-    width: 26px;
-    height: 26px;
+    width: 28px;
+    height: 28px;
 
     display: grid;
     place-items: center;
 
-    border-radius: 7px;
+    flex-shrink: 0;
 
-    background: #f1f5f9;
+    border: 1px solid #c6c8bc;
+
+    border-radius: 0;
+
+    color: var(--muted);
+
+    background: #e7e5da;
   }
 
+  .admin-layout__secondary-link:hover {
+    color: var(--ink);
+
+    border-color: #bfc1b6;
+
+    background: var(--white);
+  }
+
+  .admin-layout__secondary-link:hover > span {
+    color: var(--ink);
+
+    border-color: var(--ink);
+
+    background: var(--acid);
+  }
+
+  /* ================================================================
+     SECURITY NOTE
+  ================================================================= */
+
   .admin-layout__security-note {
+    min-width: 0;
+    max-width: 100%;
+
     display: flex;
     align-items: flex-start;
 
     gap: 9px;
 
-    margin: 18px 5px 0;
+    margin-top: auto;
 
-    padding: 11px;
+    padding: 12px;
 
-    border: 1px solid #e2e8f0;
-    border-radius: 10px;
+    border:
+      1px solid #c9cbbf;
 
-    background: #f8fafc;
+    border-left:
+      3px solid var(--orange);
+
+    border-radius: 0;
+
+    background: var(--paper-2);
+
+    overflow: hidden;
   }
 
   .admin-layout__security-icon {
-    width: 27px;
-    height: 27px;
+    width: 28px;
+    height: 28px;
 
     display: grid;
     place-items: center;
 
     flex-shrink: 0;
 
-    border-radius: 7px;
+    border: 1px solid var(--ink);
 
-    color: #475569;
-    background: #ffffff;
+    border-radius: 0;
+
+    color: var(--acid);
+
+    background: var(--ink);
+  }
+
+  .admin-layout__security-note > div {
+    min-width: 0;
   }
 
   .admin-layout__security-note strong {
     display: block;
 
-    color: #334155;
+    color: var(--ink);
 
-    font-size: 0.64rem;
-    font-weight: 850;
-    line-height: 1.3;
+    font-size: 0.6rem;
+    font-weight: 800;
+
+    text-transform: uppercase;
   }
 
   .admin-layout__security-note p {
     margin: 4px 0 0;
 
-    color: #64748b;
+    color: var(--muted);
 
-    font-size: 0.59rem;
-    line-height: 1.5;
+    font-size: 0.55rem;
+
+    line-height: 1.55;
+
+    overflow-wrap: anywhere;
   }
 
-  /* -----------------------------------------------------------------------
-   * CONTENT
-   * --------------------------------------------------------------------- */
+  /* ================================================================
+     MAIN CONTENT — INDEPENDENT SCROLL
+  ================================================================= */
 
   .admin-layout__content {
+    flex:
+      1 1 0;
+
+    width: 0;
+    max-width: calc(100% - 292px);
+
     min-width: 0;
-    flex: 1 1 auto;
+    min-height: 0;
 
     display: flex;
     flex-direction: column;
+
+    /*
+     * Main content owns its vertical scrollbar.
+     */
+    overflow-x: hidden;
+    overflow-y: auto;
+
+    overscroll-behavior: contain;
+
+    background: var(--paper);
+
+    scrollbar-width: thin;
+    scrollbar-color:
+      #aaaD9f
+      transparent;
   }
 
-  .admin-layout__header {
-    position: relative;
-    z-index: 5;
-
-    border-bottom: 1px solid var(--color-border);
-
-    background:
-      radial-gradient(
-        circle at 88% 14%,
-        rgba(100, 116, 139, 0.08),
-        transparent 27%
-      ),
-      linear-gradient(
-        135deg,
-        rgba(255, 255, 255, 0.99),
-        rgba(248, 250, 252, 0.97)
-      );
+  .admin-layout__content::-webkit-scrollbar {
+    width: 8px;
   }
 
-  .admin-layout__header-container {
-    width: min(
-      calc(100% - 48px),
-      var(--container-xl, 1280px)
-    );
-
-    margin-inline: auto;
-
-    padding: 20px 0 27px;
+  .admin-layout__content::-webkit-scrollbar-track {
+    background: transparent;
   }
 
-  .admin-layout__mobile-topbar {
+  .admin-layout__content::-webkit-scrollbar-thumb {
+    background: #aaaD9f;
+  }
+
+  /*
+   * NO ADMIN HEADER.
+   */
+
+  .admin-layout__mobile-bar {
     display: none;
   }
 
-  .admin-layout__header-bar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-
-    gap: 20px;
-
-    margin-bottom: 15px;
-  }
-
-  .admin-layout__breadcrumbs {
-    min-width: 0;
-  }
-
-  .admin-layout__breadcrumb-list {
-    display: flex;
-    align-items: center;
-
-    flex-wrap: wrap;
-
-    gap: 3px;
-
-    margin: 0;
-    padding: 0;
-
-    list-style: none;
-  }
-
-  .admin-layout__breadcrumb-item {
-    display: inline-flex;
-    align-items: center;
-
-    gap: 3px;
-
-    min-width: 0;
-
-    color: #64748b;
-  }
-
-  .admin-layout__breadcrumb-item svg {
-    flex-shrink: 0;
-
-    color: #94a3b8;
-  }
-
-  .admin-layout__breadcrumb-link,
-  .admin-layout__breadcrumb-current {
-    max-width: 260px;
-
-    overflow: hidden;
-
-    font-size: 0.66rem;
-    font-weight: 650;
-    line-height: 1.35;
-
-    text-decoration: none;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .admin-layout__breadcrumb-link {
-    color: #64748b;
-
-    transition: color 160ms ease;
-  }
-
-  .admin-layout__breadcrumb-link:hover {
-    color: #0f172a;
-  }
-
-  .admin-layout__breadcrumb-current {
-    color: #334155;
-    font-weight: 750;
-  }
-
-  .admin-layout__header-system {
-    display: flex;
-    align-items: center;
-
-    gap: 8px;
-
-    color: #64748b;
-
-    font-size: 0.64rem;
-    font-weight: 650;
-  }
-
-  .admin-layout__header-system-dot {
-    width: 7px;
-    height: 7px;
-
-    border-radius: 999px;
-
-    background: #16a34a;
-
-    box-shadow:
-      0 0 0 3px
-      rgba(22, 163, 74, 0.1);
-  }
-
-  .admin-layout__header-system svg {
-    margin-left: 3px;
-
-    color: #94a3b8;
-  }
-
-  .admin-layout__title-row {
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-
-    gap: 30px;
-  }
-
-  .admin-layout__heading {
-    min-width: 0;
-    max-width: 800px;
-  }
-
-  .admin-layout__eyebrow {
-    margin: 0 0 8px;
-
-    color: #64748b;
-
-    font-size: 0.61rem;
-    font-weight: 900;
-    line-height: 1;
-
-    letter-spacing: 0.11em;
-  }
-
-  .admin-layout__title {
-    margin: 0;
-
-    color: #0f172a;
-
-    font-size: clamp(
-      1.5rem,
-      2.8vw,
-      2.18rem
-    );
-
-    font-weight: 900;
-    line-height: 1.08;
-
-    letter-spacing: -0.03em;
-  }
-
-  .admin-layout__description {
-    max-width: 700px;
-
-    margin: 9px 0 0;
-
-    color: #64748b;
-
-    font-size: 0.82rem;
-    font-weight: 500;
-    line-height: 1.65;
-  }
-
-  .admin-layout__actions {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-
-    flex-shrink: 0;
-
-    gap: 8px;
-
-    flex-wrap: wrap;
-  }
-
   .admin-layout__main {
+    flex:
+      1 0 auto;
+
+    width: 100%;
+    max-width: 100%;
+
     min-width: 0;
-    flex: 1 1 auto;
 
     outline: none;
+
+    overflow-x: hidden;
+
+    background: var(--paper);
   }
 
   .admin-layout__main:focus {
@@ -1663,45 +1728,127 @@ const isActive = (
   }
 
   .admin-layout__main-container {
-    width: min(
-      calc(100% - 48px),
-      var(--container-xl, 1280px)
-    );
+    width: 100%;
+    max-width: 100%;
 
-    margin-inline: auto;
+    min-width: 0;
 
-    padding: 30px 0 50px;
+    margin: 0;
+
+    padding: 0;
+
+    overflow-x: hidden;
+
+    background: transparent;
   }
 
-  /* -----------------------------------------------------------------------
-   * MOBILE
-   * --------------------------------------------------------------------- */
+  .admin-layout__main-container > * {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .admin-layout__main-container img,
+  .admin-layout__main-container svg,
+  .admin-layout__main-container video,
+  .admin-layout__main-container canvas,
+  .admin-layout__main-container iframe {
+    max-width: 100%;
+  }
+
+  .admin-layout__main-container
+    :where(
+      p,
+      h1,
+      h2,
+      h3,
+      h4,
+      h5,
+      h6,
+      span,
+      strong,
+      small,
+      a,
+      li,
+      td,
+      th
+    ) {
+    overflow-wrap: anywhere;
+  }
+
+  .admin-layout__main-container table {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .admin-layout__main-container
+    :where(
+      pre,
+      .table-wrapper,
+      [data-table-scroll]
+    ) {
+    max-width: 100%;
+    overflow-x: auto;
+  }
+
+  .admin-layout__main-container
+    :where(
+      [class*="grid"],
+      [class*="row"],
+      [class*="flex"]
+    ) {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .admin-layout__main-container
+    :where(
+      [class*="grid"] > *,
+      [class*="row"] > *,
+      [class*="flex"] > *
+    ) {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  /* ================================================================
+     FOOTER
+  ================================================================= */
+
+  .admin-layout__footer {
+    flex:
+      0 0 auto;
+
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+
+    overflow-x: hidden;
+
+    border-top: 2px solid var(--ink);
+
+    background: var(--ink);
+
+    color: var(--white);
+  }
+
+  /* ================================================================
+     BACKDROP
+  ================================================================= */
 
   .admin-layout__backdrop {
     display: none;
   }
 
-  .admin-layout__progress {
-    position: fixed;
-    top: 0;
-    left: 0;
-    z-index: 2300;
-
-    width: 100%;
-    height: 2px;
-
-    background: #334155;
-
-    transform: scaleX(0);
-    transform-origin: left center;
-
-    pointer-events: none;
-  }
+  /* ================================================================
+     SKIP LINK
+  ================================================================= */
 
   .admin-layout__skip-link {
     position: fixed;
+
     top: 12px;
     left: 12px;
+
     z-index: 2400;
 
     display: inline-flex;
@@ -1710,17 +1857,27 @@ const isActive = (
 
     min-height: 42px;
 
+    max-width: calc(100vw - 24px);
+
     padding: 0 15px;
 
-    border: 1px solid #0f172a;
-    border-radius: 9px;
+    border: 2px solid var(--ink);
 
-    color: #ffffff;
-    background: #0f172a;
+    border-radius: 0;
 
-    box-shadow: var(--shadow-lg);
+    color: var(--acid);
 
-    font-size: 0.8rem;
+    background: var(--ink);
+
+    box-shadow:
+      5px 5px 0 var(--orange);
+
+    font-family:
+      Inter,
+      system-ui,
+      sans-serif;
+
+    font-size: 0.72rem;
     font-weight: 800;
 
     text-decoration: none;
@@ -1737,12 +1894,33 @@ const isActive = (
 
   .admin-layout__skip-link:focus {
     opacity: 1;
+
     pointer-events: auto;
 
     transform: translateY(0);
   }
 
+  /* ================================================================
+     MOBILE
+  ================================================================= */
+
   @media (max-width: 1000px) {
+    .admin-layout__workspace {
+      display: block;
+
+      width: 100%;
+      max-width: 100%;
+      min-width: 0;
+
+      height: auto;
+      min-height: 0;
+
+      overflow: visible;
+    }
+
+    /*
+     * Mobile sidebar becomes a drawer.
+     */
     .admin-layout__sidebar {
       position: fixed;
 
@@ -1751,18 +1929,47 @@ const isActive = (
 
       z-index: 1100;
 
-      width: min(
-        310px,
-        calc(100vw - 48px)
-      );
+      flex: none;
+
+      width:
+        min(
+          318px,
+          calc(100vw - 34px)
+        );
+
+      max-width:
+        min(
+          318px,
+          calc(100vw - 34px)
+        );
 
       min-width: 0;
 
-      height: calc(100vh - 76px);
+      height:
+        calc(
+          100vh - 76px
+        );
 
-      box-shadow: var(--shadow-xl);
+      min-height: 0;
 
-      transform: translateX(-102%);
+      overflow-x: hidden;
+      overflow-y: auto;
+
+      border-right:
+        2px solid var(--ink);
+
+      box-shadow:
+        8px 0 0 var(--acid);
+
+      background:
+        linear-gradient(
+          180deg,
+          var(--paper) 0%,
+          var(--paper-2) 100%
+        );
+
+      transform:
+        translateX(-105%);
 
       transition:
         transform 220ms ease;
@@ -1772,46 +1979,52 @@ const isActive = (
       transform: translateX(0);
     }
 
-    .admin-layout__backdrop {
-      position: fixed;
+    .admin-layout__sidebar-inner {
+      min-height: 100%;
 
-      inset: 76px 0 0;
-
-      z-index: 1050;
-
-      display: block;
-
-      background:
-        rgba(
-          15,
-          23,
-          42,
-          0.38
-        );
-
-      opacity: 0;
-      visibility: hidden;
-      pointer-events: none;
-
-      transition:
-        opacity 180ms ease,
-        visibility 180ms ease;
+      overflow-x: hidden;
     }
 
-    .admin-layout--sidebar-open
-      .admin-layout__backdrop {
-      opacity: 1;
-      visibility: visible;
-      pointer-events: auto;
+    /*
+     * Mobile page returns to normal browser scrolling.
+     */
+    .admin-layout__content {
+      width: 100%;
+      max-width: 100%;
+
+      min-width: 0;
+      min-height: 0;
+
+      display: flex;
+
+      overflow-x: hidden;
+      overflow-y: visible;
+
+      overscroll-behavior: auto;
     }
 
-    .admin-layout__mobile-topbar {
+    .admin-layout__mobile-bar {
       display: flex;
       align-items: center;
 
       gap: 10px;
 
-      margin-bottom: 13px;
+      width: 100%;
+      max-width: 100%;
+      min-width: 0;
+
+      min-height: 70px;
+
+      padding:
+        12px 18px;
+
+      border-bottom:
+        2px solid var(--ink);
+
+      background:
+        var(--white);
+
+      overflow: hidden;
     }
 
     .admin-layout__mobile-toggle {
@@ -1823,31 +2036,44 @@ const isActive = (
 
       flex-shrink: 0;
 
-      border: 1px solid var(--color-border);
-      border-radius: 9px;
+      border:
+        2px solid var(--ink);
 
-      color: #334155;
-      background: #ffffff;
+      border-radius: 0;
+
+      color: var(--acid);
+
+      background:
+        var(--ink);
 
       cursor: pointer;
 
+      box-shadow:
+        3px 3px 0 var(--orange);
+
       transition:
-        color 160ms ease,
-        background-color 160ms ease,
-        border-color 160ms ease;
+        transform 150ms ease,
+        box-shadow 150ms ease;
     }
 
     .admin-layout__mobile-toggle:hover {
-      color: #0f172a;
-      background: #f1f5f9;
-      border-color: #cbd5e1;
+      color: var(--ink);
+
+      background: var(--acid);
+
+      transform:
+        translate(-1px, -1px);
+
+      box-shadow:
+        4px 4px 0 var(--orange);
     }
 
     .admin-layout__mobile-toggle:focus-visible {
-      outline: 3px solid
-        rgba(15, 23, 42, 0.14);
+      outline:
+        3px solid var(--orange);
 
-      outline-offset: 2px;
+      outline-offset:
+        3px;
     }
 
     .admin-layout__mobile-menu-icon,
@@ -1887,32 +2113,64 @@ const isActive = (
 
     .admin-layout__mobile-context {
       min-width: 0;
-      flex: 1;
+
+      flex: 1 1 auto;
 
       display: flex;
       flex-direction: column;
 
       gap: 3px;
+
+      overflow: hidden;
     }
 
     .admin-layout__mobile-context span {
-      color: #64748b;
+      min-width: 0;
 
-      font-size: 0.59rem;
+      overflow: hidden;
+
+      color: var(--orange);
+
+      font-family:
+        "DM Mono",
+        "SFMono-Regular",
+        Consolas,
+        monospace;
+
+      font-size: 0.49rem;
       font-weight: 700;
+
       line-height: 1;
+
+      letter-spacing: 0.09em;
+
+      text-transform: uppercase;
+
+      text-overflow: ellipsis;
+
+      white-space: nowrap;
     }
 
     .admin-layout__mobile-context strong {
+      min-width: 0;
+
       overflow: hidden;
 
-      color: #0f172a;
+      color: var(--ink);
 
-      font-size: 0.76rem;
+      font-family:
+        Sora,
+        Inter,
+        system-ui,
+        sans-serif;
+
+      font-size: 0.74rem;
       font-weight: 800;
+
       line-height: 1.25;
 
       text-overflow: ellipsis;
+
       white-space: nowrap;
     }
 
@@ -1925,110 +2183,135 @@ const isActive = (
 
       flex-shrink: 0;
 
-      border: 1px solid #dcfce7;
-      border-radius: 9px;
+      border:
+        2px solid var(--ink);
 
-      color: #15803d;
-      background: #f0fdf4;
+      border-radius: 0;
+
+      color: var(--ink);
+
+      background:
+        var(--acid);
     }
 
-    .admin-layout__header-container,
+    .admin-layout__main {
+      width: 100%;
+      max-width: 100%;
+
+      min-width: 0;
+    }
+
     .admin-layout__main-container {
-      width: min(
-        calc(100% - 40px),
-        var(--container-xl, 1280px)
-      );
-    }
-  }
+      width: 100%;
+      max-width: 100%;
 
-  @media (max-width: 720px) {
-    .admin-layout__header-container {
-      padding-block: 18px 22px;
+      min-width: 0;
+
+      overflow-x: hidden;
     }
 
-    .admin-layout__header-bar {
-      align-items: flex-start;
+    .admin-layout__backdrop {
+      position: fixed;
 
-      flex-direction: column;
+      inset:
+        76px 0 0;
 
-      gap: 8px;
-    }
+      z-index: 1050;
 
-    .admin-layout__title-row {
-      align-items: flex-start;
-
-      flex-direction: column;
-
-      gap: 18px;
-    }
-
-    .admin-layout__actions {
-      justify-content: flex-start;
+      display: block;
 
       width: 100%;
+      max-width: 100%;
+
+      background:
+        rgb(
+          9 10 8 / 58%
+        );
+
+      opacity: 0;
+
+      visibility: hidden;
+
+      pointer-events: none;
+
+      transition:
+        opacity 180ms ease,
+        visibility 180ms ease;
     }
 
-    .admin-layout__main-container {
-      padding-top: 24px;
-      padding-bottom: 40px;
+    .admin-layout--sidebar-open
+      .admin-layout__backdrop {
+      opacity: 1;
+
+      visibility: visible;
+
+      pointer-events: auto;
     }
   }
+
+  /* ================================================================
+     SMALL MOBILE
+  ================================================================= */
 
   @media (max-width: 560px) {
     .admin-layout__sidebar {
       top: 70px;
 
-      height: calc(100vh - 70px);
+      width:
+        min(
+          300px,
+          calc(100vw - 24px)
+        );
+
+      max-width:
+        min(
+          300px,
+          calc(100vw - 24px)
+        );
+
+      height:
+        calc(
+          100vh - 70px
+        );
     }
 
     .admin-layout__backdrop {
-      inset: 70px 0 0;
+      inset:
+        70px 0 0;
     }
 
-    .admin-layout__header-container,
+    .admin-layout__mobile-bar {
+      min-height: 64px;
+
+      padding:
+        10px 12px;
+    }
+
     .admin-layout__main-container {
-      width: min(
-        calc(100% - 24px),
-        var(--container-xl, 1280px)
-      );
-    }
+      width: 100%;
+      max-width: 100%;
 
-    .admin-layout__title {
-      font-size: 1.48rem;
-    }
-
-    .admin-layout__description {
-      font-size: 0.77rem;
-    }
-
-    .admin-layout__breadcrumb-link,
-    .admin-layout__breadcrumb-current {
-      max-width: 180px;
-
-      font-size: 0.63rem;
-    }
-
-    .admin-layout__header-system {
-      font-size: 0.6rem;
+      overflow-x: hidden;
     }
   }
 
-  /* -----------------------------------------------------------------------
-   * FOCUS
-   * --------------------------------------------------------------------- */
+  /* ================================================================
+     FOCUS
+  ================================================================= */
 
   .admin-layout__nav-item:focus-visible,
   .admin-layout__secondary-link:focus-visible,
   .admin-layout__mobile-toggle:focus-visible {
-    outline: 3px solid
-      rgba(15, 23, 42, 0.14);
+    outline:
+      3px solid var(--orange);
 
-    outline-offset: 2px;
+    outline-offset:
+      2px;
   }
 
-  /* -----------------------------------------------------------------------
-   * SCROLL LOCK
-   * --------------------------------------------------------------------- */
+  /* ================================================================
+     SCROLL LOCK
+  ================================================================= */
 
   :global(
     html.admin-scroll-locked
@@ -2039,9 +2322,9 @@ const isActive = (
     overflow: hidden;
   }
 
-  /* -----------------------------------------------------------------------
-   * REDUCED MOTION
-   * --------------------------------------------------------------------- */
+  /* ================================================================
+     REDUCED MOTION
+  ================================================================= */
 
   @media (prefers-reduced-motion: reduce) {
     .admin-layout,
@@ -2050,11 +2333,14 @@ const isActive = (
     .admin-layout::after {
       scroll-behavior: auto !important;
 
-      transition-duration: 0.01ms !important;
+      transition-duration:
+        0.01ms !important;
 
-      animation-duration: 0.01ms !important;
+      animation-duration:
+        0.01ms !important;
 
-      animation-iteration-count: 1 !important;
+      animation-iteration-count:
+        1 !important;
     }
   }
 </style>
