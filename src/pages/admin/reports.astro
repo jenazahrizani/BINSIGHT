@@ -170,28 +170,44 @@ const typeLabels: Record<
   other: "Lainnya",
 };
 
-const totalReports = reports.length;
+const totalReports =
+  reports.length;
 
-const pendingCount = reports.filter(
-  (report) =>
-    report.status === "pending",
-).length;
+const pendingCount =
+  reports.filter(
+    (report) =>
+      report.status === "pending",
+  ).length;
 
-const activeCount = reports.filter(
-  (report) =>
-    report.status === "verified" ||
-    report.status === "in-progress",
-).length;
+const activeCount =
+  reports.filter(
+    (report) =>
+      report.status === "verified" ||
+      report.status === "in-progress",
+  ).length;
 
-const resolvedCount = reports.filter(
-  (report) =>
-    report.status === "resolved",
-).length;
+const resolvedCount =
+  reports.filter(
+    (report) =>
+      report.status === "resolved",
+  ).length;
 
-const highPriorityCount = reports.filter(
-  (report) =>
-    report.priority === "high",
-).length;
+const highPriorityCount =
+  reports.filter(
+    (report) =>
+      report.priority === "high",
+  ).length;
+
+const reportsPayload =
+  reports.map((report) => ({
+    ...report,
+    typeLabel:
+      typeLabels[report.type],
+    statusLabel:
+      statusLabels[report.status],
+    priorityLabel:
+      priorityLabels[report.priority],
+  }));
 
 const jsonLd = {
   "@context": "https://schema.org",
@@ -211,6 +227,7 @@ const jsonLd = {
 <AdminLayout
   title="Laporan"
   description="Tinjau, verifikasi, dan monitor laporan masyarakat tentang persampahan."
+  activeSection="reports"
 >
   <script
     type="application/ld+json"
@@ -222,41 +239,63 @@ const jsonLd = {
     class="reports-page"
     data-reports-page
   >
-    <header class="page-top">
-      <div class="page-top__main">
-        <div class="page-top__eyebrow">
-          <span class="page-top__eyebrow-icon">
+    <script
+      id="admin-reports-data"
+      type="application/json"
+      is:inline
+      set:html={JSON.stringify(reportsPayload)}
+    />
+
+    <section class="page-intro">
+      <div class="page-intro__main">
+        <div class="page-intro__eyebrow">
+          <span class="page-intro__mark">
             <FileText
               size={15}
-              stroke-width={2}
+              stroke-width={2.2}
               aria-hidden="true"
             />
           </span>
 
           <span>
-            REPORT MANAGEMENT
+            REPORT MANAGEMENT / ADMIN
           </span>
         </div>
 
-        <h1>
-          Laporan
-        </h1>
+        <div class="page-intro__heading-row">
+          <div>
+            <h1>
+              Laporan
+            </h1>
 
-        <p>
-          Tinjau laporan masyarakat, periksa informasi, tetapkan prioritas,
-          dan pantau status penanganannya dalam satu workspace admin.
-        </p>
+            <p>
+              Tinjau masukan masyarakat, periksa informasi, tetapkan
+              prioritas, dan pantau status tindak lanjut laporan dalam
+              satu workspace admin.
+            </p>
+          </div>
+
+          <div class="page-intro__code">
+            <span>
+              QUEUE
+            </span>
+
+            <strong>
+              / REPORTS
+            </strong>
+          </div>
+        </div>
       </div>
 
-      <div class="page-top__actions">
+      <div class="page-intro__actions">
         <button
           type="button"
-          class="button button--secondary"
+          class="button button--light"
           data-refresh
         >
           <RefreshCw
             size={16}
-            stroke-width={2}
+            stroke-width={2.2}
             aria-hidden="true"
           />
 
@@ -271,13 +310,19 @@ const jsonLd = {
         >
           <Eye
             size={16}
-            stroke-width={2}
+            stroke-width={2.1}
             aria-hidden="true"
           />
 
           <span>
             Lihat publik
           </span>
+
+          <ArrowRight
+            size={14}
+            stroke-width={2.1}
+            aria-hidden="true"
+          />
         </a>
 
         <a
@@ -286,7 +331,7 @@ const jsonLd = {
         >
           <Plus
             size={17}
-            stroke-width={2}
+            stroke-width={2.2}
             aria-hidden="true"
           />
 
@@ -295,28 +340,37 @@ const jsonLd = {
           </span>
         </a>
       </div>
-    </header>
+    </section>
 
     <section
       class="summary-grid"
       aria-label="Ringkasan laporan"
     >
-      <article class="summary-card">
+      <article class="summary-card summary-card--primary">
         <div class="summary-card__top">
-          <span class="summary-card__label">
-            Total laporan
-          </span>
+          <div>
+            <span class="summary-card__eyebrow">
+              TOTAL
+            </span>
 
-          <span class="summary-card__icon summary-card__icon--green">
+            <span class="summary-card__label">
+              Semua laporan
+            </span>
+          </div>
+
+          <span class="summary-card__icon">
             <FileText
-              size={18}
-              stroke-width={1.9}
+              size={17}
+              stroke-width={2.1}
               aria-hidden="true"
             />
           </span>
         </div>
 
-        <strong class="summary-card__value">
+        <strong
+          class="summary-card__value"
+          data-total-count
+        >
           {totalReports}
         </strong>
 
@@ -327,20 +381,29 @@ const jsonLd = {
 
       <article class="summary-card">
         <div class="summary-card__top">
-          <span class="summary-card__label">
-            Menunggu
-          </span>
+          <div>
+            <span class="summary-card__eyebrow">
+              PENDING
+            </span>
 
-          <span class="summary-card__icon summary-card__icon--pending">
+            <span class="summary-card__label">
+              Menunggu
+            </span>
+          </div>
+
+          <span class="summary-card__icon summary-card__icon--orange">
             <Clock3
-              size={18}
-              stroke-width={1.9}
+              size={17}
+              stroke-width={2.1}
               aria-hidden="true"
             />
           </span>
         </div>
 
-        <strong class="summary-card__value">
+        <strong
+          class="summary-card__value"
+          data-pending-count
+        >
           {pendingCount}
         </strong>
 
@@ -351,20 +414,29 @@ const jsonLd = {
 
       <article class="summary-card">
         <div class="summary-card__top">
-          <span class="summary-card__label">
-            Sedang diproses
-          </span>
+          <div>
+            <span class="summary-card__eyebrow">
+              ACTIVE
+            </span>
 
-          <span class="summary-card__icon summary-card__icon--active">
+            <span class="summary-card__label">
+              Sedang diproses
+            </span>
+          </div>
+
+          <span class="summary-card__icon summary-card__icon--blue">
             <Clock3
-              size={18}
-              stroke-width={1.9}
+              size={17}
+              stroke-width={2.1}
               aria-hidden="true"
             />
           </span>
         </div>
 
-        <strong class="summary-card__value">
+        <strong
+          class="summary-card__value"
+          data-active-count
+        >
           {activeCount}
         </strong>
 
@@ -375,20 +447,29 @@ const jsonLd = {
 
       <article class="summary-card">
         <div class="summary-card__top">
-          <span class="summary-card__label">
-            Selesai
-          </span>
+          <div>
+            <span class="summary-card__eyebrow">
+              RESOLVED
+            </span>
 
-          <span class="summary-card__icon summary-card__icon--resolved">
+            <span class="summary-card__label">
+              Selesai
+            </span>
+          </div>
+
+          <span class="summary-card__icon summary-card__icon--green">
             <CircleCheck
-              size={18}
-              stroke-width={1.9}
+              size={17}
+              stroke-width={2.1}
               aria-hidden="true"
             />
           </span>
         </div>
 
-        <strong class="summary-card__value">
+        <strong
+          class="summary-card__value"
+          data-resolved-count
+        >
           {resolvedCount}
         </strong>
 
@@ -398,11 +479,14 @@ const jsonLd = {
       </article>
     </section>
 
-    <section class="priority-strip">
-      <div class="priority-strip__icon">
+    <section
+      class="priority-strip"
+      aria-label="Laporan prioritas tinggi"
+    >
+      <div class="priority-strip__mark">
         <TriangleAlert
-          size={20}
-          stroke-width={1.9}
+          size={19}
+          stroke-width={2.1}
           aria-hidden="true"
         />
       </div>
@@ -412,13 +496,12 @@ const jsonLd = {
           PRIORITY WATCH
         </span>
 
-        <strong>
+        <strong data-high-priority-count>
           {highPriorityCount} laporan prioritas tinggi
         </strong>
 
         <p>
-          Prioritas membantu admin menentukan laporan mana yang perlu
-          diperiksa terlebih dahulu.
+          Prioritas membantu admin menentukan urutan pemeriksaan.
         </p>
       </div>
 
@@ -427,22 +510,24 @@ const jsonLd = {
         class="priority-strip__action"
         data-high-priority
       >
-        Tampilkan prioritas tinggi
+        <span>
+          Tampilkan prioritas tinggi
+        </span>
 
         <ArrowRight
           size={15}
-          stroke-width={1.9}
+          stroke-width={2}
           aria-hidden="true"
         />
       </button>
     </section>
 
-    <section class="workspace-card">
-      <div class="toolbar">
-        <div class="toolbar__search">
+    <section class="directory-card">
+      <div class="directory-toolbar">
+        <div class="search-box">
           <Search
             size={17}
-            stroke-width={1.9}
+            stroke-width={2}
             aria-hidden="true"
           />
 
@@ -456,14 +541,15 @@ const jsonLd = {
           <input
             id="report-search"
             type="search"
-            placeholder="Cari judul, wilayah, kategori, atau tipe laporan..."
+            placeholder="Cari judul, wilayah, kategori, tipe..."
             autocomplete="off"
+            spellcheck="false"
             data-search
           />
 
           <button
             type="button"
-            class="toolbar__clear"
+            class="search-box__clear"
             aria-label="Hapus pencarian"
             data-clear-search
             hidden
@@ -476,8 +562,8 @@ const jsonLd = {
           </button>
         </div>
 
-        <div class="toolbar__filters">
-          <label class="filter-control">
+        <div class="toolbar-filters">
+          <label class="select-box">
             <span class="sr-only">
               Filter status
             </span>
@@ -502,7 +588,7 @@ const jsonLd = {
             </select>
           </label>
 
-          <label class="filter-control">
+          <label class="select-box">
             <span class="sr-only">
               Filter prioritas
             </span>
@@ -527,7 +613,7 @@ const jsonLd = {
             </select>
           </label>
 
-          <label class="filter-control">
+          <label class="select-box">
             <span class="sr-only">
               Filter tipe laporan
             </span>
@@ -554,13 +640,14 @@ const jsonLd = {
 
           <button
             type="button"
-            class="filter-button"
+            class="filter-toggle"
             data-filter-toggle
             aria-expanded="false"
+            aria-controls="report-filter-panel"
           >
             <ListFilter
               size={16}
-              stroke-width={1.9}
+              stroke-width={2}
               aria-hidden="true"
             />
 
@@ -573,45 +660,32 @@ const jsonLd = {
 
       <div
         class="filter-panel"
+        id="report-filter-panel"
         data-filter-panel
         hidden
       >
-        <div class="filter-panel__header">
-          <div>
-            <span class="filter-panel__eyebrow">
-              FILTER DATA
-            </span>
+        <div>
+          <span class="filter-panel__eyebrow">
+            FILTER DATA
+          </span>
 
-            <h2>
-              Penyaringan laporan
-            </h2>
-          </div>
-
-          <button
-            type="button"
-            class="filter-panel__close"
-            aria-label="Tutup filter"
-            data-filter-close
-          >
-            <X
-              size={16}
-              stroke-width={2}
-              aria-hidden="true"
-            />
-          </button>
+          <h2>
+            Penyaringan laporan
+          </h2>
         </div>
 
-        <div class="filter-panel__body">
-          <div class="filter-info">
+        <div class="filter-panel__right">
+          <div class="filter-note">
             <ShieldCheck
               size={17}
-              stroke-width={1.9}
+              stroke-width={2}
               aria-hidden="true"
             />
 
             <p>
-              Laporan adalah masukan masyarakat. Status harus mencerminkan
-              hasil pemeriksaan dan tindak lanjut admin, bukan asumsi.
+              Laporan masyarakat harus diperlakukan sebagai masukan yang
+              perlu diperiksa. Status mencerminkan proses admin, bukan
+              asumsi atas kondisi lapangan.
             </p>
           </div>
 
@@ -620,15 +694,28 @@ const jsonLd = {
             class="filter-reset"
             data-filter-reset
           >
-            Reset semua filter
+            Reset filter
+          </button>
+
+          <button
+            type="button"
+            class="filter-close"
+            aria-label="Tutup filter"
+            data-filter-close
+          >
+            <X
+              size={16}
+              stroke-width={2.2}
+              aria-hidden="true"
+            />
           </button>
         </div>
       </div>
 
-      <div class="table-head">
+      <div class="directory-head">
         <div>
-          <span class="table-head__eyebrow">
-            REPORT QUEUE
+          <span class="directory-head__eyebrow">
+            REPORT QUEUE / 01
           </span>
 
           <h2>
@@ -637,14 +724,14 @@ const jsonLd = {
         </div>
 
         <span
-          class="result-count"
+          class="directory-count"
           data-result-count
         >
           {totalReports} laporan
         </span>
       </div>
 
-      <div class="table-wrap">
+      <div class="table-scroll">
         <table class="reports-table">
           <caption class="sr-only">
             Daftar laporan masyarakat BINSIGHT
@@ -694,6 +781,7 @@ const jsonLd = {
                   data-description={report.description.toLowerCase()}
                   data-category={report.category.toLowerCase()}
                   data-area={report.areaName.toLowerCase()}
+                  data-address={report.address.toLowerCase()}
                   data-type={report.type}
                   data-type-label={typeLabels[
                     report.type
@@ -705,18 +793,18 @@ const jsonLd = {
                     <div class="report-cell">
                       <span
                         class:list={[
-                          "report-cell__icon",
-                          `report-cell__icon--${report.priority}`,
+                          "report-cell__mark",
+                          `report-cell__mark--${report.priority}`,
                         ]}
                       >
                         <FileText
                           size={17}
-                          stroke-width={1.9}
+                          stroke-width={2}
                           aria-hidden="true"
                         />
                       </span>
 
-                      <div class="report-cell__copy">
+                      <div class="report-cell__content">
                         <strong>
                           {report.title}
                         </strong>
@@ -738,7 +826,7 @@ const jsonLd = {
                     <div class="area-cell">
                       <MapPin
                         size={14}
-                        stroke-width={1.9}
+                        stroke-width={2}
                         aria-hidden="true"
                       />
 
@@ -754,28 +842,30 @@ const jsonLd = {
                         "priority-badge",
                         `priority-badge--${report.priority}`,
                       ]}
+                      data-row-priority-badge
                     >
-                      {report.priority ===
-                      "high" ? (
-                        <TriangleAlert
-                          size={13}
-                          stroke-width={2}
-                          aria-hidden="true"
-                        />
-                      ) : report.priority ===
-                        "medium" ? (
-                        <Clock3
-                          size={13}
-                          stroke-width={2}
-                          aria-hidden="true"
-                        />
-                      ) : (
-                        <CircleCheck
-                          size={13}
-                          stroke-width={2}
-                          aria-hidden="true"
-                        />
-                      )}
+                      {
+                        report.priority === "high" ? (
+                          <TriangleAlert
+                            size={13}
+                            stroke-width={2.1}
+                            aria-hidden="true"
+                          />
+                        ) : report.priority ===
+                          "medium" ? (
+                          <Clock3
+                            size={13}
+                            stroke-width={2.1}
+                            aria-hidden="true"
+                          />
+                        ) : (
+                          <CircleCheck
+                            size={13}
+                            stroke-width={2.1}
+                            aria-hidden="true"
+                          />
+                        )
+                      }
 
                       <span>
                         {priorityLabels[
@@ -791,35 +881,37 @@ const jsonLd = {
                         "status-badge",
                         `status-badge--${report.status}`,
                       ]}
+                      data-row-status-badge
                     >
-                      {report.status ===
-                      "resolved" ? (
-                        <CircleCheck
-                          size={13}
-                          stroke-width={2}
-                          aria-hidden="true"
-                        />
-                      ) : report.status ===
-                        "in-progress" ? (
-                        <Clock3
-                          size={13}
-                          stroke-width={2}
-                          aria-hidden="true"
-                        />
-                      ) : report.status ===
-                        "rejected" ? (
-                        <TriangleAlert
-                          size={13}
-                          stroke-width={2}
-                          aria-hidden="true"
-                        />
-                      ) : (
-                        <ShieldCheck
-                          size={13}
-                          stroke-width={2}
-                          aria-hidden="true"
-                        />
-                      )}
+                      {
+                        report.status === "resolved" ? (
+                          <CircleCheck
+                            size={13}
+                            stroke-width={2.1}
+                            aria-hidden="true"
+                          />
+                        ) : report.status ===
+                          "in-progress" ? (
+                          <Clock3
+                            size={13}
+                            stroke-width={2.1}
+                            aria-hidden="true"
+                          />
+                        ) : report.status ===
+                          "rejected" ? (
+                          <TriangleAlert
+                            size={13}
+                            stroke-width={2.1}
+                            aria-hidden="true"
+                          />
+                        ) : (
+                          <ShieldCheck
+                            size={13}
+                            stroke-width={2.1}
+                            aria-hidden="true"
+                          />
+                        )
+                      }
 
                       <span>
                         {statusLabels[
@@ -830,7 +922,7 @@ const jsonLd = {
                   </td>
 
                   <td>
-                    <span class="updated-label">
+                    <span class="date-label">
                       {report.createdAt}
                     </span>
                   </td>
@@ -846,7 +938,7 @@ const jsonLd = {
                       >
                         <Eye
                           size={15}
-                          stroke-width={1.9}
+                          stroke-width={2}
                           aria-hidden="true"
                         />
                       </button>
@@ -860,7 +952,7 @@ const jsonLd = {
                       >
                         <Pencil
                           size={15}
-                          stroke-width={1.9}
+                          stroke-width={2}
                           aria-hidden="true"
                         />
                       </button>
@@ -877,12 +969,16 @@ const jsonLd = {
           data-empty-state
           hidden
         >
-          <span class="empty-state__icon">
+          <span class="empty-state__mark">
             <Search
-              size={23}
-              stroke-width={1.8}
+              size={22}
+              stroke-width={2}
               aria-hidden="true"
             />
+          </span>
+
+          <span class="empty-state__eyebrow">
+            NO MATCH
           </span>
 
           <h3>
@@ -890,12 +986,12 @@ const jsonLd = {
           </h3>
 
           <p>
-            Coba ubah kata pencarian atau filter yang digunakan.
+            Ubah kata pencarian atau reset filter laporan.
           </p>
 
           <button
             type="button"
-            class="button button--secondary"
+            class="button button--dark"
             data-empty-reset
           >
             Reset pencarian
@@ -903,7 +999,7 @@ const jsonLd = {
         </div>
       </div>
 
-      <footer class="table-footer">
+      <footer class="directory-footer">
         <span>
           <strong data-footer-count>
             {totalReports}
@@ -912,61 +1008,65 @@ const jsonLd = {
         </span>
 
         <span>
-          Data admin
+          BINSIGHT / REPORT QUEUE
         </span>
       </footer>
     </section>
 
     <section class="governance-grid">
       <article class="governance-card">
-        <div class="governance-card__icon governance-card__icon--green">
+        <div class="governance-card__top">
+          <span class="governance-card__index">
+            A
+          </span>
+
           <ShieldCheck
-            size={20}
-            stroke-width={1.9}
+            size={19}
+            stroke-width={2}
             aria-hidden="true"
           />
         </div>
 
-        <div>
-          <span class="governance-card__eyebrow">
-            VERIFICATION
-          </span>
+        <span class="governance-card__eyebrow">
+          VERIFICATION
+        </span>
 
-          <h2>
-            Periksa sebelum menetapkan status
-          </h2>
+        <h2>
+          Periksa sebelum menetapkan status
+        </h2>
 
-          <p>
-            Status laporan harus mengikuti hasil pemeriksaan. Laporan
-            masyarakat tidak otomatis dianggap benar hanya karena telah
-            diterima sistem.
-          </p>
-        </div>
+        <p>
+          Status laporan harus mengikuti hasil pemeriksaan. Laporan
+          masyarakat tidak otomatis dianggap benar hanya karena telah
+          diterima sistem.
+        </p>
       </article>
 
-      <article class="governance-card">
-        <div class="governance-card__icon governance-card__icon--orange">
+      <article class="governance-card governance-card--accent">
+        <div class="governance-card__top">
+          <span class="governance-card__index">
+            B
+          </span>
+
           <TriangleAlert
-            size={20}
-            stroke-width={1.9}
+            size={19}
+            stroke-width={2}
             aria-hidden="true"
           />
         </div>
 
-        <div>
-          <span class="governance-card__eyebrow">
-            PRIORITY
-          </span>
+        <span class="governance-card__eyebrow">
+          PRIORITY
+        </span>
 
-          <h2>
-            Prioritas membantu triase
-          </h2>
+        <h2>
+          Prioritas membantu triase
+        </h2>
 
-          <p>
-            Gunakan prioritas untuk membantu menentukan urutan pemeriksaan
-            tanpa mengubah prioritas menjadi ukuran statistik dampak.
-          </p>
-        </div>
+        <p>
+          Gunakan prioritas untuk menentukan urutan pemeriksaan tanpa
+          memperlakukan prioritas sebagai ukuran statistik dampak.
+        </p>
       </article>
     </section>
 
@@ -977,9 +1077,9 @@ const jsonLd = {
       hidden
       aria-labelledby="drawer-title"
     >
-      <div class="drawer__header">
+      <div class="drawer-header">
         <div>
-          <span class="drawer__eyebrow">
+          <span class="drawer-header__eyebrow">
             REPORT DETAIL
           </span>
 
@@ -990,29 +1090,36 @@ const jsonLd = {
 
         <button
           type="button"
-          class="drawer__close"
+          class="drawer-close"
           aria-label="Tutup detail"
           data-drawer-close
         >
           <X
             size={18}
-            stroke-width={2}
+            stroke-width={2.2}
             aria-hidden="true"
           />
         </button>
       </div>
 
-      <div class="drawer__body">
+      <div class="drawer-body">
         <div class="drawer-identity">
-          <span class="drawer-identity__icon">
+          <span
+            class="drawer-identity__mark"
+            data-drawer-icon
+          >
             <FileText
               size={22}
-              stroke-width={1.9}
+              stroke-width={2.1}
               aria-hidden="true"
             />
           </span>
 
           <div>
+            <span class="drawer-identity__eyebrow">
+              REPORT
+            </span>
+
             <h3 data-drawer-title>
               -
             </h3>
@@ -1039,7 +1146,7 @@ const jsonLd = {
           </span>
         </div>
 
-        <div class="drawer-section">
+        <section class="drawer-section">
           <span class="drawer-section__label">
             LOKASI
           </span>
@@ -1065,9 +1172,9 @@ const jsonLd = {
               </dd>
             </div>
           </dl>
-        </div>
+        </section>
 
-        <div class="drawer-section">
+        <section class="drawer-section">
           <span class="drawer-section__label">
             LAPORAN
           </span>
@@ -1078,9 +1185,9 @@ const jsonLd = {
           >
             -
           </p>
-        </div>
+        </section>
 
-        <div class="drawer-section">
+        <section class="drawer-section">
           <span class="drawer-section__label">
             PELAPOR
           </span>
@@ -1106,9 +1213,9 @@ const jsonLd = {
               </dd>
             </div>
           </dl>
-        </div>
+        </section>
 
-        <div class="drawer-section">
+        <section class="drawer-section">
           <span class="drawer-section__label">
             WAKTU
           </span>
@@ -1134,18 +1241,18 @@ const jsonLd = {
               </dd>
             </div>
           </dl>
-        </div>
+        </section>
       </div>
 
-      <div class="drawer__footer">
+      <div class="drawer-footer">
         <button
           type="button"
-          class="button button--secondary"
+          class="button button--light"
           data-drawer-edit
         >
           <Pencil
             size={16}
-            stroke-width={1.9}
+            stroke-width={2}
             aria-hidden="true"
           />
 
@@ -1161,7 +1268,7 @@ const jsonLd = {
         >
           <ShieldCheck
             size={16}
-            stroke-width={1.9}
+            stroke-width={2}
             aria-hidden="true"
           />
 
@@ -1200,63 +1307,129 @@ const jsonLd = {
 
 <style>
   .reports-page {
+    --acid: #dfff00;
+    --acid-soft: #efff70;
+    --ink: #090a08;
+    --ink-2: #11130f;
+    --ink-3: #1b1f18;
+    --paper: #f2f0e6;
+    --paper-2: #e4e1d4;
+    --paper-3: #cfcabd;
+    --white: #fffef8;
+    --muted: #6c7068;
+    --orange: #ff6a00;
+
     position: relative;
+    min-width: 0;
     min-height: 100%;
-    padding: 30px 30px 50px;
+    overflow-x: clip;
+    padding: 28px 28px 52px;
     background:
-      radial-gradient(
-        circle at 95% 0%,
-        rgba(132, 204, 22, 0.065),
-        transparent 31rem
-      ),
-      var(--color-background);
+      linear-gradient(
+        180deg,
+        var(--paper) 0%,
+        var(--paper) 62%,
+        #ece9dd 100%
+      );
+    color: var(--ink);
   }
 
-  .page-top {
+  .page-intro {
     display: flex;
     align-items: flex-end;
     justify-content: space-between;
-    gap: 28px;
+    gap: 30px;
+    padding-bottom: 24px;
+    border-bottom: 2px solid var(--ink);
   }
 
-  .page-top__eyebrow {
+  .page-intro__main {
+    min-width: 0;
+    flex: 1;
+  }
+
+  .page-intro__eyebrow {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    color: var(--color-primary);
+    gap: 9px;
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
     font-size: 0.62rem;
-    font-weight: 900;
-    letter-spacing: 0.12em;
+    font-weight: 700;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
   }
 
-  .page-top__eyebrow-icon {
+  .page-intro__mark {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 27px;
-    height: 27px;
-    border-radius: 8px;
-    background: var(--color-primary-soft);
+    width: 28px;
+    height: 28px;
+    border: 2px solid var(--ink);
+    background: var(--acid);
   }
 
-  .page-top h1 {
-    margin: 12px 0 0;
-    color: var(--color-text-strong);
-    font-size: clamp(1.7rem, 3vw, 2.4rem);
+  .page-intro__heading-row {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 22px;
+    margin-top: 14px;
+  }
+
+  .page-intro h1 {
+    margin: 0;
+    font-family:
+      "Sora",
+      Inter,
+      system-ui,
+      sans-serif;
+    font-size: clamp(2rem, 4vw, 3.15rem);
     font-weight: 900;
-    letter-spacing: -0.03em;
-    line-height: 1.08;
+    letter-spacing: -0.055em;
+    line-height: 0.98;
+    text-transform: uppercase;
   }
 
-  .page-top__main > p {
-    max-width: 760px;
-    margin: 9px 0 0;
-    color: var(--color-text-muted);
-    font-size: 0.77rem;
-    line-height: 1.7;
+  .page-intro__main p {
+    max-width: 790px;
+    margin: 12px 0 0;
+    color: #454941;
+    font-size: 0.79rem;
+    line-height: 1.75;
   }
 
-  .page-top__actions {
+  .page-intro__code {
+    flex: 0 0 auto;
+    padding: 10px 12px;
+    border: 2px solid var(--ink);
+    background: var(--ink);
+    color: var(--acid);
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+    font-size: 0.56rem;
+    letter-spacing: 0.09em;
+    line-height: 1.4;
+    text-transform: uppercase;
+  }
+
+  .page-intro__code span,
+  .page-intro__code strong {
+    display: block;
+  }
+
+  .page-intro__code strong {
+    color: var(--white);
+  }
+
+  .page-intro__actions {
     display: flex;
     align-items: center;
     justify-content: flex-end;
@@ -1268,137 +1441,197 @@ const jsonLd = {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 7px;
-    min-height: 41px;
-    padding: 0 13px;
-    border: 1px solid transparent;
-    border-radius: 10px;
+    gap: 8px;
+    min-height: 42px;
+    padding: 0 14px;
+    border: 2px solid var(--ink);
+    border-radius: 0;
     font: inherit;
-    font-size: 0.68rem;
-    font-weight: 800;
+    font-size: 0.65rem;
+    font-weight: 850;
+    line-height: 1;
     text-decoration: none;
+    text-transform: uppercase;
     cursor: pointer;
     white-space: nowrap;
     transition:
-      transform 150ms ease,
-      background 150ms ease,
-      border-color 150ms ease,
-      box-shadow 150ms ease;
+      transform 120ms ease,
+      box-shadow 120ms ease,
+      background 120ms ease;
   }
 
   .button:hover {
-    transform: translateY(-1px);
+    transform: translate(-2px, -2px);
+    box-shadow: 5px 5px 0 var(--ink);
+  }
+
+  .button:active {
+    transform: translate(0, 0);
+    box-shadow: none;
+  }
+
+  .button:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
   }
 
   .button:focus-visible,
-  .filter-button:focus-visible,
-  .row-action:focus-visible,
-  .drawer__close:focus-visible,
-  .filter-panel__close:focus-visible,
+  .filter-toggle:focus-visible,
   .filter-reset:focus-visible,
-  .priority-strip__action:focus-visible {
-    outline: 3px solid var(--color-primary-ring);
-    outline-offset: 2px;
+  .filter-close:focus-visible,
+  .row-action:focus-visible,
+  .priority-strip__action:focus-visible,
+  .drawer-close:focus-visible,
+  .select-box select:focus-visible,
+  .search-box input:focus-visible {
+    outline: 3px solid var(--orange);
+    outline-offset: 3px;
   }
 
   .button--primary {
-    border-color: var(--color-primary);
-    background: var(--color-primary);
-    color: #ffffff;
-    box-shadow: var(--shadow-xs);
+    background: var(--acid);
+    color: var(--ink);
   }
 
   .button--primary:hover {
-    border-color: var(--color-primary-dark);
-    background: var(--color-primary-dark);
+    background: var(--acid-soft);
   }
 
-  .button--secondary {
-    border-color: var(--color-border);
-    background: var(--color-surface);
-    color: var(--color-text-strong);
+  .button--light {
+    background: var(--white);
+    color: var(--ink);
   }
 
-  .button--secondary:hover {
-    border-color: var(--color-border-strong);
-    background: var(--color-surface-soft);
+  .button--light:hover {
+    background: var(--paper-2);
+  }
+
+  .button--dark {
+    background: var(--ink);
+    color: var(--acid);
+  }
+
+  .button--dark:hover {
+    background: var(--ink-2);
   }
 
   .button--ghost {
     border-color: transparent;
     background: transparent;
-    color: var(--color-text-muted);
+    color: var(--ink);
   }
 
   .button--ghost:hover {
-    background: var(--color-surface);
-    color: var(--color-text-strong);
+    border-color: var(--ink);
+    background: var(--white);
   }
 
   .summary-grid {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 12px;
-    margin-top: 28px;
+    gap: 10px;
+    margin-top: 18px;
   }
 
   .summary-card {
-    padding: 17px;
-    border: 1px solid var(--color-border);
-    border-radius: 16px;
-    background: var(--color-surface);
-    box-shadow: var(--shadow-xs);
+    padding: 16px;
+    border: 2px solid var(--ink);
+    background: var(--white);
+    box-shadow: 5px 5px 0 var(--paper-3);
+  }
+
+  .summary-card--primary {
+    background: var(--ink);
+    color: var(--white);
+    box-shadow: 5px 5px 0 var(--acid);
   }
 
   .summary-card__top {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: space-between;
-    gap: 10px;
+    gap: 12px;
+  }
+
+  .summary-card__eyebrow {
+    display: block;
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+    font-size: 0.56rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
   }
 
   .summary-card__label {
-    color: var(--color-text-muted);
-    font-size: 0.67rem;
+    display: block;
+    margin-top: 4px;
+    color: #62665e;
+    font-size: 0.63rem;
     font-weight: 750;
+  }
+
+  .summary-card--primary .summary-card__label {
+    color: #b8beb2;
   }
 
   .summary-card__icon {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 37px;
-    height: 37px;
-    border-radius: 10px;
+    width: 32px;
+    height: 32px;
+    border: 2px solid var(--ink);
+    background: var(--acid);
   }
 
-  .summary-card__icon--green,
-  .summary-card__icon--active,
-  .summary-card__icon--resolved {
-    background: var(--color-primary-soft);
-    color: var(--color-primary);
+  .summary-card__icon--orange {
+    background: #ffe0cb;
+    color: #a63d00;
   }
 
-  .summary-card__icon--pending {
-    background: rgba(245, 158, 11, 0.1);
-    color: #d97706;
+  .summary-card__icon--blue {
+    background: #dfe9ff;
+    color: #244b99;
+  }
+
+  .summary-card__icon--green {
+    background: var(--acid);
+    color: var(--ink);
+  }
+
+  .summary-card--primary .summary-card__icon {
+    border-color: var(--acid);
   }
 
   .summary-card__value {
     display: block;
-    margin-top: 15px;
-    color: var(--color-text-strong);
-    font-size: 1.55rem;
+    margin-top: 24px;
+    font-family:
+      "Sora",
+      Inter,
+      system-ui,
+      sans-serif;
+    font-size: clamp(1.8rem, 3vw, 2.55rem);
     font-weight: 900;
-    line-height: 1;
+    letter-spacing: -0.06em;
+    line-height: 0.95;
   }
 
   .summary-card__meta {
     display: block;
-    margin-top: 6px;
-    color: var(--color-text-faint);
-    font-size: 0.61rem;
+    margin-top: 8px;
+    color: #6a6f66;
+    font-size: 0.6rem;
     line-height: 1.5;
+  }
+
+  .summary-card--primary .summary-card__meta {
+    color: #adb2a8;
   }
 
   .priority-strip {
@@ -1406,27 +1639,22 @@ const jsonLd = {
     align-items: center;
     gap: 13px;
     margin-top: 18px;
-    padding: 14px 16px;
-    border: 1px solid rgba(245, 158, 11, 0.2);
-    border-radius: 15px;
-    background:
-      linear-gradient(
-        135deg,
-        var(--color-warning-soft),
-        var(--color-surface)
-      );
+    padding: 14px;
+    border: 2px solid var(--ink);
+    background: #fff0e4;
+    box-shadow: 5px 5px 0 var(--orange);
   }
 
-  .priority-strip__icon {
+  .priority-strip__mark {
     display: inline-flex;
     flex: 0 0 auto;
     align-items: center;
     justify-content: center;
     width: 43px;
     height: 43px;
-    border-radius: 12px;
-    background: var(--color-surface);
-    color: var(--color-warning-text);
+    border: 2px solid var(--ink);
+    background: var(--orange);
+    color: var(--ink);
   }
 
   .priority-strip__content {
@@ -1434,34 +1662,36 @@ const jsonLd = {
     min-width: 0;
   }
 
-  .priority-strip__eyebrow,
-  .table-head__eyebrow,
-  .filter-panel__eyebrow,
-  .governance-card__eyebrow,
-  .drawer__eyebrow,
-  .drawer-section__label {
-    display: block;
-    color: var(--color-primary);
-    font-size: 0.59rem;
-    font-weight: 900;
-    letter-spacing: 0.1em;
-  }
-
   .priority-strip__eyebrow {
-    color: var(--color-warning-text);
+    display: block;
+    color: #913500;
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+    font-size: 0.55rem;
+    font-weight: 700;
+    letter-spacing: 0.11em;
   }
 
   .priority-strip__content strong {
     display: block;
     margin-top: 3px;
-    color: var(--color-text-strong);
+    color: var(--ink);
+    font-family:
+      "Sora",
+      Inter,
+      system-ui,
+      sans-serif;
     font-size: 0.78rem;
-    font-weight: 850;
+    font-weight: 900;
+    text-transform: uppercase;
   }
 
   .priority-strip__content p {
     margin: 2px 0 0;
-    color: var(--color-text-muted);
+    color: #686259;
     font-size: 0.62rem;
     line-height: 1.5;
   }
@@ -1470,272 +1700,324 @@ const jsonLd = {
     display: inline-flex;
     flex: 0 0 auto;
     align-items: center;
-    gap: 6px;
-    padding: 6px 0;
+    gap: 7px;
+    padding: 7px 0;
     border: 0;
     background: transparent;
-    color: var(--color-warning-text);
+    color: #8f3700;
     font: inherit;
-    font-size: 0.63rem;
-    font-weight: 800;
+    font-size: 0.59rem;
+    font-weight: 850;
+    text-transform: uppercase;
     cursor: pointer;
   }
 
-  .workspace-card {
-    margin-top: 18px;
-    overflow: hidden;
-    border: 1px solid var(--color-border);
-    border-radius: 18px;
-    background: var(--color-surface);
-    box-shadow: var(--shadow-xs);
+  .directory-card {
+    margin-top: 24px;
+    border: 2px solid var(--ink);
+    background: var(--white);
+    box-shadow: 7px 7px 0 var(--ink);
   }
 
-  .toolbar {
+  .directory-toolbar {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 14px;
-    padding: 15px;
-    border-bottom: 1px solid var(--color-border);
-    background: var(--color-surface-soft);
+    gap: 12px;
+    padding: 14px;
+    border-bottom: 2px solid var(--ink);
+    background: var(--ink);
   }
 
-  .toolbar__search {
-    position: relative;
+  .search-box {
     display: flex;
+    min-width: 0;
+    flex: 1;
     align-items: center;
     gap: 9px;
-    flex: 1;
-    min-width: 0;
-    max-width: 490px;
-    min-height: 40px;
-    padding: 0 12px;
-    border: 1px solid var(--color-border);
-    border-radius: 10px;
-    background: var(--color-surface);
-    color: var(--color-text-faint);
+    min-height: 42px;
+    padding: 0 11px;
+    border: 2px solid #81867b;
+    background: #151812;
+    color: #aeb4a8;
   }
 
-  .toolbar__search:focus-within {
-    border-color: var(--color-primary);
-    box-shadow:
-      0 0 0 3px var(--color-primary-ring);
+  .search-box:focus-within {
+    border-color: var(--acid);
+    box-shadow: 4px 4px 0 var(--acid);
   }
 
-  .toolbar__search input {
+  .search-box input {
     width: 100%;
     min-width: 0;
     border: 0;
     outline: 0;
     background: transparent;
-    color: var(--color-text-strong);
+    color: var(--white);
     font: inherit;
-    font-size: 0.69rem;
+    font-size: 0.67rem;
   }
 
-  .toolbar__search input::placeholder {
-    color: var(--color-text-faint);
+  .search-box input::placeholder {
+    color: #737970;
   }
 
-  .toolbar__clear {
+  .search-box__clear {
     display: inline-flex;
+    flex: 0 0 auto;
     align-items: center;
     justify-content: center;
-    width: 25px;
-    height: 25px;
+    width: 26px;
+    height: 26px;
     padding: 0;
     border: 0;
-    border-radius: 7px;
     background: transparent;
-    color: var(--color-text-muted);
+    color: #aeb4a8;
     cursor: pointer;
   }
 
-  .toolbar__clear:hover {
-    background: var(--color-surface-soft);
-    color: var(--color-text-strong);
+  .search-box__clear:hover {
+    background: var(--ink-3);
+    color: var(--acid);
   }
 
-  .toolbar__filters {
+  .search-box__clear[hidden] {
+    display: none !important;
+  }
+
+  .toolbar-filters {
     display: flex;
     align-items: center;
-    flex-wrap: wrap;
     justify-content: flex-end;
-    gap: 8px;
+    flex-wrap: wrap;
+    gap: 7px;
   }
 
-  .filter-control select {
-    min-height: 40px;
-    max-width: 165px;
-    padding: 0 27px 0 11px;
-    border: 1px solid var(--color-border);
-    border-radius: 10px;
-    background: var(--color-surface);
-    color: var(--color-text-strong);
+  .select-box select {
+    min-height: 42px;
+    max-width: 170px;
+    padding: 0 28px 0 10px;
+    border: 2px solid #81867b;
+    border-radius: 0;
+    background: #151812;
+    color: var(--white);
     font: inherit;
-    font-size: 0.65rem;
+    font-size: 0.62rem;
     cursor: pointer;
   }
 
-  .filter-control select:focus {
-    border-color: var(--color-primary);
-    outline: none;
-    box-shadow:
-      0 0 0 3px var(--color-primary-ring);
-  }
-
-  .filter-button {
+  .filter-toggle {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 7px;
-    min-height: 40px;
+    min-height: 42px;
     padding: 0 11px;
-    border: 1px solid var(--color-border);
-    border-radius: 10px;
-    background: var(--color-surface);
-    color: var(--color-text-muted);
+    border: 2px solid #81867b;
+    background: #151812;
+    color: var(--white);
     font: inherit;
-    font-size: 0.67rem;
-    font-weight: 750;
+    font-size: 0.62rem;
+    font-weight: 850;
+    text-transform: uppercase;
     cursor: pointer;
   }
 
-  .filter-button:hover,
-  .filter-button[aria-expanded="true"] {
-    border-color: var(--color-primary);
-    background: var(--color-primary-soft);
-    color: var(--color-primary);
+  .filter-toggle:hover,
+  .filter-toggle[aria-expanded="true"] {
+    border-color: var(--acid);
+    background: var(--acid);
+    color: var(--ink);
   }
 
   .filter-panel {
-    padding: 15px;
-    border-bottom: 1px solid var(--color-border);
-    background: var(--color-surface-soft);
-  }
-
-  .filter-panel__header {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     justify-content: space-between;
     gap: 20px;
+    padding: 14px;
+    border-bottom: 2px solid var(--ink);
+    background: var(--paper-2);
+  }
+
+  .filter-panel[hidden] {
+    display: none !important;
+  }
+
+  .filter-panel__eyebrow {
+    display: block;
+    color: #575c53;
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+    font-size: 0.55rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
   }
 
   .filter-panel h2 {
     margin: 4px 0 0;
-    color: var(--color-text-strong);
-    font-size: 0.86rem;
-    font-weight: 820;
+    color: var(--ink);
+    font-family:
+      "Sora",
+      Inter,
+      system-ui,
+      sans-serif;
+    font-size: 0.84rem;
+    font-weight: 900;
+    text-transform: uppercase;
   }
 
-  .filter-panel__close {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 31px;
-    height: 31px;
-    border: 1px solid var(--color-border);
-    border-radius: 9px;
-    background: var(--color-surface);
-    color: var(--color-text-muted);
-    cursor: pointer;
-  }
-
-  .filter-panel__body {
+  .filter-panel__right {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 15px;
-    margin-top: 12px;
+    justify-content: flex-end;
+    gap: 12px;
   }
 
-  .filter-info {
+  .filter-note {
     display: flex;
+    max-width: 650px;
     align-items: flex-start;
     gap: 8px;
-    color: var(--color-text-muted);
+    color: #50554d;
   }
 
-  .filter-info svg {
+  .filter-note svg {
     flex: 0 0 auto;
-    margin-top: 2px;
-    color: var(--color-primary);
+    margin-top: 1px;
   }
 
-  .filter-info p {
-    max-width: 840px;
+  .filter-note p {
     margin: 0;
-    font-size: 0.65rem;
-    line-height: 1.6;
+    font-size: 0.62rem;
+    line-height: 1.55;
   }
 
   .filter-reset {
     flex: 0 0 auto;
-    border: 0;
-    background: transparent;
-    color: var(--color-primary);
+    min-height: 35px;
+    padding: 0 10px;
+    border: 2px solid var(--ink);
+    background: var(--white);
+    color: var(--ink);
     font: inherit;
-    font-size: 0.64rem;
-    font-weight: 800;
+    font-size: 0.57rem;
+    font-weight: 850;
+    text-transform: uppercase;
     cursor: pointer;
   }
 
-  .table-head {
+  .filter-reset:hover {
+    background: var(--acid);
+  }
+
+  .filter-close {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    width: 33px;
+    height: 33px;
+    padding: 0;
+    border: 2px solid var(--ink);
+    background: var(--ink);
+    color: var(--acid);
+    cursor: pointer;
+  }
+
+  .directory-head {
     display: flex;
     align-items: flex-end;
     justify-content: space-between;
-    gap: 18px;
-    padding: 18px 18px 15px;
+    gap: 16px;
+    padding: 18px 16px 14px;
+    border-bottom: 2px solid var(--ink);
   }
 
-  .table-head h2 {
-    margin: 4px 0 0;
-    color: var(--color-text-strong);
-    font-size: 0.98rem;
-    font-weight: 850;
-  }
-
-  .result-count {
-    color: var(--color-text-faint);
-    font-size: 0.64rem;
+  .directory-head__eyebrow {
+    display: block;
+    color: #62675e;
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+    font-size: 0.57rem;
     font-weight: 700;
+    letter-spacing: 0.11em;
   }
 
-  .table-wrap {
+  .directory-head h2 {
+    margin: 5px 0 0;
+    color: var(--ink);
+    font-family:
+      "Sora",
+      Inter,
+      system-ui,
+      sans-serif;
+    font-size: 0.98rem;
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    text-transform: uppercase;
+  }
+
+  .directory-count {
+    color: #5f635c;
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+    font-size: 0.6rem;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+
+  .table-scroll {
+    max-width: 100%;
     overflow-x: auto;
-    border-top: 1px solid var(--color-border);
+    overflow-y: hidden;
   }
 
   .reports-table {
     width: 100%;
-    min-width: 1000px;
+    min-width: 1050px;
     border-collapse: collapse;
     text-align: left;
   }
 
   .reports-table th {
-    padding: 11px 18px;
-    background: var(--color-surface-soft);
-    color: var(--color-text-faint);
-    font-size: 0.59rem;
-    font-weight: 850;
-    letter-spacing: 0.055em;
+    padding: 11px 16px;
+    border-bottom: 2px solid var(--ink);
+    background: var(--paper-2);
+    color: #50554d;
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+    font-size: 0.54rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
     white-space: nowrap;
   }
 
   .reports-table td {
-    padding: 13px 18px;
-    border-top: 1px solid var(--color-border);
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--paper-3);
     vertical-align: middle;
   }
 
   .reports-table tbody tr {
-    transition: background 120ms ease;
+    transition: background 100ms ease;
   }
 
   .reports-table tbody tr:hover {
-    background: rgba(248, 250, 252, 0.9);
+    background: #f4f2e8;
   }
 
   .reports-table tbody tr[data-hidden="true"] {
@@ -1744,83 +2026,90 @@ const jsonLd = {
 
   .report-cell {
     display: flex;
+    min-width: 340px;
     align-items: center;
     gap: 10px;
-    min-width: 320px;
   }
 
-  .report-cell__icon {
+  .report-cell__mark {
     display: inline-flex;
     flex: 0 0 auto;
     align-items: center;
     justify-content: center;
-    width: 37px;
-    height: 37px;
-    border-radius: 10px;
+    width: 38px;
+    height: 38px;
+    border: 2px solid currentColor;
   }
 
-  .report-cell__icon--high {
-    background: rgba(220, 38, 38, 0.08);
-    color: var(--color-danger);
+  .report-cell__mark--high {
+    background: #ffe0d0;
+    color: #a83d00;
   }
 
-  .report-cell__icon--medium {
-    background: rgba(245, 158, 11, 0.1);
-    color: #d97706;
+  .report-cell__mark--medium {
+    background: #ffefd7;
+    color: #a46600;
   }
 
-  .report-cell__icon--low {
-    background: var(--color-primary-soft);
-    color: var(--color-primary);
+  .report-cell__mark--low {
+    background: var(--acid-soft);
+    color: #4d6500;
   }
 
-  .report-cell__copy {
+  .report-cell__content {
     min-width: 0;
   }
 
-  .report-cell__copy strong,
-  .report-cell__copy span {
+  .report-cell__content strong,
+  .report-cell__content span {
     display: block;
   }
 
-  .report-cell__copy strong {
-    max-width: 390px;
+  .report-cell__content strong {
+    max-width: 410px;
     overflow: hidden;
-    color: var(--color-text-strong);
-    font-size: 0.7rem;
-    font-weight: 800;
+    color: var(--ink);
+    font-family:
+      "Sora",
+      Inter,
+      system-ui,
+      sans-serif;
+    font-size: 0.67rem;
+    font-weight: 900;
+    line-height: 1.25;
     text-overflow: ellipsis;
     white-space: nowrap;
+    text-transform: uppercase;
   }
 
-  .report-cell__copy span {
-    margin-top: 3px;
-    color: var(--color-text-faint);
-    font-size: 0.6rem;
+  .report-cell__content span {
+    margin-top: 4px;
+    color: #777b73;
+    font-size: 0.57rem;
   }
 
   .type-label,
-  .updated-label {
-    color: var(--color-text-muted);
-    font-size: 0.62rem;
+  .date-label {
+    color: #5e635b;
+    font-size: 0.61rem;
     white-space: nowrap;
   }
 
   .type-label {
-    font-weight: 700;
+    font-weight: 750;
   }
 
   .area-cell {
     display: inline-flex;
     align-items: center;
     gap: 5px;
-    color: var(--color-text-muted);
-    font-size: 0.63rem;
+    color: #5e635b;
+    font-size: 0.62rem;
     white-space: nowrap;
   }
 
   .area-cell svg {
-    color: var(--color-text-faint);
+    color: #7b8077;
   }
 
   .priority-badge,
@@ -1828,52 +2117,61 @@ const jsonLd = {
     display: inline-flex;
     align-items: center;
     gap: 5px;
-    min-height: 25px;
+    min-height: 26px;
     padding: 0 8px;
-    border-radius: 999px;
-    font-size: 0.58rem;
-    font-weight: 800;
+    border: 1px solid transparent;
+    font-size: 0.56rem;
+    font-weight: 850;
     white-space: nowrap;
+    text-transform: uppercase;
   }
 
   .priority-badge--high {
-    background: rgba(220, 38, 38, 0.08);
-    color: #b91c1c;
+    border-color: #b84a0b;
+    background: #ffe0d0;
+    color: #983900;
   }
 
   .priority-badge--medium {
-    background: rgba(245, 158, 11, 0.1);
-    color: #b45309;
+    border-color: #b37a17;
+    background: #fff0d6;
+    color: #875e10;
   }
 
   .priority-badge--low {
-    background: var(--color-primary-soft);
-    color: var(--color-primary-dark);
+    border-color: #647a14;
+    background: var(--acid-soft);
+    color: #51630a;
   }
 
   .status-badge--pending {
-    background: rgba(245, 158, 11, 0.1);
-    color: #b45309;
+    border-color: #b37a17;
+    background: #fff0d6;
+    color: #875e10;
   }
 
   .status-badge--verified {
-    background: rgba(37, 99, 235, 0.08);
-    color: #1d4ed8;
+    border-color: #31558a;
+    background: #e0eaff;
+    color: #254a83;
   }
 
   .status-badge--in-progress {
-    background: rgba(124, 58, 237, 0.09);
-    color: #6d28d9;
+    border-color: #6844a6;
+    background: #eadfff;
+    color: #5a368d;
   }
 
   .status-badge--resolved {
-    background: var(--color-primary-soft);
-    color: var(--color-primary-dark);
+    border-color: #57720d;
+    background: var(--acid-soft);
+    color: #506209;
   }
 
   .status-badge--rejected {
-    background: rgba(220, 38, 38, 0.08);
-    color: #b91c1c;
+    border-color: #ad3b34;
+    background: #ffe0dd;
+    color: #99322c;
   }
 
   .row-actions {
@@ -1887,142 +2185,233 @@ const jsonLd = {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 30px;
-    height: 30px;
+    width: 31px;
+    height: 31px;
     padding: 0;
-    border: 1px solid transparent;
-    border-radius: 8px;
+    border: 2px solid transparent;
     background: transparent;
-    color: var(--color-text-muted);
+    color: #666b62;
     cursor: pointer;
   }
 
   .row-action:hover {
-    border-color: var(--color-border);
-    background: var(--color-surface-soft);
-    color: var(--color-primary);
+    border-color: var(--ink);
+    background: var(--acid);
+    color: var(--ink);
   }
 
   .empty-state {
     display: flex;
+    min-height: 300px;
     align-items: center;
     justify-content: center;
     flex-direction: column;
-    min-height: 280px;
     padding: 30px;
+    background: var(--paper);
     text-align: center;
   }
 
-  .empty-state__icon {
+  .empty-state[hidden] {
+    display: none !important;
+  }
+
+  .empty-state__mark {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 54px;
-    height: 54px;
-    border-radius: 15px;
-    background: var(--color-surface-soft);
-    color: var(--color-text-faint);
+    width: 58px;
+    height: 58px;
+    border: 2px solid var(--ink);
+    background: var(--ink);
+    color: var(--acid);
+  }
+
+  .empty-state__eyebrow {
+    margin-top: 15px;
+    color: #676b63;
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+    font-size: 0.55rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
   }
 
   .empty-state h3 {
-    margin: 13px 0 0;
-    color: var(--color-text-strong);
-    font-size: 0.9rem;
-    font-weight: 820;
+    margin: 6px 0 0;
+    color: var(--ink);
+    font-family:
+      "Sora",
+      Inter,
+      system-ui,
+      sans-serif;
+    font-size: 0.98rem;
+    font-weight: 900;
+    text-transform: uppercase;
   }
 
   .empty-state p {
-    max-width: 390px;
-    margin: 5px 0 16px;
-    color: var(--color-text-muted);
-    font-size: 0.67rem;
+    max-width: 420px;
+    margin: 7px 0 16px;
+    color: #676b63;
+    font-size: 0.65rem;
     line-height: 1.6;
   }
 
-  .table-footer {
+  .directory-footer {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 12px;
-    padding: 12px 18px;
-    border-top: 1px solid var(--color-border);
-    color: var(--color-text-faint);
-    font-size: 0.61rem;
+    padding: 12px 16px;
+    border-top: 2px solid var(--ink);
+    background: var(--paper-2);
+    color: #666b63;
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+    font-size: 0.53rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
   }
 
-  .table-footer strong {
-    color: var(--color-text-strong);
-    font-weight: 850;
+  .directory-footer strong {
+    color: var(--ink);
+    font-weight: 900;
   }
 
   .governance-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 12px;
+    gap: 10px;
     margin-top: 18px;
   }
 
   .governance-card {
-    display: flex;
-    align-items: flex-start;
-    gap: 13px;
-    padding: 18px;
-    border: 1px solid var(--color-border);
-    border-radius: 16px;
-    background: var(--color-surface);
-    box-shadow: var(--shadow-xs);
+    min-width: 0;
+    padding: 17px;
+    border: 2px solid var(--ink);
+    background: var(--white);
+    box-shadow: 5px 5px 0 var(--paper-3);
   }
 
-  .governance-card__icon {
+  .governance-card--accent {
+    background: var(--ink);
+    color: var(--white);
+    box-shadow: 5px 5px 0 var(--acid);
+  }
+
+  .governance-card__top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .governance-card__top svg {
+    color: var(--ink);
+  }
+
+  .governance-card--accent .governance-card__top svg {
+    color: var(--acid);
+  }
+
+  .governance-card__index {
     display: inline-flex;
-    flex: 0 0 auto;
     align-items: center;
     justify-content: center;
-    width: 43px;
-    height: 43px;
-    border-radius: 12px;
+    width: 28px;
+    height: 28px;
+    background: var(--acid);
+    color: var(--ink);
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+    font-size: 0.58rem;
+    font-weight: 900;
   }
 
-  .governance-card__icon--green {
-    background: var(--color-primary-soft);
-    color: var(--color-primary);
+  .governance-card__eyebrow {
+    display: block;
+    margin-top: 16px;
+    color: #63675f;
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+    font-size: 0.55rem;
+    font-weight: 700;
+    letter-spacing: 0.11em;
   }
 
-  .governance-card__icon--orange {
-    background: rgba(245, 158, 11, 0.1);
-    color: #d97706;
+  .governance-card--accent .governance-card__eyebrow {
+    color: var(--acid);
   }
 
   .governance-card h2 {
-    margin: 4px 0 0;
-    color: var(--color-text-strong);
-    font-size: 0.84rem;
-    font-weight: 820;
+    margin: 5px 0 0;
+    color: var(--ink);
+    font-family:
+      "Sora",
+      Inter,
+      system-ui,
+      sans-serif;
+    font-size: 0.86rem;
+    font-weight: 900;
+    text-transform: uppercase;
+  }
+
+  .governance-card--accent h2 {
+    color: var(--white);
   }
 
   .governance-card p {
-    max-width: 680px;
-    margin: 5px 0 0;
-    color: var(--color-text-muted);
-    font-size: 0.65rem;
+    max-width: 720px;
+    margin: 7px 0 0;
+    color: #676b63;
+    font-size: 0.64rem;
     line-height: 1.65;
+  }
+
+  .governance-card--accent p {
+    color: #babfb4;
+  }
+
+  .drawer-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 90;
+    background: rgba(9, 10, 8, 0.62);
+    backdrop-filter: blur(2px);
+  }
+
+  .drawer-backdrop[hidden] {
+    display: none !important;
   }
 
   .report-drawer {
     position: fixed;
     top: 0;
     right: 0;
-    z-index: 81;
+    z-index: 91;
     display: grid;
-    grid-template-rows: auto 1fr auto;
-    width: min(480px, 100%);
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    width: min(500px, 100vw);
     height: 100dvh;
-    border-left: 1px solid var(--color-border);
-    background: var(--color-surface);
-    box-shadow:
-      -18px 0 48px rgba(15, 23, 42, 0.13);
+    border-left: 2px solid var(--ink);
+    background: var(--white);
+    color: var(--ink);
+    box-shadow: -12px 0 0 var(--acid);
     transform: translateX(100%);
-    transition: transform 180ms ease;
+    transition: transform 170ms ease;
   }
 
   .report-drawer[hidden] {
@@ -2033,53 +2422,61 @@ const jsonLd = {
     transform: translateX(0);
   }
 
-  .drawer-backdrop {
-    position: fixed;
-    inset: 0;
-    z-index: 80;
-    background: rgba(15, 23, 42, 0.28);
-    backdrop-filter: blur(2px);
-  }
-
-  .drawer-backdrop[hidden] {
-    display: none;
-  }
-
-  .drawer__header {
+  .drawer-header {
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
-    gap: 20px;
-    padding: 20px;
-    border-bottom: 1px solid var(--color-border);
+    gap: 18px;
+    padding: 18px;
+    border-bottom: 2px solid var(--ink);
+    background: var(--ink);
+    color: var(--white);
   }
 
-  .drawer__header h2 {
+  .drawer-header__eyebrow {
+    display: block;
+    color: var(--acid);
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+    font-size: 0.56rem;
+    font-weight: 700;
+    letter-spacing: 0.11em;
+  }
+
+  .drawer-header h2 {
     margin: 5px 0 0;
-    color: var(--color-text-strong);
-    font-size: 1.05rem;
-    font-weight: 850;
+    font-family:
+      "Sora",
+      Inter,
+      system-ui,
+      sans-serif;
+    font-size: 1.02rem;
+    font-weight: 900;
+    text-transform: uppercase;
   }
 
-  .drawer__close {
+  .drawer-close {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     width: 35px;
     height: 35px;
-    border: 1px solid var(--color-border);
-    border-radius: 10px;
-    background: var(--color-surface);
-    color: var(--color-text-muted);
+    padding: 0;
+    border: 2px solid var(--acid);
+    background: var(--acid);
+    color: var(--ink);
     cursor: pointer;
   }
 
-  .drawer__close:hover {
-    background: var(--color-surface-soft);
-    color: var(--color-text-strong);
+  .drawer-close:hover {
+    background: var(--acid-soft);
   }
 
-  .drawer__body {
+  .drawer-body {
+    min-height: 0;
     overflow-y: auto;
     padding: 20px;
   }
@@ -2090,45 +2487,77 @@ const jsonLd = {
     gap: 12px;
   }
 
-  .drawer-identity__icon {
+  .drawer-identity__mark {
     display: inline-flex;
     flex: 0 0 auto;
     align-items: center;
     justify-content: center;
-    width: 49px;
-    height: 49px;
-    border-radius: 14px;
-    background: var(--color-primary-soft);
-    color: var(--color-primary);
+    width: 52px;
+    height: 52px;
+    border: 2px solid var(--ink);
+    background: var(--acid);
+    color: var(--ink);
+  }
+
+  .drawer-identity__eyebrow {
+    display: block;
+    color: #666b62;
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+    font-size: 0.53rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
   }
 
   .drawer-identity h3 {
-    margin: 2px 0 0;
-    color: var(--color-text-strong);
-    font-size: 0.92rem;
-    font-weight: 850;
-    line-height: 1.4;
+    max-width: 350px;
+    margin: 3px 0 0;
+    color: var(--ink);
+    font-family:
+      "Sora",
+      Inter,
+      system-ui,
+      sans-serif;
+    font-size: 0.95rem;
+    font-weight: 900;
+    line-height: 1.3;
+    text-transform: uppercase;
   }
 
-  .drawer-identity div > span {
+  .drawer-identity div > span:last-child {
     display: block;
     margin-top: 3px;
-    color: var(--color-text-muted);
-    font-size: 0.64rem;
+    color: #676b63;
+    font-size: 0.62rem;
   }
 
   .drawer-status-row {
     display: flex;
-    align-items: center;
     flex-wrap: wrap;
     gap: 7px;
     margin-top: 15px;
+    padding-bottom: 16px;
+    border-bottom: 2px solid var(--ink);
   }
 
   .drawer-section {
-    margin-top: 25px;
-    padding-top: 19px;
-    border-top: 1px solid var(--color-border);
+    margin-top: 22px;
+  }
+
+  .drawer-section__label {
+    display: block;
+    color: #5f645b;
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+    font-size: 0.56rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
   }
 
   .detail-list {
@@ -2139,10 +2568,10 @@ const jsonLd = {
 
   .detail-list > div {
     display: grid;
-    grid-template-columns: 90px minmax(0, 1fr);
+    grid-template-columns: 84px minmax(0, 1fr);
     gap: 12px;
     padding: 9px 0;
-    border-bottom: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--paper-3);
   }
 
   .detail-list > div:last-child {
@@ -2150,62 +2579,68 @@ const jsonLd = {
   }
 
   .detail-list dt {
-    color: var(--color-text-faint);
-    font-size: 0.62rem;
+    color: #777b73;
+    font-size: 0.61rem;
   }
 
   .detail-list dd {
     margin: 0;
-    color: var(--color-text-strong);
+    color: var(--ink);
     font-size: 0.65rem;
-    font-weight: 700;
-    line-height: 1.5;
-    word-break: break-word;
+    font-weight: 750;
+    line-height: 1.55;
+    overflow-wrap: anywhere;
   }
 
   .drawer-description {
-    margin: 10px 0 0;
-    color: var(--color-text-muted);
+    margin: 9px 0 0;
+    color: #4f544d;
     font-size: 0.67rem;
-    line-height: 1.7;
+    line-height: 1.75;
   }
 
-  .drawer__footer {
+  .drawer-footer {
     display: flex;
     align-items: center;
     justify-content: flex-end;
     gap: 8px;
-    padding: 14px 20px;
-    border-top: 1px solid var(--color-border);
-    background: var(--color-surface);
+    padding: 14px 18px;
+    border-top: 2px solid var(--ink);
+    background: var(--paper-2);
+  }
+
+  .drawer-footer .button:disabled {
+    border-color: #9d9b91;
+    background: #d9d5ca;
+    color: #69675f;
   }
 
   .toast {
     position: fixed;
-    right: 24px;
-    bottom: 24px;
-    z-index: 100;
+    right: 22px;
+    bottom: 22px;
+    z-index: 120;
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    max-width: min(390px, calc(100vw - 30px));
-    padding: 11px 14px;
-    border: 1px solid var(--color-primary-soft);
-    border-radius: 11px;
-    background: var(--color-surface);
-    color: var(--color-text-strong);
-    box-shadow:
-      0 15px 35px rgba(15, 23, 42, 0.14);
-    font-size: 0.66rem;
+    gap: 9px;
+    max-width: min(420px, calc(100vw - 28px));
+    min-height: 44px;
+    padding: 0 13px;
+    border: 2px solid var(--ink);
+    background: var(--ink);
+    color: var(--white);
+    box-shadow: 5px 5px 0 var(--acid);
+    font-size: 0.63rem;
     font-weight: 750;
   }
 
   .toast[hidden] {
-    display: none;
+    display: none !important;
   }
 
   .toast svg {
-    color: var(--color-primary);
+    flex: 0 0 auto;
+    color: var(--acid);
   }
 
   .sr-only {
@@ -2220,13 +2655,13 @@ const jsonLd = {
     border: 0;
   }
 
-  @media (max-width: 1200px) {
-    .page-top {
+  @media (max-width: 1260px) {
+    .page-intro {
       align-items: flex-start;
       flex-direction: column;
     }
 
-    .page-top__actions {
+    .page-intro__actions {
       justify-content: flex-start;
     }
 
@@ -2234,23 +2669,24 @@ const jsonLd = {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
-    .toolbar {
+    .directory-toolbar {
       align-items: stretch;
       flex-direction: column;
     }
 
-    .toolbar__search {
-      max-width: none;
-    }
-
-    .toolbar__filters {
+    .toolbar-filters {
       justify-content: flex-start;
     }
   }
 
-  @media (max-width: 820px) {
+  @media (max-width: 900px) {
     .reports-page {
-      padding: 20px 16px 36px;
+      padding: 22px 18px 38px;
+    }
+
+    .page-intro__heading-row {
+      align-items: flex-start;
+      flex-direction: column;
     }
 
     .priority-strip {
@@ -2260,165 +2696,110 @@ const jsonLd = {
 
     .priority-strip__action {
       width: 100%;
-      padding-left: 56px;
+      justify-content: flex-start;
+    }
+
+    .filter-panel {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+
+    .filter-panel__right {
+      width: 100%;
+      align-items: flex-start;
+      flex-direction: column;
+    }
+
+    .filter-note {
+      max-width: none;
     }
 
     .governance-grid {
       grid-template-columns: 1fr;
     }
-
-    .filter-panel__body {
-      align-items: flex-start;
-      flex-direction: column;
-    }
   }
 
-  @media (max-width: 600px) {
-    .summary-grid {
-      grid-template-columns: 1fr;
+  @media (max-width: 680px) {
+    .reports-page {
+      padding: 18px 14px 34px;
     }
 
-    .page-top__actions {
+    .page-intro__actions {
       width: 100%;
-      flex-direction: column;
-      align-items: stretch;
-    }
-
-    .page-top__actions .button {
-      width: 100%;
-    }
-
-    .toolbar__filters {
       display: grid;
       grid-template-columns: 1fr;
     }
 
-    .filter-control select,
-    .filter-button {
+    .page-intro__actions .button {
+      width: 100%;
+    }
+
+    .summary-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .toolbar-filters {
+      display: grid;
+      grid-template-columns: 1fr;
+    }
+
+    .select-box select,
+    .filter-toggle {
       width: 100%;
       max-width: none;
     }
 
-    .table-head {
+    .directory-head {
       align-items: flex-start;
       flex-direction: column;
     }
 
-    .drawer__footer {
+    .directory-footer {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+
+    .drawer-footer {
       align-items: stretch;
     }
 
-    .drawer__footer .button {
+    .drawer-footer .button {
       flex: 1;
     }
 
     .toast {
-      right: 15px;
-      bottom: 15px;
+      right: 14px;
+      bottom: 14px;
+    }
+  }
+
+  @media (max-width: 470px) {
+    .page-intro h1 {
+      font-size: 1.85rem;
+    }
+
+    .page-intro__code {
+      width: 100%;
+    }
+
+    .drawer-footer {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .button,
+    .waste-drawer,
+    .report-drawer,
+    .reports-table tbody tr {
+      transition: none;
     }
   }
 </style>
 
 <script>
   // @ts-nocheck
-
-  const reports = [
-    {
-      id: "report-demo-001",
-      title: "Tumpukan sampah di area terbuka",
-      description:
-        "Laporan masyarakat mengenai tumpukan sampah yang terlihat pada area terbuka.",
-      type: "illegal-dumping",
-      typeLabel: "Pembuangan ilegal",
-      category: "Sampah campuran",
-      status: "pending",
-      statusLabel: "Menunggu",
-      priority: "high",
-      priorityLabel: "Tinggi",
-      areaName: "Kuta Utara",
-      address: "Kuta Utara, Kabupaten Badung, Bali",
-      reporterName: "Warga",
-      reporterContact: "Tidak ditampilkan",
-      createdAt: "10 Sep 2026",
-      updatedAt: "10 Sep 2026",
-    },
-    {
-      id: "report-demo-002",
-      title: "Kontainer sampah meluap",
-      description:
-        "Laporan mengenai kondisi penampungan yang terlihat melebihi kapasitas.",
-      type: "overflowing-waste",
-      typeLabel: "Sampah meluap",
-      category: "Sampah campuran",
-      status: "verified",
-      statusLabel: "Terverifikasi",
-      priority: "medium",
-      priorityLabel: "Sedang",
-      areaName: "Kuta",
-      address: "Kuta, Kabupaten Badung, Bali",
-      reporterName: "Warga",
-      reporterContact: "Tidak ditampilkan",
-      createdAt: "9 Sep 2026",
-      updatedAt: "9 Sep 2026",
-    },
-    {
-      id: "report-demo-003",
-      title: "Pembakaran sampah terbuka",
-      description:
-        "Laporan aktivitas pembakaran sampah pada ruang terbuka.",
-      type: "burning-waste",
-      typeLabel: "Pembakaran sampah",
-      category: "Sampah campuran",
-      status: "in-progress",
-      statusLabel: "Diproses",
-      priority: "high",
-      priorityLabel: "Tinggi",
-      areaName: "Mengwi",
-      address: "Mengwi, Kabupaten Badung, Bali",
-      reporterName: "Warga",
-      reporterContact: "Tidak ditampilkan",
-      createdAt: "8 Sep 2026",
-      updatedAt: "9 Sep 2026",
-    },
-    {
-      id: "report-demo-004",
-      title: "Dugaan pencemaran lingkungan",
-      description:
-        "Laporan masyarakat mengenai kondisi lingkungan yang perlu diperiksa lebih lanjut.",
-      type: "environmental-pollution",
-      typeLabel: "Pencemaran lingkungan",
-      category: "Pencemaran lingkungan",
-      status: "resolved",
-      statusLabel: "Selesai",
-      priority: "medium",
-      priorityLabel: "Sedang",
-      areaName: "Abiansemal",
-      address: "Abiansemal, Kabupaten Badung, Bali",
-      reporterName: "Warga",
-      reporterContact: "Tidak ditampilkan",
-      createdAt: "6 Sep 2026",
-      updatedAt: "8 Sep 2026",
-    },
-    {
-      id: "report-demo-005",
-      title: "Temuan material berbahaya",
-      description:
-        "Laporan mengenai material yang diduga memerlukan penanganan khusus.",
-      type: "hazardous-waste",
-      typeLabel: "Sampah berbahaya",
-      category: "Bahan berbahaya",
-      status: "rejected",
-      statusLabel: "Ditolak",
-      priority: "high",
-      priorityLabel: "Tinggi",
-      areaName: "Mengwi",
-      address: "Mengwi, Kabupaten Badung, Bali",
-      reporterName: "Warga",
-      reporterContact: "Tidak ditampilkan",
-      createdAt: "5 Sep 2026",
-      updatedAt: "7 Sep 2026",
-    },
-  ];
 
   const page =
     document.querySelector(
@@ -2429,6 +2810,26 @@ const jsonLd = {
     throw new Error(
       "BINSIGHT reports admin page root not found.",
     );
+  }
+
+  const dataNode =
+    page.querySelector(
+      "#admin-reports-data",
+    );
+
+  let reports = [];
+
+  try {
+    reports = JSON.parse(
+      dataNode?.textContent ?? "[]",
+    );
+  } catch (error) {
+    console.error(
+      "Failed to parse BINSIGHT reports data.",
+      error,
+    );
+
+    reports = [];
   }
 
   const searchInput =
@@ -2466,6 +2867,31 @@ const jsonLd = {
       "[data-footer-count]",
     );
 
+  const totalCountNode =
+    page.querySelector(
+      "[data-total-count]",
+    );
+
+  const pendingCountNode =
+    page.querySelector(
+      "[data-pending-count]",
+    );
+
+  const activeCountNode =
+    page.querySelector(
+      "[data-active-count]",
+    );
+
+  const resolvedCountNode =
+    page.querySelector(
+      "[data-resolved-count]",
+    );
+
+  const highPriorityCountNode =
+    page.querySelector(
+      "[data-high-priority-count]",
+    );
+
   const emptyState =
     page.querySelector(
       "[data-empty-state]",
@@ -2496,16 +2922,16 @@ const jsonLd = {
       "[data-empty-reset]",
     );
 
+  const highPriorityButton =
+    page.querySelector(
+      "[data-high-priority]",
+    );
+
   const rows =
     Array.from(
       page.querySelectorAll(
         "[data-report-row]",
       ),
-    );
-
-  const highPriorityButton =
-    page.querySelector(
-      "[data-high-priority]",
     );
 
   const drawer =
@@ -2598,11 +3024,9 @@ const jsonLd = {
       "[data-toast-message]",
     );
 
-  let selectedReportId =
-    null;
-
-  let toastTimer =
-    null;
+  let selectedReportId = null;
+  let activeTrigger = null;
+  let toastTimer = null;
 
   function getReport(id) {
     return reports.find(
@@ -2611,30 +3035,117 @@ const jsonLd = {
     );
   }
 
+  function setEmptyState(
+    hasResults,
+  ) {
+    if (!(emptyState instanceof HTMLElement)) {
+      return;
+    }
+
+    const shouldShow =
+      !hasResults;
+
+    emptyState.hidden =
+      !shouldShow;
+
+    emptyState.setAttribute(
+      "aria-hidden",
+      shouldShow
+        ? "false"
+        : "true",
+    );
+
+    emptyState.style.display =
+      shouldShow
+        ? "flex"
+        : "none";
+  }
+
+  function updateSummary() {
+    const total =
+      reports.length;
+
+    const pending =
+      reports.filter(
+        (report) =>
+          report.status === "pending",
+      ).length;
+
+    const active =
+      reports.filter(
+        (report) =>
+          report.status === "verified" ||
+          report.status === "in-progress",
+      ).length;
+
+    const resolved =
+      reports.filter(
+        (report) =>
+          report.status === "resolved",
+      ).length;
+
+    const highPriority =
+      reports.filter(
+        (report) =>
+          report.priority === "high",
+      ).length;
+
+    if (
+      totalCountNode instanceof HTMLElement
+    ) {
+      totalCountNode.textContent =
+        String(total);
+    }
+
+    if (
+      pendingCountNode instanceof HTMLElement
+    ) {
+      pendingCountNode.textContent =
+        String(pending);
+    }
+
+    if (
+      activeCountNode instanceof HTMLElement
+    ) {
+      activeCountNode.textContent =
+        String(active);
+    }
+
+    if (
+      resolvedCountNode instanceof HTMLElement
+    ) {
+      resolvedCountNode.textContent =
+        String(resolved);
+    }
+
+    if (
+      highPriorityCountNode instanceof HTMLElement
+    ) {
+      highPriorityCountNode.textContent =
+        `${highPriority} laporan prioritas tinggi`;
+    }
+  }
+
   function updateFilters() {
     const query =
-      searchInput instanceof
-      HTMLInputElement
+      searchInput instanceof HTMLInputElement
         ? searchInput.value
             .trim()
             .toLowerCase()
         : "";
 
     const status =
-      statusFilter instanceof
-      HTMLSelectElement
+      statusFilter instanceof HTMLSelectElement
         ? statusFilter.value
         : "all";
 
     const priority =
-      priorityFilter instanceof
-      HTMLSelectElement
+      priorityFilter instanceof HTMLSelectElement
         ? priorityFilter.value
         : "all";
 
     const type =
-      typeFilter instanceof
-      HTMLSelectElement
+      typeFilter instanceof HTMLSelectElement
         ? typeFilter.value
         : "all";
 
@@ -2659,6 +3170,11 @@ const jsonLd = {
           const area =
             row.getAttribute(
               "data-area",
+            ) ?? "";
+
+          const address =
+            row.getAttribute(
+              "data-address",
             ) ?? "";
 
           const typeLabel =
@@ -2687,6 +3203,7 @@ const jsonLd = {
             description.includes(query) ||
             category.includes(query) ||
             area.includes(query) ||
+            address.includes(query) ||
             typeLabel.includes(query);
 
           const matchesStatus =
@@ -2712,48 +3229,47 @@ const jsonLd = {
 
     rows.forEach(
       (row) => {
-        row.setAttribute(
-          "data-hidden",
+        const visible =
           visibleRows.includes(
             row,
-          )
+          );
+
+        row.setAttribute(
+          "data-hidden",
+          visible
             ? "false"
             : "true",
         );
       },
     );
 
+    const count =
+      visibleRows.length;
+
     if (
       resultCount instanceof HTMLElement
     ) {
       resultCount.textContent =
-        `${visibleRows.length} laporan`;
+        `${count} laporan`;
     }
 
     if (
       footerCount instanceof HTMLElement
     ) {
       footerCount.textContent =
-        String(
-          visibleRows.length,
-        );
+        String(count);
     }
 
-    if (
-      emptyState instanceof HTMLElement
-    ) {
-      emptyState.hidden =
-        visibleRows.length !== 0;
-    }
+    setEmptyState(
+      count > 0,
+    );
 
     if (
-      clearSearch instanceof HTMLButtonElement
+      clearSearch instanceof HTMLButtonElement &&
+      searchInput instanceof HTMLInputElement
     ) {
       clearSearch.hidden =
-        !(
-          searchInput instanceof HTMLInputElement &&
-          searchInput.value.length > 0
-        );
+        searchInput.value.trim() === "";
     }
   }
 
@@ -2801,13 +3317,9 @@ const jsonLd = {
     toastMessage.textContent =
       message;
 
-    toast.hidden =
-      false;
+    toast.hidden = false;
 
-    if (
-      toastTimer !==
-      null
-    ) {
+    if (toastTimer !== null) {
       window.clearTimeout(
         toastTimer,
       );
@@ -2830,9 +3342,7 @@ const jsonLd = {
     element,
     report,
   ) {
-    if (
-      !(element instanceof HTMLElement)
-    ) {
+    if (!(element instanceof HTMLElement)) {
       return;
     }
 
@@ -2840,8 +3350,7 @@ const jsonLd = {
       `priority-badge priority-badge--${report.priority}`;
 
     if (
-      report.priority ===
-      "high"
+      report.priority === "high"
     ) {
       element.innerHTML = `
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -2855,8 +3364,7 @@ const jsonLd = {
     }
 
     if (
-      report.priority ===
-      "medium"
+      report.priority === "medium"
     ) {
       element.innerHTML = `
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -2880,9 +3388,7 @@ const jsonLd = {
     element,
     report,
   ) {
-    if (
-      !(element instanceof HTMLElement)
-    ) {
+    if (!(element instanceof HTMLElement)) {
       return;
     }
 
@@ -2890,8 +3396,7 @@ const jsonLd = {
       `status-badge status-badge--${report.status}`;
 
     if (
-      report.status ===
-      "resolved"
+      report.status === "resolved"
     ) {
       element.innerHTML = `
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -2903,8 +3408,7 @@ const jsonLd = {
     }
 
     if (
-      report.status ===
-      "in-progress"
+      report.status === "in-progress"
     ) {
       element.innerHTML = `
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -2917,8 +3421,7 @@ const jsonLd = {
     }
 
     if (
-      report.status ===
-      "rejected"
+      report.status === "rejected"
     ) {
       element.innerHTML = `
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -2931,10 +3434,23 @@ const jsonLd = {
       return;
     }
 
+    if (
+      report.status === "verified"
+    ) {
+      element.innerHTML = `
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="9"/>
+          <path d="m9 12 2 2 4-4"/>
+        </svg>
+        <span>${report.statusLabel}</span>
+      `;
+      return;
+    }
+
     element.innerHTML = `
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <circle cx="12" cy="12" r="9"/>
-        <path d="m9 12 2 2 4-4"/>
+        <path d="M12 7v5l3 2"/>
       </svg>
       <span>${report.statusLabel}</span>
     `;
@@ -2961,15 +3477,23 @@ const jsonLd = {
         report.typeLabel;
     }
 
-    setPriorityBadge(
-      drawerPriority,
-      report,
-    );
+    if (
+      drawerPriority instanceof HTMLElement
+    ) {
+      setPriorityBadge(
+        drawerPriority,
+        report,
+      );
+    }
 
-    setStatusBadge(
-      drawerStatus,
-      report,
-    );
+    if (
+      drawerStatus instanceof HTMLElement
+    ) {
+      setStatusBadge(
+        drawerStatus,
+        report,
+      );
+    }
 
     if (
       drawerArea instanceof HTMLElement
@@ -3030,40 +3554,37 @@ const jsonLd = {
         "button button--primary";
 
       if (
-        report.status ===
-        "pending"
+        report.status === "pending"
       ) {
         drawerAction.innerHTML = `
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20Z"/>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="9"/>
             <path d="m9 12 2 2 4-4"/>
           </svg>
           <span>Verifikasi</span>
         `;
       } else if (
-        report.status ===
-        "verified"
+        report.status === "verified"
       ) {
         drawerAction.innerHTML = `
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <circle cx="12" cy="12" r="9"/>
             <path d="M12 7v5l3 2"/>
           </svg>
           <span>Mulai proses</span>
         `;
       } else if (
-        report.status ===
-        "in-progress"
+        report.status === "in-progress"
       ) {
         drawerAction.innerHTML = `
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="m5 12 4 4L19 6"/>
           </svg>
           <span>Tandai selesai</span>
         `;
       } else {
         drawerAction.innerHTML = `
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <circle cx="12" cy="12" r="9"/>
           </svg>
           <span>Tidak ada aksi</span>
@@ -3075,7 +3596,7 @@ const jsonLd = {
     }
   }
 
-  function updateRowStatus(
+  function updateRow(
     report,
   ) {
     const row =
@@ -3086,9 +3607,7 @@ const jsonLd = {
           ) === report.id,
       );
 
-    if (
-      !(row instanceof HTMLElement)
-    ) {
+    if (!(row instanceof HTMLElement)) {
       return;
     }
 
@@ -3099,7 +3618,7 @@ const jsonLd = {
 
     const statusBadge =
       row.querySelector(
-        ".status-badge",
+        "[data-row-status-badge]",
       );
 
     setStatusBadge(
@@ -3110,6 +3629,7 @@ const jsonLd = {
 
   function openDrawer(
     id,
+    trigger,
   ) {
     const report =
       getReport(id);
@@ -3125,35 +3645,46 @@ const jsonLd = {
     selectedReportId =
       id;
 
+    activeTrigger =
+      trigger instanceof HTMLElement
+        ? trigger
+        : null;
+
     populateDrawer(
       report,
     );
 
-    drawer.hidden =
-      false;
-
+    drawer.hidden = false;
     drawerBackdrop.hidden =
       false;
 
-    window.requestAnimationFrame(
-      () => {
-        drawer.setAttribute(
-          "data-open",
-          "true",
-        );
+    drawer.setAttribute(
+      "data-open",
+      "true",
+    );
 
-        drawer.setAttribute(
-          "aria-hidden",
-          "false",
-        );
-      },
+    drawer.setAttribute(
+      "aria-hidden",
+      "false",
     );
 
     document.documentElement.style.overflow =
       "hidden";
+
+    if (
+      drawerClose instanceof HTMLButtonElement
+    ) {
+      window.requestAnimationFrame(
+        () => {
+          drawerClose.focus();
+        },
+      );
+    }
   }
 
-  function closeDrawer() {
+  function closeDrawer(
+    restoreFocus = true,
+  ) {
     if (
       !(drawer instanceof HTMLElement) ||
       !(drawerBackdrop instanceof HTMLElement)
@@ -3173,11 +3704,17 @@ const jsonLd = {
 
     window.setTimeout(
       () => {
-        drawer.hidden =
-          true;
+        if (
+          drawer.getAttribute(
+            "data-open",
+          ) === "false"
+        ) {
+          drawer.hidden =
+            true;
 
-        drawerBackdrop.hidden =
-          true;
+          drawerBackdrop.hidden =
+            true;
+        }
       },
       190,
     );
@@ -3185,8 +3722,15 @@ const jsonLd = {
     document.documentElement.style.overflow =
       "";
 
-    selectedReportId =
-      null;
+    if (
+      restoreFocus &&
+      activeTrigger instanceof HTMLElement
+    ) {
+      activeTrigger.focus();
+    }
+
+    selectedReportId = null;
+    activeTrigger = null;
   }
 
   function editReport(
@@ -3229,21 +3773,21 @@ const jsonLd = {
       return;
     }
 
+    const previousStatus =
+      report.status;
+
     if (
-      report.status ===
-      "pending"
+      report.status === "pending"
     ) {
       report.status =
         "verified";
     } else if (
-      report.status ===
-      "verified"
+      report.status === "verified"
     ) {
       report.status =
         "in-progress";
     } else if (
-      report.status ===
-      "in-progress"
+      report.status === "in-progress"
     ) {
       report.status =
         "resolved";
@@ -3255,20 +3799,26 @@ const jsonLd = {
       return;
     }
 
-    report.statusLabel = {
-      pending: "Menunggu",
-      verified: "Terverifikasi",
-      "in-progress": "Diproses",
-      resolved: "Selesai",
-      rejected: "Ditolak",
-    }[
-      report.status
-    ];
+    report.statusLabel =
+      {
+        pending: "Menunggu",
+        verified: "Terverifikasi",
+        "in-progress": "Diproses",
+        resolved: "Selesai",
+        rejected: "Ditolak",
+      }[report.status];
 
     report.updatedAt =
-      "10 Sep 2026";
+      new Date().toLocaleDateString(
+        "id-ID",
+        {
+          day: "numeric",
+          month: "short",
+          year: "numeric",
+        },
+      );
 
-    updateRowStatus(
+    updateRow(
       report,
     );
 
@@ -3276,12 +3826,16 @@ const jsonLd = {
       report,
     );
 
+    updateSummary();
+    updateFilters();
+
     window.dispatchEvent(
       new CustomEvent(
         "binsight:admin-report-status-change",
         {
           detail: {
             ...report,
+            previousStatus,
           },
         },
       ),
@@ -3290,8 +3844,6 @@ const jsonLd = {
     showToast(
       `Status laporan diubah menjadi ${report.statusLabel.toLowerCase()}.`,
     );
-
-    updateFilters();
   }
 
   function showHighPriority() {
@@ -3308,6 +3860,45 @@ const jsonLd = {
       priorityFilter instanceof HTMLSelectElement
     ) {
       priorityFilter.focus();
+    }
+  }
+
+  function toggleFilterPanel() {
+    if (
+      !(filterToggle instanceof HTMLButtonElement) ||
+      !(filterPanel instanceof HTMLElement)
+    ) {
+      return;
+    }
+
+    const isOpen =
+      filterToggle.getAttribute(
+        "aria-expanded",
+      ) === "true";
+
+    filterToggle.setAttribute(
+      "aria-expanded",
+      isOpen
+        ? "false"
+        : "true",
+    );
+
+    filterPanel.hidden =
+      isOpen;
+  }
+
+  function closeFilterPanel() {
+    if (
+      filterToggle instanceof HTMLButtonElement &&
+      filterPanel instanceof HTMLElement
+    ) {
+      filterToggle.setAttribute(
+        "aria-expanded",
+        "false",
+      );
+
+      filterPanel.hidden =
+        true;
     }
   }
 
@@ -3337,14 +3928,22 @@ const jsonLd = {
       if (
         searchInput instanceof HTMLInputElement
       ) {
-        searchInput.value =
-          "";
-
+        searchInput.value = "";
         searchInput.focus();
       }
 
       updateFilters();
     },
+  );
+
+  filterToggle?.addEventListener(
+    "click",
+    toggleFilterPanel,
+  );
+
+  filterClose?.addEventListener(
+    "click",
+    closeFilterPanel,
   );
 
   filterReset?.addEventListener(
@@ -3354,57 +3953,20 @@ const jsonLd = {
 
   emptyReset?.addEventListener(
     "click",
-    resetFilters,
+    () => {
+      resetFilters();
+
+      if (
+        searchInput instanceof HTMLInputElement
+      ) {
+        searchInput.focus();
+      }
+    },
   );
 
   highPriorityButton?.addEventListener(
     "click",
     showHighPriority,
-  );
-
-  filterToggle?.addEventListener(
-    "click",
-    () => {
-      if (
-        !(filterToggle instanceof HTMLButtonElement) ||
-        !(filterPanel instanceof HTMLElement)
-      ) {
-        return;
-      }
-
-      const isOpen =
-        filterToggle.getAttribute(
-          "aria-expanded",
-        ) === "true";
-
-      filterToggle.setAttribute(
-        "aria-expanded",
-        isOpen
-          ? "false"
-          : "true",
-      );
-
-      filterPanel.hidden =
-        isOpen;
-    },
-  );
-
-  filterClose?.addEventListener(
-    "click",
-    () => {
-      if (
-        filterToggle instanceof HTMLButtonElement &&
-        filterPanel instanceof HTMLElement
-      ) {
-        filterToggle.setAttribute(
-          "aria-expanded",
-          "false",
-        );
-
-        filterPanel.hidden =
-          true;
-      }
-    },
   );
 
   page
@@ -3422,7 +3984,10 @@ const jsonLd = {
               );
 
             if (id) {
-              openDrawer(id);
+              openDrawer(
+                id,
+                button,
+              );
             }
           },
         );
@@ -3444,7 +4009,9 @@ const jsonLd = {
               );
 
             if (id) {
-              editReport(id);
+              editReport(
+                id,
+              );
             }
           },
         );
@@ -3453,12 +4020,12 @@ const jsonLd = {
 
   drawerClose?.addEventListener(
     "click",
-    closeDrawer,
+    () => closeDrawer(),
   );
 
   drawerBackdrop?.addEventListener(
     "click",
-    closeDrawer,
+    () => closeDrawer(),
   );
 
   drawerEdit?.addEventListener(
@@ -3484,6 +4051,7 @@ const jsonLd = {
     ?.addEventListener(
       "click",
       () => {
+        updateSummary();
         updateFilters();
 
         showToast(
@@ -3495,17 +4063,32 @@ const jsonLd = {
   document.addEventListener(
     "keydown",
     (event) => {
+      if (event.key !== "Escape") {
+        return;
+      }
+
       if (
-        event.key === "Escape" &&
         drawer instanceof HTMLElement &&
         drawer.getAttribute(
           "data-open",
         ) === "true"
       ) {
         closeDrawer();
+        return;
+      }
+
+      if (
+        filterPanel instanceof HTMLElement &&
+        filterToggle instanceof HTMLButtonElement &&
+        filterToggle.getAttribute(
+          "aria-expanded",
+        ) === "true"
+      ) {
+        closeFilterPanel();
       }
     },
   );
 
+  updateSummary();
   updateFilters();
 </script>

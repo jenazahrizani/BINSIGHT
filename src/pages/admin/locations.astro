@@ -1,4 +1,27 @@
 ---
+/**
+ * BINSIGHT — ADMIN LOCATIONS
+ * --------------------------------------------------------------------------
+ * Location management workspace for BINSIGHT.
+ *
+ * Design baseline:
+ * - BINSIGHT editorial / brutalist visual language
+ * - Page-owned hierarchy
+ * - No duplicate admin header
+ * - No page-level vertical scroll container
+ * - Main page uses AdminLayout document scroll
+ * - Sidebar behavior belongs exclusively to AdminLayout
+ * - Square edges, hard borders, offset shadows
+ * - Lime / ink / orange accent system
+ * - Responsive without horizontal overflow
+ *
+ * Data note:
+ * - This page currently uses local demo records.
+ * - No backend write operation is invented here.
+ * - Client actions emit BINSIGHT custom events and update local UI state.
+ * --------------------------------------------------------------------------
+ */
+
 import {
   Activity,
   ArrowRight,
@@ -18,7 +41,9 @@ import {
 
 import AdminLayout from "../../layouts/AdminLayout.astro";
 
-type LocationStatus = "active" | "inactive";
+type LocationStatus =
+  | "active"
+  | "inactive";
 
 type LocationType =
   | "collection-point"
@@ -165,16 +190,26 @@ const statusLabels: Record<LocationStatus, string> = {
   inactive: "Tidak aktif",
 };
 
-const totalLocations = locations.length;
-const activeLocations = locations.filter(
-  (location) => location.status === "active",
-).length;
-const inactiveLocations = locations.filter(
-  (location) => location.status === "inactive",
-).length;
-const linkedLocations = locations.filter(
-  (location) => location.organizationIds.length > 0,
-).length;
+const totalLocations =
+  locations.length;
+
+const activeLocations =
+  locations.filter(
+    (location) =>
+      location.status === "active",
+  ).length;
+
+const inactiveLocations =
+  locations.filter(
+    (location) =>
+      location.status === "inactive",
+  ).length;
+
+const linkedLocations =
+  locations.filter(
+    (location) =>
+      location.organizationIds.length > 0,
+  ).length;
 
 const jsonLd = {
   "@context": "https://schema.org",
@@ -194,6 +229,7 @@ const jsonLd = {
 <AdminLayout
   title="Lokasi"
   description="Kelola titik lokasi pengelolaan persampahan dalam ekosistem BINSIGHT."
+  activeSection="locations"
 >
   <script
     type="application/ld+json"
@@ -201,14 +237,27 @@ const jsonLd = {
     set:html={JSON.stringify(jsonLd)}
   />
 
-  <main
+  <script
+    id="admin-locations-data"
+    type="application/json"
+    is:inline
+    set:html={JSON.stringify(locations)}
+  />
+
+  <div
     class="locations-page"
     data-locations-page
   >
-    <header class="page-top">
-      <div class="page-top__main">
-        <div class="page-top__eyebrow">
-          <span class="page-top__eyebrow-icon">
+    <!-- ============================================================
+         PAGE INTRO
+    ============================================================= -->
+    <section
+      class="page-hero"
+      aria-labelledby="locations-page-title"
+    >
+      <div class="page-hero__copy">
+        <div class="page-hero__eyebrow">
+          <span class="page-hero__eyebrow-mark">
             <MapPin
               size={15}
               stroke-width={2}
@@ -221,20 +270,20 @@ const jsonLd = {
           </span>
         </div>
 
-        <h1>
+        <h1 id="locations-page-title">
           Lokasi
         </h1>
 
         <p>
-          Kelola titik pengumpulan, bank sampah, fasilitas pengolahan, dan
-          lokasi lain yang menjadi bagian dari peta ekosistem BINSIGHT.
+          Kelola titik pengumpulan, bank sampah, fasilitas pengolahan,
+          dan lokasi lain yang menjadi bagian dari peta ekosistem BINSIGHT.
         </p>
       </div>
 
-      <div class="page-top__actions">
+      <div class="page-hero__actions">
         <button
           type="button"
-          class="button button--secondary"
+          class="button button--paper"
           data-refresh
         >
           <RefreshCw
@@ -254,7 +303,7 @@ const jsonLd = {
         >
           <Eye
             size={16}
-            stroke-width={2}
+            stroke-width={1.9}
             aria-hidden="true"
           />
 
@@ -265,7 +314,7 @@ const jsonLd = {
 
         <button
           type="button"
-          class="button button--primary"
+          class="button button--acid"
           data-create
         >
           <Plus
@@ -279,19 +328,22 @@ const jsonLd = {
           </span>
         </button>
       </div>
-    </header>
+    </section>
 
+    <!-- ============================================================
+         SUMMARY
+    ============================================================= -->
     <section
       class="summary-grid"
       aria-label="Ringkasan lokasi"
     >
       <article class="summary-card">
         <div class="summary-card__top">
-          <span class="summary-card__label">
-            Total lokasi
+          <span class="summary-card__index">
+            01
           </span>
 
-          <span class="summary-card__icon summary-card__icon--green">
+          <span class="summary-card__icon">
             <MapPin
               size={18}
               stroke-width={1.9}
@@ -299,6 +351,10 @@ const jsonLd = {
             />
           </span>
         </div>
+
+        <span class="summary-card__label">
+          TOTAL LOKASI
+        </span>
 
         <strong
           class="summary-card__value"
@@ -312,13 +368,13 @@ const jsonLd = {
         </span>
       </article>
 
-      <article class="summary-card">
+      <article class="summary-card summary-card--acid">
         <div class="summary-card__top">
-          <span class="summary-card__label">
-            Aktif
+          <span class="summary-card__index">
+            02
           </span>
 
-          <span class="summary-card__icon summary-card__icon--active">
+          <span class="summary-card__icon">
             <CircleCheck
               size={18}
               stroke-width={1.9}
@@ -326,6 +382,10 @@ const jsonLd = {
             />
           </span>
         </div>
+
+        <span class="summary-card__label">
+          AKTIF
+        </span>
 
         <strong
           class="summary-card__value"
@@ -339,13 +399,13 @@ const jsonLd = {
         </span>
       </article>
 
-      <article class="summary-card">
+      <article class="summary-card summary-card--orange">
         <div class="summary-card__top">
-          <span class="summary-card__label">
-            Tidak aktif
+          <span class="summary-card__index">
+            03
           </span>
 
-          <span class="summary-card__icon summary-card__icon--inactive">
+          <span class="summary-card__icon">
             <TriangleAlert
               size={18}
               stroke-width={1.9}
@@ -353,6 +413,10 @@ const jsonLd = {
             />
           </span>
         </div>
+
+        <span class="summary-card__label">
+          TIDAK AKTIF
+        </span>
 
         <strong
           class="summary-card__value"
@@ -366,13 +430,13 @@ const jsonLd = {
         </span>
       </article>
 
-      <article class="summary-card">
+      <article class="summary-card summary-card--muted">
         <div class="summary-card__top">
-          <span class="summary-card__label">
-            Terhubung organisasi
+          <span class="summary-card__index">
+            04
           </span>
 
-          <span class="summary-card__icon summary-card__icon--linked">
+          <span class="summary-card__icon">
             <Building2
               size={18}
               stroke-width={1.9}
@@ -380,6 +444,10 @@ const jsonLd = {
             />
           </span>
         </div>
+
+        <span class="summary-card__label">
+          TERHUBUNG ORGANISASI
+        </span>
 
         <strong
           class="summary-card__value"
@@ -394,7 +462,32 @@ const jsonLd = {
       </article>
     </section>
 
-    <section class="workspace-card">
+    <!-- ============================================================
+         DIRECTORY
+    ============================================================= -->
+    <section
+      class="directory"
+      aria-labelledby="location-directory-title"
+    >
+      <div class="directory__top">
+        <div class="directory__title">
+          <span class="directory__eyebrow">
+            LOCATION DIRECTORY
+          </span>
+
+          <h2 id="location-directory-title">
+            Daftar lokasi
+          </h2>
+        </div>
+
+        <span
+          class="directory__count"
+          data-result-count
+        >
+          {totalLocations} lokasi
+        </span>
+      </div>
+
       <div class="toolbar">
         <div class="toolbar__search">
           <Search
@@ -415,6 +508,7 @@ const jsonLd = {
             type="search"
             placeholder="Cari lokasi, wilayah, alamat, atau tag..."
             autocomplete="off"
+            spellcheck="false"
             data-search
           />
 
@@ -422,6 +516,7 @@ const jsonLd = {
             type="button"
             class="toolbar__clear"
             aria-label="Hapus pencarian"
+            title="Hapus pencarian"
             data-clear-search
             hidden
           >
@@ -435,8 +530,8 @@ const jsonLd = {
 
         <div class="toolbar__filters">
           <label class="filter-control">
-            <span class="sr-only">
-              Filter status lokasi
+            <span class="filter-control__label">
+              STATUS
             </span>
 
             <select
@@ -444,7 +539,7 @@ const jsonLd = {
               data-status-filter
             >
               <option value="all">
-                Semua status
+                Semua
               </option>
 
               <option value="active">
@@ -458,8 +553,8 @@ const jsonLd = {
           </label>
 
           <label class="filter-control">
-            <span class="sr-only">
-              Filter tipe lokasi
+            <span class="filter-control__label">
+              TIPE
             </span>
 
             <select
@@ -467,7 +562,7 @@ const jsonLd = {
               data-type-filter
             >
               <option value="all">
-                Semua tipe
+                Semua
               </option>
 
               {
@@ -483,16 +578,16 @@ const jsonLd = {
           </label>
 
           <label class="filter-control">
-            <span class="sr-only">
-              Filter wilayah
+            <span class="filter-control__label">
+              WILAYAH
             </span>
 
             <select
-              aria-label="Filter wilayah"
+              aria-label="Filter wilayah lokasi"
               data-area-filter
             >
               <option value="all">
-                Semua wilayah
+                Semua
               </option>
 
               <option value="abiansemal">
@@ -518,6 +613,7 @@ const jsonLd = {
             class="filter-button"
             data-filter-toggle
             aria-expanded="false"
+            aria-controls="location-filter-panel"
           >
             <Filter
               size={16}
@@ -533,6 +629,7 @@ const jsonLd = {
       </div>
 
       <div
+        id="location-filter-panel"
         class="filter-panel"
         data-filter-panel
         hidden
@@ -543,15 +640,16 @@ const jsonLd = {
               FILTER DATA
             </span>
 
-            <h2>
+            <h3>
               Penyaringan lokasi
-            </h2>
+            </h3>
           </div>
 
           <button
             type="button"
             class="filter-panel__close"
             aria-label="Tutup filter"
+            title="Tutup filter"
             data-filter-close
           >
             <X
@@ -571,9 +669,9 @@ const jsonLd = {
             />
 
             <p>
-              Pastikan setiap lokasi memiliki nama, alamat, wilayah, status,
-              dan koordinat yang benar sebelum digunakan sebagai bagian dari
-              peta publik.
+              Pastikan setiap lokasi memiliki nama, alamat, wilayah,
+              status, dan koordinat yang benar sebelum digunakan sebagai
+              bagian dari peta publik.
             </p>
           </div>
 
@@ -585,25 +683,6 @@ const jsonLd = {
             Reset semua filter
           </button>
         </div>
-      </div>
-
-      <div class="table-head">
-        <div>
-          <span class="table-head__eyebrow">
-            LOCATION DIRECTORY
-          </span>
-
-          <h2>
-            Daftar lokasi
-          </h2>
-        </div>
-
-        <span
-          class="result-count"
-          data-result-count
-        >
-          {totalLocations} lokasi
-        </span>
       </div>
 
       <div class="table-wrap">
@@ -650,7 +729,7 @@ const jsonLd = {
             </tr>
           </thead>
 
-          <tbody data-table-body>
+          <tbody>
             {
               locations.map((location) => (
                 <tr
@@ -668,7 +747,13 @@ const jsonLd = {
                 >
                   <td>
                     <div class="location-cell">
-                      <span class="location-cell__icon">
+                      <span class:list={[
+                        "location-cell__icon",
+                        location.status ===
+                        "active"
+                          ? "location-cell__icon--active"
+                          : "",
+                      ]}>
                         <MapPin
                           size={17}
                           stroke-width={1.9}
@@ -677,11 +762,15 @@ const jsonLd = {
                       </span>
 
                       <div class="location-cell__copy">
-                        <strong>
+                        <strong
+                          title={location.name}
+                        >
                           {location.name}
                         </strong>
 
-                        <span>
+                        <span
+                          title={location.address}
+                        >
                           {location.address}
                         </span>
                       </div>
@@ -695,9 +784,17 @@ const jsonLd = {
                   </td>
 
                   <td>
-                    <span class="area-label">
-                      {location.areaName}
-                    </span>
+                    <div class="area-cell">
+                      <MapPin
+                        size={13}
+                        stroke-width={1.9}
+                        aria-hidden="true"
+                      />
+
+                      <span>
+                        {location.areaName}
+                      </span>
+                    </div>
                   </td>
 
                   <td>
@@ -708,7 +805,8 @@ const jsonLd = {
                       ]}
                     >
                       {
-                        location.status === "active" ? (
+                        location.status ===
+                        "active" ? (
                           <CircleCheck
                             size={13}
                             stroke-width={2}
@@ -724,15 +822,21 @@ const jsonLd = {
                       }
 
                       <span>
-                        {statusLabels[location.status]}
+                        {
+                          statusLabels[
+                            location.status
+                          ]
+                        }
                       </span>
                     </span>
                   </td>
 
                   <td>
                     <span class="organization-count">
-                      {location.organizationIds.length}
-                      {" "}
+                      {
+                        location.organizationIds
+                          .length
+                      }{" "}
                       organisasi
                     </span>
                   </td>
@@ -757,6 +861,7 @@ const jsonLd = {
                         type="button"
                         class="row-action"
                         aria-label={`Lihat ${location.name}`}
+                        title="Lihat"
                         data-view
                         data-record={location.id}
                       >
@@ -771,6 +876,7 @@ const jsonLd = {
                         type="button"
                         class="row-action"
                         aria-label={`Edit ${location.name}`}
+                        title="Edit"
                         data-edit
                         data-record={location.id}
                       >
@@ -792,34 +898,40 @@ const jsonLd = {
           class="empty-state"
           data-empty-state
           hidden
+          aria-hidden="true"
         >
           <span class="empty-state__icon">
             <Search
-              size={23}
+              size={24}
               stroke-width={1.8}
               aria-hidden="true"
             />
           </span>
 
+          <span class="empty-state__eyebrow">
+            NO MATCH
+          </span>
+
           <h3>
-            Tidak ada lokasi yang cocok
+            Lokasi tidak ditemukan
           </h3>
 
           <p>
-            Coba ubah kata pencarian atau filter yang digunakan.
+            Tidak ada lokasi yang cocok dengan pencarian atau filter
+            yang digunakan.
           </p>
 
           <button
             type="button"
-            class="button button--secondary"
+            class="button button--paper"
             data-empty-reset
           >
-            Reset pencarian
+            Reset filter
           </button>
         </div>
       </div>
 
-      <footer class="table-footer">
+      <footer class="directory__footer">
         <span>
           <strong data-footer-count>
             {totalLocations}
@@ -828,11 +940,14 @@ const jsonLd = {
         </span>
 
         <span>
-          Data admin
+          BINSIGHT / LOCATIONS
         </span>
       </footer>
     </section>
 
+    <!-- ============================================================
+         MAP GOVERNANCE
+    ============================================================= -->
     <section class="map-banner">
       <div class="map-banner__icon">
         <MapPin
@@ -872,6 +987,15 @@ const jsonLd = {
       </a>
     </section>
 
+    <!-- ============================================================
+         DETAIL DRAWER
+    ============================================================= -->
+    <div
+      class="drawer-backdrop"
+      data-drawer-backdrop
+      hidden
+    ></div>
+
     <aside
       class="location-drawer"
       data-drawer
@@ -894,6 +1018,7 @@ const jsonLd = {
           type="button"
           class="drawer__close"
           aria-label="Tutup detail"
+          title="Tutup"
           data-drawer-close
         >
           <X
@@ -914,7 +1039,7 @@ const jsonLd = {
             />
           </span>
 
-          <div>
+          <div class="drawer-identity__copy">
             <h3 data-drawer-name>
               -
             </h3>
@@ -989,6 +1114,16 @@ const jsonLd = {
                 -
               </dd>
             </div>
+
+            <div>
+              <dt>
+                Diperbarui
+              </dt>
+
+              <dd data-drawer-updated>
+                -
+              </dd>
+            </div>
           </dl>
         </div>
 
@@ -1009,6 +1144,7 @@ const jsonLd = {
           class="drawer-warning"
           data-drawer-warning
           hidden
+          aria-hidden="true"
         >
           <TriangleAlert
             size={17}
@@ -1026,7 +1162,7 @@ const jsonLd = {
       <div class="drawer__footer">
         <a
           href="/map"
-          class="button button--secondary"
+          class="button button--paper"
           data-drawer-map
         >
           <MapPin
@@ -1043,7 +1179,7 @@ const jsonLd = {
         <div class="drawer__footer-right">
           <button
             type="button"
-            class="button button--secondary"
+            class="button button--paper"
             data-drawer-edit
           >
             <Pencil
@@ -1059,7 +1195,7 @@ const jsonLd = {
 
           <button
             type="button"
-            class="button button--primary"
+            class="button button--acid"
             data-drawer-status-action
           >
             <Activity
@@ -1076,12 +1212,9 @@ const jsonLd = {
       </div>
     </aside>
 
-    <div
-      class="drawer-backdrop"
-      data-drawer-backdrop
-      hidden
-    ></div>
-
+    <!-- ============================================================
+         TOAST
+    ============================================================= -->
     <div
       class="toast"
       data-toast
@@ -1099,545 +1232,1255 @@ const jsonLd = {
         Berhasil
       </span>
     </div>
-  </main>
+  </div>
 </AdminLayout>
 
 <style>
+  /* ================================================================
+     PAGE ROOT
+  ================================================================= */
+
   .locations-page {
-    position: relative;
-    min-height: 100%;
-    padding: 30px 30px 50px;
+    --acid: #dfff00;
+    --acid-soft: #efff70;
+    --ink: #090a08;
+    --ink-2: #11130f;
+    --ink-3: #1b1f18;
+    --paper: #f2f0e6;
+    --paper-2: #e4e1d4;
+    --paper-3: #cfcabd;
+    --white: #fffef8;
+    --muted: #6c7068;
+    --muted-2: #8d9088;
+    --orange: #ff6a00;
+    --green: #87b800;
+    --line: #bab9ae;
+
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+
+    padding:
+      34px
+      34px
+      56px;
+
+    overflow-x: hidden;
+
     background:
       radial-gradient(
-        circle at 95% 0%,
-        rgba(132, 204, 22, 0.065),
-        transparent 31rem
+        circle at 96% 0%,
+        rgb(223 255 0 / 12%),
+        transparent 24rem
       ),
-      var(--color-background);
+      var(--paper);
+
+    color: var(--ink);
   }
 
-  .page-top {
+  /* ================================================================
+     HERO
+  ================================================================= */
+
+  .page-hero {
     display: flex;
     align-items: flex-end;
     justify-content: space-between;
+
     gap: 28px;
+
+    min-width: 0;
+
+    padding-bottom: 25px;
+
+    border-bottom: 3px solid var(--ink);
   }
 
-  .page-top__eyebrow {
+  .page-hero__copy {
+    min-width: 0;
+    max-width: 830px;
+  }
+
+  .page-hero__eyebrow {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    color: var(--color-primary);
-    font-size: 0.62rem;
-    font-weight: 900;
+    gap: 9px;
+
+    color: var(--orange);
+
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+
+    font-size: 0.58rem;
+    font-weight: 800;
+
+    line-height: 1;
+
     letter-spacing: 0.12em;
+
+    text-transform: uppercase;
   }
 
-  .page-top__eyebrow-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 27px;
-    height: 27px;
-    border-radius: 8px;
-    background: var(--color-primary-soft);
+  .page-hero__eyebrow-mark {
+    width: 28px;
+    height: 28px;
+
+    display: grid;
+    place-items: center;
+
+    border: 2px solid var(--ink);
+
+    color: var(--acid);
+    background: var(--ink);
+
+    box-shadow:
+      3px 3px 0 var(--orange);
   }
 
-  .page-top h1 {
-    margin: 12px 0 0;
-    color: var(--color-text-strong);
-    font-size: clamp(1.7rem, 3vw, 2.4rem);
+  .page-hero h1 {
+    margin:
+      17px
+      0
+      0;
+
+    color: var(--ink);
+
+    font-family:
+      Sora,
+      Inter,
+      system-ui,
+      sans-serif;
+
+    font-size:
+      clamp(
+        2rem,
+        4vw,
+        3.65rem
+      );
+
     font-weight: 900;
-    letter-spacing: -0.03em;
-    line-height: 1.08;
+
+    line-height: 0.98;
+
+    letter-spacing: -0.055em;
   }
 
-  .page-top__main > p {
-    max-width: 730px;
-    margin: 9px 0 0;
-    color: var(--color-text-muted);
-    font-size: 0.77rem;
-    line-height: 1.7;
+  .page-hero__copy > p {
+    max-width: 790px;
+
+    margin:
+      14px
+      0
+      0;
+
+    color: var(--muted);
+
+    font-size: 0.78rem;
+
+    line-height: 1.75;
   }
 
-  .page-top__actions {
+  .page-hero__actions {
+    flex-shrink: 0;
+
     display: flex;
     align-items: center;
     justify-content: flex-end;
+
     flex-wrap: wrap;
+
     gap: 8px;
   }
 
+  /* ================================================================
+     BUTTONS
+  ================================================================= */
+
   .button {
+    min-height: 42px;
+
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 7px;
-    min-height: 41px;
-    padding: 0 13px;
-    border: 1px solid transparent;
-    border-radius: 10px;
+
+    gap: 8px;
+
+    padding:
+      0
+      13px;
+
+    border: 2px solid var(--ink);
+
+    border-radius: 0;
+
+    color: var(--ink);
+    background: var(--paper);
+
     font: inherit;
-    font-size: 0.68rem;
-    font-weight: 800;
+
+    font-family:
+      Inter,
+      system-ui,
+      sans-serif;
+
+    font-size: 0.65rem;
+    font-weight: 850;
+
     text-decoration: none;
+
     cursor: pointer;
-    white-space: nowrap;
+
+    box-shadow:
+      3px 3px 0 var(--ink);
+
     transition:
-      transform 150ms ease,
-      background 150ms ease,
-      border-color 150ms ease,
-      box-shadow 150ms ease;
+      transform 120ms ease,
+      box-shadow 120ms ease,
+      background 120ms ease,
+      color 120ms ease;
   }
 
   .button:hover {
-    transform: translateY(-1px);
+    transform:
+      translate(
+        2px,
+        2px
+      );
+
+    box-shadow:
+      1px 1px 0 var(--ink);
+  }
+
+  .button:active {
+    transform:
+      translate(
+        3px,
+        3px
+      );
+
+    box-shadow:
+      0 0 0 var(--ink);
+  }
+
+  .button:disabled {
+    cursor: not-allowed;
+
+    opacity: 0.55;
+
+    transform: none;
+
+    box-shadow:
+      2px 2px 0 var(--ink);
   }
 
   .button:focus-visible,
-  .filter-button:focus-visible,
   .row-action:focus-visible,
   .drawer__close:focus-visible,
+  .filter-button:focus-visible,
   .filter-panel__close:focus-visible,
-  .filter-reset:focus-visible {
-    outline: 3px solid var(--color-primary-ring);
-    outline-offset: 2px;
+  .filter-reset:focus-visible,
+  .toolbar__clear:focus-visible {
+    outline:
+      3px solid var(--orange);
+
+    outline-offset:
+      3px;
   }
 
-  .button--primary {
-    border-color: var(--color-primary);
-    background: var(--color-primary);
-    color: #ffffff;
-    box-shadow: var(--shadow-xs);
+  .button--acid {
+    color: var(--ink);
+    background: var(--acid);
   }
 
-  .button--primary:hover {
-    border-color: var(--color-primary-dark);
-    background: var(--color-primary-dark);
+  .button--acid:hover {
+    background: var(--acid-soft);
   }
 
-  .button--secondary {
-    border-color: var(--color-border);
-    background: var(--color-surface);
-    color: var(--color-text-strong);
-  }
-
-  .button--secondary:hover {
-    border-color: var(--color-border-strong);
-    background: var(--color-surface-soft);
+  .button--paper {
+    color: var(--ink);
+    background: var(--white);
   }
 
   .button--ghost {
     border-color: transparent;
+
+    color: var(--ink);
+
     background: transparent;
-    color: var(--color-text-muted);
+
+    box-shadow: none;
   }
 
   .button--ghost:hover {
-    background: var(--color-surface);
-    color: var(--color-text-strong);
+    border-color: var(--ink);
+
+    background: var(--white);
+
+    box-shadow:
+      2px 2px 0 var(--ink);
   }
+
+  /* ================================================================
+     SUMMARY
+  ================================================================= */
 
   .summary-grid {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 12px;
-    margin-top: 28px;
+
+    grid-template-columns:
+      repeat(
+        4,
+        minmax(
+          0,
+          1fr
+        )
+      );
+
+    gap: 11px;
+
+    margin-top: 22px;
   }
 
   .summary-card {
+    position: relative;
+
+    min-width: 0;
+
     padding: 17px;
-    border: 1px solid var(--color-border);
-    border-radius: 16px;
-    background: var(--color-surface);
-    box-shadow: var(--shadow-xs);
+
+    border: 2px solid var(--ink);
+
+    background: var(--white);
+
+    box-shadow:
+      5px 5px 0 var(--paper-3);
+
+    overflow: hidden;
+  }
+
+  .summary-card::after {
+    content: "";
+
+    position: absolute;
+
+    right: -23px;
+    bottom: -23px;
+
+    width: 67px;
+    height: 67px;
+
+    border:
+      2px solid
+      rgb(
+        9 10 8 / 11%
+      );
+
+    border-radius: 50%;
+
+    pointer-events: none;
+  }
+
+  .summary-card--acid {
+    background: var(--acid);
+
+    box-shadow:
+      5px 5px 0 var(--ink);
+  }
+
+  .summary-card--orange {
+    background: var(--orange);
+
+    box-shadow:
+      5px 5px 0 var(--ink);
+  }
+
+  .summary-card--muted {
+    background: var(--paper-2);
   }
 
   .summary-card__top {
     display: flex;
     align-items: center;
     justify-content: space-between;
+
     gap: 10px;
   }
 
-  .summary-card__label {
-    color: var(--color-text-muted);
-    font-size: 0.67rem;
-    font-weight: 750;
+  .summary-card__index {
+    color: var(--muted);
+
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+
+    font-size: 0.52rem;
+    font-weight: 800;
+
+    letter-spacing: 0.08em;
+  }
+
+  .summary-card--acid
+    .summary-card__index,
+  .summary-card--orange
+    .summary-card__index {
+    color:
+      rgb(
+        9 10 8 / 65%
+      );
   }
 
   .summary-card__icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 37px;
-    height: 37px;
-    border-radius: 10px;
+    width: 36px;
+    height: 36px;
+
+    display: grid;
+    place-items: center;
+
+    border: 2px solid var(--ink);
+
+    color: var(--acid);
+    background: var(--ink);
   }
 
-  .summary-card__icon--green,
-  .summary-card__icon--active {
-    background: var(--color-primary-soft);
-    color: var(--color-primary);
+  .summary-card__label {
+    display: block;
+
+    margin-top: 18px;
+
+    color: var(--muted);
+
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+
+    font-size: 0.5rem;
+    font-weight: 800;
+
+    letter-spacing: 0.1em;
+
+    text-transform: uppercase;
   }
 
-  .summary-card__icon--inactive {
-    background: rgba(245, 158, 11, 0.1);
-    color: #d97706;
-  }
-
-  .summary-card__icon--linked {
-    background: rgba(37, 99, 235, 0.09);
-    color: var(--color-info);
+  .summary-card--acid
+    .summary-card__label,
+  .summary-card--orange
+    .summary-card__label {
+    color:
+      rgb(
+        9 10 8 / 67%
+      );
   }
 
   .summary-card__value {
     display: block;
-    margin-top: 15px;
-    color: var(--color-text-strong);
-    font-size: 1.55rem;
+
+    margin-top: 9px;
+
+    color: var(--ink);
+
+    font-family:
+      Sora,
+      Inter,
+      system-ui,
+      sans-serif;
+
+    font-size:
+      clamp(
+        1.8rem,
+        3vw,
+        2.8rem
+      );
+
     font-weight: 900;
-    line-height: 1;
+
+    line-height: 0.95;
+
+    letter-spacing: -0.05em;
   }
 
   .summary-card__meta {
     display: block;
-    margin-top: 6px;
-    color: var(--color-text-faint);
-    font-size: 0.61rem;
+
+    margin-top: 7px;
+
+    color: var(--muted);
+
+    font-size: 0.58rem;
+
     line-height: 1.5;
   }
 
-  .workspace-card {
-    margin-top: 20px;
-    overflow: hidden;
-    border: 1px solid var(--color-border);
-    border-radius: 18px;
-    background: var(--color-surface);
-    box-shadow: var(--shadow-xs);
+  .summary-card--acid
+    .summary-card__meta,
+  .summary-card--orange
+    .summary-card__meta {
+    color:
+      rgb(
+        9 10 8 / 67%
+      );
   }
+
+  /* ================================================================
+     DIRECTORY
+  ================================================================= */
+
+  .directory {
+    min-width: 0;
+
+    margin-top: 23px;
+
+    border:
+      2px
+      solid
+      var(--ink);
+
+    background:
+      var(--white);
+
+    box-shadow:
+      6px 6px 0 var(--ink);
+
+    overflow: hidden;
+  }
+
+  .directory__top {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+
+    gap: 18px;
+
+    padding:
+      20px
+      20px
+      17px;
+  }
+
+  .directory__title {
+    min-width: 0;
+  }
+
+  .directory__eyebrow {
+    display: block;
+
+    color: var(--orange);
+
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+
+    font-size: 0.49rem;
+    font-weight: 800;
+
+    letter-spacing: 0.12em;
+
+    text-transform: uppercase;
+  }
+
+  .directory__title h2 {
+    margin:
+      5px
+      0
+      0;
+
+    color: var(--ink);
+
+    font-family:
+      Sora,
+      Inter,
+      system-ui,
+      sans-serif;
+
+    font-size: 1.1rem;
+    font-weight: 900;
+
+    letter-spacing: -0.03em;
+  }
+
+  .directory__count {
+    flex-shrink: 0;
+
+    min-height: 29px;
+
+    display: inline-flex;
+    align-items: center;
+
+    padding:
+      0
+      9px;
+
+    border:
+      1px
+      solid
+      var(--ink);
+
+    color: var(--ink);
+
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+
+    font-size: 0.48rem;
+    font-weight: 800;
+
+    text-transform: uppercase;
+  }
+
+  /* ================================================================
+     TOOLBAR
+  ================================================================= */
 
   .toolbar {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 14px;
-    padding: 15px;
-    border-bottom: 1px solid var(--color-border);
-    background: var(--color-surface-soft);
+    align-items: flex-end;
+
+    gap: 12px;
+
+    padding:
+      14px
+      18px;
+
+    border-top:
+      2px
+      solid
+      var(--ink);
+
+    border-bottom:
+      2px
+      solid
+      var(--ink);
+
+    background:
+      var(--paper-2);
   }
 
   .toolbar__search {
     position: relative;
+
     display: flex;
     align-items: center;
+
     gap: 9px;
-    flex: 1;
+
+    flex: 1 1 auto;
+
     min-width: 0;
-    max-width: 500px;
-    min-height: 40px;
-    padding: 0 12px;
-    border: 1px solid var(--color-border);
-    border-radius: 10px;
-    background: var(--color-surface);
-    color: var(--color-text-faint);
+
+    max-width: 520px;
+
+    min-height: 42px;
+
+    padding:
+      0
+      11px;
+
+    border:
+      2px
+      solid
+      var(--ink);
+
+    color: var(--muted);
+
+    background:
+      var(--white);
   }
 
   .toolbar__search:focus-within {
-    border-color: var(--color-primary);
     box-shadow:
-      0 0 0 3px var(--color-primary-ring);
+      3px 3px 0 var(--acid);
   }
 
   .toolbar__search input {
     width: 100%;
+
     min-width: 0;
+
     border: 0;
     outline: 0;
+
+    color: var(--ink);
+
     background: transparent;
-    color: var(--color-text-strong);
+
     font: inherit;
-    font-size: 0.69rem;
+
+    font-size: 0.65rem;
   }
 
   .toolbar__search input::placeholder {
-    color: var(--color-text-faint);
+    color: var(--muted-2);
   }
 
   .toolbar__clear {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 25px;
-    height: 25px;
+    width: 26px;
+    height: 26px;
+
+    display: grid;
+    place-items: center;
+
+    flex-shrink: 0;
+
     padding: 0;
-    border: 0;
-    border-radius: 7px;
+
+    border:
+      1px
+      solid
+      transparent;
+
+    color: var(--muted);
+
     background: transparent;
-    color: var(--color-text-muted);
+
     cursor: pointer;
   }
 
   .toolbar__clear:hover {
-    background: var(--color-surface-soft);
-    color: var(--color-text-strong);
+    border-color: var(--ink);
+
+    color: var(--ink);
+
+    background:
+      var(--paper-2);
   }
 
   .toolbar__filters {
     display: flex;
-    align-items: center;
+    align-items: flex-end;
+
     flex-wrap: wrap;
+
     justify-content: flex-end;
-    gap: 8px;
+
+    gap: 9px;
+  }
+
+  .filter-control {
+    display: flex;
+    flex-direction: column;
+
+    gap: 5px;
+
+    min-width: 125px;
+  }
+
+  .filter-control__label {
+    color: var(--muted);
+
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+
+    font-size: 0.44rem;
+    font-weight: 800;
+
+    letter-spacing: 0.1em;
+
+    text-transform: uppercase;
   }
 
   .filter-control select {
-    min-height: 40px;
-    max-width: 170px;
-    padding: 0 28px 0 11px;
-    border: 1px solid var(--color-border);
-    border-radius: 10px;
-    background: var(--color-surface);
-    color: var(--color-text-strong);
+    min-height: 42px;
+
+    min-width: 125px;
+
+    padding:
+      0
+      29px
+      0
+      10px;
+
+    border:
+      2px
+      solid
+      var(--ink);
+
+    border-radius: 0;
+
+    color: var(--ink);
+
+    background:
+      var(--white);
+
     font: inherit;
-    font-size: 0.66rem;
+
+    font-size: 0.61rem;
+
+    outline: 0;
+
     cursor: pointer;
   }
 
   .filter-control select:focus {
-    border-color: var(--color-primary);
-    outline: none;
     box-shadow:
-      0 0 0 3px var(--color-primary-ring);
+      3px 3px 0 var(--acid);
   }
 
   .filter-button {
+    min-height: 42px;
+
     display: inline-flex;
     align-items: center;
     justify-content: center;
+
     gap: 7px;
-    min-height: 40px;
-    padding: 0 11px;
-    border: 1px solid var(--color-border);
-    border-radius: 10px;
-    background: var(--color-surface);
-    color: var(--color-text-muted);
+
+    padding:
+      0
+      11px;
+
+    border:
+      2px
+      solid
+      var(--ink);
+
+    border-radius: 0;
+
+    color: var(--ink);
+
+    background:
+      var(--white);
+
     font: inherit;
-    font-size: 0.67rem;
-    font-weight: 750;
+
+    font-size: 0.61rem;
+    font-weight: 800;
+
     cursor: pointer;
+
+    box-shadow:
+      3px 3px 0 var(--ink);
+
+    transition:
+      transform 120ms ease,
+      box-shadow 120ms ease,
+      background 120ms ease;
   }
 
   .filter-button:hover,
   .filter-button[aria-expanded="true"] {
-    border-color: var(--color-primary);
-    background: var(--color-primary-soft);
-    color: var(--color-primary);
+    background:
+      var(--acid);
   }
 
+  .filter-button:active {
+    transform:
+      translate(
+        2px,
+        2px
+      );
+
+    box-shadow:
+      1px 1px 0 var(--ink);
+  }
+
+  /* ================================================================
+     FILTER PANEL
+  ================================================================= */
+
   .filter-panel {
-    padding: 15px;
-    border-bottom: 1px solid var(--color-border);
-    background: var(--color-surface-soft);
+    padding:
+      16px
+      18px;
+
+    border-bottom:
+      2px
+      solid
+      var(--ink);
+
+    background:
+      var(--ink);
+
+    color: var(--white);
+  }
+
+  .filter-panel[hidden] {
+    display: none !important;
   }
 
   .filter-panel__header {
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
+
     gap: 20px;
   }
 
-  .filter-panel__eyebrow,
-  .table-head__eyebrow,
-  .map-banner__eyebrow,
-  .drawer__eyebrow,
-  .drawer-section__label {
+  .filter-panel__eyebrow {
     display: block;
-    color: var(--color-primary);
-    font-size: 0.59rem;
-    font-weight: 900;
-    letter-spacing: 0.1em;
+
+    color: var(--acid);
+
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+
+    font-size: 0.48rem;
+    font-weight: 800;
+
+    letter-spacing: 0.11em;
   }
 
-  .filter-panel h2 {
-    margin: 4px 0 0;
-    color: var(--color-text-strong);
-    font-size: 0.86rem;
-    font-weight: 820;
+  .filter-panel__header h3 {
+    margin:
+      5px
+      0
+      0;
+
+    color:
+      var(--white);
+
+    font-family:
+      Sora,
+      Inter,
+      system-ui,
+      sans-serif;
+
+    font-size: 0.83rem;
+    font-weight: 850;
   }
 
   .filter-panel__close {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 31px;
-    height: 31px;
-    border: 1px solid var(--color-border);
-    border-radius: 9px;
-    background: var(--color-surface);
-    color: var(--color-text-muted);
+    width: 32px;
+    height: 32px;
+
+    display: grid;
+    place-items: center;
+
+    flex-shrink: 0;
+
+    padding: 0;
+
+    border:
+      2px
+      solid
+      var(--acid);
+
+    color: var(--acid);
+
+    background:
+      transparent;
+
     cursor: pointer;
+  }
+
+  .filter-panel__close:hover {
+    color: var(--ink);
+
+    background:
+      var(--acid);
   }
 
   .filter-panel__body {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 15px;
-    margin-top: 12px;
+
+    gap: 16px;
+
+    margin-top: 13px;
   }
 
   .filter-info {
     display: flex;
     align-items: flex-start;
+
     gap: 8px;
-    color: var(--color-text-muted);
+
+    min-width: 0;
+
+    color:
+      rgb(
+        255 254 248 / 70%
+      );
   }
 
   .filter-info svg {
-    flex: 0 0 auto;
+    flex-shrink: 0;
+
     margin-top: 2px;
-    color: var(--color-primary);
+
+    color: var(--acid);
   }
 
   .filter-info p {
     max-width: 780px;
+
     margin: 0;
-    font-size: 0.65rem;
+
+    font-size: 0.61rem;
+
     line-height: 1.6;
   }
 
   .filter-reset {
-    flex: 0 0 auto;
-    border: 0;
-    background: transparent;
-    color: var(--color-primary);
+    min-height: 34px;
+
+    flex-shrink: 0;
+
+    padding:
+      0
+      11px;
+
+    border:
+      1px
+      solid
+      var(--acid);
+
+    border-radius: 0;
+
+    color: var(--acid);
+
+    background:
+      transparent;
+
     font: inherit;
-    font-size: 0.64rem;
+
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+
+    font-size: 0.47rem;
     font-weight: 800;
+
+    letter-spacing: 0.06em;
+
+    text-transform: uppercase;
+
     cursor: pointer;
   }
 
-  .table-head {
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    gap: 18px;
-    padding: 18px 18px 15px;
+  .filter-reset:hover {
+    color: var(--ink);
+
+    background:
+      var(--acid);
   }
 
-  .table-head h2 {
-    margin: 4px 0 0;
-    color: var(--color-text-strong);
-    font-size: 0.98rem;
-    font-weight: 850;
-  }
-
-  .result-count {
-    color: var(--color-text-faint);
-    font-size: 0.64rem;
-    font-weight: 700;
-  }
+  /* ================================================================
+     TABLE
+  ================================================================= */
 
   .table-wrap {
+    position: relative;
+
+    width: 100%;
+    max-width: 100%;
+
     overflow-x: auto;
-    border-top: 1px solid var(--color-border);
+    overflow-y: hidden;
+
+    -webkit-overflow-scrolling: touch;
   }
 
   .locations-table {
     width: 100%;
     min-width: 1120px;
+
     border-collapse: collapse;
+
     text-align: left;
+
+    background:
+      var(--white);
   }
 
   .locations-table th {
-    padding: 11px 18px;
-    background: var(--color-surface-soft);
-    color: var(--color-text-faint);
-    font-size: 0.59rem;
-    font-weight: 850;
-    letter-spacing: 0.055em;
+    padding:
+      12px
+      16px;
+
+    border-bottom:
+      2px
+      solid
+      var(--ink);
+
+    color:
+      var(--muted);
+
+    background:
+      var(--paper-2);
+
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+
+    font-size: 0.46rem;
+    font-weight: 800;
+
+    line-height: 1;
+
+    letter-spacing: 0.08em;
+
     text-transform: uppercase;
+
     white-space: nowrap;
   }
 
   .locations-table td {
-    padding: 13px 18px;
-    border-top: 1px solid var(--color-border);
+    padding:
+      13px
+      16px;
+
+    border-bottom:
+      1px
+      solid
+      var(--paper-3);
+
     vertical-align: middle;
   }
 
   .locations-table tbody tr {
-    transition: background 120ms ease;
+    transition:
+      background 120ms ease;
   }
 
   .locations-table tbody tr:hover {
-    background: rgba(248, 250, 252, 0.9);
+    background:
+      rgb(
+        223 255 0 / 7%
+      );
   }
 
-  .locations-table tbody tr[data-hidden="true"] {
-    display: none;
+  .locations-table tbody tr[data-hidden="true"],
+  .locations-table tbody tr[hidden] {
+    display: none !important;
   }
+
+  /* ================================================================
+     LOCATION CELL
+  ================================================================= */
 
   .location-cell {
+    min-width: 330px;
+
     display: flex;
     align-items: center;
-    gap: 10px;
-    min-width: 310px;
+
+    gap: 11px;
   }
 
   .location-cell__icon {
-    display: inline-flex;
-    flex: 0 0 auto;
-    align-items: center;
-    justify-content: center;
-    width: 37px;
-    height: 37px;
-    border-radius: 10px;
-    background: var(--color-primary-soft);
-    color: var(--color-primary);
+    width: 39px;
+    height: 39px;
+
+    display: grid;
+    place-items: center;
+
+    flex-shrink: 0;
+
+    border:
+      2px
+      solid
+      var(--ink);
+
+    color: var(--ink);
+
+    background:
+      var(--paper-2);
+  }
+
+  .location-cell__icon--active {
+    color: var(--ink);
+
+    background:
+      var(--acid);
   }
 
   .location-cell__copy {
     min-width: 0;
   }
 
-  .location-cell__copy strong,
-  .location-cell__copy span {
-    display: block;
-  }
-
   .location-cell__copy strong {
-    max-width: 380px;
+    display: block;
+
+    max-width: 400px;
+
     overflow: hidden;
-    color: var(--color-text-strong);
-    font-size: 0.7rem;
-    font-weight: 800;
+
+    color: var(--ink);
+
+    font-family:
+      Sora,
+      Inter,
+      system-ui,
+      sans-serif;
+
+    font-size: 0.67rem;
+    font-weight: 850;
+
+    line-height: 1.25;
+
     text-overflow: ellipsis;
+
     white-space: nowrap;
   }
 
   .location-cell__copy span {
-    margin-top: 3px;
-    color: var(--color-text-faint);
-    font-size: 0.6rem;
+    display: block;
+
+    max-width: 400px;
+
+    margin-top: 4px;
+
+    overflow: hidden;
+
+    color: var(--muted);
+
+    font-size: 0.58rem;
+
+    line-height: 1.45;
+
+    text-overflow: ellipsis;
+
+    white-space: nowrap;
   }
 
   .type-label,
-  .area-label,
+  .area-cell,
   .organization-count,
   .coordinate-label,
   .updated-label {
-    display: inline-block;
-    color: var(--color-text-muted);
-    font-size: 0.62rem;
+    color: var(--muted);
+
+    font-size: 0.59rem;
+
     white-space: nowrap;
   }
 
   .type-label {
     font-weight: 700;
+  }
+
+  .area-cell {
+    display: inline-flex;
+    align-items: center;
+
+    gap: 5px;
+  }
+
+  .area-cell svg {
+    flex-shrink: 0;
+
+    color: var(--orange);
   }
 
   .organization-count {
@@ -1646,200 +2489,490 @@ const jsonLd = {
 
   .coordinate-label {
     font-variant-numeric: tabular-nums;
+
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+
+    font-size: 0.52rem;
   }
 
   .status-badge {
     display: inline-flex;
     align-items: center;
+
     gap: 5px;
+
     min-height: 25px;
-    padding: 0 8px;
-    border-radius: 999px;
-    font-size: 0.58rem;
+
+    padding:
+      0
+      8px;
+
+    border:
+      1px
+      solid
+      var(--ink);
+
+    border-radius: 0;
+
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+
+    font-size: 0.46rem;
     font-weight: 800;
+
+    letter-spacing: 0.04em;
+
+    text-transform: uppercase;
+
     white-space: nowrap;
   }
 
   .status-badge--active {
-    background: var(--color-primary-soft);
-    color: var(--color-primary-dark);
+    color: var(--ink);
+
+    background:
+      var(--acid);
   }
 
   .status-badge--inactive {
-    background: rgba(245, 158, 11, 0.1);
-    color: #b45309;
+    color: var(--ink);
+
+    background:
+      var(--orange);
   }
+
+  /* ================================================================
+     ACTIONS
+  ================================================================= */
 
   .row-actions {
     display: flex;
     align-items: center;
     justify-content: flex-end;
-    gap: 4px;
+
+    gap: 5px;
   }
 
   .row-action {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 30px;
-    height: 30px;
+    width: 31px;
+    height: 31px;
+
+    display: grid;
+    place-items: center;
+
+    flex-shrink: 0;
+
     padding: 0;
-    border: 1px solid transparent;
-    border-radius: 8px;
-    background: transparent;
-    color: var(--color-text-muted);
+
+    border:
+      2px
+      solid
+      var(--ink);
+
+    border-radius: 0;
+
+    color: var(--ink);
+
+    background:
+      var(--white);
+
     cursor: pointer;
+
+    transition:
+      transform 120ms ease,
+      background 120ms ease,
+      color 120ms ease,
+      box-shadow 120ms ease;
   }
 
   .row-action:hover {
-    border-color: var(--color-border);
-    background: var(--color-surface-soft);
-    color: var(--color-primary);
+    transform:
+      translate(
+        2px,
+        2px
+      );
+
+    color: var(--ink);
+
+    background:
+      var(--acid);
+
+    box-shadow:
+      2px 2px 0 var(--ink);
   }
 
+  /* ================================================================
+     EMPTY STATE
+  ================================================================= */
+
   .empty-state {
+    min-height: 300px;
+
     display: flex;
     align-items: center;
     justify-content: center;
+
     flex-direction: column;
-    min-height: 280px;
-    padding: 30px;
+
+    padding: 35px;
+
     text-align: center;
   }
 
+  .empty-state[hidden] {
+    display: none !important;
+  }
+
   .empty-state__icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 54px;
-    height: 54px;
-    border-radius: 15px;
-    background: var(--color-surface-soft);
-    color: var(--color-text-faint);
+    width: 56px;
+    height: 56px;
+
+    display: grid;
+    place-items: center;
+
+    border:
+      2px
+      solid
+      var(--ink);
+
+    color: var(--ink);
+
+    background:
+      var(--paper-2);
+
+    box-shadow:
+      4px 4px 0 var(--orange);
+  }
+
+  .empty-state__eyebrow {
+    display: block;
+
+    margin-top: 16px;
+
+    color: var(--orange);
+
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+
+    font-size: 0.48rem;
+    font-weight: 800;
+
+    letter-spacing: 0.12em;
   }
 
   .empty-state h3 {
-    margin: 13px 0 0;
-    color: var(--color-text-strong);
-    font-size: 0.9rem;
-    font-weight: 820;
+    margin:
+      5px
+      0
+      0;
+
+    color: var(--ink);
+
+    font-family:
+      Sora,
+      Inter,
+      system-ui,
+      sans-serif;
+
+    font-size: 0.95rem;
+    font-weight: 900;
   }
 
   .empty-state p {
-    max-width: 390px;
-    margin: 5px 0 16px;
-    color: var(--color-text-muted);
-    font-size: 0.67rem;
+    max-width: 430px;
+
+    margin:
+      7px
+      0
+      18px;
+
+    color: var(--muted);
+
+    font-size: 0.64rem;
+
     line-height: 1.6;
   }
 
-  .table-footer {
+  /* ================================================================
+     FOOTER
+  ================================================================= */
+
+  .directory__footer {
     display: flex;
     align-items: center;
     justify-content: space-between;
+
     gap: 12px;
-    padding: 12px 18px;
-    border-top: 1px solid var(--color-border);
-    color: var(--color-text-faint);
-    font-size: 0.61rem;
+
+    padding:
+      12px
+      16px;
+
+    border-top:
+      2px
+      solid
+      var(--ink);
+
+    color: var(--muted);
+
+    background:
+      var(--paper-2);
+
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+
+    font-size: 0.46rem;
+    font-weight: 700;
+
+    letter-spacing: 0.06em;
+
+    text-transform: uppercase;
   }
 
-  .table-footer strong {
-    color: var(--color-text-strong);
-    font-weight: 850;
+  .directory__footer strong {
+    color: var(--ink);
   }
+
+  /* ================================================================
+     MAP BANNER
+  ================================================================= */
 
   .map-banner {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
+
     gap: 14px;
-    margin-top: 18px;
-    padding: 18px;
-    border: 1px solid var(--color-primary-soft);
-    border-radius: 16px;
+
+    margin-top: 20px;
+
+    padding:
+      17px;
+
+    border:
+      2px
+      solid
+      var(--ink);
+
     background:
-      linear-gradient(
-        135deg,
-        var(--color-primary-soft),
-        var(--color-surface)
-      );
+      var(--acid);
+
+    box-shadow:
+      5px 5px 0 var(--ink);
   }
 
   .map-banner__icon {
-    display: inline-flex;
-    flex: 0 0 auto;
-    align-items: center;
-    justify-content: center;
     width: 45px;
     height: 45px;
-    border-radius: 12px;
-    background: var(--color-surface);
-    color: var(--color-primary);
+
+    display: grid;
+    place-items: center;
+
+    flex-shrink: 0;
+
+    border:
+      2px
+      solid
+      var(--ink);
+
+    color: var(--acid);
+
+    background:
+      var(--ink);
   }
 
   .map-banner__content {
-    flex: 1;
+    flex: 1 1 auto;
+
     min-width: 0;
   }
 
+  .map-banner__eyebrow {
+    display: block;
+
+    color:
+      rgb(
+        9 10 8 / 60%
+      );
+
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+
+    font-size: 0.48rem;
+    font-weight: 800;
+
+    letter-spacing: 0.11em;
+  }
+
   .map-banner__content h2 {
-    margin: 4px 0 0;
-    color: var(--color-text-strong);
-    font-size: 0.85rem;
-    font-weight: 820;
+    margin:
+      4px
+      0
+      0;
+
+    color: var(--ink);
+
+    font-family:
+      Sora,
+      Inter,
+      system-ui,
+      sans-serif;
+
+    font-size: 0.83rem;
+    font-weight: 900;
   }
 
   .map-banner__content p {
     max-width: 860px;
-    margin: 4px 0 0;
-    color: var(--color-text-muted);
-    font-size: 0.64rem;
+
+    margin:
+      5px
+      0
+      0;
+
+    color:
+      rgb(
+        9 10 8 / 68%
+      );
+
+    font-size: 0.62rem;
+
     line-height: 1.6;
   }
 
   .map-banner__link {
     display: inline-flex;
-    flex: 0 0 auto;
     align-items: center;
-    gap: 6px;
-    color: var(--color-primary);
-    font-size: 0.66rem;
-    font-weight: 800;
+
+    gap: 7px;
+
+    flex-shrink: 0;
+
+    min-height: 36px;
+
+    padding:
+      0
+      10px;
+
+    border:
+      2px
+      solid
+      var(--ink);
+
+    color: var(--ink);
+
+    background:
+      var(--white);
+
+    font-size: 0.59rem;
+    font-weight: 850;
+
     text-decoration: none;
-    white-space: nowrap;
+
+    box-shadow:
+      3px 3px 0 var(--ink);
   }
 
   .map-banner__link:hover {
-    color: var(--color-primary-dark);
+    transform:
+      translate(
+        2px,
+        2px
+      );
+
+    box-shadow:
+      1px 1px 0 var(--ink);
   }
+
+  /* ================================================================
+     DRAWER
+  ================================================================= */
 
   .drawer-backdrop {
     position: fixed;
+
     inset: 0;
+
     z-index: 80;
-    background: rgba(15, 23, 42, 0.28);
-    backdrop-filter: blur(2px);
+
+    background:
+      rgb(
+        9 10 8 / 62%
+      );
+
+    backdrop-filter:
+      blur(
+        2px
+      );
   }
 
   .drawer-backdrop[hidden] {
-    display: none;
+    display: none !important;
   }
 
   .location-drawer {
     position: fixed;
+
     top: 0;
     right: 0;
+    bottom: 0;
+
     z-index: 81;
+
+    width:
+      min(
+        480px,
+        calc(
+          100vw - 18px
+        )
+      );
+
     display: grid;
-    grid-template-rows: auto 1fr auto;
-    width: min(470px, 100%);
-    height: 100dvh;
-    border-left: 1px solid var(--color-border);
-    background: var(--color-surface);
+
+    grid-template-rows:
+      auto
+      minmax(
+        0,
+        1fr
+      )
+      auto;
+
+    border-left:
+      3px
+      solid
+      var(--ink);
+
+    background:
+      var(--paper);
+
     box-shadow:
-      -18px 0 48px rgba(15, 23, 42, 0.13);
-    transform: translateX(100%);
-    transition: transform 180ms ease;
+      -10px
+      0
+      0
+      var(--orange);
+
+    transform:
+      translateX(
+        100%
+      );
+
+    transition:
+      transform 180ms ease;
   }
 
   .location-drawer[hidden] {
@@ -1847,154 +2980,342 @@ const jsonLd = {
   }
 
   .location-drawer[data-open="true"] {
-    transform: translateX(0);
+    transform:
+      translateX(
+        0
+      );
   }
 
   .drawer__header {
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
-    gap: 20px;
-    padding: 20px;
-    border-bottom: 1px solid var(--color-border);
+
+    gap: 18px;
+
+    padding:
+      18px;
+
+    border-bottom:
+      2px
+      solid
+      var(--ink);
+
+    background:
+      var(--ink);
+
+    color:
+      var(--white);
+  }
+
+  .drawer__eyebrow {
+    display: block;
+
+    color: var(--acid);
+
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+
+    font-size: 0.48rem;
+    font-weight: 800;
+
+    letter-spacing: 0.12em;
   }
 
   .drawer__header h2 {
-    margin: 5px 0 0;
-    color: var(--color-text-strong);
-    font-size: 1.05rem;
-    font-weight: 850;
+    margin:
+      5px
+      0
+      0;
+
+    color: var(--white);
+
+    font-family:
+      Sora,
+      Inter,
+      system-ui,
+      sans-serif;
+
+    font-size: 1rem;
+    font-weight: 900;
   }
 
   .drawer__close {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
     width: 35px;
     height: 35px;
-    border: 1px solid var(--color-border);
-    border-radius: 10px;
-    background: var(--color-surface);
-    color: var(--color-text-muted);
+
+    display: grid;
+    place-items: center;
+
+    flex-shrink: 0;
+
+    padding: 0;
+
+    border:
+      2px
+      solid
+      var(--acid);
+
+    border-radius: 0;
+
+    color: var(--acid);
+
+    background:
+      transparent;
+
     cursor: pointer;
   }
 
   .drawer__close:hover {
-    background: var(--color-surface-soft);
-    color: var(--color-text-strong);
+    color: var(--ink);
+
+    background:
+      var(--acid);
   }
 
   .drawer__body {
+    min-width: 0;
+
     overflow-y: auto;
-    padding: 20px;
+
+    padding:
+      20px;
+
+    overscroll-behavior: contain;
   }
 
   .drawer-identity {
     display: flex;
     align-items: flex-start;
+
     gap: 12px;
   }
 
   .drawer-identity__icon {
-    display: inline-flex;
-    flex: 0 0 auto;
-    align-items: center;
-    justify-content: center;
-    width: 49px;
-    height: 49px;
-    border-radius: 14px;
-    background: var(--color-primary-soft);
-    color: var(--color-primary);
+    width: 50px;
+    height: 50px;
+
+    display: grid;
+    place-items: center;
+
+    flex-shrink: 0;
+
+    border:
+      2px
+      solid
+      var(--ink);
+
+    color: var(--acid);
+
+    background: var(--ink);
+
+    box-shadow:
+      4px 4px 0 var(--orange);
   }
 
-  .drawer-identity h3 {
-    margin: 2px 0 0;
-    color: var(--color-text-strong);
-    font-size: 0.92rem;
-    font-weight: 850;
-    line-height: 1.4;
+  .drawer-identity__copy {
+    min-width: 0;
   }
 
-  .drawer-identity div > span {
+  .drawer-identity__copy h3 {
+    margin:
+      3px
+      0
+      0;
+
+    color: var(--ink);
+
+    font-family:
+      Sora,
+      Inter,
+      system-ui,
+      sans-serif;
+
+    font-size: 0.88rem;
+    font-weight: 900;
+
+    line-height: 1.35;
+
+    overflow-wrap: anywhere;
+  }
+
+  .drawer-identity__copy > span {
     display: block;
-    margin-top: 3px;
-    color: var(--color-text-muted);
-    font-size: 0.64rem;
+
+    margin-top: 4px;
+
+    color: var(--muted);
+
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+
+    font-size: 0.49rem;
+    font-weight: 700;
+
+    letter-spacing: 0.05em;
+
+    text-transform: uppercase;
   }
 
   .drawer-status-row {
     display: flex;
     align-items: center;
     flex-wrap: wrap;
+
     gap: 7px;
-    margin-top: 15px;
+
+    margin-top: 16px;
   }
 
   .drawer-section {
-    margin-top: 25px;
-    padding-top: 19px;
-    border-top: 1px solid var(--color-border);
+    margin-top: 24px;
+
+    padding-top: 18px;
+
+    border-top:
+      2px
+      solid
+      var(--ink);
+  }
+
+  .drawer-section__label {
+    display: block;
+
+    color: var(--orange);
+
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+
+    font-size: 0.47rem;
+    font-weight: 800;
+
+    letter-spacing: 0.11em;
+
+    text-transform: uppercase;
   }
 
   .detail-list {
     display: grid;
+
     gap: 0;
-    margin: 10px 0 0;
+
+    margin:
+      12px
+      0
+      0;
   }
 
   .detail-list > div {
     display: grid;
-    grid-template-columns: 115px minmax(0, 1fr);
-    gap: 12px;
-    padding: 9px 0;
-    border-bottom: 1px solid var(--color-border);
-  }
 
-  .detail-list > div:last-child {
-    border-bottom: 0;
+    grid-template-columns:
+      105px
+      minmax(
+        0,
+        1fr
+      );
+
+    gap: 10px;
+
+    padding:
+      9px
+      0;
+
+    border-bottom:
+      1px
+      solid
+      var(--paper-3);
   }
 
   .detail-list dt {
-    color: var(--color-text-faint);
-    font-size: 0.62rem;
+    color: var(--muted);
+
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+
+    font-size: 0.46rem;
+    font-weight: 700;
+
+    text-transform: uppercase;
   }
 
   .detail-list dd {
     margin: 0;
-    color: var(--color-text-strong);
-    font-size: 0.65rem;
-    font-weight: 700;
+
+    color: var(--ink);
+
+    font-size: 0.62rem;
+    font-weight: 750;
+
     line-height: 1.5;
+
+    overflow-wrap: anywhere;
+
     word-break: break-word;
   }
 
   .drawer-description {
-    margin: 10px 0 0;
-    color: var(--color-text-muted);
-    font-size: 0.67rem;
+    margin:
+      9px
+      0
+      0;
+
+    color: var(--muted);
+
+    font-size: 0.66rem;
+
     line-height: 1.7;
   }
 
   .drawer-warning {
     display: flex;
     align-items: flex-start;
-    gap: 8px;
-    margin-top: 20px;
-    padding: 12px;
-    border: 1px solid rgba(245, 158, 11, 0.22);
-    border-radius: 11px;
-    background: var(--color-warning-soft);
-    color: var(--color-warning-text);
+
+    gap: 9px;
+
+    margin-top: 19px;
+
+    padding:
+      12px;
+
+    border:
+      2px
+      solid
+      var(--ink);
+
+    color: var(--ink);
+
+    background:
+      var(--orange);
+  }
+
+  .drawer-warning[hidden] {
+    display: none !important;
   }
 
   .drawer-warning svg {
-    flex: 0 0 auto;
+    flex-shrink: 0;
+
     margin-top: 1px;
   }
 
   .drawer-warning p {
     margin: 0;
-    font-size: 0.64rem;
+
+    font-size: 0.6rem;
+
     line-height: 1.6;
   }
 
@@ -2002,75 +3323,122 @@ const jsonLd = {
     display: flex;
     align-items: center;
     justify-content: space-between;
+
     gap: 10px;
-    padding: 14px 20px;
-    border-top: 1px solid var(--color-border);
-    background: var(--color-surface);
+
+    padding:
+      14px
+      18px;
+
+    border-top:
+      2px
+      solid
+      var(--ink);
+
+    background:
+      var(--paper-2);
   }
 
   .drawer__footer-right {
     display: flex;
     align-items: center;
     justify-content: flex-end;
+
     gap: 7px;
   }
 
+  /* ================================================================
+     TOAST
+  ================================================================= */
+
   .toast {
     position: fixed;
-    right: 24px;
-    bottom: 24px;
+
+    right: 22px;
+    bottom: 22px;
+
     z-index: 100;
+
+    max-width:
+      min(
+        400px,
+        calc(
+          100vw - 30px
+        )
+      );
+
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    max-width: min(390px, calc(100vw - 30px));
-    padding: 11px 14px;
-    border: 1px solid var(--color-primary-soft);
-    border-radius: 11px;
-    background: var(--color-surface);
-    color: var(--color-text-strong);
+
+    gap: 9px;
+
+    padding:
+      11px
+      13px;
+
+    border:
+      2px
+      solid
+      var(--ink);
+
+    color: var(--ink);
+
+    background:
+      var(--acid);
+
     box-shadow:
-      0 15px 35px rgba(15, 23, 42, 0.14);
-    font-size: 0.66rem;
-    font-weight: 750;
+      5px 5px 0 var(--ink);
+
+    font-size: 0.63rem;
+    font-weight: 800;
   }
 
   .toast[hidden] {
-    display: none;
-  }
-
-  .toast svg {
-    color: var(--color-primary);
+    display: none !important;
   }
 
   .sr-only {
     position: absolute;
+
     width: 1px;
     height: 1px;
+
     padding: 0;
     margin: -1px;
+
     overflow: hidden;
-    clip: rect(0, 0, 0, 0);
+
+    clip:
+      rect(
+        0,
+        0,
+        0,
+        0
+      );
+
     white-space: nowrap;
+
     border: 0;
   }
 
-  @media (max-width: 1200px) {
-    .summary-grid {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
+  /* ================================================================
+     RESPONSIVE
+  ================================================================= */
 
-    .page-top {
+  @media (max-width: 1240px) {
+    .page-hero {
       align-items: flex-start;
+
       flex-direction: column;
     }
 
-    .page-top__actions {
+    .page-hero__actions {
       justify-content: flex-start;
     }
 
     .toolbar {
       align-items: stretch;
+
       flex-direction: column;
     }
 
@@ -2083,73 +3451,162 @@ const jsonLd = {
     }
   }
 
-  @media (max-width: 760px) {
+  @media (max-width: 1120px) {
+    .summary-grid {
+      grid-template-columns:
+        repeat(
+          2,
+          minmax(
+            0,
+            1fr
+          )
+        );
+    }
+  }
+
+  @media (max-width: 840px) {
     .locations-page {
-      padding: 20px 16px 36px;
+      padding:
+        24px
+        18px
+        42px;
     }
 
     .toolbar__filters {
       display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+
+      grid-template-columns:
+        repeat(
+          2,
+          minmax(
+            0,
+            1fr
+          )
+        );
+
       width: 100%;
+    }
+
+    .filter-control {
+      width: 100%;
+      min-width: 0;
     }
 
     .filter-control select,
     .filter-button {
       width: 100%;
-      max-width: none;
     }
 
     .filter-button {
-      grid-column: span 2;
+      grid-column:
+        span 2;
     }
 
     .filter-panel__body {
       align-items: flex-start;
+
       flex-direction: column;
     }
 
     .map-banner {
       align-items: flex-start;
+
       flex-wrap: wrap;
     }
 
     .map-banner__link {
-      width: 100%;
-      padding-left: 59px;
+      margin-left: 59px;
     }
   }
 
-  @media (max-width: 540px) {
-    .summary-grid {
-      grid-template-columns: 1fr;
+  @media (max-width: 640px) {
+    .locations-page {
+      padding:
+        19px
+        13px
+        34px;
     }
 
-    .page-top__actions {
+    .page-hero h1 {
+      font-size:
+        clamp(
+          1.9rem,
+          10vw,
+          2.7rem
+        );
+    }
+
+    .page-hero__actions {
       width: 100%;
+
       flex-direction: column;
+
       align-items: stretch;
     }
 
-    .page-top__actions .button {
+    .page-hero__actions .button {
       width: 100%;
     }
 
+    .summary-grid {
+      grid-template-columns:
+        1fr;
+    }
+
+    .toolbar {
+      padding:
+        13px;
+    }
+
     .toolbar__filters {
-      grid-template-columns: 1fr;
+      grid-template-columns:
+        1fr;
     }
 
     .filter-button {
       grid-column: auto;
     }
 
-    .table-head {
+    .directory__top {
       align-items: flex-start;
+
       flex-direction: column;
+
+      padding:
+        17px
+        14px
+        14px;
+    }
+
+    .locations-table {
+      min-width: 1120px;
+    }
+
+    .directory__footer {
+      align-items: flex-start;
+
+      flex-direction: column;
+    }
+
+    .map-banner {
+      padding:
+        14px;
+
+      box-shadow:
+        4px 4px 0 var(--ink);
+    }
+
+    .map-banner__link {
+      width: 100%;
+
+      margin-left: 0;
+
+      justify-content: center;
     }
 
     .drawer__footer {
       align-items: stretch;
+
       flex-direction: column;
     }
 
@@ -2163,137 +3620,68 @@ const jsonLd = {
     }
 
     .toast {
-      right: 15px;
-      bottom: 15px;
+      right: 14px;
+      bottom: 14px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .locations-page *,
+    .locations-page *::before,
+    .locations-page *::after {
+      scroll-behavior: auto !important;
+
+      transition-duration:
+        0.01ms !important;
+
+      animation-duration:
+        0.01ms !important;
+
+      animation-iteration-count:
+        1 !important;
+    }
+
+    .location-drawer,
+    .button,
+    .row-action,
+    .map-banner__link {
+      transition: none !important;
     }
   }
 </style>
 
 <script>
-// @ts-nocheck
-
-  const locations = [
-    {
-      id: "loc-demo-001",
-      slug: "titik-pengelolaan-mengwi",
-      name: "Titik Pengelolaan Sampah Mengwi",
-      description:
-        "Lokasi pengelolaan yang terhubung dengan aktivitas pemilahan dan pengumpulan material.",
-      address: "Mengwi, Kabupaten Badung, Bali",
-      areaId: "mengwi",
-      areaName: "Mengwi",
-      type: "collection-point",
-      typeLabel: "Titik pengumpulan",
-      status: "active",
-      statusLabel: "Aktif",
-      coordinates: {
-        lat: -8.544,
-        lng: 115.171,
-      },
-      organizationIds: ["org-demo-001"],
-      tags: ["pengumpulan", "pemilahan"],
-      createdAt: "2026-09-01",
-      updatedAt: "2026-09-10",
-    },
-    {
-      id: "loc-demo-002",
-      slug: "hub-daur-ulang-kuta",
-      name: "Hub Daur Ulang Kuta",
-      description:
-        "Fasilitas yang menangani material yang dapat dipulihkan dan diproses kembali.",
-      address: "Kuta, Kabupaten Badung, Bali",
-      areaId: "kuta",
-      areaName: "Kuta",
-      type: "recycling-center",
-      typeLabel: "Pusat daur ulang",
-      status: "active",
-      statusLabel: "Aktif",
-      coordinates: {
-        lat: -8.727,
-        lng: 115.171,
-      },
-      organizationIds: ["org-demo-003"],
-      tags: ["recycling", "material-recovery"],
-      createdAt: "2026-09-02",
-      updatedAt: "2026-09-08",
-    },
-    {
-      id: "loc-demo-003",
-      slug: "bank-sampah-kuta-utara",
-      name: "Bank Sampah Kuta Utara",
-      description:
-        "Titik berbasis masyarakat untuk penerimaan, pemilahan, dan pengelolaan material tertentu.",
-      address: "Kuta Utara, Kabupaten Badung, Bali",
-      areaId: "kuta-utara",
-      areaName: "Kuta Utara",
-      type: "waste-bank",
-      typeLabel: "Bank sampah",
-      status: "active",
-      statusLabel: "Aktif",
-      coordinates: {
-        lat: -8.66,
-        lng: 115.168,
-      },
-      organizationIds: ["org-demo-002"],
-      tags: ["bank-sampah", "komunitas"],
-      createdAt: "2026-09-03",
-      updatedAt: "2026-09-09",
-    },
-    {
-      id: "loc-demo-004",
-      slug: "fasilitas-pengolahan-abiansemal",
-      name: "Fasilitas Pengolahan Abiansemal",
-      description:
-        "Lokasi fasilitas pengolahan yang sedang dipersiapkan untuk informasi operasional.",
-      address: "Abiansemal, Kabupaten Badung, Bali",
-      areaId: "abiansemal",
-      areaName: "Abiansemal",
-      type: "processing-facility",
-      typeLabel: "Fasilitas pengolahan",
-      status: "inactive",
-      statusLabel: "Tidak aktif",
-      coordinates: {
-        lat: -8.55,
-        lng: 115.206,
-      },
-      organizationIds: ["org-demo-004"],
-      tags: ["pengolahan"],
-      createdAt: "2026-09-04",
-      updatedAt: "2026-09-07",
-    },
-    {
-      id: "loc-demo-005",
-      slug: "drop-point-mengwi",
-      name: "Drop Point Mengwi",
-      description:
-        "Titik penerimaan material dengan cakupan layanan yang terbatas.",
-      address: "Mengwi, Kabupaten Badung, Bali",
-      areaId: "mengwi",
-      areaName: "Mengwi",
-      type: "drop-point",
-      typeLabel: "Drop point",
-      status: "active",
-      statusLabel: "Aktif",
-      coordinates: {
-        lat: -8.536,
-        lng: 115.173,
-      },
-      organizationIds: [],
-      tags: ["drop-point"],
-      createdAt: "2026-09-05",
-      updatedAt: "2026-09-06",
-    },
-  ];
+  // @ts-nocheck
 
   const page =
     document.querySelector(
       "[data-locations-page]",
     );
 
-  if (!(page instanceof HTMLElement)) {
+  if (
+    !(page instanceof HTMLElement)
+  ) {
     throw new Error(
-      "BINSIGHT locations page root not found.",
+      "BINSIGHT locations admin page root not found.",
     );
+  }
+
+  const dataNode =
+    document.getElementById(
+      "admin-locations-data",
+    );
+
+  let locations = [];
+
+  try {
+    locations =
+      dataNode?.textContent
+        ? JSON.parse(
+            dataNode.textContent,
+          )
+        : [];
+  } catch {
+    locations = [];
   }
 
   const searchInput =
@@ -2301,7 +3689,7 @@ const jsonLd = {
       "[data-search]",
     );
 
-  const clearSearchButton =
+  const clearSearch =
     page.querySelector(
       "[data-clear-search]",
     );
@@ -2341,17 +3729,11 @@ const jsonLd = {
       "[data-filter-reset]",
     );
 
-  const emptyReset =
-    page.querySelector(
-      "[data-empty-reset]",
-    );
-
-  const rows =
-    Array.from(
-      page.querySelectorAll(
-        "[data-location-row]",
-      ),
-    );
+  let rows = Array.from(
+    page.querySelectorAll(
+      "[data-location-row]",
+    ),
+  );
 
   const resultCount =
     page.querySelector(
@@ -2366,6 +3748,11 @@ const jsonLd = {
   const emptyState =
     page.querySelector(
       "[data-empty-state]",
+    );
+
+  const emptyReset =
+    page.querySelector(
+      "[data-empty-reset]",
     );
 
   const totalCount =
@@ -2443,6 +3830,11 @@ const jsonLd = {
       "[data-drawer-tags]",
     );
 
+  const drawerUpdated =
+    page.querySelector(
+      "[data-drawer-updated]",
+    );
+
   const drawerDescription =
     page.querySelector(
       "[data-drawer-description]",
@@ -2481,7 +3873,41 @@ const jsonLd = {
   let selectedLocationId =
     null;
 
-  let toastTimer = null;
+  let toastTimer =
+    null;
+
+  let scrollLockCount =
+    0;
+
+  let previouslyFocusedElement =
+    null;
+
+  function lockPageScroll() {
+    scrollLockCount +=
+      1;
+
+    if (
+      scrollLockCount === 1
+    ) {
+      document.documentElement.style.overflow =
+        "hidden";
+    }
+  }
+
+  function unlockPageScroll() {
+    scrollLockCount =
+      Math.max(
+        0,
+        scrollLockCount - 1,
+      );
+
+    if (
+      scrollLockCount === 0
+    ) {
+      document.documentElement.style.overflow =
+        "";
+    }
+  }
 
   function getLocation(
     id,
@@ -2492,26 +3918,29 @@ const jsonLd = {
     );
   }
 
-  function setSummaryValues() {
+  function updateSummary() {
     const total =
       locations.length;
 
     const active =
       locations.filter(
         (location) =>
-          location.status === "active",
+          location.status ===
+          "active",
       ).length;
 
     const inactive =
       locations.filter(
         (location) =>
-          location.status === "inactive",
+          location.status ===
+          "inactive",
       ).length;
 
     const linked =
       locations.filter(
         (location) =>
-          location.organizationIds.length > 0,
+          location.organizationIds.length >
+          0,
       ).length;
 
     if (
@@ -2541,6 +3970,34 @@ const jsonLd = {
       linkedCount.textContent =
         String(linked);
     }
+  }
+
+  function setEmptyState(
+    hasResults,
+  ) {
+    if (
+      !(emptyState instanceof HTMLElement)
+    ) {
+      return;
+    }
+
+    const shouldShow =
+      !hasResults;
+
+    emptyState.hidden =
+      !shouldShow;
+
+    emptyState.setAttribute(
+      "aria-hidden",
+      shouldShow
+        ? "false"
+        : "true",
+    );
+
+    emptyState.style.display =
+      shouldShow
+        ? "flex"
+        : "none";
   }
 
   function getVisibleRows() {
@@ -2642,12 +4099,20 @@ const jsonLd = {
 
     rows.forEach(
       (row) => {
+        const visible =
+          visibleRows.includes(
+            row,
+          );
+
         row.setAttribute(
           "data-hidden",
-          visibleRows.includes(row)
+          visible
             ? "false"
             : "true",
         );
+
+        row.hidden =
+          !visible;
       },
     );
 
@@ -2668,60 +4133,87 @@ const jsonLd = {
         String(count);
     }
 
-    if (
-      emptyState instanceof HTMLElement
-    ) {
-      emptyState.hidden =
-        count !== 0;
-    }
+    setEmptyState(
+      count > 0,
+    );
 
     if (
-      clearSearchButton instanceof
-      HTMLButtonElement
+      clearSearch instanceof HTMLButtonElement
     ) {
       const hasSearch =
-        searchInput instanceof
-        HTMLInputElement &&
+        searchInput instanceof HTMLInputElement &&
         searchInput.value.length > 0;
 
-      clearSearchButton.hidden =
+      clearSearch.hidden =
         !hasSearch;
     }
   }
 
   function resetFilters() {
     if (
-      searchInput instanceof HTMLInputElement
+      searchInput instanceof
+      HTMLInputElement
     ) {
-      searchInput.value = "";
+      searchInput.value =
+        "";
     }
 
     if (
-      statusFilter instanceof HTMLSelectElement
+      statusFilter instanceof
+      HTMLSelectElement
     ) {
-      statusFilter.value = "all";
+      statusFilter.value =
+        "all";
     }
 
     if (
-      typeFilter instanceof HTMLSelectElement
+      typeFilter instanceof
+      HTMLSelectElement
     ) {
-      typeFilter.value = "all";
+      typeFilter.value =
+        "all";
     }
 
     if (
-      areaFilter instanceof HTMLSelectElement
+      areaFilter instanceof
+      HTMLSelectElement
     ) {
-      areaFilter.value = "all";
+      areaFilter.value =
+        "all";
     }
 
     applyFilters();
+  }
+
+  function setFilterPanel(
+    open,
+  ) {
+    if (
+      !(filterPanel instanceof
+        HTMLElement) ||
+      !(filterToggle instanceof
+        HTMLButtonElement)
+    ) {
+      return;
+    }
+
+    filterPanel.hidden =
+      !open;
+
+    filterToggle.setAttribute(
+      "aria-expanded",
+      open
+        ? "true"
+        : "false",
+    );
   }
 
   function setDrawerStatus(
     location,
   ) {
     if (
-      !(drawerStatus instanceof HTMLElement)
+      !(drawerStatus instanceof
+        HTMLElement)
     ) {
       return;
     }
@@ -2729,25 +4221,23 @@ const jsonLd = {
     drawerStatus.className =
       `status-badge status-badge--${location.status}`;
 
-    if (
-      location.status === "active"
-    ) {
-      drawerStatus.innerHTML = `
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="m5 12 4 4L19 6"/>
-        </svg>
-        <span>Aktif</span>
-      `;
-    } else {
-      drawerStatus.innerHTML = `
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="m10.3 2.6-8.1 14A2 2 0 0 0 4 19.6h16a2 2 0 0 0 1.7-3l-8.1-14a2 2 0 0 0-3.3 0Z"/>
-          <path d="M12 9v4"/>
-          <path d="M12 17h.01"/>
-        </svg>
-        <span>Tidak aktif</span>
-      `;
-    }
+    drawerStatus.innerHTML =
+      location.status ===
+      "active"
+        ? `
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="m5 12 4 4L19 6"/>
+          </svg>
+          <span>Aktif</span>
+        `
+        : `
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="m10.3 2.6-8.1 14A2 2 0 0 0 4 19.6h16a2 2 0 0 0 1.7-3l-8.1-14a2 2 0 0 0-3.3 0Z"/>
+            <path d="M12 9v4"/>
+            <path d="M12 17h.01"/>
+          </svg>
+          <span>Tidak aktif</span>
+        `;
   }
 
   function updateDrawer(
@@ -2768,7 +4258,8 @@ const jsonLd = {
       drawerType instanceof HTMLElement
     ) {
       drawerType.textContent =
-        location.typeLabel;
+        location.typeLabel ??
+        "Lainnya";
     }
 
     setDrawerStatus(
@@ -2806,12 +4297,21 @@ const jsonLd = {
     }
 
     if (
-      drawerTags instanceof HTMLElement
+      drawerTags instanceof
+      HTMLElement
     ) {
       drawerTags.textContent =
         location.tags.length > 0
           ? location.tags.join(", ")
           : "Tidak ada tag";
+    }
+
+    if (
+      drawerUpdated instanceof
+      HTMLElement
+    ) {
+      drawerUpdated.textContent =
+        location.updatedAt;
     }
 
     if (
@@ -2823,37 +4323,118 @@ const jsonLd = {
     }
 
     if (
-      drawerWarning instanceof HTMLElement
+      drawerWarning instanceof
+      HTMLElement
     ) {
+      const shouldWarn =
+        location.status ===
+        "inactive";
+
       drawerWarning.hidden =
-        location.status === "active";
+        !shouldWarn;
+
+      drawerWarning.setAttribute(
+        "aria-hidden",
+        shouldWarn
+          ? "false"
+          : "true",
+      );
     }
 
     if (
       drawerStatusAction instanceof
       HTMLButtonElement
     ) {
-      drawerStatusAction.innerHTML =
-        location.status === "active"
-          ? `
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M6 6h12v12H6z"/>
-            </svg>
-            <span>Nonaktifkan</span>
-          `
-          : `
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="m5 12 4 4L19 6"/>
-            </svg>
-            <span>Aktifkan</span>
-          `;
+      drawerStatusAction.replaceChildren();
+
+      const label =
+        document.createElement(
+          "span",
+        );
+
+      label.textContent =
+        location.status ===
+        "active"
+          ? "Nonaktifkan"
+          : "Aktifkan";
+
+      drawerStatusAction.append(
+        label,
+      );
     }
 
     if (
-      drawerMap instanceof HTMLAnchorElement
+      drawerMap instanceof
+      HTMLAnchorElement
     ) {
       drawerMap.href =
         `/map#${location.slug}`;
+    }
+  }
+
+  function updateRow(
+    row,
+    location,
+  ) {
+    if (
+      !(row instanceof
+        HTMLElement)
+    ) {
+      return;
+    }
+
+    row.setAttribute(
+      "data-status",
+      location.status,
+    );
+
+    row.setAttribute(
+      "data-type",
+      location.type,
+    );
+
+    const statusBadge =
+      row.querySelector(
+        ".status-badge",
+      );
+
+    if (
+      statusBadge instanceof HTMLElement
+    ) {
+      statusBadge.className =
+        `status-badge status-badge--${location.status}`;
+
+      statusBadge.innerHTML =
+        location.status ===
+        "active"
+          ? `
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="m5 12 4 4L19 6"/>
+            </svg>
+            <span>Aktif</span>
+          `
+          : `
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="m10.3 2.6-8.1 14A2 2 0 0 0 4 19.6h16a2 2 0 0 0 1.7-3l-8.1-14a2 2 0 0 0-3.3 0Z"/>
+              <path d="M12 9v4"/>
+              <path d="M12 17h.01"/>
+            </svg>
+            <span>Tidak aktif</span>
+          `;
+    }
+
+    const icon =
+      row.querySelector(
+        ".location-cell__icon",
+      );
+
+    if (
+      icon instanceof HTMLElement
+    ) {
+      icon.classList.toggle(
+        "location-cell__icon--active",
+        location.status === "active",
+      );
     }
   }
 
@@ -2867,11 +4448,19 @@ const jsonLd = {
 
     if (
       !location ||
-      !(drawer instanceof HTMLElement) ||
-      !(drawerBackdrop instanceof HTMLElement)
+      !(drawer instanceof
+        HTMLElement) ||
+      !(drawerBackdrop instanceof
+        HTMLElement)
     ) {
       return;
     }
+
+    previouslyFocusedElement =
+      document.activeElement instanceof
+      HTMLElement
+        ? document.activeElement
+        : null;
 
     selectedLocationId =
       locationId;
@@ -2880,11 +4469,15 @@ const jsonLd = {
       location,
     );
 
-    drawer.hidden = false;
+    drawer.hidden =
+      false;
+
     drawerBackdrop.hidden =
       false;
 
-    window.requestAnimationFrame(
+    lockPageScroll();
+
+    requestAnimationFrame(
       () => {
         drawer.setAttribute(
           "data-open",
@@ -2895,20 +4488,32 @@ const jsonLd = {
           "aria-hidden",
           "false",
         );
+
+        if (
+          drawerClose instanceof
+          HTMLButtonElement
+        ) {
+          drawerClose.focus();
+        }
       },
     );
-
-    document.documentElement.style.overflow =
-      "hidden";
   }
 
   function closeDrawer() {
     if (
-      !(drawer instanceof HTMLElement) ||
-      !(drawerBackdrop instanceof HTMLElement)
+      !(drawer instanceof
+        HTMLElement) ||
+      !(drawerBackdrop instanceof
+        HTMLElement)
     ) {
       return;
     }
+
+    const wasOpen =
+      drawer.getAttribute(
+        "data-open",
+      ) ===
+      "true";
 
     drawer.setAttribute(
       "data-open",
@@ -2922,26 +4527,48 @@ const jsonLd = {
 
     window.setTimeout(
       () => {
-        drawer.hidden = true;
-        drawerBackdrop.hidden =
-          true;
+        if (
+          drawer.getAttribute(
+            "data-open",
+          ) !==
+          "true"
+        ) {
+          drawer.hidden =
+            true;
+
+          drawerBackdrop.hidden =
+            true;
+        }
       },
       190,
     );
 
-    document.documentElement.style.overflow =
-      "";
+    if (wasOpen) {
+      unlockPageScroll();
+    }
 
     selectedLocationId =
       null;
+
+    if (
+      previouslyFocusedElement instanceof
+      HTMLElement
+    ) {
+      previouslyFocusedElement.focus();
+
+      previouslyFocusedElement =
+        null;
+    }
   }
 
   function showToast(
     message,
   ) {
     if (
-      !(toast instanceof HTMLElement) ||
-      !(toastMessage instanceof HTMLElement)
+      !(toast instanceof
+        HTMLElement) ||
+      !(toastMessage instanceof
+        HTMLElement)
     ) {
       return;
     }
@@ -2949,7 +4576,8 @@ const jsonLd = {
     toastMessage.textContent =
       message;
 
-    toast.hidden = false;
+    toast.hidden =
+      false;
 
     if (
       toastTimer !== null
@@ -2962,19 +4590,22 @@ const jsonLd = {
     toastTimer =
       window.setTimeout(
         () => {
-          toast.hidden = true;
-          toastTimer = null;
+          toast.hidden =
+            true;
+
+          toastTimer =
+            null;
         },
-        3000,
+        2800,
       );
   }
 
   function refreshLocations() {
+    updateSummary();
     applyFilters();
-    setSummaryValues();
 
     showToast(
-      "Data lokasi diperbarui.",
+      "Daftar lokasi diperbarui.",
     );
   }
 
@@ -2991,12 +4622,10 @@ const jsonLd = {
   }
 
   function editLocation(
-    locationId,
+    id,
   ) {
     const location =
-      getLocation(
-        locationId,
-      );
+      getLocation(id);
 
     if (!location) {
       return;
@@ -3006,13 +4635,15 @@ const jsonLd = {
       new CustomEvent(
         "binsight:admin-location-edit",
         {
-          detail: location,
+          detail: {
+            ...location,
+          },
         },
       ),
     );
 
     showToast(
-      `Mode edit untuk ${location.name} dipersiapkan.`,
+      `Mode edit untuk "${location.name}" dipersiapkan.`,
     );
   }
 
@@ -3031,23 +4662,43 @@ const jsonLd = {
     }
 
     location.status =
-      location.status === "active"
+      location.status ===
+      "active"
         ? "inactive"
         : "active";
 
+    location.updatedAt =
+      "10 Sep 2026";
+
     location.statusLabel =
-      location.status === "active"
+      location.status ===
+      "active"
         ? "Aktif"
         : "Tidak aktif";
 
-    location.updatedAt =
-      "10 Sep 2026";
+    const row =
+      rows.find(
+        (candidate) =>
+          candidate.getAttribute(
+            "data-id",
+          ) ===
+          location.id,
+      );
+
+    if (
+      row instanceof HTMLElement
+    ) {
+      updateRow(
+        row,
+        location,
+      );
+    }
 
     updateDrawer(
       location,
     );
 
-    setSummaryValues();
+    updateSummary();
     applyFilters();
 
     window.dispatchEvent(
@@ -3062,7 +4713,7 @@ const jsonLd = {
     );
 
     showToast(
-      `${location.name} sekarang ${location.statusLabel.toLowerCase()}.`,
+      `"${location.name}" sekarang ${location.statusLabel.toLowerCase()}.`,
     );
   }
 
@@ -3086,13 +4737,16 @@ const jsonLd = {
     applyFilters,
   );
 
-  clearSearchButton?.addEventListener(
+  clearSearch?.addEventListener(
     "click",
     () => {
       if (
-        searchInput instanceof HTMLInputElement
+        searchInput instanceof
+        HTMLInputElement
       ) {
-        searchInput.value = "";
+        searchInput.value =
+          "";
+
         searchInput.focus();
       }
 
@@ -3100,22 +4754,28 @@ const jsonLd = {
     },
   );
 
-  filterReset?.addEventListener(
+  emptyReset?.addEventListener(
     "click",
     resetFilters,
   );
 
-  emptyReset?.addEventListener(
+  filterReset?.addEventListener(
     "click",
-    resetFilters,
+    () => {
+      resetFilters();
+
+      setFilterPanel(
+        false,
+      );
+    },
   );
 
   filterToggle?.addEventListener(
     "click",
     () => {
       if (
-        !(filterPanel instanceof HTMLElement) ||
-        !(filterToggle instanceof HTMLButtonElement)
+        !(filterToggle instanceof
+          HTMLButtonElement)
       ) {
         return;
       }
@@ -3123,34 +4783,21 @@ const jsonLd = {
       const isOpen =
         filterToggle.getAttribute(
           "aria-expanded",
-        ) === "true";
+        ) ===
+        "true";
 
-      filterToggle.setAttribute(
-        "aria-expanded",
-        isOpen
-          ? "false"
-          : "true",
+      setFilterPanel(
+        !isOpen,
       );
-
-      filterPanel.hidden =
-        isOpen;
     },
   );
 
   filterClose?.addEventListener(
     "click",
     () => {
-      if (
-        filterPanel instanceof HTMLElement &&
-        filterToggle instanceof HTMLButtonElement
-      ) {
-        filterPanel.hidden = true;
-
-        filterToggle.setAttribute(
-          "aria-expanded",
-          "false",
-        );
-      }
+      setFilterPanel(
+        false,
+      );
     },
   );
 
@@ -3211,7 +4858,9 @@ const jsonLd = {
   drawerEdit?.addEventListener(
     "click",
     () => {
-      if (selectedLocationId) {
+      if (
+        selectedLocationId
+      ) {
         editLocation(
           selectedLocationId,
         );
@@ -3246,17 +4895,49 @@ const jsonLd = {
     "keydown",
     (event) => {
       if (
-        event.key === "Escape" &&
-        drawer instanceof HTMLElement &&
+        event.key !==
+        "Escape"
+      ) {
+        return;
+      }
+
+      if (
+        drawer instanceof
+          HTMLElement &&
         drawer.getAttribute(
           "data-open",
-        ) === "true"
+        ) ===
+          "true"
       ) {
         closeDrawer();
+
+        return;
+      }
+
+      if (
+        filterPanel instanceof
+          HTMLElement &&
+        !filterPanel.hidden
+      ) {
+        setFilterPanel(
+          false,
+        );
       }
     },
   );
 
-  setSummaryValues();
+  window.addEventListener(
+    "beforeunload",
+    () => {
+      document.documentElement.style.overflow =
+        "";
+    },
+  );
+
+  setEmptyState(
+    rows.length > 0,
+  );
+
+  updateSummary();
   applyFilters();
 </script>

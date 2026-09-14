@@ -1,9 +1,33 @@
 ---
+/**
+ * BINSIGHT — ADMIN ORGANIZATIONS
+ * --------------------------------------------------------------------------
+ * Organization management workspace for BINSIGHT.
+ *
+ * Design baseline:
+ * - BINSIGHT editorial / brutalist visual language
+ * - Page-owned hierarchy
+ * - No duplicate admin header
+ * - No page-level vertical scroll container
+ * - Main page uses AdminLayout document scroll
+ * - Sidebar behavior belongs exclusively to AdminLayout
+ * - Square edges, hard borders, offset shadows
+ * - Lime / ink / orange accent system
+ * - Responsive without horizontal overflow
+ *
+ * Data note:
+ * - This page currently uses local demo records.
+ * - No backend write operation is invented here.
+ * - Client actions emit BINSIGHT custom events and update local UI state.
+ * --------------------------------------------------------------------------
+ */
+
 import {
   ArrowRight,
   Building2,
   CircleCheck,
   Eye,
+  FileText,
   Filter,
   MapPin,
   Pencil,
@@ -150,19 +174,26 @@ const typeLabels: Record<
   other: "Lainnya",
 };
 
-const totalOrganizations = organizations.length;
-const verifiedCount = organizations.filter(
-  (organization) =>
-    organization.status === "verified",
-).length;
-const pendingCount = organizations.filter(
-  (organization) =>
-    organization.status === "pending",
-).length;
-const publicCount = organizations.filter(
-  (organization) =>
-    organization.isPublic,
-).length;
+const totalOrganizations =
+  organizations.length;
+
+const verifiedCount =
+  organizations.filter(
+    (organization) =>
+      organization.status === "verified",
+  ).length;
+
+const pendingCount =
+  organizations.filter(
+    (organization) =>
+      organization.status === "pending",
+  ).length;
+
+const publicCount =
+  organizations.filter(
+    (organization) =>
+      organization.isPublic,
+  ).length;
 
 const jsonLd = {
   "@context": "https://schema.org",
@@ -182,6 +213,7 @@ const jsonLd = {
 <AdminLayout
   title="Organisasi"
   description="Verifikasi dan kelola organisasi yang menjadi bagian dari ekosistem BINSIGHT."
+  activeSection="organizations"
 >
   <script
     type="application/ld+json"
@@ -189,14 +221,27 @@ const jsonLd = {
     set:html={JSON.stringify(jsonLd)}
   />
 
-  <main
+  <script
+    id="admin-organizations-data"
+    type="application/json"
+    is:inline
+    set:html={JSON.stringify(organizations)}
+  />
+
+  <div
     class="organizations-page"
     data-organizations-page
   >
-    <header class="page-top">
-      <div class="page-top__main">
-        <div class="page-top__eyebrow">
-          <span class="page-top__eyebrow-icon">
+    <!-- ============================================================
+         PAGE INTRO
+    ============================================================= -->
+    <section
+      class="page-hero"
+      aria-labelledby="organizations-page-title"
+    >
+      <div class="page-hero__copy">
+        <div class="page-hero__eyebrow">
+          <span class="page-hero__eyebrow-mark">
             <Building2
               size={15}
               stroke-width={2}
@@ -209,20 +254,20 @@ const jsonLd = {
           </span>
         </div>
 
-        <h1>
+        <h1 id="organizations-page-title">
           Organisasi
         </h1>
 
         <p>
-          Verifikasi, kelola, dan pantau organisasi yang ditampilkan dalam
-          ekosistem data BINSIGHT.
+          Verifikasi, kelola, dan pantau organisasi yang menjadi bagian
+          dari ekosistem data BINSIGHT.
         </p>
       </div>
 
-      <div class="page-top__actions">
+      <div class="page-hero__actions">
         <button
           type="button"
-          class="button button--secondary"
+          class="button button--paper"
           data-refresh
         >
           <RefreshCw
@@ -242,7 +287,7 @@ const jsonLd = {
         >
           <Eye
             size={16}
-            stroke-width={2}
+            stroke-width={1.9}
             aria-hidden="true"
           />
 
@@ -253,7 +298,7 @@ const jsonLd = {
 
         <button
           type="button"
-          class="button button--primary"
+          class="button button--acid"
           data-create
         >
           <Plus
@@ -267,19 +312,22 @@ const jsonLd = {
           </span>
         </button>
       </div>
-    </header>
+    </section>
 
+    <!-- ============================================================
+         SUMMARY
+    ============================================================= -->
     <section
       class="summary-grid"
       aria-label="Ringkasan organisasi"
     >
       <article class="summary-card">
         <div class="summary-card__top">
-          <span class="summary-card__label">
-            Total organisasi
+          <span class="summary-card__index">
+            01
           </span>
 
-          <span class="summary-card__icon summary-card__icon--green">
+          <span class="summary-card__icon">
             <Building2
               size={18}
               stroke-width={1.9}
@@ -287,6 +335,10 @@ const jsonLd = {
             />
           </span>
         </div>
+
+        <span class="summary-card__label">
+          TOTAL ORGANISASI
+        </span>
 
         <strong
           class="summary-card__value"
@@ -300,13 +352,13 @@ const jsonLd = {
         </span>
       </article>
 
-      <article class="summary-card">
+      <article class="summary-card summary-card--acid">
         <div class="summary-card__top">
-          <span class="summary-card__label">
-            Terverifikasi
+          <span class="summary-card__index">
+            02
           </span>
 
-          <span class="summary-card__icon summary-card__icon--verified">
+          <span class="summary-card__icon">
             <CircleCheck
               size={18}
               stroke-width={1.9}
@@ -314,6 +366,10 @@ const jsonLd = {
             />
           </span>
         </div>
+
+        <span class="summary-card__label">
+          TERVERIFIKASI
+        </span>
 
         <strong
           class="summary-card__value"
@@ -327,13 +383,13 @@ const jsonLd = {
         </span>
       </article>
 
-      <article class="summary-card">
+      <article class="summary-card summary-card--orange">
         <div class="summary-card__top">
-          <span class="summary-card__label">
-            Menunggu
+          <span class="summary-card__index">
+            03
           </span>
 
-          <span class="summary-card__icon summary-card__icon--pending">
+          <span class="summary-card__icon">
             <ShieldCheck
               size={18}
               stroke-width={1.9}
@@ -341,6 +397,10 @@ const jsonLd = {
             />
           </span>
         </div>
+
+        <span class="summary-card__label">
+          MENUNGGU
+        </span>
 
         <strong
           class="summary-card__value"
@@ -354,13 +414,13 @@ const jsonLd = {
         </span>
       </article>
 
-      <article class="summary-card">
+      <article class="summary-card summary-card--muted">
         <div class="summary-card__top">
-          <span class="summary-card__label">
-            Publik
+          <span class="summary-card__index">
+            04
           </span>
 
-          <span class="summary-card__icon summary-card__icon--public">
+          <span class="summary-card__icon">
             <Eye
               size={18}
               stroke-width={1.9}
@@ -368,6 +428,10 @@ const jsonLd = {
             />
           </span>
         </div>
+
+        <span class="summary-card__label">
+          PUBLIK
+        </span>
 
         <strong
           class="summary-card__value"
@@ -382,7 +446,32 @@ const jsonLd = {
       </article>
     </section>
 
-    <section class="workspace-card">
+    <!-- ============================================================
+         DIRECTORY
+    ============================================================= -->
+    <section
+      class="directory"
+      aria-labelledby="organization-directory-title"
+    >
+      <div class="directory__top">
+        <div class="directory__title">
+          <span class="directory__eyebrow">
+            ORGANIZATION DIRECTORY
+          </span>
+
+          <h2 id="organization-directory-title">
+            Daftar organisasi
+          </h2>
+        </div>
+
+        <span
+          class="directory__count"
+          data-result-count
+        >
+          {totalOrganizations} organisasi
+        </span>
+      </div>
+
       <div class="toolbar">
         <div class="toolbar__search">
           <Search
@@ -403,6 +492,7 @@ const jsonLd = {
             type="search"
             placeholder="Cari nama organisasi, wilayah, atau pengelola..."
             autocomplete="off"
+            spellcheck="false"
             data-search
           />
 
@@ -410,6 +500,7 @@ const jsonLd = {
             type="button"
             class="toolbar__clear"
             aria-label="Hapus pencarian"
+            title="Hapus pencarian"
             data-clear-search
             hidden
           >
@@ -423,16 +514,16 @@ const jsonLd = {
 
         <div class="toolbar__filters">
           <label class="filter-control">
-            <span class="sr-only">
-              Filter status
+            <span class="filter-control__label">
+              STATUS
             </span>
 
             <select
-              aria-label="Filter status"
+              aria-label="Filter status organisasi"
               data-status-filter
             >
               <option value="all">
-                Semua status
+                Semua
               </option>
 
               <option value="verified">
@@ -450,8 +541,8 @@ const jsonLd = {
           </label>
 
           <label class="filter-control">
-            <span class="sr-only">
-              Filter tipe organisasi
+            <span class="filter-control__label">
+              TIPE
             </span>
 
             <select
@@ -459,7 +550,7 @@ const jsonLd = {
               data-type-filter
             >
               <option value="all">
-                Semua tipe
+                Semua
               </option>
 
               {
@@ -481,6 +572,7 @@ const jsonLd = {
             class="filter-button"
             data-filter-toggle
             aria-expanded="false"
+            aria-controls="organization-filter-panel"
           >
             <Filter
               size={16}
@@ -496,6 +588,7 @@ const jsonLd = {
       </div>
 
       <div
+        id="organization-filter-panel"
         class="filter-panel"
         data-filter-panel
         hidden
@@ -506,15 +599,16 @@ const jsonLd = {
               FILTER DATA
             </span>
 
-            <h2>
+            <h3>
               Penyaringan organisasi
-            </h2>
+            </h3>
           </div>
 
           <button
             type="button"
             class="filter-panel__close"
             aria-label="Tutup filter"
+            title="Tutup filter"
             data-filter-close
           >
             <X
@@ -534,8 +628,9 @@ const jsonLd = {
             />
 
             <p>
-              Gunakan status untuk memprioritaskan organisasi yang membutuhkan
-              pemeriksaan sebelum informasi ditampilkan ke publik.
+              Gunakan status dan tipe untuk memprioritaskan organisasi
+              yang membutuhkan pemeriksaan sebelum informasi ditampilkan
+              kepada publik.
             </p>
           </div>
 
@@ -546,27 +641,6 @@ const jsonLd = {
           >
             Reset semua filter
           </button>
-        </div>
-      </div>
-
-      <div class="table-head">
-        <div>
-          <span class="table-head__eyebrow">
-            DIRECTORY
-          </span>
-
-          <h2>
-            Daftar organisasi
-          </h2>
-        </div>
-
-        <div class="table-head__right">
-          <span
-            class="result-count"
-            data-result-count
-          >
-            {totalOrganizations} organisasi
-          </span>
         </div>
       </div>
 
@@ -610,7 +684,7 @@ const jsonLd = {
             </tr>
           </thead>
 
-          <tbody data-table-body>
+          <tbody>
             {
               organizations.map(
                 (organization) => (
@@ -620,12 +694,25 @@ const jsonLd = {
                     data-name={organization.name.toLowerCase()}
                     data-area={organization.area.toLowerCase()}
                     data-manager={organization.manager.toLowerCase()}
+                    data-description={organization.description.toLowerCase()}
+                    data-address={organization.address.toLowerCase()}
                     data-status={organization.status}
                     data-type={organization.type}
+                    data-visibility={
+                      organization.isPublic
+                        ? "public"
+                        : "private"
+                    }
                   >
                     <td>
                       <div class="organization-cell">
-                        <span class="organization-cell__icon">
+                        <span class:list={[
+                          "organization-cell__icon",
+                          organization.status ===
+                          "verified"
+                            ? "organization-cell__icon--verified"
+                            : "",
+                        ]}>
                           <Building2
                             size={17}
                             stroke-width={1.9}
@@ -634,11 +721,15 @@ const jsonLd = {
                         </span>
 
                         <div class="organization-cell__copy">
-                          <strong>
+                          <strong
+                            title={organization.name}
+                          >
                             {organization.name}
                           </strong>
 
-                          <span>
+                          <span
+                            title={organization.address}
+                          >
                             {organization.address}
                           </span>
                         </div>
@@ -697,7 +788,9 @@ const jsonLd = {
                         }
 
                         <span>
-                          {statusLabels[organization.status]}
+                          {statusLabels[
+                            organization.status
+                          ]}
                         </span>
                       </span>
                     </td>
@@ -711,9 +804,25 @@ const jsonLd = {
                             : "visibility-badge--private",
                         ]}
                       >
-                        {organization.isPublic
-                          ? "Publik"
-                          : "Privat"}
+                        {organization.isPublic ? (
+                          <Eye
+                            size={12}
+                            stroke-width={2}
+                            aria-hidden="true"
+                          />
+                        ) : (
+                          <ShieldCheck
+                            size={12}
+                            stroke-width={2}
+                            aria-hidden="true"
+                          />
+                        )}
+
+                        <span>
+                          {organization.isPublic
+                            ? "Publik"
+                            : "Privat"}
+                        </span>
                       </span>
                     </td>
 
@@ -729,6 +838,7 @@ const jsonLd = {
                           type="button"
                           class="row-action"
                           aria-label={`Lihat ${organization.name}`}
+                          title="Lihat"
                           data-view
                           data-record={organization.id}
                         >
@@ -743,10 +853,26 @@ const jsonLd = {
                           type="button"
                           class="row-action"
                           aria-label={`Edit ${organization.name}`}
+                          title="Edit"
                           data-edit
                           data-record={organization.id}
                         >
                           <Pencil
+                            size={15}
+                            stroke-width={1.9}
+                            aria-hidden="true"
+                          />
+                        </button>
+
+                        <button
+                          type="button"
+                          class="row-action row-action--danger"
+                          aria-label={`Hapus ${organization.name}`}
+                          title="Hapus"
+                          data-delete
+                          data-record={organization.id}
+                        >
+                          <Trash2
                             size={15}
                             stroke-width={1.9}
                             aria-hidden="true"
@@ -765,34 +891,40 @@ const jsonLd = {
           class="empty-state"
           data-empty-state
           hidden
+          aria-hidden="true"
         >
           <span class="empty-state__icon">
             <Search
-              size={23}
+              size={24}
               stroke-width={1.8}
               aria-hidden="true"
             />
           </span>
 
+          <span class="empty-state__eyebrow">
+            NO MATCH
+          </span>
+
           <h3>
-            Tidak ada organisasi yang cocok
+            Organisasi tidak ditemukan
           </h3>
 
           <p>
-            Coba ubah kata pencarian atau filter yang digunakan.
+            Tidak ada organisasi yang cocok dengan pencarian atau
+            filter yang digunakan.
           </p>
 
           <button
             type="button"
-            class="button button--secondary"
+            class="button button--paper"
             data-empty-reset
           >
-            Reset pencarian
+            Reset filter
           </button>
         </div>
       </div>
 
-      <footer class="table-footer">
+      <footer class="directory__footer">
         <span>
           <strong data-footer-count>
             {totalOrganizations}
@@ -801,11 +933,14 @@ const jsonLd = {
         </span>
 
         <span>
-          Data admin
+          BINSIGHT / ORGANIZATIONS
         </span>
       </footer>
     </section>
 
+    <!-- ============================================================
+         GOVERNANCE
+    ============================================================= -->
     <section class="verification-banner">
       <div class="verification-banner__icon">
         <ShieldCheck
@@ -825,9 +960,9 @@ const jsonLd = {
         </h2>
 
         <p>
-          Pastikan nama, tipe, wilayah, deskripsi, dan keterhubungan lokasi
-          organisasi telah diperiksa sebelum organisasi ditandai terverifikasi
-          dan dapat ditampilkan kepada masyarakat.
+          Pastikan nama, tipe, wilayah, deskripsi, dan keterhubungan
+          lokasi organisasi telah diperiksa sebelum organisasi ditandai
+          terverifikasi dan dapat ditampilkan kepada masyarakat.
         </p>
       </div>
 
@@ -845,6 +980,9 @@ const jsonLd = {
       </a>
     </section>
 
+    <!-- ============================================================
+         DETAIL DRAWER
+    ============================================================= -->
     <div
       class="drawer-backdrop"
       data-drawer-backdrop
@@ -855,7 +993,8 @@ const jsonLd = {
       class="organization-drawer"
       data-drawer
       aria-hidden="true"
-      aria-labelledby="drawer-title"
+      hidden
+      aria-labelledby="organization-drawer-title"
     >
       <div class="drawer__header">
         <div>
@@ -863,7 +1002,7 @@ const jsonLd = {
             ORGANIZATION DETAIL
           </span>
 
-          <h2 id="drawer-title">
+          <h2 id="organization-drawer-title">
             Detail organisasi
           </h2>
         </div>
@@ -872,6 +1011,7 @@ const jsonLd = {
           type="button"
           class="drawer__close"
           aria-label="Tutup detail"
+          title="Tutup"
           data-drawer-close
         >
           <X
@@ -892,7 +1032,7 @@ const jsonLd = {
             />
           </span>
 
-          <div>
+          <div class="drawer-identity__copy">
             <h3 data-drawer-name>
               -
             </h3>
@@ -964,6 +1104,16 @@ const jsonLd = {
                 -
               </dd>
             </div>
+
+            <div>
+              <dt>
+                Diperbarui
+              </dt>
+
+              <dd data-drawer-updated>
+                -
+              </dd>
+            </div>
           </dl>
         </div>
 
@@ -992,8 +1142,8 @@ const jsonLd = {
           />
 
           <p>
-            Organisasi ini belum terverifikasi. Periksa informasi sebelum
-            mengubah status menjadi terverifikasi.
+            Organisasi ini belum terverifikasi. Periksa informasi
+            sebelum mengubah status menjadi terverifikasi.
           </p>
         </div>
       </div>
@@ -1018,7 +1168,7 @@ const jsonLd = {
         <div class="drawer__footer-right">
           <button
             type="button"
-            class="button button--secondary"
+            class="button button--paper"
             data-drawer-edit
           >
             <Pencil
@@ -1034,7 +1184,7 @@ const jsonLd = {
 
           <button
             type="button"
-            class="button button--primary"
+            class="button button--acid"
             data-drawer-verify
           >
             <ShieldCheck
@@ -1051,6 +1201,9 @@ const jsonLd = {
       </div>
     </aside>
 
+    <!-- ============================================================
+         TOAST
+    ============================================================= -->
     <div
       class="toast"
       data-toast
@@ -1068,929 +1221,2086 @@ const jsonLd = {
         Berhasil
       </span>
     </div>
-  </main>
+  </div>
 </AdminLayout>
 
 <style>
+  /* ================================================================
+     PAGE ROOT
+  ================================================================= */
+
   .organizations-page {
-    position: relative;
-    min-height: 100%;
-    padding: 30px 30px 50px;
+    --acid: #dfff00;
+    --acid-soft: #efff70;
+    --ink: #090a08;
+    --ink-2: #11130f;
+    --ink-3: #1b1f18;
+    --paper: #f2f0e6;
+    --paper-2: #e4e1d4;
+    --paper-3: #cfcabd;
+    --white: #fffef8;
+    --muted: #6c7068;
+    --muted-2: #8d9088;
+    --orange: #ff6a00;
+    --green: #87b800;
+    --line: #bab9ae;
+
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+
+    padding:
+      34px
+      34px
+      56px;
+
+    overflow-x: hidden;
+
     background:
       radial-gradient(
-        circle at 95% 0%,
-        rgba(132, 204, 22, 0.065),
-        transparent 31rem
+        circle at 96% 0%,
+        rgb(223 255 0 / 12%),
+        transparent 24rem
       ),
-      var(--color-background);
+      var(--paper);
+
+    color: var(--ink);
   }
 
-  .page-top {
+  /* ================================================================
+     HERO
+  ================================================================= */
+
+  .page-hero {
     display: flex;
     align-items: flex-end;
     justify-content: space-between;
+
     gap: 28px;
+
+    min-width: 0;
+
+    padding-bottom: 25px;
+
+    border-bottom: 3px solid var(--ink);
   }
 
-  .page-top__eyebrow {
+  .page-hero__copy {
+    min-width: 0;
+    max-width: 820px;
+  }
+
+  .page-hero__eyebrow {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    color: var(--color-primary);
-    font-size: 0.62rem;
-    font-weight: 900;
+    gap: 9px;
+
+    color: var(--orange);
+
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+
+    font-size: 0.58rem;
+    font-weight: 800;
+
+    line-height: 1;
+
     letter-spacing: 0.12em;
+
+    text-transform: uppercase;
   }
 
-  .page-top__eyebrow-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 27px;
-    height: 27px;
-    border-radius: 8px;
-    background: var(--color-primary-soft);
+  .page-hero__eyebrow-mark {
+    width: 28px;
+    height: 28px;
+
+    display: grid;
+    place-items: center;
+
+    border: 2px solid var(--ink);
+
+    color: var(--acid);
+    background: var(--ink);
+
+    box-shadow:
+      3px 3px 0 var(--orange);
   }
 
-  .page-top h1 {
-    margin: 12px 0 0;
-    color: var(--color-text-strong);
-    font-size: clamp(1.7rem, 3vw, 2.4rem);
+  .page-hero h1 {
+    margin:
+      17px
+      0
+      0;
+
+    color: var(--ink);
+
+    font-family:
+      Sora,
+      Inter,
+      system-ui,
+      sans-serif;
+
+    font-size:
+      clamp(
+        2rem,
+        4vw,
+        3.65rem
+      );
+
     font-weight: 900;
-    letter-spacing: -0.03em;
-    line-height: 1.08;
+
+    line-height: 0.98;
+
+    letter-spacing: -0.055em;
   }
 
-  .page-top__main > p {
-    max-width: 690px;
-    margin: 9px 0 0;
-    color: var(--color-text-muted);
-    font-size: 0.77rem;
-    line-height: 1.7;
+  .page-hero__copy > p {
+    max-width: 760px;
+
+    margin:
+      14px
+      0
+      0;
+
+    color: var(--muted);
+
+    font-size: 0.78rem;
+
+    line-height: 1.75;
   }
 
-  .page-top__actions {
+  .page-hero__actions {
+    flex-shrink: 0;
+
     display: flex;
     align-items: center;
     justify-content: flex-end;
+
     flex-wrap: wrap;
+
     gap: 8px;
   }
 
+  /* ================================================================
+     BUTTONS
+  ================================================================= */
+
   .button {
+    min-height: 42px;
+
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 7px;
-    min-height: 41px;
-    padding: 0 13px;
-    border: 1px solid transparent;
-    border-radius: 10px;
+
+    gap: 8px;
+
+    padding:
+      0
+      13px;
+
+    border: 2px solid var(--ink);
+
+    border-radius: 0;
+
+    color: var(--ink);
+    background: var(--paper);
+
     font: inherit;
-    font-size: 0.68rem;
-    font-weight: 800;
+
+    font-family:
+      Inter,
+      system-ui,
+      sans-serif;
+
+    font-size: 0.65rem;
+    font-weight: 850;
+
     text-decoration: none;
+
     cursor: pointer;
-    white-space: nowrap;
+
+    box-shadow:
+      3px 3px 0 var(--ink);
+
     transition:
-      transform 150ms ease,
-      background 150ms ease,
-      border-color 150ms ease,
-      box-shadow 150ms ease;
+      transform 120ms ease,
+      box-shadow 120ms ease,
+      background 120ms ease,
+      color 120ms ease;
   }
 
   .button:hover {
-    transform: translateY(-1px);
+    transform:
+      translate(
+        2px,
+        2px
+      );
+
+    box-shadow:
+      1px 1px 0 var(--ink);
+  }
+
+  .button:active {
+    transform:
+      translate(
+        3px,
+        3px
+      );
+
+    box-shadow:
+      0 0 0 var(--ink);
+  }
+
+  .button:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+    transform: none;
+    box-shadow:
+      2px 2px 0 var(--ink);
   }
 
   .button:focus-visible,
-  .filter-button:focus-visible,
   .row-action:focus-visible,
   .drawer__close:focus-visible,
+  .filter-button:focus-visible,
   .filter-panel__close:focus-visible,
-  .filter-reset:focus-visible {
-    outline: 3px solid var(--color-primary-ring);
-    outline-offset: 2px;
+  .filter-reset:focus-visible,
+  .toolbar__clear:focus-visible {
+    outline:
+      3px solid var(--orange);
+
+    outline-offset:
+      3px;
   }
 
-  .button--primary {
-    background: var(--color-primary);
-    border-color: var(--color-primary);
-    color: #ffffff;
-    box-shadow: var(--shadow-xs);
+  .button--acid {
+    color: var(--ink);
+    background: var(--acid);
   }
 
-  .button--primary:hover {
-    background: var(--color-primary-dark);
-    border-color: var(--color-primary-dark);
+  .button--acid:hover {
+    background: var(--acid-soft);
   }
 
-  .button--secondary {
-    background: var(--color-surface);
-    border-color: var(--color-border);
-    color: var(--color-text-strong);
-  }
-
-  .button--secondary:hover {
-    border-color: var(--color-border-strong);
-    background: var(--color-surface-soft);
+  .button--paper {
+    color: var(--ink);
+    background: var(--white);
   }
 
   .button--ghost {
-    background: transparent;
     border-color: transparent;
-    color: var(--color-text-muted);
+    color: var(--ink);
+    background: transparent;
+    box-shadow: none;
   }
 
   .button--ghost:hover {
-    background: var(--color-surface);
-    color: var(--color-text-strong);
+    border-color: var(--ink);
+    background: var(--white);
+    box-shadow:
+      2px 2px 0 var(--ink);
   }
 
   .button--danger {
-    background: transparent;
-    border-color: rgba(220, 38, 38, 0.2);
-    color: var(--color-danger);
+    color: var(--white);
+    background: #b42318;
+    border-color: var(--ink);
   }
 
   .button--danger:hover {
-    background: rgba(220, 38, 38, 0.06);
-    border-color: rgba(220, 38, 38, 0.3);
+    background: #941c14;
   }
+
+  /* ================================================================
+     SUMMARY
+  ================================================================= */
 
   .summary-grid {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 12px;
-    margin-top: 28px;
+
+    grid-template-columns:
+      repeat(
+        4,
+        minmax(
+          0,
+          1fr
+        )
+      );
+
+    gap: 11px;
+
+    margin-top: 22px;
   }
 
   .summary-card {
+    position: relative;
+
+    min-width: 0;
+
     padding: 17px;
-    border: 1px solid var(--color-border);
-    border-radius: 16px;
-    background: var(--color-surface);
-    box-shadow: var(--shadow-xs);
+
+    border: 2px solid var(--ink);
+
+    background: var(--white);
+
+    box-shadow:
+      5px 5px 0 var(--paper-3);
+
+    overflow: hidden;
+  }
+
+  .summary-card::after {
+    content: "";
+
+    position: absolute;
+
+    right: -23px;
+    bottom: -23px;
+
+    width: 67px;
+    height: 67px;
+
+    border:
+      2px solid
+      rgb(
+        9 10 8 / 11%
+      );
+
+    border-radius: 50%;
+
+    pointer-events: none;
+  }
+
+  .summary-card--acid {
+    background: var(--acid);
+
+    box-shadow:
+      5px 5px 0 var(--ink);
+  }
+
+  .summary-card--orange {
+    background: var(--orange);
+
+    box-shadow:
+      5px 5px 0 var(--ink);
+  }
+
+  .summary-card--muted {
+    background: var(--paper-2);
   }
 
   .summary-card__top {
     display: flex;
     align-items: center;
     justify-content: space-between;
+
     gap: 10px;
   }
 
-  .summary-card__label {
-    color: var(--color-text-muted);
-    font-size: 0.67rem;
-    font-weight: 750;
+  .summary-card__index {
+    color: var(--muted);
+
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+
+    font-size: 0.52rem;
+    font-weight: 800;
+
+    letter-spacing: 0.08em;
+  }
+
+  .summary-card--acid
+    .summary-card__index,
+  .summary-card--orange
+    .summary-card__index {
+    color:
+      rgb(
+        9 10 8 / 65%
+      );
   }
 
   .summary-card__icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 37px;
-    height: 37px;
-    border-radius: 10px;
+    width: 36px;
+    height: 36px;
+
+    display: grid;
+    place-items: center;
+
+    border: 2px solid var(--ink);
+
+    color: var(--acid);
+    background: var(--ink);
   }
 
-  .summary-card__icon--green,
-  .summary-card__icon--verified {
-    background: var(--color-primary-soft);
-    color: var(--color-primary);
+  .summary-card__label {
+    display: block;
+
+    margin-top: 18px;
+
+    color: var(--muted);
+
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+
+    font-size: 0.5rem;
+    font-weight: 800;
+
+    letter-spacing: 0.1em;
+
+    text-transform: uppercase;
   }
 
-  .summary-card__icon--pending {
-    background: rgba(245, 158, 11, 0.1);
-    color: #d97706;
-  }
-
-  .summary-card__icon--public {
-    background: rgba(37, 99, 235, 0.09);
-    color: var(--color-info);
+  .summary-card--acid
+    .summary-card__label,
+  .summary-card--orange
+    .summary-card__label {
+    color:
+      rgb(
+        9 10 8 / 67%
+      );
   }
 
   .summary-card__value {
     display: block;
-    margin-top: 15px;
-    color: var(--color-text-strong);
-    font-size: 1.55rem;
+
+    margin-top: 9px;
+
+    color: var(--ink);
+
+    font-family:
+      Sora,
+      Inter,
+      system-ui,
+      sans-serif;
+
+    font-size:
+      clamp(
+        1.8rem,
+        3vw,
+        2.8rem
+      );
+
     font-weight: 900;
-    line-height: 1;
+
+    line-height: 0.95;
+
+    letter-spacing: -0.05em;
   }
 
   .summary-card__meta {
     display: block;
-    margin-top: 6px;
-    color: var(--color-text-faint);
-    font-size: 0.61rem;
+
+    margin-top: 7px;
+
+    color: var(--muted);
+
+    font-size: 0.58rem;
+
     line-height: 1.5;
   }
 
-  .workspace-card {
-    margin-top: 20px;
-    overflow: hidden;
-    border: 1px solid var(--color-border);
-    border-radius: 18px;
-    background: var(--color-surface);
-    box-shadow: var(--shadow-xs);
+  .summary-card--acid
+    .summary-card__meta,
+  .summary-card--orange
+    .summary-card__meta {
+    color:
+      rgb(
+        9 10 8 / 67%
+      );
   }
+
+  /* ================================================================
+     DIRECTORY
+  ================================================================= */
+
+  .directory {
+    min-width: 0;
+
+    margin-top: 23px;
+
+    border:
+      2px
+      solid
+      var(--ink);
+
+    background:
+      var(--white);
+
+    box-shadow:
+      6px 6px 0 var(--ink);
+
+    overflow: hidden;
+  }
+
+  .directory__top {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+
+    gap: 18px;
+
+    padding:
+      20px
+      20px
+      17px;
+  }
+
+  .directory__title {
+    min-width: 0;
+  }
+
+  .directory__eyebrow {
+    display: block;
+
+    color: var(--orange);
+
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+
+    font-size: 0.49rem;
+    font-weight: 800;
+
+    letter-spacing: 0.12em;
+
+    text-transform: uppercase;
+  }
+
+  .directory__title h2 {
+    margin:
+      5px
+      0
+      0;
+
+    color: var(--ink);
+
+    font-family:
+      Sora,
+      Inter,
+      system-ui,
+      sans-serif;
+
+    font-size: 1.1rem;
+    font-weight: 900;
+
+    letter-spacing: -0.03em;
+  }
+
+  .directory__count {
+    flex-shrink: 0;
+
+    min-height: 29px;
+
+    display: inline-flex;
+    align-items: center;
+
+    padding:
+      0
+      9px;
+
+    border:
+      1px
+      solid
+      var(--ink);
+
+    color: var(--ink);
+
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+
+    font-size: 0.48rem;
+    font-weight: 800;
+
+    text-transform: uppercase;
+  }
+
+  /* ================================================================
+     TOOLBAR
+  ================================================================= */
 
   .toolbar {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 14px;
-    padding: 15px;
-    border-bottom: 1px solid var(--color-border);
-    background: var(--color-surface-soft);
+    align-items: flex-end;
+
+    gap: 12px;
+
+    padding:
+      14px
+      18px;
+
+    border-top:
+      2px
+      solid
+      var(--ink);
+
+    border-bottom:
+      2px
+      solid
+      var(--ink);
+
+    background:
+      var(--paper-2);
   }
 
   .toolbar__search {
     position: relative;
+
     display: flex;
     align-items: center;
+
     gap: 9px;
-    flex: 1;
+
+    flex: 1 1 auto;
+
     min-width: 0;
+
     max-width: 560px;
-    min-height: 40px;
-    padding: 0 12px;
-    border: 1px solid var(--color-border);
-    border-radius: 10px;
-    background: var(--color-surface);
-    color: var(--color-text-faint);
+
+    min-height: 42px;
+
+    padding:
+      0
+      11px;
+
+    border:
+      2px
+      solid
+      var(--ink);
+
+    color: var(--muted);
+
+    background:
+      var(--white);
   }
 
   .toolbar__search:focus-within {
-    border-color: var(--color-primary);
     box-shadow:
-      0 0 0 3px var(--color-primary-ring);
+      3px 3px 0 var(--acid);
   }
 
   .toolbar__search input {
     width: 100%;
+
     min-width: 0;
+
     border: 0;
     outline: 0;
+
+    color: var(--ink);
+
     background: transparent;
-    color: var(--color-text-strong);
+
     font: inherit;
-    font-size: 0.69rem;
+
+    font-size: 0.65rem;
   }
 
   .toolbar__search input::placeholder {
-    color: var(--color-text-faint);
+    color: var(--muted-2);
   }
 
   .toolbar__clear {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 25px;
-    height: 25px;
+    width: 26px;
+    height: 26px;
+
+    display: grid;
+    place-items: center;
+
+    flex-shrink: 0;
+
     padding: 0;
-    border: 0;
-    border-radius: 7px;
+
+    border:
+      1px
+      solid
+      transparent;
+
+    color: var(--muted);
+
     background: transparent;
-    color: var(--color-text-muted);
+
     cursor: pointer;
   }
 
   .toolbar__clear:hover {
-    background: var(--color-surface-soft);
-    color: var(--color-text-strong);
+    border-color:
+      var(--ink);
+
+    color: var(--ink);
+
+    background: var(--paper-2);
   }
 
   .toolbar__filters {
     display: flex;
-    align-items: center;
+    align-items: flex-end;
+
     flex-wrap: wrap;
-    justify-content: flex-end;
-    gap: 8px;
+
+    gap: 9px;
+  }
+
+  .filter-control {
+    display: flex;
+    flex-direction: column;
+
+    gap: 5px;
+
+    min-width: 136px;
+  }
+
+  .filter-control__label {
+    color: var(--muted);
+
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+
+    font-size: 0.44rem;
+    font-weight: 800;
+
+    letter-spacing: 0.1em;
+
+    text-transform: uppercase;
   }
 
   .filter-control select {
-    min-height: 40px;
-    max-width: 180px;
-    padding: 0 30px 0 11px;
-    border: 1px solid var(--color-border);
-    border-radius: 10px;
-    background: var(--color-surface);
-    color: var(--color-text-strong);
-    font: inherit;
-    font-size: 0.67rem;
+    min-height: 42px;
+
+    min-width: 136px;
+
+    padding:
+      0
+      29px
+      0
+      10px;
+
+    border:
+      2px
+      solid
+      var(--ink);
+
+    border-radius: 0;
+
+    color: var(--ink);
+
+    background: var(--white);
+
+    font:
+      inherit;
+
+    font-size: 0.61rem;
+
+    outline: 0;
+
     cursor: pointer;
   }
 
   .filter-control select:focus {
-    border-color: var(--color-primary);
-    outline: none;
     box-shadow:
-      0 0 0 3px var(--color-primary-ring);
+      3px 3px 0 var(--acid);
   }
 
   .filter-button {
+    min-height: 42px;
+
     display: inline-flex;
     align-items: center;
     justify-content: center;
+
     gap: 7px;
-    min-height: 40px;
-    padding: 0 11px;
-    border: 1px solid var(--color-border);
-    border-radius: 10px;
-    background: var(--color-surface);
-    color: var(--color-text-muted);
+
+    padding:
+      0
+      11px;
+
+    border:
+      2px
+      solid
+      var(--ink);
+
+    border-radius: 0;
+
+    color: var(--ink);
+
+    background:
+      var(--white);
+
     font: inherit;
-    font-size: 0.67rem;
-    font-weight: 750;
+
+    font-size: 0.61rem;
+    font-weight: 800;
+
     cursor: pointer;
+
+    box-shadow:
+      3px 3px 0 var(--ink);
+
+    transition:
+      transform 120ms ease,
+      box-shadow 120ms ease,
+      background 120ms ease;
   }
 
   .filter-button:hover,
   .filter-button[aria-expanded="true"] {
-    border-color: var(--color-primary);
-    color: var(--color-primary);
-    background: var(--color-primary-soft);
+    background:
+      var(--acid);
   }
 
+  .filter-button:active {
+    transform:
+      translate(
+        2px,
+        2px
+      );
+
+    box-shadow:
+      1px 1px 0 var(--ink);
+  }
+
+  /* ================================================================
+     FILTER PANEL
+  ================================================================= */
+
   .filter-panel {
-    padding: 15px;
-    border-bottom: 1px solid var(--color-border);
-    background: var(--color-surface-soft);
+    padding:
+      16px
+      18px;
+
+    border-bottom:
+      2px
+      solid
+      var(--ink);
+
+    background:
+      var(--ink);
+
+    color: var(--white);
+  }
+
+  .filter-panel[hidden] {
+    display: none !important;
   }
 
   .filter-panel__header {
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
+
     gap: 20px;
   }
 
-  .filter-panel__eyebrow,
-  .table-head__eyebrow,
-  .verification-banner__eyebrow,
-  .drawer__eyebrow,
-  .drawer-section__label {
+  .filter-panel__eyebrow {
     display: block;
-    color: var(--color-primary);
-    font-size: 0.59rem;
-    font-weight: 900;
-    letter-spacing: 0.1em;
+
+    color: var(--acid);
+
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+
+    font-size: 0.48rem;
+    font-weight: 800;
+
+    letter-spacing: 0.11em;
   }
 
-  .filter-panel h2 {
-    margin: 4px 0 0;
-    color: var(--color-text-strong);
-    font-size: 0.86rem;
-    font-weight: 820;
+  .filter-panel__header h3 {
+    margin:
+      5px
+      0
+      0;
+
+    color: var(--white);
+
+    font-family:
+      Sora,
+      Inter,
+      system-ui,
+      sans-serif;
+
+    font-size: 0.83rem;
+    font-weight: 850;
   }
 
   .filter-panel__close {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 31px;
-    height: 31px;
-    border: 1px solid var(--color-border);
-    border-radius: 9px;
-    background: var(--color-surface);
-    color: var(--color-text-muted);
+    width: 32px;
+    height: 32px;
+
+    display: grid;
+    place-items: center;
+
+    flex-shrink: 0;
+
+    padding: 0;
+
+    border:
+      2px
+      solid
+      var(--acid);
+
+    color: var(--acid);
+
+    background: transparent;
+
     cursor: pointer;
+  }
+
+  .filter-panel__close:hover {
+    color: var(--ink);
+    background: var(--acid);
   }
 
   .filter-panel__body {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 15px;
-    margin-top: 12px;
+
+    gap: 16px;
+
+    margin-top: 13px;
   }
 
   .filter-info {
     display: flex;
     align-items: flex-start;
+
     gap: 8px;
-    color: var(--color-text-muted);
+
+    min-width: 0;
+
+    color:
+      rgb(
+        255 254 248 / 70%
+      );
   }
 
   .filter-info svg {
-    flex: 0 0 auto;
+    flex-shrink: 0;
+
     margin-top: 2px;
-    color: var(--color-primary);
+
+    color: var(--acid);
   }
 
   .filter-info p {
     max-width: 760px;
+
     margin: 0;
-    font-size: 0.65rem;
+
+    font-size: 0.61rem;
+
     line-height: 1.6;
   }
 
   .filter-reset {
-    flex: 0 0 auto;
-    border: 0;
-    background: transparent;
-    color: var(--color-primary);
+    min-height: 34px;
+
+    flex-shrink: 0;
+
+    padding:
+      0
+      11px;
+
+    border:
+      1px
+      solid
+      var(--acid);
+
+    border-radius: 0;
+
+    color: var(--acid);
+
+    background:
+      transparent;
+
     font: inherit;
-    font-size: 0.64rem;
+
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+
+    font-size: 0.47rem;
     font-weight: 800;
+
+    letter-spacing: 0.06em;
+
+    text-transform: uppercase;
+
     cursor: pointer;
   }
 
-  .table-head {
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    gap: 18px;
-    padding: 18px 18px 15px;
+  .filter-reset:hover {
+    color: var(--ink);
+    background: var(--acid);
   }
 
-  .table-head h2 {
-    margin: 4px 0 0;
-    color: var(--color-text-strong);
-    font-size: 0.98rem;
-    font-weight: 850;
-  }
-
-  .result-count {
-    color: var(--color-text-faint);
-    font-size: 0.64rem;
-    font-weight: 700;
-  }
+  /* ================================================================
+     TABLE
+  ================================================================= */
 
   .table-wrap {
+    position: relative;
+
+    width: 100%;
+    max-width: 100%;
+
     overflow-x: auto;
-    border-top: 1px solid var(--color-border);
+    overflow-y: hidden;
+
+    -webkit-overflow-scrolling: touch;
   }
 
   .organizations-table {
     width: 100%;
-    min-width: 900px;
+    min-width: 1060px;
+
     border-collapse: collapse;
+
     text-align: left;
+
+    background:
+      var(--white);
   }
 
   .organizations-table th {
-    padding: 11px 18px;
-    background: var(--color-surface-soft);
-    color: var(--color-text-faint);
-    font-size: 0.59rem;
-    font-weight: 850;
-    letter-spacing: 0.055em;
+    padding:
+      12px
+      16px;
+
+    border-bottom:
+      2px
+      solid
+      var(--ink);
+
+    color:
+      var(--muted);
+
+    background:
+      var(--paper-2);
+
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+
+    font-size: 0.46rem;
+    font-weight: 800;
+
+    line-height: 1;
+
+    letter-spacing: 0.08em;
+
     text-transform: uppercase;
+
     white-space: nowrap;
   }
 
   .organizations-table td {
-    padding: 13px 18px;
-    border-top: 1px solid var(--color-border);
+    padding:
+      13px
+      16px;
+
+    border-bottom:
+      1px
+      solid
+      var(--paper-3);
+
     vertical-align: middle;
   }
 
   .organizations-table tbody tr {
-    transition: background 120ms ease;
+    transition:
+      background 120ms ease;
   }
 
   .organizations-table tbody tr:hover {
-    background: rgba(248, 250, 252, 0.9);
+    background:
+      rgb(
+        223 255 0 / 7%
+      );
   }
 
   .organizations-table tbody tr[data-hidden="true"] {
     display: none;
   }
 
+  .organizations-table tbody tr[hidden] {
+    display: none !important;
+  }
+
+  /* ================================================================
+     ORGANIZATION CELL
+  ================================================================= */
+
   .organization-cell {
+    min-width: 390px;
+
     display: flex;
     align-items: center;
-    gap: 10px;
-    min-width: 280px;
+
+    gap: 11px;
   }
 
   .organization-cell__icon {
-    display: inline-flex;
-    flex: 0 0 auto;
-    align-items: center;
-    justify-content: center;
-    width: 37px;
-    height: 37px;
-    border-radius: 10px;
-    background: var(--color-primary-soft);
-    color: var(--color-primary);
+    width: 39px;
+    height: 39px;
+
+    display: grid;
+    place-items: center;
+
+    flex-shrink: 0;
+
+    border:
+      2px
+      solid
+      var(--ink);
+
+    color: var(--ink);
+
+    background:
+      var(--paper-2);
+  }
+
+  .organization-cell__icon--verified {
+    color: var(--ink);
+    background: var(--acid);
   }
 
   .organization-cell__copy {
     min-width: 0;
   }
 
-  .organization-cell__copy strong,
-  .organization-cell__copy span {
-    display: block;
-  }
-
   .organization-cell__copy strong {
-    max-width: 380px;
+    display: block;
+
+    max-width: 470px;
+
     overflow: hidden;
-    color: var(--color-text-strong);
-    font-size: 0.7rem;
-    font-weight: 800;
+
+    color: var(--ink);
+
+    font-family:
+      Sora,
+      Inter,
+      system-ui,
+      sans-serif;
+
+    font-size: 0.67rem;
+    font-weight: 850;
+
+    line-height: 1.25;
+
     text-overflow: ellipsis;
+
     white-space: nowrap;
   }
 
   .organization-cell__copy span {
-    margin-top: 3px;
-    color: var(--color-text-faint);
-    font-size: 0.6rem;
+    display: block;
+
+    max-width: 470px;
+
+    margin-top: 4px;
+
+    overflow: hidden;
+
+    color: var(--muted);
+
+    font-size: 0.58rem;
+
+    line-height: 1.45;
+
+    text-overflow: ellipsis;
+
+    white-space: nowrap;
   }
 
-  .type-label {
-    display: inline-block;
-    color: var(--color-text-muted);
-    font-size: 0.63rem;
-    font-weight: 700;
+  .type-label,
+  .updated-label {
+    color: var(--muted);
+
+    font-size: 0.59rem;
+
     white-space: nowrap;
   }
 
   .area-cell {
     display: inline-flex;
     align-items: center;
-    gap: 5px;
-    color: var(--color-text-muted);
-    font-size: 0.63rem;
+
+    gap: 6px;
+
+    color: var(--muted);
+
+    font-size: 0.59rem;
+
     white-space: nowrap;
   }
 
   .area-cell svg {
-    color: var(--color-text-faint);
+    flex-shrink: 0;
+    color: var(--orange);
   }
+
+  /* ================================================================
+     BADGES
+  ================================================================= */
 
   .status-badge,
   .visibility-badge {
     display: inline-flex;
     align-items: center;
+
     gap: 5px;
+
     min-height: 25px;
-    padding: 0 8px;
-    border-radius: 999px;
-    font-size: 0.58rem;
+
+    padding:
+      0
+      8px;
+
+    border:
+      1px
+      solid
+      var(--ink);
+
+    border-radius: 0;
+
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+
+    font-size: 0.46rem;
     font-weight: 800;
+
+    letter-spacing: 0.04em;
+
+    text-transform: uppercase;
+
     white-space: nowrap;
   }
 
   .status-badge--verified {
-    background: var(--color-primary-soft);
-    color: var(--color-primary-dark);
+    color: var(--ink);
+    background: var(--acid);
   }
 
   .status-badge--pending {
-    background: rgba(245, 158, 11, 0.1);
-    color: #b45309;
+    color: var(--ink);
+    background: var(--orange);
   }
 
   .status-badge--unverified {
-    background: rgba(220, 38, 38, 0.08);
-    color: #b91c1c;
+    color: var(--white);
+    background: #b42318;
   }
 
   .visibility-badge--public {
-    background: rgba(37, 99, 235, 0.08);
-    color: #1d4ed8;
+    color: var(--ink);
+    background: var(--acid);
   }
 
   .visibility-badge--private {
-    background: var(--color-surface-soft);
-    color: var(--color-text-muted);
+    color: var(--ink);
+    background: var(--paper-2);
   }
 
-  .updated-label {
-    color: var(--color-text-muted);
-    font-size: 0.61rem;
-    white-space: nowrap;
-  }
+  /* ================================================================
+     ACTIONS
+  ================================================================= */
 
   .row-actions {
     display: flex;
     align-items: center;
     justify-content: flex-end;
-    gap: 4px;
+
+    gap: 5px;
   }
 
   .row-action {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 30px;
-    height: 30px;
+    width: 31px;
+    height: 31px;
+
+    display: grid;
+    place-items: center;
+
+    flex-shrink: 0;
+
     padding: 0;
-    border: 1px solid transparent;
-    border-radius: 8px;
-    background: transparent;
-    color: var(--color-text-muted);
+
+    border:
+      2px
+      solid
+      var(--ink);
+
+    border-radius: 0;
+
+    color: var(--ink);
+
+    background:
+      var(--white);
+
     cursor: pointer;
+
+    transition:
+      transform 120ms ease,
+      background 120ms ease,
+      color 120ms ease,
+      box-shadow 120ms ease;
   }
 
   .row-action:hover {
-    border-color: var(--color-border);
-    background: var(--color-surface-soft);
-    color: var(--color-primary);
+    transform:
+      translate(
+        2px,
+        2px
+      );
+
+    color: var(--ink);
+
+    background: var(--acid);
+
+    box-shadow:
+      2px 2px 0 var(--ink);
   }
 
+  .row-action--danger:hover {
+    color: var(--white);
+
+    background:
+      #b42318;
+  }
+
+  /* ================================================================
+     EMPTY
+  ================================================================= */
+
   .empty-state {
+    min-height: 300px;
+
     display: flex;
     align-items: center;
     justify-content: center;
+
     flex-direction: column;
-    min-height: 290px;
-    padding: 30px;
+
+    padding: 35px;
+
     text-align: center;
   }
 
+  .empty-state[hidden] {
+    display: none !important;
+  }
+
   .empty-state__icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 54px;
-    height: 54px;
-    border-radius: 15px;
-    background: var(--color-surface-soft);
-    color: var(--color-text-faint);
+    width: 56px;
+    height: 56px;
+
+    display: grid;
+    place-items: center;
+
+    border:
+      2px
+      solid
+      var(--ink);
+
+    color: var(--ink);
+
+    background:
+      var(--paper-2);
+
+    box-shadow:
+      4px 4px 0 var(--orange);
+  }
+
+  .empty-state__eyebrow {
+    display: block;
+
+    margin-top: 16px;
+
+    color: var(--orange);
+
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+
+    font-size: 0.48rem;
+    font-weight: 800;
+
+    letter-spacing: 0.12em;
   }
 
   .empty-state h3 {
-    margin: 13px 0 0;
-    color: var(--color-text-strong);
-    font-size: 0.9rem;
-    font-weight: 820;
+    margin:
+      5px
+      0
+      0;
+
+    color: var(--ink);
+
+    font-family:
+      Sora,
+      Inter,
+      system-ui,
+      sans-serif;
+
+    font-size: 0.95rem;
+    font-weight: 900;
   }
 
   .empty-state p {
-    max-width: 390px;
-    margin: 5px 0 16px;
-    color: var(--color-text-muted);
-    font-size: 0.67rem;
+    max-width: 430px;
+
+    margin:
+      7px
+      0
+      18px;
+
+    color: var(--muted);
+
+    font-size: 0.64rem;
+
     line-height: 1.6;
   }
 
-  .table-footer {
+  /* ================================================================
+     FOOTER
+  ================================================================= */
+
+  .directory__footer {
     display: flex;
     align-items: center;
     justify-content: space-between;
+
     gap: 12px;
-    padding: 12px 18px;
-    border-top: 1px solid var(--color-border);
-    color: var(--color-text-faint);
-    font-size: 0.61rem;
+
+    padding:
+      12px
+      16px;
+
+    border-top:
+      2px
+      solid
+      var(--ink);
+
+    color: var(--muted);
+
+    background:
+      var(--paper-2);
+
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+
+    font-size: 0.46rem;
+    font-weight: 700;
+
+    letter-spacing: 0.06em;
+
+    text-transform: uppercase;
   }
 
-  .table-footer strong {
-    color: var(--color-text-strong);
-    font-weight: 850;
+  .directory__footer strong {
+    color: var(--ink);
   }
+
+  /* ================================================================
+     VERIFICATION BANNER
+  ================================================================= */
 
   .verification-banner {
     display: flex;
-    align-items: center;
-    gap: 14px;
-    margin-top: 18px;
-    padding: 18px;
-    border: 1px solid var(--color-primary-soft);
-    border-radius: 16px;
+    align-items: flex-start;
+
+    gap: 15px;
+
+    margin-top: 20px;
+
+    padding:
+      17px;
+
+    border:
+      2px
+      solid
+      var(--ink);
+
     background:
-      linear-gradient(
-        135deg,
-        var(--color-primary-soft),
-        var(--color-surface)
-      );
+      var(--acid);
+
+    box-shadow:
+      5px 5px 0 var(--ink);
   }
 
   .verification-banner__icon {
-    display: inline-flex;
-    flex: 0 0 auto;
-    align-items: center;
-    justify-content: center;
     width: 45px;
     height: 45px;
-    border-radius: 12px;
-    background: var(--color-surface);
-    color: var(--color-primary);
+
+    display: grid;
+    place-items: center;
+
+    flex-shrink: 0;
+
+    border:
+      2px
+      solid
+      var(--ink);
+
+    color: var(--acid);
+
+    background:
+      var(--ink);
   }
 
   .verification-banner__content {
-    flex: 1;
+    flex: 1 1 auto;
+
     min-width: 0;
   }
 
+  .verification-banner__eyebrow {
+    display: block;
+
+    color:
+      rgb(
+        9 10 8 / 60%
+      );
+
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+
+    font-size: 0.48rem;
+    font-weight: 800;
+
+    letter-spacing: 0.11em;
+  }
+
   .verification-banner__content h2 {
-    margin: 4px 0 0;
-    color: var(--color-text-strong);
-    font-size: 0.85rem;
-    font-weight: 820;
+    margin:
+      4px
+      0
+      0;
+
+    color: var(--ink);
+
+    font-family:
+      Sora,
+      Inter,
+      system-ui,
+      sans-serif;
+
+    font-size: 0.83rem;
+    font-weight: 900;
   }
 
   .verification-banner__content p {
     max-width: 850px;
-    margin: 4px 0 0;
-    color: var(--color-text-muted);
-    font-size: 0.64rem;
+
+    margin:
+      5px
+      0
+      0;
+
+    color:
+      rgb(
+        9 10 8 / 68%
+      );
+
+    font-size: 0.62rem;
+
     line-height: 1.6;
   }
 
   .verification-banner__link {
     display: inline-flex;
-    flex: 0 0 auto;
     align-items: center;
-    gap: 6px;
-    color: var(--color-primary);
-    font-size: 0.66rem;
-    font-weight: 800;
+
+    gap: 7px;
+
+    flex-shrink: 0;
+
+    min-height: 36px;
+
+    padding:
+      0
+      10px;
+
+    border:
+      2px
+      solid
+      var(--ink);
+
+    color: var(--ink);
+
+    background:
+      var(--white);
+
+    font-size: 0.59rem;
+    font-weight: 850;
+
     text-decoration: none;
-    white-space: nowrap;
+
+    box-shadow:
+      3px 3px 0 var(--ink);
   }
 
   .verification-banner__link:hover {
-    color: var(--color-primary-dark);
+    transform:
+      translate(
+        2px,
+        2px
+      );
+
+    box-shadow:
+      1px 1px 0 var(--ink);
   }
+
+  /* ================================================================
+     DRAWER
+  ================================================================= */
 
   .drawer-backdrop {
     position: fixed;
+
     inset: 0;
+
     z-index: 80;
-    background: rgba(15, 23, 42, 0.28);
-    backdrop-filter: blur(2px);
+
+    background:
+      rgb(
+        9 10 8 / 62%
+      );
+
+    backdrop-filter:
+      blur(
+        2px
+      );
   }
 
-  .drawer-backdrop[hidden],
-  .organization-drawer[hidden] {
-    display: none;
+  .drawer-backdrop[hidden] {
+    display: none !important;
   }
 
   .organization-drawer {
     position: fixed;
+
     top: 0;
     right: 0;
+    bottom: 0;
+
     z-index: 81;
+
+    width:
+      min(
+        480px,
+        calc(
+          100vw - 18px
+        )
+      );
+
     display: grid;
-    grid-template-rows: auto 1fr auto;
-    width: min(460px, 100%);
-    height: 100dvh;
-    border-left: 1px solid var(--color-border);
-    background: var(--color-surface);
+
+    grid-template-rows:
+      auto
+      minmax(
+        0,
+        1fr
+      )
+      auto;
+
+    border-left:
+      3px
+      solid
+      var(--ink);
+
+    background:
+      var(--paper);
+
     box-shadow:
-      -18px 0 48px rgba(15, 23, 42, 0.13);
-    transform: translateX(100%);
-    transition: transform 180ms ease;
+      -10px
+      0
+      0
+      var(--orange);
+
+    transform:
+      translateX(
+        100%
+      );
+
+    transition:
+      transform 180ms ease;
+  }
+
+  .organization-drawer[hidden] {
+    display: grid;
   }
 
   .organization-drawer[data-open="true"] {
-    transform: translateX(0);
+    transform:
+      translateX(
+        0
+      );
   }
 
   .drawer__header {
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
-    gap: 20px;
-    padding: 20px;
-    border-bottom: 1px solid var(--color-border);
+
+    gap: 18px;
+
+    padding:
+      18px;
+
+    border-bottom:
+      2px
+      solid
+      var(--ink);
+
+    background:
+      var(--ink);
+
+    color:
+      var(--white);
+  }
+
+  .drawer__eyebrow {
+    display: block;
+
+    color: var(--acid);
+
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+
+    font-size: 0.48rem;
+    font-weight: 800;
+
+    letter-spacing: 0.12em;
   }
 
   .drawer__header h2 {
-    margin: 5px 0 0;
-    color: var(--color-text-strong);
-    font-size: 1.05rem;
-    font-weight: 850;
+    margin:
+      5px
+      0
+      0;
+
+    color: var(--white);
+
+    font-family:
+      Sora,
+      Inter,
+      system-ui,
+      sans-serif;
+
+    font-size: 1rem;
+    font-weight: 900;
   }
 
   .drawer__close {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
     width: 35px;
     height: 35px;
-    border: 1px solid var(--color-border);
-    border-radius: 10px;
-    background: var(--color-surface);
-    color: var(--color-text-muted);
+
+    display: grid;
+    place-items: center;
+
+    flex-shrink: 0;
+
+    padding: 0;
+
+    border:
+      2px
+      solid
+      var(--acid);
+
+    border-radius: 0;
+
+    color: var(--acid);
+
+    background:
+      transparent;
+
     cursor: pointer;
   }
 
   .drawer__close:hover {
-    color: var(--color-text-strong);
-    background: var(--color-surface-soft);
+    color: var(--ink);
+
+    background: var(--acid);
   }
 
   .drawer__body {
+    min-width: 0;
+
     overflow-y: auto;
-    padding: 20px;
+
+    padding:
+      20px;
+
+    overscroll-behavior: contain;
   }
 
   .drawer-identity {
     display: flex;
     align-items: flex-start;
+
     gap: 12px;
   }
 
   .drawer-identity__icon {
-    display: inline-flex;
-    flex: 0 0 auto;
-    align-items: center;
-    justify-content: center;
-    width: 49px;
-    height: 49px;
-    border-radius: 14px;
-    background: var(--color-primary-soft);
-    color: var(--color-primary);
+    width: 50px;
+    height: 50px;
+
+    display: grid;
+    place-items: center;
+
+    flex-shrink: 0;
+
+    border:
+      2px
+      solid
+      var(--ink);
+
+    color: var(--acid);
+
+    background: var(--ink);
+
+    box-shadow:
+      4px 4px 0 var(--orange);
   }
 
-  .drawer-identity h3 {
-    margin: 2px 0 0;
-    color: var(--color-text-strong);
-    font-size: 0.92rem;
-    font-weight: 850;
-    line-height: 1.4;
+  .drawer-identity__copy {
+    min-width: 0;
   }
 
-  .drawer-identity div > span {
+  .drawer-identity__copy h3 {
+    margin:
+      3px
+      0
+      0;
+
+    color: var(--ink);
+
+    font-family:
+      Sora,
+      Inter,
+      system-ui,
+      sans-serif;
+
+    font-size: 0.88rem;
+    font-weight: 900;
+
+    line-height: 1.35;
+
+    overflow-wrap: anywhere;
+  }
+
+  .drawer-identity__copy > span {
     display: block;
-    margin-top: 3px;
-    color: var(--color-text-muted);
-    font-size: 0.64rem;
+
+    margin-top: 4px;
+
+    color: var(--muted);
+
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+
+    font-size: 0.49rem;
+    font-weight: 700;
+
+    letter-spacing: 0.05em;
+
+    text-transform: uppercase;
   }
 
   .drawer-status-row {
     display: flex;
     align-items: center;
     flex-wrap: wrap;
+
     gap: 7px;
-    margin-top: 15px;
+
+    margin-top: 16px;
   }
 
   .drawer-section {
-    margin-top: 25px;
-    padding-top: 19px;
-    border-top: 1px solid var(--color-border);
+    margin-top: 24px;
+
+    padding-top: 18px;
+
+    border-top:
+      2px
+      solid
+      var(--ink);
+  }
+
+  .drawer-section__label {
+    display: block;
+
+    color: var(--orange);
+
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+
+    font-size: 0.47rem;
+    font-weight: 800;
+
+    letter-spacing: 0.11em;
+
+    text-transform: uppercase;
   }
 
   .detail-list {
     display: grid;
+
     gap: 0;
-    margin: 10px 0 0;
+
+    margin:
+      12px
+      0
+      0;
   }
 
   .detail-list > div {
     display: grid;
-    grid-template-columns: 120px minmax(0, 1fr);
-    gap: 12px;
-    padding: 9px 0;
-    border-bottom: 1px solid var(--color-border);
-  }
 
-  .detail-list > div:last-child {
-    border-bottom: 0;
+    grid-template-columns:
+      105px
+      minmax(
+        0,
+        1fr
+      );
+
+    gap: 10px;
+
+    padding:
+      9px
+      0;
+
+    border-bottom:
+      1px
+      solid
+      var(--paper-3);
   }
 
   .detail-list dt {
-    color: var(--color-text-faint);
-    font-size: 0.62rem;
+    color: var(--muted);
+
+    font-family:
+      "DM Mono",
+      "SFMono-Regular",
+      Consolas,
+      monospace;
+
+    font-size: 0.46rem;
+    font-weight: 700;
+
+    text-transform: uppercase;
   }
 
   .detail-list dd {
     margin: 0;
-    color: var(--color-text-strong);
-    font-size: 0.65rem;
-    font-weight: 700;
+
+    color: var(--ink);
+
+    font-size: 0.62rem;
+    font-weight: 750;
+
     line-height: 1.5;
+
+    overflow-wrap: anywhere;
   }
 
   .drawer-description {
-    margin: 10px 0 0;
-    color: var(--color-text-muted);
-    font-size: 0.67rem;
+    margin:
+      9px
+      0
+      0;
+
+    color: var(--muted);
+
+    font-size: 0.66rem;
+
     line-height: 1.7;
   }
 
   .drawer-warning {
     display: flex;
     align-items: flex-start;
-    gap: 8px;
-    margin-top: 20px;
-    padding: 12px;
-    border: 1px solid rgba(245, 158, 11, 0.22);
-    border-radius: 11px;
-    background: var(--color-warning-soft);
-    color: var(--color-warning-text);
+
+    gap: 9px;
+
+    margin-top: 19px;
+
+    padding:
+      12px;
+
+    border:
+      2px
+      solid
+      var(--ink);
+
+    color: var(--ink);
+
+    background:
+      var(--orange);
+  }
+
+  .drawer-warning[hidden] {
+    display: none !important;
   }
 
   .drawer-warning svg {
-    flex: 0 0 auto;
+    flex-shrink: 0;
+
     margin-top: 1px;
   }
 
   .drawer-warning p {
     margin: 0;
-    font-size: 0.64rem;
+
+    font-size: 0.6rem;
+
     line-height: 1.6;
   }
 
@@ -1998,77 +3308,130 @@ const jsonLd = {
     display: flex;
     align-items: center;
     justify-content: space-between;
+
     gap: 10px;
-    padding: 14px 20px;
-    border-top: 1px solid var(--color-border);
-    background: var(--color-surface);
+
+    padding:
+      14px
+      18px;
+
+    border-top:
+      2px
+      solid
+      var(--ink);
+
+    background:
+      var(--paper-2);
   }
 
   .drawer__footer-right {
     display: flex;
     align-items: center;
     justify-content: flex-end;
+
     gap: 7px;
   }
 
+  /* ================================================================
+     TOAST
+  ================================================================= */
+
   .toast {
     position: fixed;
-    right: 24px;
-    bottom: 24px;
+
+    right: 22px;
+    bottom: 22px;
+
     z-index: 100;
+
+    max-width:
+      min(
+        400px,
+        calc(
+          100vw - 30px
+        )
+      );
+
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    max-width: min(390px, calc(100vw - 30px));
-    padding: 11px 14px;
-    border: 1px solid var(--color-primary-soft);
-    border-radius: 11px;
-    background: var(--color-surface);
-    color: var(--color-text-strong);
+
+    gap: 9px;
+
+    padding:
+      11px
+      13px;
+
+    border:
+      2px
+      solid
+      var(--ink);
+
+    color: var(--ink);
+
+    background:
+      var(--acid);
+
     box-shadow:
-      0 15px 35px rgba(15, 23, 42, 0.14);
-    font-size: 0.66rem;
-    font-weight: 750;
+      5px 5px 0 var(--ink);
+
+    font-size: 0.63rem;
+    font-weight: 800;
+  }
+
+  .toast[hidden] {
+    display: none !important;
   }
 
   .toast svg {
-    color: var(--color-primary);
+    flex-shrink: 0;
   }
+
+  /* ================================================================
+     ACCESSIBILITY
+  ================================================================= */
 
   .sr-only {
     position: absolute;
+
     width: 1px;
     height: 1px;
+
     padding: 0;
     margin: -1px;
+
     overflow: hidden;
-    clip: rect(0, 0, 0, 0);
+
+    clip:
+      rect(
+        0,
+        0,
+        0,
+        0
+      );
+
     white-space: nowrap;
+
     border: 0;
   }
 
-  @media (max-width: 1100px) {
-    .summary-grid {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
+  /* ================================================================
+     RESPONSIVE
+  ================================================================= */
 
-    .page-top {
+  @media (max-width: 1240px) {
+    .page-hero {
       align-items: flex-start;
+
       flex-direction: column;
     }
 
-    .page-top__actions {
+    .page-hero__actions {
       justify-content: flex-start;
-    }
-  }
-
-  @media (max-width: 760px) {
-    .organizations-page {
-      padding: 20px 16px 36px;
     }
 
     .toolbar {
       align-items: stretch;
+
       flex-direction: column;
     }
 
@@ -2079,57 +3442,169 @@ const jsonLd = {
     .toolbar__filters {
       justify-content: flex-start;
     }
+  }
 
-    .filter-panel__body {
-      align-items: flex-start;
-      flex-direction: column;
+  @media (max-width: 1120px) {
+    .summary-grid {
+      grid-template-columns:
+        repeat(
+          2,
+          minmax(
+            0,
+            1fr
+          )
+        );
     }
 
     .verification-banner {
       align-items: flex-start;
+    }
+
+    .verification-banner__content {
+      flex-basis: 100%;
+    }
+  }
+
+  @media (max-width: 820px) {
+    .organizations-page {
+      padding:
+        24px
+        18px
+        42px;
+    }
+
+    .toolbar__filters {
+      width: 100%;
+    }
+
+    .filter-control {
+      flex: 1 1 160px;
+    }
+
+    .filter-control select {
+      width: 100%;
+    }
+
+    .filter-button {
+      flex: 0 0 auto;
+    }
+
+    .filter-panel__body {
+      align-items: flex-start;
+
+      flex-direction: column;
+    }
+
+    .verification-banner {
       flex-wrap: wrap;
     }
 
     .verification-banner__link {
-      width: 100%;
-      padding-left: 59px;
+      margin-left: 60px;
     }
   }
 
-  @media (max-width: 540px) {
-    .summary-grid {
-      grid-template-columns: 1fr;
+  @media (max-width: 640px) {
+    .organizations-page {
+      padding:
+        19px
+        13px
+        34px;
     }
 
-    .page-top__actions {
+    .page-hero h1 {
+      font-size:
+        clamp(
+          1.9rem,
+          10vw,
+          2.7rem
+        );
+    }
+
+    .page-hero__actions {
       width: 100%;
+
       flex-direction: column;
+
       align-items: stretch;
     }
 
-    .page-top__actions .button {
+    .page-hero__actions .button {
       width: 100%;
+    }
+
+    .summary-grid {
+      grid-template-columns:
+        1fr;
+    }
+
+    .toolbar {
+      padding:
+        13px;
     }
 
     .toolbar__filters {
       display: grid;
-      grid-template-columns: 1fr;
+
+      grid-template-columns:
+        1fr;
+
       width: 100%;
     }
 
+    .filter-control,
     .filter-control select,
     .filter-button {
       width: 100%;
-      max-width: none;
+      min-width: 0;
     }
 
-    .table-head {
+    .filter-panel {
+      padding:
+        14px
+        13px;
+    }
+
+    .directory__top {
       align-items: flex-start;
+
       flex-direction: column;
+
+      padding:
+        17px
+        14px
+        14px;
+    }
+
+    .directory__footer {
+      align-items: flex-start;
+
+      flex-direction: column;
+    }
+
+    .organizations-table {
+      min-width: 1040px;
+    }
+
+    .verification-banner {
+      padding:
+        14px;
+
+      box-shadow:
+        4px 4px 0 var(--ink);
+    }
+
+    .verification-banner__link {
+      width: 100%;
+
+      margin-left: 0;
+
+      justify-content: center;
     }
 
     .drawer__footer {
       align-items: stretch;
+
       flex-direction: column;
     }
 
@@ -2141,109 +3616,70 @@ const jsonLd = {
     .drawer__footer > .button {
       flex: 1;
     }
+
+    .toast {
+      right: 14px;
+      bottom: 14px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .organizations-page *,
+    .organizations-page *::before,
+    .organizations-page *::after {
+      scroll-behavior: auto !important;
+
+      transition-duration:
+        0.01ms !important;
+
+      animation-duration:
+        0.01ms !important;
+
+      animation-iteration-count:
+        1 !important;
+    }
+
+    .organization-drawer,
+    .button,
+    .row-action,
+    .verification-banner__link {
+      transition: none !important;
+    }
   }
 </style>
 
 <script>
-// @ts-nocheck
-
-  const organizations = [
-    {
-      id: "org-demo-001",
-      name: "Dinas Lingkungan Hidup dan Kebersihan Kabupaten Badung",
-      slug: "dlhk-badung",
-      type: "government",
-      typeLabel: "Pemerintah",
-      status: "verified",
-      statusLabel: "Terverifikasi",
-      area: "Mengwi",
-      address: "Kabupaten Badung, Bali",
-      description:
-        "Instansi pemerintah daerah yang berkaitan dengan pengelolaan lingkungan dan persampahan Kabupaten Badung.",
-      manager: "Administrator Instansi",
-      isPublic: true,
-      updatedAt: "10 Sep 2026",
-      locationCount: 3,
-    },
-    {
-      id: "org-demo-002",
-      name: "Bank Sampah Unit Badung",
-      slug: "bank-sampah-unit-badung",
-      type: "community",
-      typeLabel: "Komunitas",
-      status: "pending",
-      statusLabel: "Menunggu",
-      area: "Kuta Utara",
-      address: "Badung, Bali",
-      description:
-        "Organisasi masyarakat yang mengelola pemilahan dan pengumpulan material yang masih memiliki nilai guna.",
-      manager: "Pengelola Organisasi",
-      isPublic: false,
-      updatedAt: "9 Sep 2026",
-      locationCount: 1,
-    },
-    {
-      id: "org-demo-003",
-      name: "Bali Recycle Hub",
-      slug: "bali-recycle-hub",
-      type: "private",
-      typeLabel: "Swasta",
-      status: "verified",
-      statusLabel: "Terverifikasi",
-      area: "Kuta",
-      address: "Kuta, Badung, Bali",
-      description:
-        "Organisasi yang berfokus pada pengelolaan material yang dapat dipulihkan dan diproses kembali.",
-      manager: "Manager Operasional",
-      isPublic: true,
-      updatedAt: "8 Sep 2026",
-      locationCount: 2,
-    },
-    {
-      id: "org-demo-004",
-      name: "Komunitas Hijau Badung",
-      slug: "komunitas-hijau-badung",
-      type: "nonprofit",
-      typeLabel: "Nirlaba",
-      status: "pending",
-      statusLabel: "Menunggu",
-      area: "Abiansemal",
-      address: "Abiansemal, Badung, Bali",
-      description:
-        "Komunitas lingkungan yang menjalankan kegiatan edukasi dan pengelolaan material berbasis masyarakat.",
-      manager: "Koordinator Komunitas",
-      isPublic: false,
-      updatedAt: "7 Sep 2026",
-      locationCount: 1,
-    },
-    {
-      id: "org-demo-005",
-      name: "Koperasi Daur Ulang Badung",
-      slug: "koperasi-daur-ulang-badung",
-      type: "cooperative",
-      typeLabel: "Koperasi",
-      status: "unverified",
-      statusLabel: "Belum diverifikasi",
-      area: "Mengwi",
-      address: "Mengwi, Badung, Bali",
-      description:
-        "Koperasi yang mengembangkan kegiatan pemilahan dan pemanfaatan material yang dapat diproses kembali.",
-      manager: "Pengurus Koperasi",
-      isPublic: false,
-      updatedAt: "6 Sep 2026",
-      locationCount: 0,
-    },
-  ];
+  // @ts-nocheck
 
   const page =
     document.querySelector(
       "[data-organizations-page]",
     );
 
-  if (!(page instanceof HTMLElement)) {
+  if (
+    !(page instanceof HTMLElement)
+  ) {
     throw new Error(
-      "BINSIGHT organizations page root not found.",
+      "BINSIGHT organizations admin page root not found.",
     );
+  }
+
+  const dataNode =
+    document.getElementById(
+      "admin-organizations-data",
+    );
+
+  let organizations = [];
+
+  try {
+    organizations =
+      dataNode?.textContent
+        ? JSON.parse(
+            dataNode.textContent,
+          )
+        : [];
+  } catch {
+    organizations = [];
   }
 
   const searchInput =
@@ -2251,7 +3687,7 @@ const jsonLd = {
       "[data-search]",
     );
 
-  const clearSearchButton =
+  const clearSearch =
     page.querySelector(
       "[data-clear-search]",
     );
@@ -2286,12 +3722,11 @@ const jsonLd = {
       "[data-filter-reset]",
     );
 
-  const rows =
-    Array.from(
-      page.querySelectorAll(
-        "[data-organization-row]",
-      ),
-    );
+  let rows = Array.from(
+    page.querySelectorAll(
+      "[data-organization-row]",
+    ),
+  );
 
   const resultCount =
     page.querySelector(
@@ -2368,6 +3803,11 @@ const jsonLd = {
       "[data-drawer-location-count]",
     );
 
+  const drawerUpdated =
+    page.querySelector(
+      "[data-drawer-updated]",
+    );
+
   const drawerDescription =
     page.querySelector(
       "[data-drawer-description]",
@@ -2428,6 +3868,39 @@ const jsonLd = {
 
   let toastTimer = null;
 
+  let scrollLockCount = 0;
+
+  let previouslyFocusedElement =
+    null;
+
+  function lockPageScroll() {
+    scrollLockCount += 1;
+
+    if (
+      scrollLockCount ===
+      1
+    ) {
+      document.documentElement.style.overflow =
+        "hidden";
+    }
+  }
+
+  function unlockPageScroll() {
+    scrollLockCount =
+      Math.max(
+        0,
+        scrollLockCount - 1,
+      );
+
+    if (
+      scrollLockCount ===
+      0
+    ) {
+      document.documentElement.style.overflow =
+        "";
+    }
+  }
+
   function getOrganization(
     id,
   ) {
@@ -2437,7 +3910,7 @@ const jsonLd = {
     );
   }
 
-  function setSummaryValues() {
+  function updateSummary() {
     const total =
       organizations.length;
 
@@ -2486,11 +3959,221 @@ const jsonLd = {
       publicCount instanceof HTMLElement
     ) {
       publicCount.textContent =
-        String(publicOrganizations);
+        String(
+          publicOrganizations,
+        );
     }
   }
 
-  function getVisibleRows() {
+  function setEmptyState(
+    hasResults,
+  ) {
+    if (
+      !(emptyState instanceof
+        HTMLElement)
+    ) {
+      return;
+    }
+
+    const shouldShow =
+      !hasResults;
+
+    emptyState.hidden =
+      !shouldShow;
+
+    emptyState.setAttribute(
+      "aria-hidden",
+      shouldShow
+        ? "false"
+        : "true",
+    );
+
+    emptyState.style.display =
+      shouldShow
+        ? "flex"
+        : "none";
+  }
+
+  function updateRowAttributes(
+    row,
+    organization,
+  ) {
+    if (
+      !(row instanceof
+        HTMLElement)
+    ) {
+      return;
+    }
+
+    row.setAttribute(
+      "data-name",
+      organization.name.toLowerCase(),
+    );
+
+    row.setAttribute(
+      "data-area",
+      organization.area.toLowerCase(),
+    );
+
+    row.setAttribute(
+      "data-manager",
+      organization.manager.toLowerCase(),
+    );
+
+    row.setAttribute(
+      "data-description",
+      organization.description.toLowerCase(),
+    );
+
+    row.setAttribute(
+      "data-address",
+      organization.address.toLowerCase(),
+    );
+
+    row.setAttribute(
+      "data-status",
+      organization.status,
+    );
+
+    row.setAttribute(
+      "data-type",
+      organization.type,
+    );
+
+    row.setAttribute(
+      "data-visibility",
+      organization.isPublic
+        ? "public"
+        : "private",
+    );
+
+    const statusBadge =
+      row.querySelector(
+        ".status-badge",
+      );
+
+    setStatusBadge(
+      statusBadge,
+      organization,
+    );
+
+    const visibilityBadge =
+      row.querySelector(
+        ".visibility-badge",
+      );
+
+    setVisibilityBadge(
+      visibilityBadge,
+      organization,
+    );
+  }
+
+  function setStatusBadge(
+    element,
+    organization,
+  ) {
+    if (
+      !(element instanceof
+        HTMLElement)
+    ) {
+      return;
+    }
+
+    element.className =
+      `status-badge status-badge--${organization.status}`;
+
+    element.replaceChildren();
+
+    let icon;
+
+    if (
+      organization.status ===
+      "verified"
+    ) {
+      icon =
+        document.createElement(
+          "span",
+        );
+
+      icon.textContent =
+        "✓";
+    } else if (
+      organization.status ===
+      "pending"
+    ) {
+      icon =
+        document.createElement(
+          "span",
+        );
+
+      icon.textContent =
+        "◷";
+    } else {
+      icon =
+        document.createElement(
+          "span",
+        );
+
+      icon.textContent =
+        "!";
+    }
+
+    icon.setAttribute(
+      "aria-hidden",
+      "true",
+    );
+
+    element.append(
+      icon,
+    );
+
+    const label =
+      document.createElement(
+        "span",
+      );
+
+    label.textContent =
+      organization.statusLabel;
+
+    element.append(
+      label,
+    );
+  }
+
+  function setVisibilityBadge(
+    element,
+    organization,
+  ) {
+    if (
+      !(element instanceof
+        HTMLElement)
+    ) {
+      return;
+    }
+
+    element.className =
+      organization.isPublic
+        ? "visibility-badge visibility-badge--public"
+        : "visibility-badge visibility-badge--private";
+
+    element.replaceChildren();
+
+    const label =
+      document.createElement(
+        "span",
+      );
+
+    label.textContent =
+      organization.isPublic
+        ? "Publik"
+        : "Privat";
+
+    element.append(
+      label,
+    );
+  }
+
+  function getMatchingRows() {
     const query =
       searchInput instanceof
       HTMLInputElement
@@ -2528,6 +4211,16 @@ const jsonLd = {
             "data-manager",
           ) ?? "";
 
+        const description =
+          row.getAttribute(
+            "data-description",
+          ) ?? "";
+
+        const address =
+          row.getAttribute(
+            "data-address",
+          ) ?? "";
+
         const rowStatus =
           row.getAttribute(
             "data-status",
@@ -2540,9 +4233,21 @@ const jsonLd = {
 
         const matchesSearch =
           query === "" ||
-          name.includes(query) ||
-          area.includes(query) ||
-          manager.includes(query);
+          name.includes(
+            query,
+          ) ||
+          area.includes(
+            query,
+          ) ||
+          manager.includes(
+            query,
+          ) ||
+          description.includes(
+            query,
+          ) ||
+          address.includes(
+            query,
+          );
 
         const matchesStatus =
           status === "all" ||
@@ -2562,13 +4267,13 @@ const jsonLd = {
   }
 
   function applyFilters() {
-    const visibleRows =
-      getVisibleRows();
+    const matchingRows =
+      getMatchingRows();
 
     rows.forEach(
       (row) => {
         const visible =
-          visibleRows.includes(
+          matchingRows.includes(
             row,
           );
 
@@ -2578,11 +4283,14 @@ const jsonLd = {
             ? "false"
             : "true",
         );
+
+        row.hidden =
+          !visible;
       },
     );
 
     const count =
-      visibleRows.length;
+      matchingRows.length;
 
     if (
       resultCount instanceof HTMLElement
@@ -2598,15 +4306,12 @@ const jsonLd = {
         String(count);
     }
 
-    if (
-      emptyState instanceof HTMLElement
-    ) {
-      emptyState.hidden =
-        count !== 0;
-    }
+    setEmptyState(
+      count > 0,
+    );
 
     if (
-      clearSearchButton instanceof
+      clearSearch instanceof
       HTMLButtonElement
     ) {
       const hasSearch =
@@ -2615,7 +4320,7 @@ const jsonLd = {
         searchInput.value.length >
           0;
 
-      clearSearchButton.hidden =
+      clearSearch.hidden =
         !hasSearch;
     }
   }
@@ -2625,7 +4330,8 @@ const jsonLd = {
       searchInput instanceof
       HTMLInputElement
     ) {
-      searchInput.value = "";
+      searchInput.value =
+        "";
     }
 
     if (
@@ -2647,42 +4353,27 @@ const jsonLd = {
     applyFilters();
   }
 
-  function setStatusBadge(
-    element,
-    organization,
+  function setFilterPanel(
+    open,
   ) {
     if (
-      !(element instanceof HTMLElement)
+      !(filterPanel instanceof
+        HTMLElement) ||
+      !(filterToggle instanceof
+        HTMLButtonElement)
     ) {
       return;
     }
 
-    element.className =
-      `status-badge status-badge--${organization.status}`;
+    filterPanel.hidden =
+      !open;
 
-    element.innerHTML = "";
-
-    let iconMarkup = "";
-
-    if (
-      organization.status ===
-      "verified"
-    ) {
-      iconMarkup =
-        "<svg width=\"13\" height=\"13\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m5 12 4 4L19 6\"/></svg>";
-    } else if (
-      organization.status ===
-      "pending"
-    ) {
-      iconMarkup =
-        "<svg width=\"13\" height=\"13\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20Z\"/><path d=\"M12 6v6l4 2\"/></svg>";
-    } else {
-      iconMarkup =
-        "<svg width=\"13\" height=\"13\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m10.3 2.6-8.1 14A2 2 0 0 0 4 19.6h16a2 2 0 0 0 1.7-3l-8.1-14a2 2 0 0 0-3.3 0Z\"/><path d=\"M12 9v4\"/><path d=\"M12 17h.01\"/></svg>";
-    }
-
-    element.innerHTML =
-      `${iconMarkup}<span>${organization.statusLabel}</span>`;
+    filterToggle.setAttribute(
+      "aria-expanded",
+      open
+        ? "true"
+        : "false",
+    );
   }
 
   function updateDrawer(
@@ -2693,17 +4384,22 @@ const jsonLd = {
     }
 
     if (
-      drawerName instanceof HTMLElement
+      drawerName instanceof
+      HTMLElement
     ) {
       drawerName.textContent =
         organization.name;
     }
 
     if (
-      drawerType instanceof HTMLElement
+      drawerType instanceof
+      HTMLElement
     ) {
       drawerType.textContent =
-        organization.typeLabel;
+        typeLabels[
+          organization.type
+        ] ??
+        organization.type;
     }
 
     setStatusBadge(
@@ -2711,23 +4407,14 @@ const jsonLd = {
       organization,
     );
 
+    setVisibilityBadge(
+      drawerVisibility,
+      organization,
+    );
+
     if (
-      drawerVisibility instanceof
+      drawerArea instanceof
       HTMLElement
-    ) {
-      drawerVisibility.className =
-        organization.isPublic
-          ? "visibility-badge visibility-badge--public"
-          : "visibility-badge visibility-badge--private";
-
-      drawerVisibility.textContent =
-        organization.isPublic
-          ? "Publik"
-          : "Privat";
-    }
-
-    if (
-      drawerArea instanceof HTMLElement
     ) {
       drawerArea.textContent =
         organization.area;
@@ -2758,6 +4445,14 @@ const jsonLd = {
     }
 
     if (
+      drawerUpdated instanceof
+      HTMLElement
+    ) {
+      drawerUpdated.textContent =
+        organization.updatedAt;
+    }
+
+    if (
       drawerDescription instanceof
       HTMLElement
     ) {
@@ -2766,37 +4461,55 @@ const jsonLd = {
     }
 
     if (
-      drawerWarning instanceof HTMLElement
+      drawerWarning instanceof
+      HTMLElement
     ) {
-      drawerWarning.hidden =
-        organization.status ===
+      const shouldWarn =
+        organization.status !==
         "verified";
+
+      drawerWarning.hidden =
+        !shouldWarn;
+
+      drawerWarning.setAttribute(
+        "aria-hidden",
+        shouldWarn
+          ? "false"
+          : "true",
+      );
     }
 
     if (
       drawerVerify instanceof
       HTMLButtonElement
     ) {
-      drawerVerify.hidden =
+      const alreadyVerified =
         organization.status ===
         "verified";
 
-      drawerVerify.innerHTML =
-        organization.status ===
-        "verified"
-          ? `
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="m5 12 4 4L19 6"/>
-            </svg>
-            <span>Terverifikasi</span>
-          `
-          : `
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20Z"/>
-              <path d="m9 12 2 2 4-4"/>
-            </svg>
-            <span>Verifikasi</span>
-          `;
+      drawerVerify.disabled =
+        alreadyVerified;
+
+      drawerVerify.className =
+        alreadyVerified
+          ? "button button--paper"
+          : "button button--acid";
+
+      drawerVerify.replaceChildren();
+
+      const label =
+        document.createElement(
+          "span",
+        );
+
+      label.textContent =
+        alreadyVerified
+          ? "Sudah terverifikasi"
+          : "Verifikasi";
+
+      drawerVerify.append(
+        label,
+      );
     }
   }
 
@@ -2810,11 +4523,19 @@ const jsonLd = {
 
     if (
       !organization ||
-      !(drawer instanceof HTMLElement) ||
-      !(drawerBackdrop instanceof HTMLElement)
+      !(drawer instanceof
+        HTMLElement) ||
+      !(drawerBackdrop instanceof
+        HTMLElement)
     ) {
       return;
     }
+
+    previouslyFocusedElement =
+      document.activeElement instanceof
+      HTMLElement
+        ? document.activeElement
+        : null;
 
     selectedOrganizationId =
       organizationId;
@@ -2823,11 +4544,15 @@ const jsonLd = {
       organization,
     );
 
-    drawer.hidden = false;
+    drawer.hidden =
+      false;
+
     drawerBackdrop.hidden =
       false;
 
-    window.requestAnimationFrame(
+    lockPageScroll();
+
+    requestAnimationFrame(
       () => {
         drawer.setAttribute(
           "data-open",
@@ -2838,20 +4563,32 @@ const jsonLd = {
           "aria-hidden",
           "false",
         );
+
+        if (
+          drawerClose instanceof
+          HTMLButtonElement
+        ) {
+          drawerClose.focus();
+        }
       },
     );
-
-    document.documentElement.style.overflow =
-      "hidden";
   }
 
   function closeDrawer() {
     if (
-      !(drawer instanceof HTMLElement) ||
-      !(drawerBackdrop instanceof HTMLElement)
+      !(drawer instanceof
+        HTMLElement) ||
+      !(drawerBackdrop instanceof
+        HTMLElement)
     ) {
       return;
     }
+
+    const wasOpen =
+      drawer.getAttribute(
+        "data-open",
+      ) ===
+      "true";
 
     drawer.setAttribute(
       "data-open",
@@ -2865,25 +4602,48 @@ const jsonLd = {
 
     window.setTimeout(
       () => {
-        drawer.hidden = true;
-        drawerBackdrop.hidden =
-          true;
+        if (
+          drawer.getAttribute(
+            "data-open",
+          ) !==
+          "true"
+        ) {
+          drawer.hidden =
+            true;
+
+          drawerBackdrop.hidden =
+            true;
+        }
       },
       190,
     );
 
-    document.documentElement.style.overflow =
-      "";
+    if (wasOpen) {
+      unlockPageScroll();
+    }
+
     selectedOrganizationId =
       null;
+
+    if (
+      previouslyFocusedElement instanceof
+      HTMLElement
+    ) {
+      previouslyFocusedElement.focus();
+
+      previouslyFocusedElement =
+        null;
+    }
   }
 
   function showToast(
     message,
   ) {
     if (
-      !(toast instanceof HTMLElement) ||
-      !(toastMessage instanceof HTMLElement)
+      !(toast instanceof
+        HTMLElement) ||
+      !(toastMessage instanceof
+        HTMLElement)
     ) {
       return;
     }
@@ -2891,9 +4651,12 @@ const jsonLd = {
     toastMessage.textContent =
       message;
 
-    toast.hidden = false;
+    toast.hidden =
+      false;
 
-    if (toastTimer !== null) {
+    if (
+      toastTimer !== null
+    ) {
       window.clearTimeout(
         toastTimer,
       );
@@ -2902,29 +4665,21 @@ const jsonLd = {
     toastTimer =
       window.setTimeout(
         () => {
-          toast.hidden = true;
-          toastTimer = null;
+          toast.hidden =
+            true;
+
+          toastTimer =
+            null;
         },
-        3000,
+        2800,
       );
-  }
-
-  function refreshView() {
-    applyFilters();
-    setSummaryValues();
-
-    showToast(
-      "Data organisasi diperbarui.",
-    );
   }
 
   function editOrganization(
-    organizationId,
+    id,
   ) {
     const organization =
-      getOrganization(
-        organizationId,
-      );
+      getOrganization(id);
 
     if (!organization) {
       return;
@@ -2934,13 +4689,15 @@ const jsonLd = {
       new CustomEvent(
         "binsight:admin-organization-edit",
         {
-          detail: organization,
+          detail: {
+            ...organization,
+          },
         },
       ),
     );
 
     showToast(
-      `Mode edit untuk ${organization.name} dipersiapkan.`,
+      `Mode edit untuk "${organization.name}" dipersiapkan.`,
     );
   }
 
@@ -2957,7 +4714,9 @@ const jsonLd = {
   }
 
   function verifySelectedOrganization() {
-    if (!selectedOrganizationId) {
+    if (
+      !selectedOrganizationId
+    ) {
       return;
     }
 
@@ -2970,20 +4729,52 @@ const jsonLd = {
       return;
     }
 
+    if (
+      organization.status ===
+      "verified"
+    ) {
+      showToast(
+        "Organisasi ini sudah terverifikasi.",
+      );
+
+      return;
+    }
+
     organization.status =
       "verified";
+
+    organization.isPublic =
+      true;
+
+    organization.updatedAt =
+      "10 Sep 2026, sekarang";
 
     organization.statusLabel =
       "Terverifikasi";
 
-    organization.isPublic =
-      true;
+    const row =
+      rows.find(
+        (candidate) =>
+          candidate.getAttribute(
+            "data-id",
+          ) ===
+          organization.id,
+      );
+
+    if (
+      row instanceof HTMLElement
+    ) {
+      updateRowAttributes(
+        row,
+        organization,
+      );
+    }
 
     updateDrawer(
       organization,
     );
 
-    setSummaryValues();
+    updateSummary();
     applyFilters();
 
     window.dispatchEvent(
@@ -2998,30 +4789,26 @@ const jsonLd = {
     );
 
     showToast(
-      `${organization.name} ditandai terverifikasi.`,
+      `"${organization.name}" ditandai terverifikasi.`,
     );
   }
 
-  function deleteSelectedOrganization() {
-    if (!selectedOrganizationId) {
-      return;
-    }
-
+  function deleteOrganization(
+    id,
+  ) {
     const organization =
-      getOrganization(
-        selectedOrganizationId,
-      );
+      getOrganization(id);
 
     if (!organization) {
       return;
     }
 
-    const shouldDelete =
+    const confirmed =
       window.confirm(
-        `Hapus organisasi "${organization.name}" dari daftar admin?`,
+        `Hapus organisasi "${organization.name}" dari workspace admin?`,
       );
 
-    if (!shouldDelete) {
+    if (!confirmed) {
       return;
     }
 
@@ -3030,8 +4817,7 @@ const jsonLd = {
         (candidate) =>
           candidate.getAttribute(
             "data-id",
-          ) ===
-          selectedOrganizationId,
+          ) === id,
       );
 
     if (
@@ -3040,22 +4826,37 @@ const jsonLd = {
       row.remove();
     }
 
-    const index =
+    const organizationIndex =
       organizations.findIndex(
         (item) =>
-          item.id ===
-          selectedOrganizationId,
+          item.id === id,
       );
 
-    if (index >= 0) {
+    if (
+      organizationIndex >=
+      0
+    ) {
       organizations.splice(
-        index,
+        organizationIndex,
         1,
       );
     }
 
-    closeDrawer();
-    setSummaryValues();
+    rows =
+      Array.from(
+        page.querySelectorAll(
+          "[data-organization-row]",
+        ),
+      );
+
+    if (
+      selectedOrganizationId ===
+      id
+    ) {
+      closeDrawer();
+    }
+
+    updateSummary();
     applyFilters();
 
     window.dispatchEvent(
@@ -3063,14 +4864,23 @@ const jsonLd = {
         "binsight:admin-organization-delete",
         {
           detail: {
-            id: organization.id,
+            ...organization,
           },
         },
       ),
     );
 
     showToast(
-      `${organization.name} dihapus dari daftar.`,
+      `"${organization.name}" dihapus dari daftar.`,
+    );
+  }
+
+  function refreshOrganizations() {
+    updateSummary();
+    applyFilters();
+
+    showToast(
+      "Daftar organisasi diperbarui.",
     );
   }
 
@@ -3089,14 +4899,16 @@ const jsonLd = {
     applyFilters,
   );
 
-  clearSearchButton?.addEventListener(
+  clearSearch?.addEventListener(
     "click",
     () => {
       if (
         searchInput instanceof
         HTMLInputElement
       ) {
-        searchInput.value = "";
+        searchInput.value =
+          "";
+
         searchInput.focus();
       }
 
@@ -3111,53 +4923,42 @@ const jsonLd = {
 
   filterReset?.addEventListener(
     "click",
-    resetFilters,
+    () => {
+      resetFilters();
+      setFilterPanel(
+        false,
+      );
+    },
   );
 
   filterToggle?.addEventListener(
     "click",
     () => {
       if (
-        !(filterPanel instanceof
-          HTMLElement) ||
         !(filterToggle instanceof
           HTMLButtonElement)
       ) {
         return;
       }
 
-      const isOpen =
+      const currentlyOpen =
         filterToggle.getAttribute(
           "aria-expanded",
-        ) === "true";
+        ) ===
+        "true";
 
-      filterToggle.setAttribute(
-        "aria-expanded",
-        isOpen
-          ? "false"
-          : "true",
+      setFilterPanel(
+        !currentlyOpen,
       );
-
-      filterPanel.hidden =
-        isOpen;
     },
   );
 
   filterClose?.addEventListener(
     "click",
     () => {
-      if (
-        filterPanel instanceof HTMLElement &&
-        filterToggle instanceof HTMLButtonElement
-      ) {
-        filterPanel.hidden =
-          true;
-
-        filterToggle.setAttribute(
-          "aria-expanded",
-          "false",
-        );
-      }
+      setFilterPanel(
+        false,
+      );
     },
   );
 
@@ -3205,6 +5006,28 @@ const jsonLd = {
       },
     );
 
+  page
+    .querySelectorAll(
+      "[data-delete]",
+    )
+    .forEach(
+      (button) => {
+        button.addEventListener(
+          "click",
+          () => {
+            const id =
+              button.getAttribute(
+                "data-record",
+              );
+
+            if (id) {
+              deleteOrganization(id);
+            }
+          },
+        );
+      },
+    );
+
   drawerClose?.addEventListener(
     "click",
     closeDrawer,
@@ -3213,11 +5036,6 @@ const jsonLd = {
   drawerBackdrop?.addEventListener(
     "click",
     closeDrawer,
-  );
-
-  drawerVerify?.addEventListener(
-    "click",
-    verifySelectedOrganization,
   );
 
   drawerEdit?.addEventListener(
@@ -3233,25 +5051,20 @@ const jsonLd = {
     },
   );
 
-  drawerDelete?.addEventListener(
+  drawerVerify?.addEventListener(
     "click",
-    deleteSelectedOrganization,
+    verifySelectedOrganization,
   );
 
-  document.addEventListener(
-    "keydown",
-    (event) => {
+  drawerDelete?.addEventListener(
+    "click",
+    () => {
       if (
-        event.key === "Escape"
+        selectedOrganizationId
       ) {
-        if (
-          drawer instanceof HTMLElement &&
-          drawer.getAttribute(
-            "data-open",
-          ) === "true"
-        ) {
-          closeDrawer();
-        }
+        deleteOrganization(
+          selectedOrganizationId,
+        );
       }
     },
   );
@@ -3262,7 +5075,7 @@ const jsonLd = {
     )
     ?.addEventListener(
       "click",
-      refreshView,
+      refreshOrganizations,
     );
 
   page
@@ -3274,6 +5087,57 @@ const jsonLd = {
       createOrganization,
     );
 
-  setSummaryValues();
+  document.addEventListener(
+    "keydown",
+    (event) => {
+      if (
+        event.key !==
+        "Escape"
+      ) {
+        return;
+      }
+
+      if (
+        drawer instanceof
+          HTMLElement &&
+        drawer.getAttribute(
+          "data-open",
+        ) ===
+          "true"
+      ) {
+        closeDrawer();
+
+        return;
+      }
+
+      if (
+        filterPanel instanceof
+          HTMLElement &&
+        !filterPanel.hidden
+      ) {
+        setFilterPanel(
+          false,
+        );
+      }
+    },
+  );
+
+  window.addEventListener(
+    "beforeunload",
+    () => {
+      document.documentElement.style.overflow =
+        "";
+    },
+  );
+
+  /*
+   * Initial state:
+   * records exist -> empty state remains hidden.
+   */
+  setEmptyState(
+    rows.length > 0,
+  );
+
+  updateSummary();
   applyFilters();
 </script>
