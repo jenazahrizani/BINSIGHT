@@ -1,12 +1,15 @@
 ---
 import {
+  ArrowDownRight,
+  ArrowRight,
   ArrowUpRight,
   Building2,
   ChartColumn,
-  ChevronRight,
+  FileText,
   Map,
   Menu,
   Recycle,
+  Search,
   ShieldCheck,
   TriangleAlert,
   X,
@@ -25,12 +28,15 @@ function siteHref(path: string): string {
 
   if (
     BASE_URL &&
-    (normalized === BASE_URL || normalized.startsWith(`${BASE_URL}/`))
+    (normalized === BASE_URL ||
+      normalized.startsWith(`${BASE_URL}/`))
   ) {
     return normalized;
   }
 
-  if (normalized === "/") return `${BASE_URL}/`;
+  if (normalized === "/") {
+    return `${BASE_URL}/`;
+  }
 
   return `${BASE_URL}${normalized}`;
 }
@@ -40,7 +46,8 @@ const services = [
     number: "01",
     title: "Peta Persampahan",
     description:
-      "Menampilkan informasi persampahan berdasarkan wilayah dan lokasi agar kondisi lapangan dapat dipahami secara lebih kontekstual.",
+      "Melihat informasi persampahan berdasarkan wilayah dan lokasi untuk memahami kondisi secara lebih kontekstual.",
+    detail: "LOCATION / CONTEXT",
     href: "/map",
     icon: Map,
   },
@@ -48,7 +55,8 @@ const services = [
     number: "02",
     title: "Data & Informasi",
     description:
-      "Menyusun informasi yang tercatat di BINSIGHT menjadi konteks yang lebih mudah dibaca oleh masyarakat dan pemangku kepentingan.",
+      "Membaca informasi yang tersedia di BINSIGHT dalam bentuk yang lebih terstruktur dan mudah dipahami.",
+    detail: "DATA / INSIGHT",
     href: "/dashboard",
     icon: ChartColumn,
   },
@@ -56,15 +64,17 @@ const services = [
     number: "03",
     title: "Jaringan Organisasi",
     description:
-      "Mempertemukan informasi tentang organisasi, komunitas, dan pihak yang bergerak dalam pengelolaan persampahan.",
+      "Menemukan organisasi, komunitas, pendidikan, dan pihak lain yang bergerak dalam isu persampahan.",
+    detail: "PEOPLE / NETWORK",
     href: "/organizations",
     icon: Building2,
   },
   {
     number: "04",
-    title: "Edukasi & Laporan",
+    title: "Edukasi & Pengetahuan",
     description:
-      "Membantu masyarakat mengenali jenis sampah sekaligus menyampaikan kondisi persampahan yang perlu diperhatikan.",
+      "Mengenali kategori material dan memahami bahwa setiap jenis sampah memiliki karakteristik pengelolaan yang berbeda.",
+    detail: "MATERIAL / EDUCATION",
     href: "/waste",
     icon: Recycle,
   },
@@ -74,32 +84,98 @@ const principles = [
   {
     number: "01",
     title: "Kontekstual",
-    text: "Informasi tidak berdiri sendiri. Lokasi, organisasi, material, dan laporan ditempatkan dalam konteks yang saling terhubung.",
+    text: "Informasi dilihat bersama lokasi, material, organisasi, dan kondisi lingkungan.",
   },
   {
     number: "02",
     title: "Terbuka",
-    text: "BINSIGHT dirancang sebagai sumber informasi publik yang mudah dijelajahi dan dipahami.",
+    text: "Platform dirancang agar informasi publik mudah ditemukan, dibaca, dan dijelajahi.",
   },
   {
     number: "03",
     title: "Bertanggung Jawab",
-    text: "Data ditampilkan dengan hati-hati tanpa menambahkan statistik publik yang belum tervalidasi.",
+    text: "Informasi ditampilkan secara hati-hati tanpa menambahkan data publik yang belum tervalidasi.",
   },
 ];
 
 const wasteCategories = [
-  "Organik",
-  "Anorganik",
-  "Bahan Berbahaya",
-  "Elektronik",
-  "Residu",
+  {
+    number: "01",
+    label: "Organik",
+    type: "BIOLOGICAL MATERIAL",
+  },
+  {
+    number: "02",
+    label: "Anorganik",
+    type: "RECYCLABLE MATERIAL",
+  },
+  {
+    number: "03",
+    label: "Bahan Berbahaya",
+    type: "SPECIAL HANDLING",
+  },
+  {
+    number: "04",
+    label: "Elektronik",
+    type: "ELECTRONIC MATERIAL",
+  },
+  {
+    number: "05",
+    label: "Residu",
+    type: "FINAL MATERIAL",
+  },
 ];
 
-const organizationExamples = [
-  { name: "Organisasi Contoh A", type: "Komunitas", location: "Badung", verified: true },
-  { name: "Organisasi Contoh B", type: "Swasta", location: "Mengwi", verified: true },
-  { name: "Organisasi Contoh C", type: "Pendidikan", location: "Abiansemal", verified: false },
+const organizations = [
+  {
+    name: "Organisasi Contoh A",
+    type: "Komunitas",
+    area: "Badung",
+    verified: true,
+  },
+  {
+    name: "Organisasi Contoh B",
+    type: "Swasta",
+    area: "Mengwi",
+    verified: true,
+  },
+  {
+    name: "Organisasi Contoh C",
+    type: "Pendidikan",
+    area: "Abiansemal",
+    verified: false,
+  },
+];
+
+const contextItems = [
+  {
+    number: "01",
+    label: "PLACE",
+    title: "Lokasi",
+    text: "Kondisi dilihat berdasarkan ruang dan wilayah.",
+    href: "/map",
+  },
+  {
+    number: "02",
+    label: "DATA",
+    title: "Informasi",
+    text: "Catatan dan informasi disusun menjadi konteks.",
+    href: "/dashboard",
+  },
+  {
+    number: "03",
+    label: "PEOPLE",
+    title: "Organisasi",
+    text: "Ekosistem pengelola dapat ditemukan dan dikenali.",
+    href: "/organizations",
+  },
+  {
+    number: "04",
+    label: "MATERIAL",
+    title: "Pengetahuan",
+    text: "Jenis material dipahami sebelum menentukan penanganan.",
+    href: "/waste",
+  },
 ];
 
 const footerLinks = [
@@ -107,7 +183,6 @@ const footerLinks = [
   { label: "Data", href: "/dashboard" },
   { label: "Organisasi", href: "/organizations" },
   { label: "Jenis Sampah", href: "/waste" },
-  { label: "Laporan", href: "/reports" },
 ];
 
 const currentYear = new Date().getFullYear();
@@ -117,476 +192,1362 @@ const currentYear = new Date().getFullYear();
 <html lang="id">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1"
+    />
+
     <meta
       name="description"
       content="BINSIGHT — Badung Waste Intelligence. Platform informasi persampahan Kabupaten Badung untuk menemukan, memahami, dan melaporkan kondisi persampahan."
     />
-    <meta name="theme-color" content="#f5f6ef" />
-    <title>BINSIGHT — Badung Waste Intelligence</title>
 
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <meta
+      name="theme-color"
+      content="#f4efe8"
+    />
+
+    <title>
+      BINSIGHT — Badung Waste Intelligence
+    </title>
+
     <link
-      href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700;800&family=Sora:wght@600;700;800&display=swap"
+      rel="preconnect"
+      href="https://fonts.googleapis.com"
+    />
+
+    <link
+      rel="preconnect"
+      href="https://fonts.gstatic.com"
+      crossorigin
+    />
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500;600&family=DM+Serif+Display:ital@0;1&family=Manrope:wght@400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
   </head>
 
   <body>
     <div class="site">
-      <header class="site-header" id="top">
-        <div class="container site-header__inner">
-          <a class="brand" href={siteHref("/")} aria-label="BINSIGHT — Beranda">
-            <span class="brand__mark" aria-hidden="true">B</span>
-            <span class="brand__text">
+
+      <!-- =========================
+           HEADER
+      ========================== -->
+
+      <header
+        class="header"
+        id="top"
+      >
+        <div class="shell header__inner">
+
+          <a
+            class="brand"
+            href={siteHref("/")}
+            aria-label="BINSIGHT Beranda"
+          >
+            <span
+              class="brand__symbol"
+              aria-hidden="true"
+            >
+              B
+            </span>
+
+            <span class="brand__copy">
               <strong>BINSIGHT</strong>
-              <small>BADUNG WASTE INTELLIGENCE</small>
+
+              <small>
+                BADUNG WASTE INTELLIGENCE
+              </small>
             </span>
           </a>
 
-          <nav class="desktop-nav" aria-label="Navigasi utama">
-            <a class="desktop-nav__link is-active" href={siteHref("/")}>Beranda</a>
-            <a class="desktop-nav__link" href={siteHref("/map")}>Peta</a>
-            <a class="desktop-nav__link" href={siteHref("/dashboard")}>Data</a>
-            <a class="desktop-nav__link" href={siteHref("/organizations")}>Organisasi</a>
-            <a class="desktop-nav__link" href={siteHref("/company")}>Tentang</a>
+          <nav
+            class="desktop-nav"
+            aria-label="Navigasi utama"
+          >
+            <a
+              class="desktop-nav__item is-active"
+              href={siteHref("/")}
+            >
+              Beranda
+            </a>
+
+            <a
+              class="desktop-nav__item"
+              href={siteHref("/map")}
+            >
+              Peta
+            </a>
+
+            <a
+              class="desktop-nav__item"
+              href={siteHref("/dashboard")}
+            >
+              Data
+            </a>
+
+            <a
+              class="desktop-nav__item"
+              href={siteHref("/organizations")}
+            >
+              Organisasi
+            </a>
+
+            <a
+              class="desktop-nav__item"
+              href={siteHref("/company")}
+            >
+              Tentang
+            </a>
           </nav>
 
-          <div class="site-header__actions">
-            <a class="header-cta" href={siteHref("/reports/create")}>
-              <span>Laporkan Kondisi</span>
-              <ArrowUpRight size={15} stroke-width={2} aria-hidden="true" />
+          <div class="header__actions">
+
+            <a
+              class="header-search"
+              href={siteHref("/search")}
+              aria-label="Cari BINSIGHT"
+            >
+              <Search
+                size={17}
+                stroke-width={2}
+                aria-hidden="true"
+              />
             </a>
 
             <button
-              class="mobile-menu-toggle"
+              class="menu-trigger"
               type="button"
               aria-label="Buka menu"
               aria-expanded="false"
               data-menu-trigger
             >
-              <Menu size={20} stroke-width={2} data-menu-open />
-              <X size={20} stroke-width={2} data-menu-close hidden />
+              <Menu
+                size={21}
+                stroke-width={2}
+                data-menu-open
+              />
+
+              <X
+                size={21}
+                stroke-width={2}
+                data-menu-close
+                hidden
+              />
             </button>
+
           </div>
         </div>
 
-        <div class="mobile-panel" data-mobile-panel hidden>
-          <nav class="container mobile-panel__nav" aria-label="Navigasi mobile">
-            <a href={siteHref("/")}>Beranda</a>
-            <a href={siteHref("/map")}>Peta</a>
-            <a href={siteHref("/dashboard")}>Data</a>
-            <a href={siteHref("/organizations")}>Organisasi</a>
-            <a href={siteHref("/company")}>Tentang BINSIGHT</a>
-            <a class="mobile-panel__cta" href={siteHref("/reports/create")}>
-              Buat Laporan
-              <ArrowUpRight size={15} stroke-width={2} aria-hidden="true" />
-            </a>
-          </nav>
+        <div
+          class="mobile-panel"
+          data-mobile-panel
+          hidden
+        >
+          <div class="shell mobile-panel__inner">
+
+            <div class="mobile-panel__intro">
+              <small>
+                NAVIGATION / BINSIGHT
+              </small>
+
+              <span>
+                BADUNG WASTE INTELLIGENCE
+              </span>
+            </div>
+
+            <nav
+              class="mobile-nav"
+              aria-label="Navigasi mobile"
+            >
+              <a href={siteHref("/")}>
+                <span>01</span>
+                <strong>Beranda</strong>
+              </a>
+
+              <a href={siteHref("/map")}>
+                <span>02</span>
+                <strong>Peta</strong>
+              </a>
+
+              <a href={siteHref("/dashboard")}>
+                <span>03</span>
+                <strong>Data</strong>
+              </a>
+
+              <a href={siteHref("/organizations")}>
+                <span>04</span>
+                <strong>Organisasi</strong>
+              </a>
+
+              <a href={siteHref("/company")}>
+                <span>05</span>
+                <strong>Tentang</strong>
+              </a>
+            </nav>
+
+          </div>
         </div>
       </header>
 
+
       <main>
+
+        <!-- =========================
+             HERO
+        ========================== -->
+
         <section class="hero">
-          <div class="container hero__grid">
+          <div class="shell hero__inner">
+
+            <aside class="hero__side-label">
+              <span>01</span>
+
+              <span>
+                PUBLIC PLATFORM
+              </span>
+
+              <span>
+                BADUNG / BALI
+              </span>
+            </aside>
+
             <div class="hero__content">
-              <p class="eyebrow">
-                <span class="eyebrow__line" aria-hidden="true"></span>
+
+              <p class="hero__eyebrow">
+                <span aria-hidden="true"></span>
                 BADUNG WASTE INTELLIGENCE
               </p>
 
               <h1>
-                Kenali.
-                <span>Pahami.</span>
-                <em>Jaga Badung.</em>
+                Membaca
+                <em>Badung</em>
+                lewat
+                <strong>informasi.</strong>
               </h1>
 
-              <p class="hero__lead">
-                BINSIGHT adalah platform informasi persampahan Kabupaten Badung
-                yang menghubungkan <strong>peta, data, organisasi, edukasi,</strong>
-                dan <strong>laporan masyarakat</strong> dalam satu tempat.
-              </p>
+              <div class="hero__lower">
 
-              <div class="hero__actions">
-                <a class="button button--primary" href={siteHref("/map")}>
-                  Jelajahi BINSIGHT
-                  <ArrowUpRight size={17} stroke-width={2} aria-hidden="true" />
-                </a>
-                <a class="button button--secondary" href={siteHref("/company")}>
-                  Tentang Platform
-                </a>
-              </div>
+                <div class="hero__description">
 
-              <div class="hero__note">
-                <span class="status-dot" aria-hidden="true"></span>
-                <span>PLATFORM INFORMASI PUBLIK · KABUPATEN BADUNG</span>
+                  <p>
+                    BINSIGHT menghubungkan informasi
+                    persampahan Kabupaten Badung dalam
+                    satu ruang digital — dari lokasi,
+                    data, organisasi, material,
+                    sampai laporan masyarakat.
+                  </p>
+
+                  <div class="hero__buttons">
+
+                    <a
+                      class="button button--blue"
+                      href={siteHref("/map")}
+                    >
+                      Jelajahi BINSIGHT
+
+                      <ArrowUpRight
+                        size={17}
+                        stroke-width={2}
+                        aria-hidden="true"
+                      />
+                    </a>
+
+                    <a
+                      class="button button--line"
+                      href={siteHref("/company")}
+                    >
+                      Tentang platform
+                    </a>
+
+                  </div>
+
+                </div>
+
+
+                <div
+                  class="hero__signal"
+                  aria-label="Ringkasan sistem BINSIGHT"
+                >
+
+                  <div class="signal-head">
+                    <span>
+                      PLATFORM SIGNAL
+                    </span>
+
+                    <span>
+                      LIVE
+                    </span>
+                  </div>
+
+                  <div class="signal-main">
+
+                    <div class="signal-title">
+                      <span>BADUNG</span>
+
+                      <strong>
+                        CONTEXT
+                      </strong>
+                    </div>
+
+                    <div
+                      class="signal-bars"
+                      aria-hidden="true"
+                    >
+                      <span style="--size: 76%;"></span>
+                      <span style="--size: 51%;"></span>
+                      <span style="--size: 84%;"></span>
+                      <span style="--size: 63%;"></span>
+                      <span style="--size: 91%;"></span>
+                      <span style="--size: 44%;"></span>
+                      <span style="--size: 68%;"></span>
+                      <span style="--size: 58%;"></span>
+                      <span style="--size: 82%;"></span>
+                      <span style="--size: 72%;"></span>
+                    </div>
+
+                    <div class="signal-axis">
+                      <span>PLACE</span>
+                      <span>DATA</span>
+                      <span>PEOPLE</span>
+                    </div>
+
+                  </div>
+
+                  <div class="signal-foot">
+
+                    <span>
+                      INFORMATION SYSTEM
+                    </span>
+
+                    <strong>
+                      ACTIVE
+                    </strong>
+
+                  </div>
+
+                </div>
+
               </div>
             </div>
 
-            <aside class="hero-card" aria-label="Ringkasan BINSIGHT">
-              <div class="hero-card__top">
-                <span>01</span>
-                <span>OVERVIEW</span>
-              </div>
+          </div>
+        </section>
 
-              <div class="hero-card__visual">
-                <div class="visual-grid" aria-hidden="true"></div>
-                <div class="visual-circle visual-circle--one" aria-hidden="true"></div>
-                <div class="visual-circle visual-circle--two" aria-hidden="true"></div>
 
-                <div class="visual-pin visual-pin--one"><span></span>KUTA</div>
-                <div class="visual-pin visual-pin--two"><span></span>MENGWI</div>
-                <div class="visual-pin visual-pin--three"><span></span>ABIANSEMAL</div>
+        <!-- =========================
+             INTRO
+        ========================== -->
 
-                <div class="visual-label">
-                  <small>CONTEXT</small>
-                  <strong>BADUNG</strong>
-                </div>
-              </div>
+        <section class="intro">
+          <div class="shell">
 
-              <div class="hero-card__bottom">
-                <div>
-                  <span class="meta-label">MODEL</span>
-                  <strong>MAP + DATA + NETWORK</strong>
-                </div>
-                <span class="hero-card__arrow" aria-hidden="true">
-                  <ArrowUpRight size={18} stroke-width={1.8} />
+            <div class="section-marker">
+              <span>02</span>
+              <span>ABOUT THE PLATFORM</span>
+            </div>
+
+            <div class="intro__grid">
+
+              <div class="intro__headline">
+
+                <span class="big-number">
+                  01
                 </span>
+
+                <h2>
+                  Sampah adalah
+                  <em>konteks.</em>
+                </h2>
+
               </div>
-            </aside>
+
+              <div class="intro__copy">
+
+                <p class="lead">
+                  Persampahan tidak berdiri sebagai
+                  satu masalah yang terpisah.
+                </p>
+
+                <p>
+                  Ada material, lokasi, pengelola,
+                  kebiasaan, proses, dan kondisi
+                  lingkungan yang semuanya
+                  saling berhubungan.
+                </p>
+
+                <p>
+                  BINSIGHT menyatukan hubungan tersebut
+                  menjadi informasi yang lebih mudah
+                  ditemukan dan dipahami.
+                </p>
+
+                <a
+                  class="arrow-link"
+                  href={siteHref("/company")}
+                >
+                  Kenali BINSIGHT
+
+                  <span>
+                    <ArrowUpRight
+                      size={15}
+                      stroke-width={2}
+                      aria-hidden="true"
+                    />
+                  </span>
+                </a>
+
+              </div>
+
+            </div>
+
           </div>
         </section>
 
-        <section class="intro section">
-          <div class="container intro__grid">
-            <div>
-              <p class="section-label">01 / TENTANG BINSIGHT</p>
-              <h2>Satu platform untuk membaca ekosistem persampahan.</h2>
+
+        <!-- =========================
+             SERVICES
+        ========================== -->
+
+        <section class="services">
+          <div class="shell">
+
+            <div class="section-marker">
+              <span>03</span>
+              <span>EXPLORE</span>
             </div>
 
-            <div class="intro__copy">
-              <p>
-                Persampahan bukan hanya soal lokasi pembuangan. Ada material,
-                pengelola, proses, kebiasaan, dan kondisi lingkungan yang saling
-                terhubung.
-              </p>
-              <p>
-                BINSIGHT menyederhanakan hubungan tersebut menjadi pengalaman
-                digital yang lebih jelas: masyarakat dapat menemukan informasi,
-                memahami konteks, dan ikut menyampaikan kondisi di sekitarnya.
-              </p>
-              <a class="text-link" href={siteHref("/company")}>
-                Kenali BINSIGHT lebih jauh
-                <ChevronRight size={16} stroke-width={2} aria-hidden="true" />
-              </a>
-            </div>
-          </div>
-        </section>
+            <div class="services__intro">
 
-        <section class="services section section--soft">
-          <div class="container">
-            <div class="section-head">
               <div>
-                <p class="section-label">02 / LAYANAN INFORMASI</p>
-                <h2>Yang bisa dilakukan di BINSIGHT</h2>
+
+                <p class="mini-label">
+                  WHAT YOU CAN EXPLORE
+                </p>
+
+                <h2>
+                  Empat pintu.
+                  <em>Satu ekosistem.</em>
+                </h2>
+
               </div>
-              <p class="section-head__intro">
-                Setiap bagian dirancang untuk membantu pengguna melihat isu
-                persampahan dari sudut yang berbeda, tetapi tetap dalam satu konteks.
+
+              <p>
+                Setiap bagian memberikan sudut pandang
+                yang berbeda tanpa memisahkan
+                hubungan antar informasi.
               </p>
+
             </div>
 
-            <div class="service-grid">
+            <div class="service-list">
+
               {services.map((service) => {
                 const Icon = service.icon;
+
                 return (
-                  <a class="service-card" href={siteHref(service.href)}>
-                    <div class="service-card__head">
-                      <span class="service-card__number">{service.number}</span>
-                      <span class="service-card__icon">
-                        <Icon size={23} stroke-width={1.8} aria-hidden="true" />
+                  <a
+                    class="service-row"
+                    href={siteHref(service.href)}
+                  >
+
+                    <div class="service-row__number">
+                      {service.number}
+                    </div>
+
+                    <div class="service-row__icon">
+                      <Icon
+                        size={22}
+                        stroke-width={1.8}
+                        aria-hidden="true"
+                      />
+                    </div>
+
+                    <div class="service-row__main">
+
+                      <small>
+                        {service.detail}
+                      </small>
+
+                      <h3>
+                        {service.title}
+                      </h3>
+
+                      <p>
+                        {service.description}
+                      </p>
+
+                    </div>
+
+                    <div class="service-row__action">
+
+                      <span>
+                        Explore
                       </span>
+
+                      <div>
+                        <ArrowUpRight
+                          size={18}
+                          stroke-width={2}
+                          aria-hidden="true"
+                        />
+                      </div>
+
                     </div>
 
-                    <div class="service-card__content">
-                      <h3>{service.title}</h3>
-                      <p>{service.description}</p>
-                    </div>
-
-                    <span class="service-card__link">
-                      Pelajari
-                      <ArrowUpRight size={15} stroke-width={2} aria-hidden="true" />
-                    </span>
                   </a>
                 );
               })}
+
             </div>
+
           </div>
         </section>
 
-        <section class="statement section section--dark">
-          <div class="container statement__grid">
-            <div>
-              <p class="section-label section-label--light">03 / CARA KERJA</p>
-              <h2>
-                Informasi terhubung.
-                <span>Konteks menjadi kekuatan.</span>
-              </h2>
+
+        <!-- =========================
+             FLOW
+        ========================== -->
+
+        <section class="flow">
+          <div class="shell">
+
+            <div class="section-marker section-marker--light">
+              <span>04</span>
+              <span>HOW IT CONNECTS</span>
             </div>
 
-            <div class="statement__formula">
-              <div class="formula-row"><span>01</span><strong>MAP</strong><small>LOKASI</small></div>
-              <div class="formula-row"><span>02</span><strong>DATA</strong><small>INFORMASI</small></div>
-              <div class="formula-row"><span>03</span><strong>NETWORK</strong><small>ORGANISASI</small></div>
-              <div class="formula-row"><span>04</span><strong>EDUCATION</strong><small>MATERIAL</small></div>
-              <div class="formula-row"><span>05</span><strong>REPORT</strong><small>PARTISIPASI</small></div>
-            </div>
-          </div>
-        </section>
+            <div class="flow__header">
 
-        <section class="principles section">
-          <div class="container">
-            <div class="section-head section-head--compact">
               <div>
-                <p class="section-label">04 / PRINSIP</p>
-                <h2>Dibangun untuk informasi yang mudah dipercaya.</h2>
+
+                <p class="mini-label mini-label--light">
+                  INFORMATION FLOW
+                </p>
+
+                <h2>
+                  Lihat.
+                  <span>Pahami.</span>
+                  Bertindak.
+                </h2>
+
               </div>
+
+              <p>
+                Informasi di BINSIGHT dibangun sebagai
+                rangkaian konteks, bukan sekadar
+                kumpulan halaman.
+              </p>
+
             </div>
 
-            <div class="principle-grid">
+            <div class="flow-line">
+
+              <div class="flow-step">
+
+                <span class="flow-step__number">
+                  01
+                </span>
+
+                <div class="flow-step__circle">
+                  <Map
+                    size={21}
+                    stroke-width={1.8}
+                    aria-hidden="true"
+                  />
+                </div>
+
+                <small>PLACE</small>
+
+                <strong>
+                  Lokasi
+                </strong>
+
+                <p>
+                  Di mana kondisi ditemukan?
+                </p>
+
+              </div>
+
+              <div
+                class="flow-arrow"
+                aria-hidden="true"
+              >
+                <ArrowRight
+                  size={20}
+                  stroke-width={1.8}
+                />
+              </div>
+
+              <div class="flow-step">
+
+                <span class="flow-step__number">
+                  02
+                </span>
+
+                <div class="flow-step__circle">
+                  <ChartColumn
+                    size={21}
+                    stroke-width={1.8}
+                    aria-hidden="true"
+                  />
+                </div>
+
+                <small>DATA</small>
+
+                <strong>
+                  Informasi
+                </strong>
+
+                <p>
+                  Apa yang tercatat?
+                </p>
+
+              </div>
+
+              <div
+                class="flow-arrow"
+                aria-hidden="true"
+              >
+                <ArrowRight
+                  size={20}
+                  stroke-width={1.8}
+                />
+              </div>
+
+              <div class="flow-step">
+
+                <span class="flow-step__number">
+                  03
+                </span>
+
+                <div class="flow-step__circle">
+                  <Building2
+                    size={21}
+                    stroke-width={1.8}
+                    aria-hidden="true"
+                  />
+                </div>
+
+                <small>NETWORK</small>
+
+                <strong>
+                  Orang
+                </strong>
+
+                <p>
+                  Siapa yang bergerak?
+                </p>
+
+              </div>
+
+              <div
+                class="flow-arrow"
+                aria-hidden="true"
+              >
+                <ArrowRight
+                  size={20}
+                  stroke-width={1.8}
+                />
+              </div>
+
+              <div class="flow-step">
+
+                <span class="flow-step__number">
+                  04
+                </span>
+
+                <div class="flow-step__circle">
+                  <FileText
+                    size={21}
+                    stroke-width={1.8}
+                    aria-hidden="true"
+                  />
+                </div>
+
+                <small>ACTION</small>
+
+                <strong>
+                  Laporan
+                </strong>
+
+                <p>
+                  Apa yang bisa disampaikan?
+                </p>
+
+              </div>
+
+            </div>
+
+          </div>
+        </section>
+
+
+        <!-- =========================
+             PRINCIPLES
+        ========================== -->
+
+        <section class="principles">
+          <div class="shell">
+
+            <div class="section-marker">
+              <span>05</span>
+              <span>PRINCIPLES</span>
+            </div>
+
+            <div class="principles__headline">
+
+              <p class="mini-label">
+                DESIGNING FOR TRUST
+              </p>
+
+              <h2>
+                Informasi publik
+                <em>harus terasa jelas.</em>
+              </h2>
+
+            </div>
+
+            <div class="principles__grid">
+
               {principles.map((item) => (
-                <article class="principle-card">
-                  <span class="principle-card__number">{item.number}</span>
-                  <h3>{item.title}</h3>
-                  <p>{item.text}</p>
+                <article class="principle">
+
+                  <div class="principle__top">
+
+                    <span>
+                      {item.number}
+                    </span>
+
+                    <ArrowDownRight
+                      size={17}
+                      stroke-width={1.8}
+                      aria-hidden="true"
+                    />
+
+                  </div>
+
+                  <h3>
+                    {item.title}
+                  </h3>
+
+                  <p>
+                    {item.text}
+                  </p>
+
                 </article>
               ))}
+
             </div>
+
           </div>
         </section>
 
-        <section class="network section section--soft">
-          <div class="container">
-            <div class="section-head">
+
+        <!-- =========================
+             NETWORK
+        ========================== -->
+
+        <section class="network">
+          <div class="shell">
+
+            <div class="section-marker">
+              <span>06</span>
+              <span>NETWORK</span>
+            </div>
+
+            <div class="network__header">
+
               <div>
-                <p class="section-label">05 / EKOSISTEM</p>
-                <h2>Siapa yang bergerak di dalam ekosistem?</h2>
-              </div>
-              <div class="section-head__side">
-                <p>
-                  BINSIGHT menyediakan ruang informasi untuk mengenali pihak yang
-                  bergerak di bidang persampahan dan lingkungan.
+
+                <p class="mini-label">
+                  ECOSYSTEM DIRECTORY
                 </p>
-                <a class="text-link" href={siteHref("/organizations")}>
-                  Lihat organisasi
-                  <ChevronRight size={16} stroke-width={2} aria-hidden="true" />
-                </a>
+
+                <h2>
+                  Siapa yang
+                  <em>bergerak?</em>
+                </h2>
+
               </div>
-            </div>
 
-            <div class="organization-list">
-              {organizationExamples.map((organization, index) => (
+              <div class="network__side">
+
+                <p>
+                  Kenali organisasi dan pihak yang
+                  terlibat dalam pengelolaan
+                  persampahan dan lingkungan.
+                </p>
+
                 <a
-                  class="organization-row"
+                  class="arrow-link"
                   href={siteHref("/organizations")}
-                  aria-label={`Lihat ${organization.name}`}
                 >
-                  <span class="organization-row__index">{String(index + 1).padStart(2, "0")}</span>
-                  <span class="organization-row__main">
-                    <strong>{organization.name}</strong>
-                    <small>{organization.type}</small>
+                  Lihat semua organisasi
+
+                  <span>
+                    <ArrowUpRight
+                      size={15}
+                      stroke-width={2}
+                      aria-hidden="true"
+                    />
                   </span>
-                  <span class="organization-row__location">{organization.location}</span>
-                  <span class:list={["verification", organization.verified && "is-verified"]}>
-                    <ShieldCheck size={15} stroke-width={1.8} aria-hidden="true" />
-                    {organization.verified ? "TERVERIFIKASI" : "CONTOH"}
-                  </span>
-                  <ArrowUpRight class="organization-row__arrow" size={18} stroke-width={1.8} aria-hidden="true" />
                 </a>
-              ))}
+
+              </div>
+
             </div>
 
-            <p class="preview-note">
-              Data organisasi di atas adalah contoh visual untuk kebutuhan preview.
-              Data publik aktual dapat dihubungkan kembali ke sumber data project.
+
+            <div class="directory">
+
+              <div class="directory__head">
+
+                <span>INDEX</span>
+                <span>ORGANIZATION</span>
+                <span>TYPE</span>
+                <span>AREA</span>
+                <span>STATUS</span>
+                <span></span>
+
+              </div>
+
+
+              {organizations.map((organization, index) => (
+                <a
+                  class="directory__row"
+                  href={siteHref("/organizations")}
+                >
+
+                  <span class="directory__index">
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
+
+                  <span class="directory__name">
+
+                    <strong>
+                      {organization.name}
+                    </strong>
+
+                    <small>
+                      PUBLIC ORGANIZATION
+                    </small>
+
+                  </span>
+
+                  <span class="directory__type">
+                    {organization.type}
+                  </span>
+
+                  <span class="directory__area">
+                    {organization.area}
+                  </span>
+
+                  <span
+                    class:list={[
+                      "directory__status",
+                      organization.verified &&
+                        "is-verified",
+                    ]}
+                  >
+
+                    <ShieldCheck
+                      size={14}
+                      stroke-width={1.8}
+                      aria-hidden="true"
+                    />
+
+                    {organization.verified
+                      ? "TERVERIFIKASI"
+                      : "CONTOH"}
+
+                  </span>
+
+                  <ArrowUpRight
+                    class="directory__arrow"
+                    size={18}
+                    stroke-width={1.8}
+                    aria-hidden="true"
+                  />
+
+                </a>
+              ))}
+
+            </div>
+
+            <p class="data-note">
+              Data organisasi di atas merupakan
+              contoh visual untuk kebutuhan preview.
             </p>
+
           </div>
         </section>
 
-        <section class="materials section">
-          <div class="container materials__grid">
-            <div class="materials__intro">
-              <p class="section-label">06 / PENGETAHUAN MATERIAL</p>
-              <h2>Kenali materialnya.</h2>
-              <p>
-                Mengenal kategori sampah membantu pengguna memahami bahwa setiap
-                material memiliki karakteristik dan kebutuhan pengelolaan yang berbeda.
-              </p>
-              <a class="button button--secondary materials__button" href={siteHref("/waste")}>
-                <span>Lihat Jenis Sampah</span>
-                <span class="button__icon" aria-hidden="true">
-                  <ArrowUpRight size={16} stroke-width={2} />
-                </span>
-              </a>
+
+        <!-- =========================
+             MATERIALS
+        ========================== -->
+
+        <section class="materials">
+          <div class="shell">
+
+            <div class="section-marker">
+              <span>07</span>
+              <span>MATERIAL KNOWLEDGE</span>
             </div>
 
-            <div class="material-list" aria-label="Kategori sampah">
-              {wasteCategories.map((category, index) => (
-                <a class="material-item" href={siteHref("/waste")}>
-                  <span class="material-item__index">{String(index + 1).padStart(2, "0")}</span>
-                  <span class="material-item__name">{category}</span>
-                  <span class="material-item__icon" aria-hidden="true">
-                    <ArrowUpRight size={17} stroke-width={1.8} />
-                  </span>
+            <div class="materials__layout">
+
+              <div class="materials__intro">
+
+                <p class="mini-label">
+                  MATERIAL LIBRARY
+                </p>
+
+                <h2>
+                  Kenali apa yang
+                  <em>kita buang.</em>
+                </h2>
+
+                <p>
+                  Setiap material memiliki
+                  karakteristik dan kebutuhan
+                  pengelolaan yang berbeda.
+                </p>
+
+                <a
+                  class="material-button"
+                  href={siteHref("/waste")}
+                >
+                  Lihat jenis sampah
+
+                  <ArrowUpRight
+                    size={17}
+                    stroke-width={2}
+                    aria-hidden="true"
+                  />
+                </a>
+
+              </div>
+
+              <div
+                class="material-cloud"
+                aria-label="Kategori sampah"
+              >
+
+                {wasteCategories.map((category, index) => (
+                  <a
+                    class:list={[
+                      "material-chip",
+                      `material-chip--${index + 1}`,
+                    ]}
+                    href={siteHref("/waste")}
+                  >
+
+                    <span>
+                      {String(index + 1).padStart(2, "0")}
+                    </span>
+
+                    <strong>
+                      {category.label}
+                    </strong>
+
+                    <small>
+                      {category.type}
+                    </small>
+
+                    <ArrowUpRight
+                      size={17}
+                      stroke-width={1.8}
+                      aria-hidden="true"
+                    />
+
+                  </a>
+                ))}
+
+              </div>
+
+            </div>
+
+          </div>
+        </section>
+
+
+        <!-- =========================
+             CONTEXT INDEX
+             Penutup non-CTA
+        ========================== -->
+
+        <section class="context-index">
+          <div class="shell">
+
+            <div class="section-marker">
+              <span>08</span>
+              <span>CONTEXT INDEX</span>
+            </div>
+
+            <div class="context-index__header">
+
+              <div>
+
+                <p class="mini-label">
+                  BINSIGHT SYSTEM
+                </p>
+
+                <h2>
+                  Empat konteks.
+                  <em>Satu pandangan.</em>
+                </h2>
+
+              </div>
+
+              <p>
+                BINSIGHT mempertemukan tempat,
+                informasi, manusia, dan material
+                agar isu persampahan dapat dilihat
+                secara lebih utuh.
+              </p>
+
+            </div>
+
+
+            <div class="context-grid">
+
+              {contextItems.map((item) => (
+                <a
+                  class="context-card"
+                  href={siteHref(item.href)}
+                >
+
+                  <div class="context-card__top">
+
+                    <span>
+                      {item.number}
+                    </span>
+
+                    <ArrowUpRight
+                      size={18}
+                      stroke-width={1.8}
+                      aria-hidden="true"
+                    />
+
+                  </div>
+
+                  <small>
+                    {item.label}
+                  </small>
+
+                  <h3>
+                    {item.title}
+                  </h3>
+
+                  <p>
+                    {item.text}
+                  </p>
+
                 </a>
               ))}
+
             </div>
+
           </div>
         </section>
 
-        <section class="report-cta">
-          <div class="container report-cta__inner">
-            <div>
-              <p class="section-label section-label--light">07 / PARTISIPASI</p>
-              <h2>Melihat masalah?<br /><span>Masukkan ke sistem.</span></h2>
-            </div>
-
-            <div class="report-cta__copy">
-              <p>
-                Bantu memperkaya informasi persampahan dengan menyampaikan kondisi
-                yang Anda temukan di lingkungan sekitar.
-              </p>
-              <a class="button button--primary button--light" href={siteHref("/reports/create")}>
-                Buat Laporan
-                <ArrowUpRight size={17} stroke-width={2} aria-hidden="true" />
-              </a>
-            </div>
-          </div>
-        </section>
       </main>
 
+
+      <!-- =========================
+           FOOTER
+      ========================== -->
+
       <footer class="footer">
-        <div class="container">
+        <div class="shell">
+
           <div class="footer__top">
+
             <div class="footer__brand">
-              <a class="brand brand--footer" href={siteHref("/")}>
-                <span class="brand__mark" aria-hidden="true">B</span>
-                <span class="brand__text">
-                  <strong>BINSIGHT</strong>
-                  <small>BADUNG WASTE INTELLIGENCE</small>
+
+              <a
+                class="brand"
+                href={siteHref("/")}
+              >
+
+                <span class="brand__symbol">
+                  B
                 </span>
+
+                <span class="brand__copy">
+
+                  <strong>
+                    BINSIGHT
+                  </strong>
+
+                  <small>
+                    BADUNG WASTE INTELLIGENCE
+                  </small>
+
+                </span>
+
               </a>
+
               <p>
-                Platform informasi persampahan Kabupaten Badung untuk menemukan,
-                memahami, dan melaporkan kondisi persampahan.
+                Platform informasi persampahan
+                Kabupaten Badung untuk menemukan,
+                memahami, dan melaporkan kondisi
+                persampahan.
               </p>
+
             </div>
 
-            <div class="footer__columns">
-              <div>
-                <p class="footer__label">EKSPLORE</p>
-                <nav aria-label="Eksplorasi">
-                  {footerLinks.map((link) => (
-                    <a href={siteHref(link.href)}>
-                      {link.label}
-                      <ArrowUpRight size={13} stroke-width={1.8} aria-hidden="true" />
-                    </a>
-                  ))}
-                </nav>
-              </div>
+
+            <div class="footer__nav">
 
               <div>
-                <p class="footer__label">KONTAK / PLATFORM</p>
-                <div class="footer__meta">
-                  <span>BADUNG, BALI</span>
-                  <span>PUBLIC INFORMATION PLATFORM</span>
-                  <span>© {currentYear} BINSIGHT</span>
-                </div>
+
+                <small>
+                  EXPLORE
+                </small>
+
+                {footerLinks.map((link) => (
+                  <a href={siteHref(link.href)}>
+
+                    {link.label}
+
+                    <ArrowUpRight
+                      size={14}
+                      stroke-width={1.8}
+                      aria-hidden="true"
+                    />
+
+                  </a>
+                ))}
+
               </div>
+
+
+              <div>
+
+                <small>
+                  PLATFORM
+                </small>
+
+                <span>
+                  BADUNG / BALI
+                </span>
+
+                <span>
+                  PUBLIC INFORMATION
+                </span>
+
+                <span>
+                  © {currentYear} BINSIGHT
+                </span>
+
+              </div>
+
             </div>
+
           </div>
+
 
           <div class="footer__bottom">
-            <span>BINSIGHT / BADUNG WASTE INTELLIGENCE</span>
-            <span>MAP · DATA · NETWORK · EDUCATION · REPORT</span>
+
+            <span>
+              BINSIGHT / BADUNG WASTE INTELLIGENCE
+            </span>
+
+            <span>
+              PLACE · DATA · PEOPLE · MATERIAL
+            </span>
+
           </div>
+
         </div>
       </footer>
+
+
+      <!-- =========================
+           ONLY REPORT ENTRY POINT
+      ========================== -->
 
       <a
         class="floating-report"
         href={siteHref("/reports/create")}
         aria-label="Buat laporan kondisi persampahan"
       >
-        <span class="floating-report__icon" aria-hidden="true">
-          <TriangleAlert size={20} stroke-width={2.2} />
+
+        <span class="floating-report__icon">
+          <TriangleAlert
+            size={19}
+            stroke-width={2}
+            aria-hidden="true"
+          />
         </span>
-        <span class="floating-report__content">
-          <small>LAPORAN MASYARAKAT</small>
-          <strong>Buat Laporan</strong>
+
+        <span class="floating-report__label">
+          <small>
+            LAPORAN MASYARAKAT
+          </small>
+
+          <strong>
+            Buat laporan
+          </strong>
         </span>
-        <span class="floating-report__arrow" aria-hidden="true">
-          <ArrowUpRight size={17} stroke-width={2.2} />
+
+        <span class="floating-report__arrow">
+          <ArrowUpRight
+            size={16}
+            stroke-width={2}
+            aria-hidden="true"
+          />
         </span>
+
       </a>
+
     </div>
   </body>
 
+
   <script>
-    const trigger = document.querySelector<HTMLElement>("[data-menu-trigger]");
-    const panel = document.querySelector<HTMLElement>("[data-mobile-panel]");
-    const openIcon = trigger?.querySelector<SVGElement>("[data-menu-open]");
-    const closeIcon = trigger?.querySelector<SVGElement>("[data-menu-close]");
+    const trigger =
+      document.querySelector<HTMLElement>(
+        "[data-menu-trigger]"
+      );
+
+    const panel =
+      document.querySelector<HTMLElement>(
+        "[data-mobile-panel]"
+      );
+
+    const openIcon =
+      trigger?.querySelector<SVGElement>(
+        "[data-menu-open]"
+      );
+
+    const closeIcon =
+      trigger?.querySelector<SVGElement>(
+        "[data-menu-close]"
+      );
 
     const setMenu = (open: boolean) => {
       if (!trigger || !panel) return;
 
-      trigger.setAttribute("aria-expanded", String(open));
-      trigger.setAttribute("aria-label", open ? "Tutup menu" : "Buka menu");
+      trigger.setAttribute(
+        "aria-expanded",
+        String(open)
+      );
+
+      trigger.setAttribute(
+        "aria-label",
+        open
+          ? "Tutup menu"
+          : "Buka menu"
+      );
+
       panel.hidden = !open;
 
       if (open) {
-        openIcon?.setAttribute("hidden", "");
-        closeIcon?.removeAttribute("hidden");
-        if (openIcon) openIcon.style.display = "none";
-        if (closeIcon) closeIcon.style.display = "block";
+        openIcon?.setAttribute(
+          "hidden",
+          ""
+        );
+
+        closeIcon?.removeAttribute(
+          "hidden"
+        );
+
+        if (openIcon) {
+          openIcon.style.display = "none";
+        }
+
+        if (closeIcon) {
+          closeIcon.style.display = "block";
+        }
       } else {
-        openIcon?.removeAttribute("hidden");
-        closeIcon?.setAttribute("hidden", "");
-        if (openIcon) openIcon.style.display = "block";
-        if (closeIcon) closeIcon.style.display = "none";
+        openIcon?.removeAttribute(
+          "hidden"
+        );
+
+        closeIcon?.setAttribute(
+          "hidden",
+          ""
+        );
+
+        if (openIcon) {
+          openIcon.style.display = "block";
+        }
+
+        if (closeIcon) {
+          closeIcon.style.display = "none";
+        }
       }
 
-      document.body.classList.toggle("menu-open", open);
+      document.body.classList.toggle(
+        "menu-open",
+        open
+      );
     };
 
-    // Ensure a single menu icon is visible on first render.
-    if (openIcon) openIcon.style.display = "block";
-    if (closeIcon) closeIcon.style.display = "none";
+    if (openIcon) {
+      openIcon.style.display = "block";
+    }
 
-    trigger?.addEventListener("click", () => {
-      const isOpen = trigger.getAttribute("aria-expanded") === "true";
-      setMenu(!isOpen);
-    });
+    if (closeIcon) {
+      closeIcon.style.display = "none";
+    }
 
-    panel?.querySelectorAll("a").forEach((link) => {
-      link.addEventListener("click", () => setMenu(false));
-    });
+    trigger?.addEventListener(
+      "click",
+      () => {
+        const isOpen =
+          trigger.getAttribute(
+            "aria-expanded"
+          ) === "true";
 
-    window.addEventListener("resize", () => {
-      if (window.innerWidth > 1020) setMenu(false);
-    });
+        setMenu(!isOpen);
+      }
+    );
 
-    document.addEventListener("keydown", (event) => {
-      if (event.key === "Escape") setMenu(false);
-    });
+    panel
+      ?.querySelectorAll("a")
+      .forEach((link) => {
+        link.addEventListener(
+          "click",
+          () => setMenu(false)
+        );
+      });
+
+    window.addEventListener(
+      "resize",
+      () => {
+        if (window.innerWidth > 980) {
+          setMenu(false);
+        }
+      }
+    );
+
+    document.addEventListener(
+      "keydown",
+      (event) => {
+        if (event.key === "Escape") {
+          setMenu(false);
+        }
+      }
+    );
   </script>
+
 
   <style>
     :global(:root) {
       color-scheme: light;
-      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+
+      font-family:
+        Manrope,
+        Inter,
+        ui-sans-serif,
+        system-ui,
+        sans-serif;
     }
 
     :global(*) {
@@ -595,14 +1556,15 @@ const currentYear = new Date().getFullYear();
 
     :global(html) {
       scroll-behavior: smooth;
-      background: #f5f6ef;
+      background: #f4efe8;
     }
 
     :global(body) {
       min-width: 320px;
       margin: 0;
-      background: #f5f6ef;
-      color: #171a16;
+
+      background: #f4efe8;
+      color: #17181b;
     }
 
     :global(body.menu-open) {
@@ -619,1320 +1581,2730 @@ const currentYear = new Date().getFullYear();
       -webkit-tap-highlight-color: transparent;
     }
 
+
+    /* =========================
+       SYSTEM
+    ========================== */
+
     .site {
-      --ink: #171a16;
-      --ink-soft: #4e554d;
-      --muted: #737a71;
-      --line: #d8dbd2;
-      --paper: #f5f6ef;
-      --paper-alt: #eceee7;
-      --white: #ffffff;
-      --accent: #cbdc35;
-      --accent-dark: #707f10;
-      --deep: #20251f;
-      --max: 1240px;
-      width: 100%;
+      --bg: #f4efe8;
+      --paper: #fffdf8;
+      --paper-2: #ece7de;
+
+      --ink: #17181b;
+      --muted: #6d6c69;
+      --soft: #98948d;
+
+      --line: #d9d2c7;
+
+      --blue: #2754ff;
+      --blue-dark: #193bd0;
+
+      --orange: #ff6947;
+      --yellow: #f6c84b;
+
+      --dark: #161a26;
+
+      --max: 1260px;
+
+      min-height: 100vh;
+
       overflow: clip;
-      background: var(--paper);
+
+      background: var(--bg);
       color: var(--ink);
+
       -webkit-font-smoothing: antialiased;
       text-rendering: optimizeLegibility;
     }
 
-    .container {
-      width: min(var(--max), calc(100% - 48px));
+    .shell {
+      width:
+        min(
+          var(--max),
+          calc(100% - 56px)
+        );
+
       margin: 0 auto;
     }
 
-    /* Header */
-    .site-header {
+
+    /* =========================
+       HEADER
+    ========================== */
+
+    .header {
       position: sticky;
       top: 0;
-      z-index: 50;
-      border-bottom: 1px solid rgba(23, 26, 22, 0.1);
-      background: rgba(245, 246, 239, 0.96);
-      backdrop-filter: blur(14px);
+      z-index: 100;
+
+      border-bottom:
+        1px solid
+        rgba(23, 24, 27, 0.1);
+
+      background:
+        rgba(
+          244,
+          239,
+          232,
+          0.9
+        );
+
+      backdrop-filter:
+        blur(18px);
     }
 
-    .site-header__inner {
-      min-height: 78px;
+    .header__inner {
+      min-height: 84px;
+
       display: grid;
-      grid-template-columns: minmax(0, 1fr) auto auto;
+
+      grid-template-columns:
+        minmax(0, 1fr)
+        auto
+        auto;
+
       align-items: center;
-      gap: 32px;
+
+      gap: 30px;
     }
 
     .brand {
       display: inline-flex;
+
       align-items: center;
-      gap: 12px;
+
+      gap: 11px;
+
       width: fit-content;
     }
 
-    .brand__mark {
+    .brand__symbol {
       display: grid;
-      width: 38px;
-      height: 38px;
+
+      width: 41px;
+      height: 41px;
+
       place-items: center;
-      flex: 0 0 38px;
-      background: var(--ink);
-      color: var(--accent);
-      font-family: Sora, Inter, sans-serif;
-      font-size: 18px;
-      font-weight: 800;
-      letter-spacing: -0.08em;
+
+      border-radius: 13px;
+
+      background: var(--blue);
+      color: #fff;
+
+      font-family:
+        "DM Serif Display",
+        Georgia,
+        serif;
+
+      font-size: 24px;
+
+      line-height: 1;
     }
 
-    .brand__text {
+    .brand__copy {
       display: flex;
+
       flex-direction: column;
-      gap: 3px;
+
+      gap: 2px;
     }
 
-    .brand__text strong {
-      font-family: Sora, Inter, sans-serif;
-      font-size: 15px;
+    .brand__copy strong {
+      font-size: 16px;
       font-weight: 800;
+
       letter-spacing: -0.045em;
     }
 
-    .brand__text small {
+    .brand__copy small {
       color: var(--muted);
-      font-family: "DM Mono", monospace;
+
+      font-family:
+        "DM Mono",
+        monospace;
+
       font-size: 7px;
-      font-weight: 600;
-      letter-spacing: 0.1em;
+      font-weight: 500;
+
+      letter-spacing: 0.09em;
     }
 
     .desktop-nav {
       display: flex;
-      align-items: stretch;
-      gap: 2px;
-      height: 78px;
-    }
 
-    .desktop-nav__link {
-      position: relative;
-      display: inline-flex;
       align-items: center;
-      min-height: 78px;
-      padding: 0 11px;
-      color: #5d645b;
-      font-size: 12px;
-      font-weight: 600;
-      transition: color 160ms ease;
+
+      padding: 5px;
+
+      border:
+        1px solid
+        var(--line);
+
+      border-radius: 999px;
+
+      background:
+        rgba(
+          255,
+          253,
+          248,
+          0.72
+        );
     }
 
-    .desktop-nav__link::after {
-      position: absolute;
-      right: 11px;
-      bottom: 16px;
-      left: 11px;
-      height: 2px;
-      content: "";
-      background: var(--ink);
-      transform: scaleX(0);
-      transform-origin: center;
-      transition: transform 160ms ease;
+    .desktop-nav__item {
+      min-height: 38px;
+
+      display: inline-flex;
+
+      align-items: center;
+
+      padding: 0 16px;
+
+      border-radius: 999px;
+
+      color: #686763;
+
+      font-size: 11px;
+      font-weight: 700;
+
+      transition:
+        color 160ms ease,
+        background 160ms ease;
     }
 
-    .desktop-nav__link:hover,
-    .desktop-nav__link.is-active {
+    .desktop-nav__item:hover {
       color: var(--ink);
     }
 
-    .desktop-nav__link:hover::after,
-    .desktop-nav__link.is-active::after {
-      transform: scaleX(1);
-    }
-
-    .site-header__actions {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .header-cta {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 7px;
-      min-height: 40px;
-      padding: 0 14px;
+    .desktop-nav__item.is-active {
       background: var(--ink);
-      color: var(--white);
-      font-size: 10px;
-      font-weight: 700;
-      transition: background 160ms ease, transform 160ms ease;
+      color: #fff;
     }
 
-    .header-cta:hover {
-      background: #30372e;
-      transform: translateY(-1px);
+    .header__actions {
+      display: flex;
+
+      align-items: center;
+
+      gap: 8px;
     }
 
-    .mobile-menu-toggle {
-      display: none;
+    .header-search,
+    .menu-trigger {
+      display: grid;
+
       width: 42px;
       height: 42px;
-      padding: 0;
+
       place-items: center;
-      border: 1px solid var(--line);
-      background: var(--white);
-      color: var(--ink);
+
+      border:
+        1px solid
+        var(--line);
+
+      border-radius: 50%;
+
+      background: var(--paper);
+
       cursor: pointer;
+
+      transition:
+        background 160ms ease,
+        transform 160ms ease;
     }
 
-    .mobile-menu-toggle svg {
+    .header-search:hover,
+    .menu-trigger:hover {
+      background: #fff;
+
+      transform:
+        translateY(-1px);
+    }
+
+    .menu-trigger {
+      display: none;
+    }
+
+    .menu-trigger svg {
       display: block;
     }
 
-    .mobile-menu-toggle svg[hidden] {
+    .menu-trigger svg[hidden] {
       display: none !important;
     }
 
     .mobile-panel {
-      border-top: 1px solid var(--line);
+      border-top:
+        1px solid
+        var(--line);
+
       background: var(--paper);
     }
 
-    .mobile-panel__nav {
-      display: grid;
-      gap: 0;
-      padding-top: 8px;
-      padding-bottom: 16px;
+    .mobile-panel__inner {
+      padding:
+        24px 0 30px;
     }
 
-    .mobile-panel__nav > a {
+    .mobile-panel__intro {
       display: flex;
+
+      flex-direction: column;
+
+      gap: 5px;
+
+      margin-bottom: 20px;
+    }
+
+    .mobile-panel__intro small {
+      color: var(--soft);
+
+      font-family:
+        "DM Mono",
+        monospace;
+
+      font-size: 8px;
+
+      letter-spacing: 0.1em;
+    }
+
+    .mobile-panel__intro span {
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .mobile-nav {
+      display: grid;
+
+      border-top:
+        1px solid
+        var(--line);
+    }
+
+    .mobile-nav a {
+      display: grid;
+
+      grid-template-columns:
+        32px
+        1fr;
+
       align-items: center;
+
+      gap: 10px;
+
+      min-height: 64px;
+
+      border-bottom:
+        1px solid
+        var(--line);
+    }
+
+    .mobile-nav a span {
+      color: var(--soft);
+
+      font-family:
+        "DM Mono",
+        monospace;
+
+      font-size: 8px;
+    }
+
+    .mobile-nav a strong {
+      font-size: 18px;
+      font-weight: 800;
+
+      letter-spacing: -0.04em;
+    }
+
+
+    /* =========================
+       HERO
+    ========================== */
+
+    .hero {
+      position: relative;
+
+      border-bottom:
+        1px solid
+        var(--line);
+
+      background:
+        radial-gradient(
+          circle at 74% 28%,
+          rgba(
+            39,
+            84,
+            255,
+            0.08
+          ),
+          transparent 25%
+        );
+    }
+
+    .hero__inner {
+      position: relative;
+
+      min-height: 780px;
+
+      display: grid;
+
+      grid-template-columns:
+        50px
+        minmax(0, 1fr);
+
+      align-items: stretch;
+    }
+
+    .hero__side-label {
+      display: flex;
+
+      flex-direction: column;
+
+      align-items: center;
+
       justify-content: space-between;
-      min-height: 50px;
-      border-bottom: 1px solid var(--line);
-      font-size: 14px;
+
+      padding:
+        70px 0 46px;
+
+      border-right:
+        1px solid
+        var(--line);
+
+      color: var(--soft);
+
+      font-family:
+        "DM Mono",
+        monospace;
+
+      font-size: 7px;
+
+      letter-spacing: 0.1em;
+
+      text-transform: uppercase;
+    }
+
+    .hero__side-label
+      span:first-child {
+      color: var(--ink);
+
+      font-size: 10px;
       font-weight: 600;
     }
 
-    .mobile-panel__nav .mobile-panel__cta {
-      justify-content: center;
-      gap: 7px;
-      margin-top: 12px;
-      border: 0;
-      background: var(--ink);
-      color: var(--white);
-    }
+    .hero__side-label
+      span:nth-child(2),
+    .hero__side-label
+      span:nth-child(3) {
+      writing-mode: vertical-rl;
 
-    /* Hero */
-    .hero {
-      border-bottom: 1px solid var(--line);
-      background:
-        radial-gradient(circle at 88% 20%, rgba(203, 220, 53, 0.17), transparent 25%),
-        linear-gradient(180deg, #f8f9f4 0%, #f2f3ed 100%);
-    }
-
-    .hero__grid {
-      display: grid;
-      grid-template-columns: minmax(0, 1.04fr) minmax(360px, 0.8fr);
-      align-items: center;
-      gap: 72px;
-      min-height: 730px;
-      padding-top: 64px;
-      padding-bottom: 72px;
+      transform:
+        rotate(
+          180deg
+        );
     }
 
     .hero__content {
-      min-width: 0;
+      padding:
+        92px 0 96px 74px;
     }
 
-    .eyebrow,
-    .section-label,
-    .meta-label,
-    .footer__label {
-      margin: 0;
-      font-family: "DM Mono", monospace;
-      font-size: 9px;
-      font-weight: 600;
-      letter-spacing: 0.12em;
-      line-height: 1.4;
-      text-transform: uppercase;
-    }
-
-    .eyebrow {
+    .hero__eyebrow {
       display: inline-flex;
+
       align-items: center;
-      gap: 10px;
+
+      gap: 9px;
+
+      margin: 0;
+
       color: var(--muted);
+
+      font-family:
+        "DM Mono",
+        monospace;
+
+      font-size: 8px;
+      font-weight: 600;
+
+      letter-spacing: 0.1em;
     }
 
-    .eyebrow__line {
-      width: 30px;
+    .hero__eyebrow span {
+      width: 26px;
       height: 1px;
-      background: var(--ink);
+
+      background:
+        var(--blue);
     }
 
     .hero h1 {
-      max-width: 730px;
-      margin: 26px 0 0;
-      font-family: Sora, Inter, sans-serif;
-      font-size: clamp(66px, 7.8vw, 118px);
-      font-weight: 800;
-      line-height: 0.9;
-      letter-spacing: -0.085em;
-      text-transform: uppercase;
+      max-width: 870px;
+
+      margin:
+        30px 0 0;
+
+      font-family:
+        "DM Serif Display",
+        Georgia,
+        serif;
+
+      font-size:
+        clamp(
+          72px,
+          9vw,
+          138px
+        );
+
+      font-weight: 400;
+
+      line-height: 0.84;
+
+      letter-spacing: -0.065em;
     }
 
-    .hero h1 span,
-    .hero h1 em {
+    .hero h1 em,
+    .hero h1 strong {
       display: block;
-    }
 
-    .hero h1 span {
-      margin-left: 5%;
+      font-weight: 400;
     }
 
     .hero h1 em {
-      margin-left: 1%;
-      color: var(--accent-dark);
-      font-style: normal;
+      margin-left: 10%;
+
+      color:
+        var(--blue);
+
+      font-style: italic;
     }
 
-    .hero__lead {
-      max-width: 610px;
-      margin: 32px 0 0;
-      color: var(--ink-soft);
+    .hero h1 strong {
+      margin-left: 4%;
+
+      color:
+        var(--orange);
+    }
+
+    .hero__lower {
+      display: grid;
+
+      grid-template-columns:
+        minmax(280px, 0.75fr)
+        minmax(360px, 1fr);
+
+      gap: 80px;
+
+      align-items: end;
+
+      margin-top: 76px;
+    }
+
+    .hero__description p {
+      max-width: 480px;
+
+      margin: 0;
+
+      color: #54534f;
+
       font-size: 15px;
-      line-height: 1.8;
+
+      line-height: 1.85;
     }
 
-    .hero__lead strong {
-      color: var(--ink);
-      font-weight: 700;
-    }
-
-    .hero__actions {
+    .hero__buttons {
       display: flex;
+
       flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 28px;
+
+      gap: 9px;
+
+      margin-top: 26px;
     }
 
     .button {
+      min-height: 47px;
+
       display: inline-flex;
+
       align-items: center;
       justify-content: center;
+
       gap: 8px;
-      min-height: 48px;
+
       padding: 0 17px;
-      border: 1px solid var(--ink);
-      font-size: 11px;
-      font-weight: 700;
-      transition: transform 160ms ease, background 160ms ease, color 160ms ease;
-    }
 
-    .button:hover {
-      transform: translateY(-2px);
-    }
+      border-radius: 999px;
 
-    .button--primary {
-      background: var(--ink);
-      color: var(--white);
-    }
-
-    .button--primary:hover {
-      background: #31392f;
-    }
-
-    .button--secondary {
-      background: transparent;
-      color: var(--ink);
-    }
-
-    .button--secondary:hover {
-      background: var(--white);
-    }
-
-    .button--light {
-      background: var(--white);
-      border-color: var(--white);
-      color: var(--ink);
-    }
-
-    .hero__note {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-top: 40px;
-      color: #7d847a;
-      font-family: "DM Mono", monospace;
-      font-size: 8px;
-      font-weight: 500;
-      letter-spacing: 0.08em;
-    }
-
-    .status-dot {
-      width: 7px;
-      height: 7px;
-      flex: 0 0 7px;
-      border-radius: 50%;
-      background: var(--accent);
-      box-shadow: inset 0 0 0 2px var(--ink);
-    }
-
-    .hero-card {
-      min-width: 0;
-      overflow: hidden;
-      border: 1px solid #cbd0c6;
-      background: var(--white);
-      box-shadow: 0 20px 55px rgba(23, 26, 22, 0.08);
-    }
-
-    .hero-card__top,
-    .hero-card__bottom {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-      padding: 0 18px;
-      font-family: "DM Mono", monospace;
-      font-size: 8px;
-      font-weight: 600;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-    }
-
-    .hero-card__top {
-      min-height: 54px;
-      border-bottom: 1px solid var(--line);
-      color: var(--muted);
-    }
-
-    .hero-card__bottom {
-      align-items: center;
-      min-height: 98px;
-      padding: 18px 18px 20px;
-      border-top: 1px solid var(--line);
-    }
-
-    .hero-card__bottom > div {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      min-width: 0;
-    }
-
-    .hero-card__bottom strong {
-      display: block;
-      max-width: 100%;
-      font-family: Inter, sans-serif;
-      font-size: 12px;
-      font-weight: 700;
-      line-height: 1.45;
-      letter-spacing: 0;
-    }
-
-    .hero-card__arrow {
-      display: grid;
-      width: 36px;
-      height: 36px;
-      flex: 0 0 36px;
-      place-items: center;
-      border: 1px solid var(--line);
-    }
-
-    .hero-card__visual {
-      position: relative;
-      min-height: 420px;
-      overflow: hidden;
-      background: linear-gradient(120deg, #dce65f 0%, #cbdc35 100%);
-    }
-
-    .visual-grid {
-      position: absolute;
-      inset: 0;
-      opacity: 0.32;
-      background-image:
-        linear-gradient(rgba(23, 26, 22, 0.12) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(23, 26, 22, 0.12) 1px, transparent 1px);
-      background-size: 42px 42px;
-    }
-
-    .visual-circle {
-      position: absolute;
-      border: 1px solid rgba(23, 26, 22, 0.28);
-      border-radius: 50%;
-    }
-
-    .visual-circle--one {
-      width: 72%;
-      aspect-ratio: 1;
-      top: 10%;
-      left: 14%;
-    }
-
-    .visual-circle--two {
-      width: 46%;
-      aspect-ratio: 1;
-      top: 23%;
-      left: 27%;
-    }
-
-    .visual-pin {
-      position: absolute;
-      display: inline-flex;
-      align-items: center;
-      gap: 7px;
-      padding: 6px 8px;
-      background: var(--ink);
-      color: var(--white);
-      font-family: "DM Mono", monospace;
-      font-size: 8px;
-      font-weight: 600;
-      letter-spacing: 0.08em;
-    }
-
-    .visual-pin span {
-      width: 6px;
-      height: 6px;
-      flex: 0 0 6px;
-      border: 1px solid var(--white);
-      border-radius: 50%;
-      background: var(--accent);
-    }
-
-    .visual-pin--one { top: 23%; left: 19%; }
-    .visual-pin--two { top: 46%; right: 14%; }
-    .visual-pin--three { right: 21%; bottom: 20%; }
-
-    .visual-label {
-      position: absolute;
-      right: 10%;
-      bottom: 9%;
-      display: flex;
-      flex-direction: column;
-      gap: 3px;
-      padding: 13px 15px;
-      background: rgba(255, 255, 255, 0.92);
-      border: 1px solid rgba(23, 26, 22, 0.15);
-    }
-
-    .visual-label small {
-      font-family: "DM Mono", monospace;
-      font-size: 8px;
-      font-weight: 600;
-      letter-spacing: 0.1em;
-    }
-
-    .visual-label strong {
-      font-family: Sora, Inter, sans-serif;
-      font-size: 28px;
-      font-weight: 800;
-      line-height: 1;
-      letter-spacing: -0.06em;
-    }
-
-    /* Shared sections */
-    .section {
-      padding: 104px 0;
-      border-bottom: 1px solid var(--line);
-    }
-
-    .section--soft {
-      background: var(--paper-alt);
-    }
-
-    .section--dark {
-      background: var(--deep);
-      color: var(--white);
-      border-bottom-color: #31372f;
-    }
-
-    .section-label {
-      color: #727a70;
-    }
-
-    .section-label--light {
-      color: #a8b0a3;
-    }
-
-    .section h2 {
-      max-width: 910px;
-      margin: 17px 0 0;
-      font-family: Sora, Inter, sans-serif;
-      font-size: clamp(46px, 5.8vw, 82px);
-      font-weight: 800;
-      line-height: 0.96;
-      letter-spacing: -0.075em;
-      text-transform: uppercase;
-    }
-
-    .section-head {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) 340px;
-      gap: 56px;
-      align-items: end;
-      margin-bottom: 48px;
-    }
-
-    .section-head--compact {
-      grid-template-columns: 1fr;
-    }
-
-    .section-head__intro,
-    .section-head__side p {
-      max-width: 360px;
-      margin: 0;
-      color: var(--ink-soft);
-      font-size: 13px;
-      line-height: 1.75;
-    }
-
-    /* Intro */
-    .intro__grid {
-      display: grid;
-      grid-template-columns: minmax(0, 1.08fr) minmax(300px, 0.62fr);
-      gap: 88px;
-      align-items: start;
-    }
-
-    .intro__copy {
-      padding-top: 42px;
-    }
-
-    .intro__copy p {
-      margin: 0 0 20px;
-      color: var(--ink-soft);
-      font-size: 15px;
-      line-height: 1.85;
-    }
-
-    .text-link {
-      display: inline-flex;
-      align-items: center;
-      gap: 7px;
-      margin-top: 5px;
-      padding-bottom: 5px;
-      border-bottom: 1px solid var(--ink);
-      font-size: 11px;
-      font-weight: 700;
-      transition: gap 160ms ease;
-    }
-
-    .text-link:hover {
-      gap: 11px;
-    }
-
-    /* Services */
-    .service-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 14px;
-    }
-
-    .service-card {
-      position: relative;
-      display: flex;
-      flex-direction: column;
-      min-width: 0;
-      min-height: 286px;
-      padding: 26px 26px 22px;
-      border: 1px solid #cfd3c9;
-      background: var(--white);
-      transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
-    }
-
-    .service-card:hover {
-      transform: translateY(-4px);
-      border-color: #aeb4a8;
-      box-shadow: 0 16px 36px rgba(23, 26, 22, 0.07);
-    }
-
-    .service-card__head {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 16px;
-    }
-
-    .service-card__number {
-      color: #7c837a;
-      font-family: "DM Mono", monospace;
-      font-size: 9px;
-      font-weight: 600;
-    }
-
-    .service-card__icon {
-      display: grid;
-      width: 54px;
-      height: 54px;
-      flex: 0 0 54px;
-      place-items: center;
-      border: 1px solid var(--ink);
-      background: var(--accent);
-      color: var(--ink);
-    }
-
-    .service-card__content {
-      margin-top: auto;
-      padding-top: 44px;
-      padding-right: 55px;
-    }
-
-    .service-card__content h3 {
-      margin: 0;
-      font-family: Sora, Inter, sans-serif;
-      font-size: 25px;
-      font-weight: 800;
-      line-height: 1.08;
-      letter-spacing: -0.045em;
-      text-transform: uppercase;
-    }
-
-    .service-card__content p {
-      margin: 12px 0 0;
-      color: var(--ink-soft);
-      font-size: 12px;
-      line-height: 1.72;
-    }
-
-    .service-card__link {
-      position: absolute;
-      right: 20px;
-      bottom: 18px;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      color: #626a61;
-      font-family: "DM Mono", monospace;
-      font-size: 8px;
-      font-weight: 600;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-    }
-
-    /* Statement */
-    .statement__grid {
-      display: grid;
-      grid-template-columns: minmax(0, 1.15fr) minmax(320px, 0.85fr);
-      gap: 90px;
-      align-items: start;
-    }
-
-    .statement h2 span {
-      display: block;
-      color: var(--accent);
-    }
-
-    .statement__formula {
-      border-top: 1px solid #3a4038;
-    }
-
-    .formula-row {
-      display: grid;
-      grid-template-columns: 34px minmax(0, 1fr) auto;
-      align-items: center;
-      gap: 16px;
-      min-height: 62px;
-      border-bottom: 1px solid #3a4038;
-    }
-
-    .formula-row > span,
-    .formula-row small {
-      color: #8f9890;
-      font-family: "DM Mono", monospace;
-      font-size: 8px;
-    }
-
-    .formula-row strong {
-      color: var(--white);
-      font-family: Sora, Inter, sans-serif;
-      font-size: 18px;
-      font-weight: 700;
-      letter-spacing: -0.04em;
-    }
-
-    .formula-row small {
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-    }
-
-    /* Principles */
-    .principle-grid {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      border-top: 1px solid var(--line);
-    }
-
-    .principle-card {
-      min-width: 0;
-      min-height: 250px;
-      padding: 26px 28px 22px 0;
-      border-right: 1px solid var(--line);
-    }
-
-    .principle-card + .principle-card {
-      padding-left: 28px;
-    }
-
-    .principle-card:last-child {
-      padding-right: 0;
-      border-right: 0;
-    }
-
-    .principle-card__number {
-      color: #70776e;
-      font-family: "DM Mono", monospace;
-      font-size: 9px;
-      font-weight: 600;
-      letter-spacing: 0.08em;
-    }
-
-    .principle-card h3 {
-      margin: 52px 0 0;
-      font-family: Sora, Inter, sans-serif;
-      font-size: 23px;
-      font-weight: 800;
-      letter-spacing: -0.045em;
-      text-transform: uppercase;
-    }
-
-    .principle-card p {
-      max-width: 330px;
-      margin: 11px 0 0;
-      color: var(--ink-soft);
-      font-size: 12px;
-      line-height: 1.72;
-    }
-
-    /* Organization */
-    .section-head__side {
-      align-self: end;
-    }
-
-    .section-head__side .text-link {
-      margin-top: 15px;
-    }
-
-    .organization-list {
-      border-top: 1px solid var(--ink);
-    }
-
-    .organization-row {
-      display: grid;
-      grid-template-columns: 48px minmax(0, 1fr) 130px 150px 22px;
-      gap: 16px;
-      align-items: center;
-      min-width: 0;
-      min-height: 84px;
-      border-bottom: 1px solid var(--line);
-      transition: background 160ms ease, padding 160ms ease;
-    }
-
-    .organization-row:hover {
-      padding-left: 10px;
-      padding-right: 10px;
-      background: var(--white);
-    }
-
-    .organization-row__index {
-      color: #7c8279;
-      font-family: "DM Mono", monospace;
-      font-size: 8px;
-    }
-
-    .organization-row__main {
-      min-width: 0;
-      display: flex;
-      flex-direction: column;
-      gap: 5px;
-    }
-
-    .organization-row__main strong {
-      overflow: hidden;
-      font-family: Sora, Inter, sans-serif;
-      font-size: 18px;
-      font-weight: 700;
-      letter-spacing: -0.04em;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .organization-row__main small,
-    .organization-row__location,
-    .verification {
-      color: #71786f;
-      font-family: "DM Mono", monospace;
-      font-size: 7px;
-      font-weight: 500;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-    }
-
-    .verification {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 5px;
-      min-height: 28px;
-      padding: 0 7px;
-      border: 1px solid var(--line);
-      white-space: nowrap;
-    }
-
-    .verification.is-verified {
-      color: #5e6f00;
-      border-color: #aab86a;
-      background: rgba(203, 220, 53, 0.2);
-    }
-
-    .organization-row__arrow {
-      color: #7a8177;
-      transition: transform 160ms ease, color 160ms ease;
-    }
-
-    .organization-row:hover .organization-row__arrow {
-      color: var(--ink);
-      transform: translate(2px, -2px);
-    }
-
-    .preview-note {
-      margin: 16px 0 0;
-      color: #858b83;
       font-size: 10px;
-      line-height: 1.6;
-    }
+      font-weight: 800;
 
-    /* Materials */
-    .materials__grid {
-      display: grid;
-      grid-template-columns: minmax(0, 0.78fr) minmax(0, 1fr);
-      gap: clamp(56px, 7vw, 104px);
-      align-items: start;
-    }
-
-    .materials__intro {
-      padding-top: 2px;
-    }
-
-    .materials__intro h2 {
-      max-width: 520px;
-    }
-
-    .materials__intro p:not(.section-label) {
-      max-width: 470px;
-      margin: 26px 0 32px;
-      color: var(--ink-soft);
-      font-size: 14px;
-      line-height: 1.85;
-    }
-
-    .materials__button {
-      width: fit-content;
-      min-width: 190px;
-      gap: 14px;
-      padding: 0 14px 0 17px;
-    }
-
-    .button__icon {
-      display: grid;
-      width: 30px;
-      height: 30px;
-      flex: 0 0 30px;
-      place-items: center;
-      border: 1px solid var(--line);
-      background: var(--white);
-    }
-
-    .material-list {
-      display: grid;
-      gap: 10px;
-      padding-top: 2px;
-    }
-
-    .material-item {
-      display: grid;
-      grid-template-columns: 44px minmax(0, 1fr) 40px;
-      align-items: center;
-      gap: 18px;
-      min-height: 82px;
-      padding: 0 16px 0 18px;
-      border: 1px solid var(--line);
-      background: var(--white);
       transition:
         transform 160ms ease,
-        border-color 160ms ease,
-        background 160ms ease,
         box-shadow 160ms ease;
     }
 
-    .material-item:hover {
-      border-color: #aeb5a6;
-      background: #fbfbf7;
-      box-shadow: 0 12px 26px rgba(23, 26, 22, 0.06);
-      transform: translateX(4px);
+    .button:hover {
+      transform:
+        translateY(-2px);
     }
 
-    .material-item__index {
-      display: inline-grid;
-      width: 32px;
-      height: 32px;
-      place-items: center;
-      color: var(--ink-soft);
-      background: var(--paper-alt);
-      border: 1px solid var(--line);
-      font-family: "DM Mono", monospace;
+    .button--blue {
+      background:
+        var(--blue);
+
+      color: #fff;
+
+      box-shadow:
+        0 8px 20px
+        rgba(
+          39,
+          84,
+          255,
+          0.18
+        );
+    }
+
+    .button--line {
+      border:
+        1px solid
+        var(--line);
+
+      background:
+        var(--paper);
+    }
+
+    .hero__signal {
+      overflow: hidden;
+
+      border:
+        1px solid
+        #cfc7bb;
+
+      border-radius: 24px;
+
+      background:
+        rgba(
+          255,
+          253,
+          248,
+          0.78
+        );
+
+      box-shadow:
+        0 22px 60px
+        rgba(
+          31,
+          34,
+          39,
+          0.08
+        );
+    }
+
+    .signal-head,
+    .signal-foot {
+      min-height: 50px;
+
+      display: flex;
+
+      align-items: center;
+      justify-content: space-between;
+
+      gap: 18px;
+
+      padding: 0 18px;
+
+      color: var(--muted);
+
+      font-family:
+        "DM Mono",
+        monospace;
+
+      font-size: 7px;
+      font-weight: 600;
+
+      letter-spacing: 0.1em;
+    }
+
+    .signal-head {
+      border-bottom:
+        1px solid
+        var(--line);
+    }
+
+    .signal-head span:last-child {
+      color: #177642;
+    }
+
+    .signal-main {
+      position: relative;
+
+      min-height: 300px;
+
+      padding:
+        28px 24px;
+
+      background:
+        linear-gradient(
+          180deg,
+          rgba(
+            39,
+            84,
+            255,
+            0.035
+          ),
+          transparent
+        );
+    }
+
+    .signal-title {
+      display: flex;
+
+      align-items: baseline;
+
+      justify-content: space-between;
+
+      gap: 20px;
+    }
+
+    .signal-title span {
+      color: var(--muted);
+
+      font-family:
+        "DM Mono",
+        monospace;
+
+      font-size: 8px;
+
+      letter-spacing: 0.08em;
+    }
+
+    .signal-title strong {
+      color: var(--ink);
+
+      font-family:
+        "DM Serif Display",
+        Georgia,
+        serif;
+
+      font-size: 34px;
+      font-weight: 400;
+
+      letter-spacing: -0.04em;
+    }
+
+    .signal-bars {
+      position: absolute;
+
+      right: 24px;
+      bottom: 54px;
+      left: 24px;
+
+      height: 150px;
+
+      display: flex;
+
+      align-items: flex-end;
+
+      gap: 7px;
+
+      border-bottom:
+        1px solid
+        var(--line);
+    }
+
+    .signal-bars span {
+      flex: 1;
+
+      height:
+        var(--size);
+
+      min-width: 4px;
+
+      border-radius:
+        5px 5px 0 0;
+
+      background:
+        linear-gradient(
+          180deg,
+          var(--blue),
+          #6884ff
+        );
+
+      opacity: 0.88;
+    }
+
+    .signal-bars span:nth-child(3n) {
+      background:
+        var(--orange);
+    }
+
+    .signal-bars span:nth-child(5n) {
+      background:
+        var(--yellow);
+    }
+
+    .signal-axis {
+      position: absolute;
+
+      right: 24px;
+      bottom: 22px;
+      left: 24px;
+
+      display: flex;
+
+      justify-content: space-between;
+
+      color: var(--soft);
+
+      font-family:
+        "DM Mono",
+        monospace;
+
+      font-size: 7px;
+
+      letter-spacing: 0.08em;
+    }
+
+    .signal-foot {
+      border-top:
+        1px solid
+        var(--line);
+    }
+
+    .signal-foot strong {
+      color:
+        var(--blue);
+    }
+
+
+    /* =========================
+       COMMON
+    ========================== */
+
+    .section-marker {
+      display: flex;
+
+      align-items: center;
+
+      gap: 12px;
+
+      color: #89847c;
+
+      font-family:
+        "DM Mono",
+        monospace;
+
       font-size: 8px;
       font-weight: 600;
-      letter-spacing: 0.04em;
-    }
 
-    .material-item__name {
-      min-width: 0;
-      color: var(--ink);
-      font-family: Sora, Inter, sans-serif;
-      font-size: clamp(17px, 2vw, 21px);
-      font-weight: 700;
-      letter-spacing: -0.04em;
-      line-height: 1.15;
-    }
+      letter-spacing: 0.11em;
 
-    .material-item__icon {
-      display: grid;
-      width: 38px;
-      height: 38px;
-      flex: 0 0 38px;
-      place-items: center;
-      justify-self: end;
-      border: 1px solid var(--line);
-      color: var(--ink);
-      background: var(--paper);
-      transition:
-        background 160ms ease,
-        border-color 160ms ease,
-        transform 160ms ease;
-    }
-
-    .material-item:hover .material-item__icon {
-      border-color: var(--ink);
-      background: var(--accent);
-      transform: translate(1px, -1px);
-    }
-
-    .button svg,
-    .material-item svg,
-    .service-card svg,
-    .organization-row svg,
-    .floating-report svg {
-      display: block;
-      flex: 0 0 auto;
-    }
-
-    /* Report CTA */
-    .report-cta {
-      background: var(--deep);
-      color: var(--white);
-      border-top: 1px solid #333a32;
-      border-bottom: 1px solid #333a32;
-    }
-
-    .report-cta__inner {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) minmax(300px, 0.62fr);
-      align-items: center;
-      gap: 88px;
-      min-height: 460px;
-      padding-top: 72px;
-      padding-bottom: 72px;
-    }
-
-    .report-cta h2 {
-      margin: 17px 0 0;
-      font-family: Sora, Inter, sans-serif;
-      font-size: clamp(52px, 6.8vw, 96px);
-      font-weight: 800;
-      line-height: 0.92;
-      letter-spacing: -0.08em;
       text-transform: uppercase;
     }
 
-    .report-cta h2 span {
-      color: var(--accent);
+    .section-marker span:first-child {
+      color:
+        var(--blue);
     }
 
-    .report-cta__copy {
-      max-width: 440px;
+    .section-marker::after {
+      content: "";
+
+      width: 34px;
+      height: 1px;
+
+      background:
+        var(--line);
     }
 
-    .report-cta__copy p {
-      margin: 0 0 24px;
-      color: #c3c9c0;
+    .section-marker--light {
+      color: #9197a9;
+    }
+
+    .section-marker--light
+      span:first-child {
+      color:
+        var(--yellow);
+    }
+
+    .mini-label {
+      margin: 0;
+
+      color:
+        var(--muted);
+
+      font-family:
+        "DM Mono",
+        monospace;
+
+      font-size: 8px;
+      font-weight: 600;
+
+      letter-spacing: 0.1em;
+
+      text-transform: uppercase;
+    }
+
+    .mini-label--light {
+      color: #9399aa;
+    }
+
+
+    /* =========================
+       INTRO
+    ========================== */
+
+    .intro {
+      padding:
+        120px 0;
+
+      border-bottom:
+        1px solid
+        var(--line);
+
+      background:
+        var(--paper);
+    }
+
+    .intro__grid {
+      display: grid;
+
+      grid-template-columns:
+        minmax(0, 1.15fr)
+        minmax(300px, 0.62fr);
+
+      gap: 100px;
+
+      margin-top: 55px;
+    }
+
+    .intro__headline {
+      position: relative;
+
+      padding-left: 74px;
+    }
+
+    .big-number {
+      position: absolute;
+
+      top: 0;
+      left: 0;
+
+      color: #c6c0b7;
+
+      font-family:
+        "DM Mono",
+        monospace;
+
+      font-size: 10px;
+    }
+
+    .intro h2,
+    .services h2,
+    .principles h2,
+    .network h2,
+    .materials h2,
+    .context-index h2,
+    .flow h2 {
+      margin: 0;
+
+      font-family:
+        "DM Serif Display",
+        Georgia,
+        serif;
+
+      font-size:
+        clamp(
+          52px,
+          6vw,
+          88px
+        );
+
+      font-weight: 400;
+
+      line-height: 0.93;
+
+      letter-spacing: -0.055em;
+    }
+
+    .intro h2 em,
+    .services h2 em,
+    .principles h2 em,
+    .network h2 em,
+    .materials h2 em,
+    .context-index h2 em {
+      color:
+        var(--blue);
+
+      font-style: italic;
+    }
+
+    .intro__copy {
+      padding-top: 12px;
+    }
+
+    .intro__copy p {
+      margin:
+        0 0 20px;
+
+      color: #65615b;
+
       font-size: 14px;
+
+      line-height: 1.82;
+    }
+
+    .intro__copy .lead {
+      margin-bottom: 28px;
+
+      color:
+        var(--ink);
+
+      font-size: 18px;
+
+      font-weight: 700;
+
+      line-height: 1.55;
+    }
+
+    .arrow-link {
+      display: inline-flex;
+
+      align-items: center;
+
+      gap: 8px;
+
+      margin-top: 7px;
+
+      font-size: 10px;
+      font-weight: 800;
+    }
+
+    .arrow-link span {
+      display: grid;
+
+      width: 31px;
+      height: 31px;
+
+      place-items: center;
+
+      border:
+        1px solid
+        var(--line);
+
+      border-radius: 50%;
+
+      transition:
+        transform 160ms ease,
+        background 160ms ease;
+    }
+
+    .arrow-link:hover span {
+      transform:
+        translate(
+          2px,
+          -2px
+        );
+
+      background:
+        var(--yellow);
+    }
+
+
+    /* =========================
+       SERVICES
+    ========================== */
+
+    .services {
+      padding:
+        120px 0;
+
+      border-bottom:
+        1px solid
+        var(--line);
+    }
+
+    .services__intro {
+      display: grid;
+
+      grid-template-columns:
+        minmax(0, 1fr)
+        330px;
+
+      gap: 60px;
+
+      margin-top: 52px;
+      margin-bottom: 54px;
+    }
+
+    .services__intro > p {
+      max-width: 320px;
+
+      margin: 0;
+
+      align-self: end;
+
+      color: #65615b;
+
+      font-size: 13px;
+
       line-height: 1.8;
     }
 
-    /* Footer */
+    .services h2 em {
+      display: block;
+    }
+
+    .service-list {
+      border-top:
+        1px solid
+        var(--line);
+    }
+
+    .service-row {
+      position: relative;
+
+      display: grid;
+
+      grid-template-columns:
+        56px
+        62px
+        minmax(0, 1fr)
+        120px;
+
+      align-items: center;
+
+      gap: 20px;
+
+      min-height: 176px;
+
+      border-bottom:
+        1px solid
+        var(--line);
+
+      transition:
+        background 180ms ease,
+        padding 180ms ease;
+    }
+
+    .service-row:hover {
+      padding-left: 16px;
+      padding-right: 16px;
+
+      border-radius: 18px;
+
+      background:
+        #ece8ff;
+    }
+
+    .service-row__number {
+      align-self: start;
+
+      padding-top: 27px;
+
+      color: #9b958d;
+
+      font-family:
+        "DM Mono",
+        monospace;
+
+      font-size: 9px;
+    }
+
+    .service-row__icon {
+      display: grid;
+
+      width: 50px;
+      height: 50px;
+
+      place-items: center;
+
+      border:
+        1px solid
+        #d3ccc1;
+
+      border-radius: 15px;
+
+      background:
+        var(--paper);
+
+      color:
+        var(--blue);
+    }
+
+    .service-row__main small {
+      color: #9a958e;
+
+      font-family:
+        "DM Mono",
+        monospace;
+
+      font-size: 7px;
+
+      letter-spacing: 0.1em;
+    }
+
+    .service-row__main h3 {
+      margin:
+        8px 0 7px;
+
+      font-size: 24px;
+
+      font-weight: 800;
+
+      letter-spacing: -0.05em;
+    }
+
+    .service-row__main p {
+      max-width: 640px;
+
+      margin: 0;
+
+      color: #6c6862;
+
+      font-size: 11px;
+
+      line-height: 1.7;
+    }
+
+    .service-row__action {
+      display: flex;
+
+      align-items: center;
+
+      justify-content: flex-end;
+
+      gap: 8px;
+
+      color: #7c7771;
+
+      font-family:
+        "DM Mono",
+        monospace;
+
+      font-size: 7px;
+
+      letter-spacing: 0.08em;
+
+      text-transform: uppercase;
+    }
+
+    .service-row__action > div {
+      display: grid;
+
+      width: 38px;
+      height: 38px;
+
+      place-items: center;
+
+      border:
+        1px solid
+        var(--line);
+
+      border-radius: 50%;
+
+      background:
+        var(--paper);
+
+      transition:
+        background 160ms ease,
+        transform 160ms ease;
+    }
+
+    .service-row:hover
+      .service-row__action > div {
+      background:
+        var(--blue);
+
+      color: #fff;
+
+      transform:
+        translate(
+          2px,
+          -2px
+        );
+    }
+
+
+    /* =========================
+       FLOW
+    ========================== */
+
+    .flow {
+      padding:
+        116px 0;
+
+      border-bottom:
+        1px solid
+        #292e3e;
+
+      background:
+        var(--dark);
+
+      color: #fff;
+    }
+
+    .flow__header {
+      display: grid;
+
+      grid-template-columns:
+        minmax(0, 1fr)
+        330px;
+
+      gap: 60px;
+
+      margin-top: 52px;
+
+      margin-bottom: 64px;
+    }
+
+    .flow h2 {
+      max-width: 750px;
+
+      margin-top: 13px;
+
+      font-size:
+        clamp(
+          54px,
+          6vw,
+          89px
+        );
+
+      line-height: 0.91;
+    }
+
+    .flow h2 span {
+      color:
+        var(--yellow);
+
+      font-style: italic;
+    }
+
+    .flow__header > p {
+      margin: 0;
+
+      align-self: end;
+
+      color: #abb0bc;
+
+      font-size: 13px;
+
+      line-height: 1.8;
+    }
+
+    .flow-line {
+      display: grid;
+
+      grid-template-columns:
+        1fr
+        50px
+        1fr
+        50px
+        1fr
+        50px
+        1fr;
+
+      align-items: center;
+
+      border-top:
+        1px solid
+        #353b4e;
+
+      border-bottom:
+        1px solid
+        #353b4e;
+    }
+
+    .flow-step {
+      position: relative;
+
+      min-width: 0;
+
+      padding:
+        34px 20px
+        38px 0;
+    }
+
+    .flow-step:not(:first-child) {
+      padding-left: 20px;
+    }
+
+    .flow-step__number {
+      position: absolute;
+
+      top: 16px;
+      right: 0;
+
+      color: #697084;
+
+      font-family:
+        "DM Mono",
+        monospace;
+
+      font-size: 7px;
+    }
+
+    .flow-step__circle {
+      display: grid;
+
+      width: 46px;
+      height: 46px;
+
+      place-items: center;
+
+      margin-bottom: 18px;
+
+      border:
+        1px solid
+        #454b5c;
+
+      border-radius: 50%;
+
+      color:
+        var(--yellow);
+    }
+
+    .flow-step small {
+      display: block;
+
+      color: #858c9f;
+
+      font-family:
+        "DM Mono",
+        monospace;
+
+      font-size: 7px;
+
+      letter-spacing: 0.1em;
+    }
+
+    .flow-step strong {
+      display: block;
+
+      margin-top: 5px;
+
+      color: #fff;
+
+      font-size: 19px;
+
+      font-weight: 800;
+
+      letter-spacing: -0.04em;
+    }
+
+    .flow-step p {
+      max-width: 170px;
+
+      margin:
+        7px 0 0;
+
+      color: #9198a8;
+
+      font-size: 10px;
+
+      line-height: 1.6;
+    }
+
+    .flow-arrow {
+      display: grid;
+
+      place-items: center;
+
+      color: #687186;
+    }
+
+
+    /* =========================
+       PRINCIPLES
+    ========================== */
+
+    .principles {
+      padding:
+        120px 0;
+
+      border-bottom:
+        1px solid
+        var(--line);
+
+      background:
+        var(--paper);
+    }
+
+    .principles__headline {
+      max-width: 800px;
+
+      margin-top: 50px;
+    }
+
+    .principles__headline h2 {
+      margin-top: 13px;
+    }
+
+    .principles__headline h2 em {
+      display: block;
+    }
+
+    .principles__grid {
+      display: grid;
+
+      grid-template-columns:
+        repeat(
+          3,
+          minmax(0, 1fr)
+        );
+
+      gap: 12px;
+
+      margin-top: 62px;
+    }
+
+    .principle {
+      min-height: 305px;
+
+      padding:
+        22px
+        22px
+        26px;
+
+      border:
+        1px solid
+        var(--line);
+
+      border-radius: 20px;
+
+      background:
+        var(--bg);
+
+      transition:
+        transform 180ms ease,
+        background 180ms ease;
+    }
+
+    .principle:nth-child(2) {
+      transform:
+        translateY(
+          26px
+        );
+    }
+
+    .principle:hover {
+      transform:
+        translateY(
+          -4px
+        );
+
+      background:
+        #e8efff;
+    }
+
+    .principle:nth-child(2):hover {
+      transform:
+        translateY(
+          21px
+        );
+    }
+
+    .principle__top {
+      display: flex;
+
+      align-items: center;
+
+      justify-content: space-between;
+
+      color: #8a857e;
+    }
+
+    .principle__top span {
+      font-family:
+        "DM Mono",
+        monospace;
+
+      font-size: 8px;
+    }
+
+    .principle h3 {
+      margin:
+        74px 0 0;
+
+      font-size: 26px;
+      font-weight: 800;
+
+      letter-spacing: -0.05em;
+    }
+
+    .principle p {
+      max-width: 320px;
+
+      margin:
+        12px 0 0;
+
+      color: #69655f;
+
+      font-size: 12px;
+
+      line-height: 1.75;
+    }
+
+
+    /* =========================
+       NETWORK
+    ========================== */
+
+    .network {
+      padding:
+        120px 0;
+
+      border-bottom:
+        1px solid
+        var(--line);
+
+      background:
+        #e9e4db;
+    }
+
+    .network__header {
+      display: grid;
+
+      grid-template-columns:
+        minmax(0, 1fr)
+        340px;
+
+      gap: 70px;
+
+      margin-top: 52px;
+
+      margin-bottom: 54px;
+    }
+
+    .network h2 {
+      margin-top: 12px;
+    }
+
+    .network h2 em {
+      display: block;
+    }
+
+    .network__side {
+      align-self: end;
+    }
+
+    .network__side p {
+      margin: 0;
+
+      color: #67635d;
+
+      font-size: 13px;
+
+      line-height: 1.8;
+    }
+
+    .network__side .arrow-link {
+      margin-top: 16px;
+    }
+
+    .directory {
+      border-top:
+        1px solid
+        var(--ink);
+    }
+
+    .directory__head,
+    .directory__row {
+      display: grid;
+
+      grid-template-columns:
+        55px
+        minmax(0, 1.2fr)
+        150px
+        120px
+        150px
+        24px;
+
+      gap: 16px;
+
+      align-items: center;
+    }
+
+    .directory__head {
+      min-height: 44px;
+
+      color: #858077;
+
+      font-family:
+        "DM Mono",
+        monospace;
+
+      font-size: 7px;
+
+      letter-spacing: 0.08em;
+
+      text-transform: uppercase;
+    }
+
+    .directory__row {
+      min-height: 88px;
+
+      border-top:
+        1px solid
+        rgba(
+          23,
+          24,
+          27,
+          0.13
+        );
+
+      transition:
+        background 160ms ease,
+        padding 160ms ease;
+    }
+
+    .directory__row:hover {
+      padding-left: 12px;
+      padding-right: 12px;
+
+      border-radius: 16px;
+
+      background:
+        var(--paper);
+    }
+
+    .directory__index {
+      color: #918b82;
+
+      font-family:
+        "DM Mono",
+        monospace;
+
+      font-size: 8px;
+    }
+
+    .directory__name {
+      min-width: 0;
+
+      display: flex;
+
+      flex-direction: column;
+
+      gap: 4px;
+    }
+
+    .directory__name strong {
+      overflow: hidden;
+
+      text-overflow: ellipsis;
+
+      white-space: nowrap;
+
+      font-size: 15px;
+
+      font-weight: 800;
+
+      letter-spacing: -0.035em;
+    }
+
+    .directory__name small,
+    .directory__type,
+    .directory__area,
+    .directory__status {
+      font-family:
+        "DM Mono",
+        monospace;
+
+      font-size: 7px;
+
+      letter-spacing: 0.06em;
+
+      text-transform: uppercase;
+    }
+
+    .directory__name small,
+    .directory__type,
+    .directory__area {
+      color: #7e7972;
+    }
+
+    .directory__status {
+      display: inline-flex;
+
+      align-items: center;
+
+      justify-content: center;
+
+      gap: 5px;
+
+      min-height: 28px;
+
+      padding: 0 7px;
+
+      border:
+        1px solid
+        #cdc7bc;
+
+      border-radius: 999px;
+
+      color: #817c75;
+
+      white-space: nowrap;
+    }
+
+    .directory__status.is-verified {
+      border-color:
+        #9eb4ff;
+
+      background:
+        #dfe6ff;
+
+      color:
+        #304fca;
+    }
+
+    .directory__arrow {
+      color: #8c867e;
+
+      transition:
+        transform 160ms ease;
+    }
+
+    .directory__row:hover
+      .directory__arrow {
+      transform:
+        translate(
+          2px,
+          -2px
+        );
+    }
+
+    .data-note {
+      margin:
+        15px 0 0;
+
+      color: #8f8a82;
+
+      font-size: 9px;
+
+      line-height: 1.6;
+    }
+
+
+    /* =========================
+       MATERIALS
+    ========================== */
+
+    .materials {
+      padding:
+        120px 0;
+
+      border-bottom:
+        1px solid
+        var(--line);
+
+      background:
+        var(--paper);
+    }
+
+    .materials__layout {
+      display: grid;
+
+      grid-template-columns:
+        minmax(320px, 0.72fr)
+        minmax(0, 1fr);
+
+      gap: 90px;
+
+      margin-top: 54px;
+    }
+
+    .materials__intro {
+      padding-top: 10px;
+    }
+
+    .materials h2 {
+      margin-top: 12px;
+    }
+
+    .materials h2 em {
+      display: block;
+    }
+
+    .materials__intro
+      > p:not(.mini-label) {
+      max-width: 420px;
+
+      margin:
+        26px 0 30px;
+
+      color: #69655f;
+
+      font-size: 13px;
+
+      line-height: 1.8;
+    }
+
+    .material-button {
+      display: inline-flex;
+
+      align-items: center;
+
+      gap: 9px;
+
+      min-height: 45px;
+
+      padding: 0 15px;
+
+      border-radius: 999px;
+
+      background:
+        var(--ink);
+
+      color: #fff;
+
+      font-size: 10px;
+
+      font-weight: 800;
+    }
+
+    .material-cloud {
+      position: relative;
+
+      min-height: 490px;
+    }
+
+    .material-chip {
+      position: absolute;
+
+      display: flex;
+
+      flex-direction: column;
+
+      justify-content: space-between;
+
+      min-width: 190px;
+
+      min-height: 150px;
+
+      padding:
+        16px 18px;
+
+      border:
+        1px solid
+        rgba(
+          23,
+          24,
+          27,
+          0.1
+        );
+
+      border-radius: 22px;
+
+      box-shadow:
+        0 20px 35px
+        rgba(
+          24,
+          25,
+          29,
+          0.07
+        );
+
+      transition:
+        transform 180ms ease,
+        box-shadow 180ms ease;
+    }
+
+    .material-chip:hover {
+      transform:
+        translateY(
+          -7px
+        )
+        rotate(
+          0deg
+        ) !important;
+
+      box-shadow:
+        0 26px 44px
+        rgba(
+          24,
+          25,
+          29,
+          0.12
+        );
+    }
+
+    .material-chip span {
+      font-family:
+        "DM Mono",
+        monospace;
+
+      font-size: 7px;
+
+      opacity: 0.65;
+    }
+
+    .material-chip strong {
+      margin-top: auto;
+
+      font-size: 22px;
+
+      font-weight: 800;
+
+      letter-spacing: -0.05em;
+    }
+
+    .material-chip small {
+      margin-top: 3px;
+
+      font-family:
+        "DM Mono",
+        monospace;
+
+      font-size: 6px;
+
+      letter-spacing: 0.08em;
+
+      opacity: 0.65;
+    }
+
+    .material-chip svg {
+      position: absolute;
+
+      top: 16px;
+      right: 16px;
+    }
+
+    .material-chip--1 {
+      top: 20px;
+      left: 8%;
+
+      background:
+        #dfe7ff;
+
+      color:
+        #223fbd;
+
+      transform:
+        rotate(
+          -6deg
+        );
+    }
+
+    .material-chip--2 {
+      top: 0;
+      right: 2%;
+
+      background:
+        #ffd9ce;
+
+      color:
+        #9f3720;
+
+      transform:
+        rotate(
+          5deg
+        );
+    }
+
+    .material-chip--3 {
+      top: 175px;
+      left: 34%;
+
+      background:
+        #f6de8d;
+
+      color:
+        #7d5f0b;
+
+      transform:
+        rotate(
+          2deg
+        );
+    }
+
+    .material-chip--4 {
+      right: 12%;
+      bottom: 12px;
+
+      background:
+        #d9f0e2;
+
+      color:
+        #276246;
+
+      transform:
+        rotate(
+          -4deg
+        );
+    }
+
+    .material-chip--5 {
+      bottom: 0;
+      left: 2%;
+
+      background:
+        #ddd9d1;
+
+      color:
+        #55514b;
+
+      transform:
+        rotate(
+          6deg
+        );
+    }
+
+
+    /* =========================
+       CONTEXT INDEX
+    ========================== */
+
+    .context-index {
+      padding:
+        120px 0;
+
+      border-bottom:
+        1px solid
+        var(--line);
+
+      background:
+        #f0ebe3;
+    }
+
+    .context-index__header {
+      display: grid;
+
+      grid-template-columns:
+        minmax(0, 1fr)
+        340px;
+
+      gap: 70px;
+
+      align-items: end;
+
+      margin-top: 52px;
+
+      margin-bottom: 58px;
+    }
+
+    .context-index h2 {
+      margin-top: 12px;
+    }
+
+    .context-index h2 em {
+      display: block;
+    }
+
+    .context-index__header > p {
+      margin: 0;
+
+      color: #6b6760;
+
+      font-size: 13px;
+
+      line-height: 1.8;
+    }
+
+    .context-grid {
+      display: grid;
+
+      grid-template-columns:
+        repeat(
+          4,
+          minmax(0, 1fr)
+        );
+
+      gap: 12px;
+    }
+
+    .context-card {
+      display: flex;
+
+      flex-direction: column;
+
+      min-height: 265px;
+
+      padding:
+        20px;
+
+      border:
+        1px solid
+        #d5cec3;
+
+      border-radius: 20px;
+
+      background:
+        rgba(
+          255,
+          253,
+          248,
+          0.75
+        );
+
+      transition:
+        transform 180ms ease,
+        background 180ms ease,
+        box-shadow 180ms ease;
+    }
+
+    .context-card:nth-child(2) {
+      transform:
+        translateY(
+          22px
+        );
+    }
+
+    .context-card:nth-child(4) {
+      transform:
+        translateY(
+          10px
+        );
+    }
+
+    .context-card:hover {
+      transform:
+        translateY(
+          -5px
+        );
+
+      background:
+        #fff;
+
+      box-shadow:
+        0 18px 35px
+        rgba(
+          31,
+          32,
+          35,
+          0.07
+        );
+    }
+
+    .context-card:nth-child(2):hover {
+      transform:
+        translateY(
+          17px
+        );
+    }
+
+    .context-card:nth-child(4):hover {
+      transform:
+        translateY(
+          5px
+        );
+    }
+
+    .context-card__top {
+      display: flex;
+
+      align-items: center;
+
+      justify-content: space-between;
+
+      color: #8c867e;
+    }
+
+    .context-card__top span {
+      font-family:
+        "DM Mono",
+        monospace;
+
+      font-size: 8px;
+    }
+
+    .context-card > small {
+      margin-top: 70px;
+
+      color: #8d877f;
+
+      font-family:
+        "DM Mono",
+        monospace;
+
+      font-size: 7px;
+
+      letter-spacing: 0.1em;
+    }
+
+    .context-card h3 {
+      margin:
+        7px 0 0;
+
+      font-family:
+        "DM Serif Display",
+        Georgia,
+        serif;
+
+      font-size: 31px;
+
+      font-weight: 400;
+
+      letter-spacing: -0.04em;
+    }
+
+    .context-card p {
+      max-width: 220px;
+
+      margin:
+        9px 0 0;
+
+      color: #6b6760;
+
+      font-size: 11px;
+
+      line-height: 1.7;
+    }
+
+
+    /* =========================
+       FOOTER
+    ========================== */
+
     .footer {
-      background: #eef0e9;
+      background:
+        #ece7de;
     }
 
     .footer__top {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) minmax(350px, 0.78fr);
-      gap: 76px;
-      padding: 70px 0 58px;
+
+      grid-template-columns:
+        minmax(0, 1fr)
+        minmax(360px, 0.75fr);
+
+      gap: 100px;
+
+      padding:
+        75px 0 60px;
     }
 
     .footer__brand p {
-      max-width: 450px;
-      margin: 22px 0 0;
-      color: var(--ink-soft);
+      max-width: 430px;
+
+      margin:
+        20px 0 0;
+
+      color: #6b6760;
+
       font-size: 12px;
+
       line-height: 1.8;
     }
 
-    .footer__columns {
+    .footer__nav {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 46px;
+
+      grid-template-columns:
+        1fr 1fr;
+
+      gap: 45px;
     }
 
-    .footer__label {
-      margin-bottom: 14px;
-      color: #858c83;
-    }
+    .footer__nav > div {
+      display: flex;
 
-    .footer__columns nav {
-      display: grid;
-      gap: 7px;
-    }
+      flex-direction: column;
 
-    .footer__columns nav a {
-      display: inline-flex;
-      align-items: center;
-      justify-content: space-between;
+      align-items: flex-start;
+
       gap: 8px;
-      width: fit-content;
+    }
+
+    .footer__nav small {
+      margin-bottom: 9px;
+
+      color: #928d85;
+
+      font-family:
+        "DM Mono",
+        monospace;
+
+      font-size: 7px;
+
+      letter-spacing: 0.09em;
+    }
+
+    .footer__nav a {
+      display: inline-flex;
+
+      align-items: center;
+
+      gap: 7px;
+
       font-size: 11px;
-      font-weight: 600;
+
+      font-weight: 700;
     }
 
-    .footer__columns nav a:hover {
-      color: #647000;
+    .footer__nav a:hover {
+      color:
+        var(--blue);
     }
 
-    .footer__meta {
-      display: grid;
-      gap: 9px;
-      color: #666d65;
-      font-family: "DM Mono", monospace;
-      font-size: 8px;
-      line-height: 1.6;
-      letter-spacing: 0.06em;
+    .footer__nav span {
+      color: #706b64;
+
+      font-family:
+        "DM Mono",
+        monospace;
+
+      font-size: 7px;
+
+      letter-spacing: 0.05em;
     }
 
     .footer__bottom {
       display: flex;
+
       align-items: center;
+
       justify-content: space-between;
+
       gap: 20px;
-      min-height: 56px;
-      border-top: 1px solid var(--line);
-      color: #7e857c;
-      font-family: "DM Mono", monospace;
+
+      min-height: 58px;
+
+      border-top:
+        1px solid
+        var(--line);
+
+      color: #817b73;
+
+      font-family:
+        "DM Mono",
+        monospace;
+
       font-size: 7px;
+
       font-weight: 600;
+
       letter-spacing: 0.08em;
     }
 
-    /* Floating report */
+
+    /* =========================
+       FLOATING REPORT
+    ========================== */
+
     .floating-report {
       position: fixed;
+
       right: 22px;
       bottom: 22px;
-      z-index: 100;
+
+      z-index: 120;
+
       display: inline-flex;
+
       align-items: center;
-      gap: 11px;
-      min-width: 222px;
-      min-height: 62px;
-      padding: 9px 10px;
-      border: 1px solid var(--ink);
-      border-radius: 999px;
-      background: var(--accent);
-      color: var(--ink);
-      box-shadow: 0 12px 28px rgba(23, 26, 22, 0.18);
-      transition: transform 180ms ease, box-shadow 180ms ease, background 180ms ease;
+
+      gap: 10px;
+
+      min-height: 64px;
+
+      padding:
+        8px 9px 8px 10px;
+
+      border:
+        1px solid
+        #b44b32;
+
+      border-radius: 18px;
+
+      background:
+        var(--orange);
+
+      color: #fff;
+
+      box-shadow:
+        0 15px 34px
+        rgba(
+          31,
+          32,
+          35,
+          0.2
+        );
+
+      transition:
+        transform 180ms ease,
+        box-shadow 180ms ease,
+        background 180ms ease;
     }
 
     .floating-report:hover {
-      transform: translateY(-4px);
-      background: #d8e765;
-      box-shadow: 0 16px 34px rgba(23, 26, 22, 0.22);
+      transform:
+        translateY(
+          -4px
+        );
+
+      background:
+        #f25837;
+
+      box-shadow:
+        0 20px 40px
+        rgba(
+          31,
+          32,
+          35,
+          0.25
+        );
     }
 
     .floating-report__icon {
       display: grid;
-      width: 42px;
-      height: 42px;
-      flex: 0 0 42px;
+
+      width: 44px;
+      height: 44px;
+
       place-items: center;
-      border-radius: 50%;
-      background: var(--ink);
-      color: var(--accent);
+
+      border-radius: 14px;
+
+      background:
+        rgba(
+          23,
+          24,
+          27,
+          0.92
+        );
+
+      color:
+        var(--yellow);
     }
 
-    .floating-report__content {
+    .floating-report__label {
       display: flex;
-      min-width: 0;
+
       flex-direction: column;
-      gap: 2px;
+
+      min-width: 96px;
+
+      gap: 3px;
     }
 
-    .floating-report__content small {
-      overflow: hidden;
-      color: rgba(23, 26, 22, 0.62);
-      font-family: "DM Mono", monospace;
-      font-size: 7px;
-      font-weight: 600;
+    .floating-report__label small {
+      color:
+        rgba(
+          255,
+          255,
+          255,
+          0.68
+        );
+
+      font-family:
+        "DM Mono",
+        monospace;
+
+      font-size: 6px;
+
       letter-spacing: 0.09em;
-      line-height: 1.25;
-      text-overflow: ellipsis;
-      white-space: nowrap;
     }
 
-    .floating-report__content strong {
-      font-family: Inter, ui-sans-serif, system-ui, sans-serif;
-      font-size: 12px;
+    .floating-report__label strong {
+      color: #fff;
+
+      font-size: 11px;
+
       font-weight: 800;
-      line-height: 1.25;
     }
 
     .floating-report__arrow {
       display: grid;
-      width: 30px;
-      height: 30px;
-      flex: 0 0 30px;
-      margin-left: auto;
+
+      width: 32px;
+      height: 32px;
+
       place-items: center;
+
       border-radius: 50%;
-      background: rgba(255, 255, 255, 0.45);
+
+      background:
+        rgba(
+          255,
+          255,
+          255,
+          0.18
+        );
     }
 
-    .floating-report__arrow svg {
-      transition: transform 180ms ease;
-    }
 
-    .floating-report:hover .floating-report__arrow svg {
-      transform: translate(2px, -2px);
-    }
+    /* =========================
+       ACCESSIBILITY
+    ========================== */
 
-    /* Accessibility */
     :global(a:focus-visible),
     :global(button:focus-visible) {
-      outline: 3px solid #879700;
+      outline:
+        3px solid
+        rgba(
+          39,
+          84,
+          255,
+          0.42
+        );
+
       outline-offset: 4px;
     }
 
-    /* Tablet */
-    @media (max-width: 1080px) {
-      .desktop-nav,
-      .header-cta {
+
+    /* =========================
+       TABLET
+    ========================== */
+
+    @media (max-width: 1050px) {
+
+      .desktop-nav {
         display: none;
       }
 
-      .site-header__inner {
-        grid-template-columns: 1fr auto;
+      .header__inner {
+        grid-template-columns:
+          1fr auto;
+
+        gap: 10px;
       }
 
-      .mobile-menu-toggle {
+      .menu-trigger {
         display: grid;
       }
 
-      .hero__grid {
+      .hero__lower {
         grid-template-columns: 1fr;
-        gap: 48px;
-        min-height: auto;
-        padding-top: 60px;
-        padding-bottom: 68px;
+
+        gap: 40px;
       }
 
-      .hero__content {
-        max-width: 820px;
+      .hero__signal {
+        max-width: 680px;
       }
 
-      .hero-card {
-        max-width: 720px;
-      }
-
-      .intro__grid,
-      .statement__grid,
-      .materials__grid,
-      .report-cta__inner,
+      .services__intro,
+      .flow__header,
+      .network__header,
+      .materials__layout,
+      .context-index__header,
       .footer__top {
         grid-template-columns: 1fr;
-        gap: 48px;
+
+        gap: 42px;
       }
 
-      .intro__copy {
-        max-width: 720px;
-        padding-top: 0;
+      .directory__head,
+      .directory__row {
+        grid-template-columns:
+          48px
+          minmax(0, 1fr)
+          120px
+          110px
+          135px
+          20px;
       }
 
-      .section-head {
-        grid-template-columns: 1fr;
-        gap: 22px;
+      .flow-line {
+        grid-template-columns:
+          1fr
+          35px
+          1fr
+          35px
+          1fr
+          35px
+          1fr;
       }
 
-      .section-head__intro,
-      .section-head__side p {
-        max-width: 700px;
+      .context-grid {
+        grid-template-columns:
+          repeat(
+            2,
+            minmax(0, 1fr)
+          );
       }
+
     }
 
-    /* Mobile */
+
+    /* =========================
+       MOBILE
+    ========================== */
+
     @media (max-width: 700px) {
-      .container {
-        width: min(var(--max), calc(100% - 32px));
+
+      .shell {
+        width:
+          min(
+            var(--max),
+            calc(100% - 30px)
+          );
       }
 
-      .site-header__inner {
-        min-height: 68px;
+      .header__inner {
+        min-height: 70px;
       }
 
-      .brand__mark {
-        width: 34px;
-        height: 34px;
-        flex-basis: 34px;
-        font-size: 16px;
+      .brand__symbol {
+        width: 37px;
+        height: 37px;
+
+        border-radius: 11px;
       }
 
-      .brand__text strong {
+      .brand__copy strong {
         font-size: 14px;
       }
 
-      .brand__text small {
+      .brand__copy small {
         display: none;
       }
 
-      .hero__grid {
-        padding-top: 48px;
-        padding-bottom: 56px;
+      .header-search {
+        display: none;
+      }
+
+      .header__actions {
+        gap: 6px;
+      }
+
+
+      /* Hero */
+
+      .hero__inner {
+        min-height: auto;
+
+        grid-template-columns: 1fr;
+      }
+
+      .hero__side-label {
+        display: none;
+      }
+
+      .hero__content {
+        padding:
+          55px 0 60px;
       }
 
       .hero h1 {
-        margin-top: 21px;
-        font-size: clamp(56px, 16.5vw, 86px);
+        margin-top: 23px;
+
+        font-size:
+          clamp(
+            58px,
+            18vw,
+            92px
+          );
+
+        line-height: 0.86;
       }
 
-      .hero h1 span {
-        margin-left: 3%;
+      .hero h1 em {
+        margin-left: 7%;
       }
 
-      .hero__lead {
-        font-size: 14px;
-        line-height: 1.75;
+      .hero h1 strong {
+        margin-left: 2%;
       }
 
-      .hero__actions {
+      .hero__lower {
+        margin-top: 52px;
+      }
+
+      .hero__buttons {
         flex-direction: column;
       }
 
@@ -1940,194 +4312,376 @@ const currentYear = new Date().getFullYear();
         width: 100%;
       }
 
-      .hero__note {
-        align-items: flex-start;
-        margin-top: 28px;
+      .signal-main {
+        min-height: 250px;
       }
 
-      .hero-card__visual {
-        min-height: 350px;
+      .signal-title strong {
+        font-size: 29px;
       }
 
-      .hero-card__bottom {
-        min-height: 92px;
-        padding: 16px 14px 18px;
+
+      /* Sections */
+
+      .section-marker {
+        font-size: 7px;
       }
 
-      .hero-card__bottom strong {
-        font-size: 11px;
-        line-height: 1.5;
+      .intro,
+      .services,
+      .principles,
+      .network,
+      .materials,
+      .context-index {
+        padding:
+          78px 0;
       }
 
-      .visual-label {
-        right: 7%;
-        bottom: 7%;
-      }
-
-      .section {
-        padding: 76px 0;
-      }
-
-      .section h2 {
-        font-size: clamp(39px, 12.5vw, 62px);
-      }
-
-      .service-grid,
-      .principle-grid {
+      .intro__grid {
         grid-template-columns: 1fr;
+
+        gap: 40px;
+
+        margin-top: 40px;
       }
 
-      .service-card {
-        min-height: 248px;
+      .intro__headline {
+        padding-left: 52px;
       }
 
-      .service-card__content {
-        padding-top: 38px;
+      .intro h2,
+      .services h2,
+      .principles h2,
+      .network h2,
+      .materials h2,
+      .context-index h2,
+      .flow h2 {
+        font-size:
+          clamp(
+            48px,
+            14vw,
+            68px
+          );
       }
 
-      .statement__grid {
-        gap: 42px;
+
+      /* Services */
+
+      .services__intro {
+        margin-top: 38px;
+        margin-bottom: 38px;
       }
 
-      .formula-row {
-        grid-template-columns: 28px minmax(0, 1fr);
-        min-height: 68px;
+      .service-row {
+        grid-template-columns:
+          34px
+          48px
+          minmax(0, 1fr);
+
+        gap: 11px;
+
+        min-height: 166px;
       }
 
-      .formula-row small {
-        grid-column: 2;
-        margin-top: -20px;
-        padding-bottom: 14px;
+      .service-row:hover {
+        padding-left: 8px;
+        padding-right: 8px;
       }
 
-      .principle-card,
-      .principle-card + .principle-card,
-      .principle-card:last-child {
-        min-height: 0;
-        padding: 24px 0;
-        border-right: 0;
-        border-bottom: 1px solid var(--line);
+      .service-row__number {
+        padding-top: 24px;
       }
 
-      .principle-card:last-child {
-        border-bottom: 0;
+      .service-row__icon {
+        width: 44px;
+        height: 44px;
+
+        border-radius: 13px;
       }
 
-      .principle-card h3 {
-        margin-top: 30px;
+      .service-row__main h3 {
+        font-size: 19px;
       }
 
-      .organization-row {
-        grid-template-columns: 34px minmax(0, 1fr) 20px;
-        gap: 12px;
-        min-height: 78px;
+      .service-row__main p {
+        font-size: 10px;
       }
 
-      .organization-row:hover {
-        padding-left: 5px;
-        padding-right: 5px;
-      }
-
-      .organization-row__location,
-      .verification {
+      .service-row__action {
         display: none;
       }
 
-      .organization-row__main strong {
-        font-size: 16px;
+
+      /* Flow */
+
+      .flow {
+        padding:
+          80px 0;
       }
 
-      .materials__button {
-        width: 100%;
+      .flow__header {
+        margin-top: 38px;
+        margin-bottom: 42px;
       }
 
-      .material-list {
-        gap: 8px;
+      .flow-line {
+        display: grid;
+
+        grid-template-columns: 1fr;
       }
 
-      .material-item {
-        grid-template-columns: 38px minmax(0, 1fr) 36px;
-        gap: 12px;
-        min-height: 72px;
-        padding: 0 12px 0 12px;
+      .flow-step,
+      .flow-step:not(:first-child) {
+        padding:
+          26px 0 30px;
       }
 
-      .material-item__index {
-        width: 28px;
-        height: 28px;
+      .flow-arrow {
+        display: none;
       }
 
-      .material-item__name {
-        font-size: 16px;
+      .flow-step {
+        border-bottom:
+          1px solid
+          #353b4e;
       }
 
-      .material-item__icon {
-        width: 34px;
-        height: 34px;
-        flex-basis: 34px;
+      .flow-step:last-child {
+        border-bottom: 0;
       }
 
-      .report-cta__inner {
-        min-height: auto;
-        padding-top: 70px;
-        padding-bottom: 70px;
+
+      /* Principles */
+
+      .principles__headline {
+        margin-top: 38px;
       }
 
-      .report-cta h2 {
-        font-size: clamp(50px, 14.5vw, 78px);
+      .principles__grid {
+        grid-template-columns: 1fr;
+
+        margin-top: 40px;
       }
+
+      .principle:nth-child(2) {
+        transform: none;
+      }
+
+      .principle:nth-child(2):hover {
+        transform:
+          translateY(
+            -4px
+          );
+      }
+
+      .principle {
+        min-height: 240px;
+      }
+
+      .principle h3 {
+        margin-top: 52px;
+      }
+
+
+      /* Network */
+
+      .network__header {
+        margin-top: 38px;
+        margin-bottom: 38px;
+      }
+
+      .directory {
+        border-top:
+          1px solid
+          var(--ink);
+      }
+
+      .directory__head {
+        display: none;
+      }
+
+      .directory__row {
+        grid-template-columns:
+          28px
+          minmax(0, 1fr)
+          20px;
+
+        min-height: 82px;
+
+        gap: 11px;
+      }
+
+      .directory__type,
+      .directory__area,
+      .directory__status {
+        display: none;
+      }
+
+      .directory__row:hover {
+        padding-left: 6px;
+        padding-right: 6px;
+      }
+
+      .directory__name strong {
+        font-size: 14px;
+      }
+
+
+      /* Materials */
+
+      .materials__layout {
+        margin-top: 40px;
+      }
+
+      .material-cloud {
+        min-height: 630px;
+      }
+
+      .material-chip {
+        min-width: 155px;
+        min-height: 128px;
+      }
+
+      .material-chip strong {
+        font-size: 18px;
+      }
+
+      .material-chip--1 {
+        top: 5px;
+        left: 2%;
+      }
+
+      .material-chip--2 {
+        top: 102px;
+        right: 0;
+      }
+
+      .material-chip--3 {
+        top: 220px;
+        left: 17%;
+      }
+
+      .material-chip--4 {
+        right: 0;
+        bottom: 105px;
+      }
+
+      .material-chip--5 {
+        bottom: 0;
+        left: 3%;
+      }
+
+
+      /* Context */
+
+      .context-index__header {
+        margin-top: 38px;
+        margin-bottom: 40px;
+      }
+
+      .context-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .context-card {
+        min-height: 215px;
+      }
+
+      .context-card:nth-child(2),
+      .context-card:nth-child(4) {
+        transform: none;
+      }
+
+      .context-card:hover,
+      .context-card:nth-child(2):hover,
+      .context-card:nth-child(4):hover {
+        transform:
+          translateY(
+            -4px
+          );
+      }
+
+      .context-card > small {
+        margin-top: 45px;
+      }
+
+
+      /* Footer */
 
       .footer__top {
-        padding: 56px 0 42px;
+        padding:
+          56px 0 42px;
       }
 
-      .footer__columns {
+      .footer__nav {
         grid-template-columns: 1fr;
-        gap: 30px;
+
+        gap: 32px;
       }
 
       .footer__bottom {
+        min-height: 85px;
+
         align-items: flex-start;
-        flex-direction: column;
+
         justify-content: center;
-        min-height: 78px;
-        padding: 14px 0;
+
+        flex-direction: column;
+
+        gap: 8px;
       }
 
+
+      /* Floating report */
+
       .floating-report {
-        right: 16px;
-        bottom: max(16px, env(safe-area-inset-bottom));
-        min-width: 56px;
-        width: 56px;
-        height: 56px;
-        min-height: 56px;
-        justify-content: center;
+        right: 14px;
+        bottom: 14px;
+
+        width: 54px;
+        height: 54px;
+
+        min-height: 54px;
+
         padding: 0;
-        gap: 0;
+
+        justify-content: center;
+
+        border-radius: 50%;
       }
 
       .floating-report__icon {
         width: 44px;
         height: 44px;
-        flex-basis: 44px;
+
+        border-radius: 50%;
       }
 
-      .floating-report__content,
+      .floating-report__label,
       .floating-report__arrow {
         display: none;
       }
+
     }
 
+
     @media (prefers-reduced-motion: reduce) {
+
       :global(html) {
         scroll-behavior: auto;
       }
 
       :global(*) {
-        transition-duration: 0.01ms !important;
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
+        transition-duration:
+          0.01ms !important;
+
+        animation-duration:
+          0.01ms !important;
+
+        animation-iteration-count:
+          1 !important;
       }
+
     }
   </style>
 </html>
