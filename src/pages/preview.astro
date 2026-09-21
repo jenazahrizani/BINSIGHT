@@ -1,6 +1,6 @@
 ---
 import {
-  ArrowDownRight,
+  ArrowDown,
   ArrowRight,
   ArrowUpRight,
   Building2,
@@ -24,12 +24,16 @@ function siteHref(path: string): string {
     return path;
   }
 
-  const normalized = path.startsWith("/") ? path : `/${path}`;
+  const normalized = path.startsWith("/")
+    ? path
+    : `/${path}`;
 
   if (
     BASE_URL &&
-    (normalized === BASE_URL ||
-      normalized.startsWith(`${BASE_URL}/`))
+    (
+      normalized === BASE_URL ||
+      normalized.startsWith(`${BASE_URL}/`)
+    )
   ) {
     return normalized;
   }
@@ -44,37 +48,37 @@ function siteHref(path: string): string {
 const services = [
   {
     number: "01",
+    code: "PLACE / 01",
     title: "Peta Persampahan",
     description:
-      "Melihat informasi persampahan berdasarkan wilayah dan lokasi untuk memahami kondisi secara lebih kontekstual.",
-    detail: "LOCATION / CONTEXT",
+      "Menelusuri kondisi persampahan berdasarkan lokasi dan wilayah untuk memahami konteks ruang di Badung.",
     href: "/map",
     icon: Map,
   },
   {
     number: "02",
+    code: "DATA / 02",
     title: "Data & Informasi",
     description:
-      "Membaca informasi yang tersedia di BINSIGHT dalam bentuk yang lebih terstruktur dan mudah dipahami.",
-    detail: "DATA / INSIGHT",
+      "Membaca informasi yang tersedia melalui rangkaian data yang lebih terstruktur dan mudah dipahami.",
     href: "/dashboard",
     icon: ChartColumn,
   },
   {
     number: "03",
+    code: "PEOPLE / 03",
     title: "Jaringan Organisasi",
     description:
-      "Menemukan organisasi, komunitas, pendidikan, dan pihak lain yang bergerak dalam isu persampahan.",
-    detail: "PEOPLE / NETWORK",
+      "Mengenali organisasi, komunitas, pendidikan, dan pihak lain yang bergerak dalam ekosistem persampahan.",
     href: "/organizations",
     icon: Building2,
   },
   {
     number: "04",
-    title: "Edukasi & Pengetahuan",
+    code: "MATERIAL / 04",
+    title: "Pengetahuan Material",
     description:
-      "Mengenali kategori material dan memahami bahwa setiap jenis sampah memiliki karakteristik pengelolaan yang berbeda.",
-    detail: "MATERIAL / EDUCATION",
+      "Memahami kategori sampah dan karakter setiap material sebelum menentukan bagaimana material tersebut dikelola.",
     href: "/waste",
     icon: Recycle,
   },
@@ -83,63 +87,44 @@ const services = [
 const principles = [
   {
     number: "01",
+    label: "CONTEXT",
     title: "Kontekstual",
-    text: "Informasi dilihat bersama lokasi, material, organisasi, dan kondisi lingkungan.",
+    text:
+      "Lokasi, material, organisasi, dan kondisi ditempatkan dalam hubungan yang saling menjelaskan.",
   },
   {
     number: "02",
+    label: "ACCESS",
     title: "Terbuka",
-    text: "Platform dirancang agar informasi publik mudah ditemukan, dibaca, dan dijelajahi.",
+    text:
+      "Informasi publik disusun agar dapat ditemukan dan dipahami tanpa struktur yang rumit.",
   },
   {
     number: "03",
+    label: "CARE",
     title: "Bertanggung Jawab",
-    text: "Informasi ditampilkan secara hati-hati tanpa menambahkan data publik yang belum tervalidasi.",
-  },
-];
-
-const wasteCategories = [
-  {
-    number: "01",
-    label: "Organik",
-    type: "BIOLOGICAL MATERIAL",
-  },
-  {
-    number: "02",
-    label: "Anorganik",
-    type: "RECYCLABLE MATERIAL",
-  },
-  {
-    number: "03",
-    label: "Bahan Berbahaya",
-    type: "SPECIAL HANDLING",
-  },
-  {
-    number: "04",
-    label: "Elektronik",
-    type: "ELECTRONIC MATERIAL",
-  },
-  {
-    number: "05",
-    label: "Residu",
-    type: "FINAL MATERIAL",
+    text:
+      "Informasi ditampilkan secara hati-hati dan tidak mengarang statistik yang belum tervalidasi.",
   },
 ];
 
 const organizations = [
   {
+    number: "01",
     name: "Organisasi Contoh A",
     type: "Komunitas",
     area: "Badung",
     verified: true,
   },
   {
+    number: "02",
     name: "Organisasi Contoh B",
     type: "Swasta",
     area: "Mengwi",
     verified: true,
   },
   {
+    number: "03",
     name: "Organisasi Contoh C",
     type: "Pendidikan",
     area: "Abiansemal",
@@ -147,34 +132,67 @@ const organizations = [
   },
 ];
 
-const contextItems = [
+const materials = [
   {
     number: "01",
-    label: "PLACE",
-    title: "Lokasi",
-    text: "Kondisi dilihat berdasarkan ruang dan wilayah.",
-    href: "/map",
+    name: "Organik",
+    code: "BIO / MATERIAL",
+    size: "wide",
   },
   {
     number: "02",
-    label: "DATA",
-    title: "Informasi",
-    text: "Catatan dan informasi disusun menjadi konteks.",
-    href: "/dashboard",
+    name: "Anorganik",
+    code: "RECYCLE / MATERIAL",
+    size: "medium",
   },
   {
     number: "03",
-    label: "PEOPLE",
-    title: "Organisasi",
-    text: "Ekosistem pengelola dapat ditemukan dan dikenali.",
-    href: "/organizations",
+    name: "Bahan Berbahaya",
+    code: "SPECIAL / HANDLING",
+    size: "medium",
   },
   {
     number: "04",
-    label: "MATERIAL",
-    title: "Pengetahuan",
-    text: "Jenis material dipahami sebelum menentukan penanganan.",
-    href: "/waste",
+    name: "Elektronik",
+    code: "E-WASTE / MATERIAL",
+    size: "small",
+  },
+  {
+    number: "05",
+    name: "Residu",
+    code: "FINAL / MATERIAL",
+    size: "small",
+  },
+];
+
+const contextItems = [
+  {
+    number: "01",
+    code: "PLACE",
+    title: "Lokasi",
+    description:
+      "Memahami isu berdasarkan wilayah dan konteks ruang.",
+  },
+  {
+    number: "02",
+    code: "DATA",
+    title: "Informasi",
+    description:
+      "Menyusun informasi menjadi sesuatu yang dapat dibaca.",
+  },
+  {
+    number: "03",
+    code: "PEOPLE",
+    title: "Ekosistem",
+    description:
+      "Mengenali pihak yang bergerak dalam pengelolaan.",
+  },
+  {
+    number: "04",
+    code: "MATERIAL",
+    title: "Material",
+    description:
+      "Membedakan karakter dan jenis material sampah.",
   },
 ];
 
@@ -192,6 +210,7 @@ const currentYear = new Date().getFullYear();
 <html lang="id">
   <head>
     <meta charset="utf-8" />
+
     <meta
       name="viewport"
       content="width=device-width, initial-scale=1"
@@ -204,7 +223,7 @@ const currentYear = new Date().getFullYear();
 
     <meta
       name="theme-color"
-      content="#f4efe8"
+      content="#ebe4d6"
     />
 
     <title>
@@ -223,7 +242,7 @@ const currentYear = new Date().getFullYear();
     />
 
     <link
-      href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500;600&family=DM+Serif+Display:ital@0;1&family=Manrope:wght@400;500;600;700;800&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400;6..96,500&family=IBM+Plex+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
   </head>
@@ -231,9 +250,9 @@ const currentYear = new Date().getFullYear();
   <body>
     <div class="site">
 
-      <!-- =========================
+      <!-- =========================================
            HEADER
-      ========================== -->
+      ========================================== -->
 
       <header
         class="header"
@@ -244,17 +263,19 @@ const currentYear = new Date().getFullYear();
           <a
             class="brand"
             href={siteHref("/")}
-            aria-label="BINSIGHT Beranda"
+            aria-label="BINSIGHT — Beranda"
           >
             <span
-              class="brand__symbol"
+              class="brand__mark"
               aria-hidden="true"
             >
               B
             </span>
 
             <span class="brand__copy">
-              <strong>BINSIGHT</strong>
+              <strong>
+                BINSIGHT
+              </strong>
 
               <small>
                 BADUNG WASTE INTELLIGENCE
@@ -267,57 +288,57 @@ const currentYear = new Date().getFullYear();
             aria-label="Navigasi utama"
           >
             <a
-              class="desktop-nav__item is-active"
+              class="desktop-nav__link is-active"
               href={siteHref("/")}
             >
               Beranda
             </a>
 
             <a
-              class="desktop-nav__item"
+              class="desktop-nav__link"
               href={siteHref("/map")}
             >
               Peta
             </a>
 
             <a
-              class="desktop-nav__item"
+              class="desktop-nav__link"
               href={siteHref("/dashboard")}
             >
               Data
             </a>
 
             <a
-              class="desktop-nav__item"
+              class="desktop-nav__link"
               href={siteHref("/organizations")}
             >
               Organisasi
             </a>
 
             <a
-              class="desktop-nav__item"
+              class="desktop-nav__link"
               href={siteHref("/company")}
             >
               Tentang
             </a>
           </nav>
 
-          <div class="header__actions">
+          <div class="header__tools">
 
             <a
-              class="header-search"
+              class="search-button"
               href={siteHref("/search")}
               aria-label="Cari BINSIGHT"
             >
               <Search
                 size={17}
-                stroke-width={2}
+                stroke-width={1.8}
                 aria-hidden="true"
               />
             </a>
 
             <button
-              class="menu-trigger"
+              class="menu-button"
               type="button"
               aria-label="Buka menu"
               aria-expanded="false"
@@ -325,13 +346,13 @@ const currentYear = new Date().getFullYear();
             >
               <Menu
                 size={21}
-                stroke-width={2}
+                stroke-width={1.8}
                 data-menu-open
               />
 
               <X
                 size={21}
-                stroke-width={2}
+                stroke-width={1.8}
                 data-menu-close
                 hidden
               />
@@ -347,14 +368,14 @@ const currentYear = new Date().getFullYear();
         >
           <div class="shell mobile-panel__inner">
 
-            <div class="mobile-panel__intro">
-              <small>
-                NAVIGATION / BINSIGHT
-              </small>
-
+            <div class="mobile-panel__head">
               <span>
-                BADUNG WASTE INTELLIGENCE
+                INDEX / NAVIGATION
               </span>
+
+              <strong>
+                BINSIGHT
+              </strong>
             </div>
 
             <nav
@@ -387,6 +408,16 @@ const currentYear = new Date().getFullYear();
               </a>
             </nav>
 
+            <div class="mobile-panel__footer">
+              <span>
+                BADUNG / BALI
+              </span>
+
+              <span>
+                PUBLIC INFORMATION PLATFORM
+              </span>
+            </div>
+
           </div>
         </div>
       </header>
@@ -394,205 +425,259 @@ const currentYear = new Date().getFullYear();
 
       <main>
 
-        <!-- =========================
+        <!-- =========================================
              HERO
-        ========================== -->
+        ========================================== -->
 
         <section class="hero">
-          <div class="shell hero__inner">
 
-            <aside class="hero__side-label">
-              <span>01</span>
+          <div
+            class="hero__grain"
+            aria-hidden="true"
+          ></div>
 
-              <span>
-                PUBLIC PLATFORM
+          <div class="shell hero__grid">
+
+            <div class="hero__index">
+              <span class="hero__index-number">
+                00
               </span>
 
-              <span>
-                BADUNG / BALI
+              <span class="hero__index-label">
+                ENTRY / BINSIGHT
               </span>
-            </aside>
 
-            <div class="hero__content">
+              <span class="hero__index-location">
+                BADUNG
+                <br />
+                BALI
+              </span>
+            </div>
 
-              <p class="hero__eyebrow">
-                <span aria-hidden="true"></span>
-                BADUNG WASTE INTELLIGENCE
-              </p>
+            <div class="hero__main">
 
-              <h1>
-                Membaca
-                <em>Badung</em>
-                lewat
-                <strong>informasi.</strong>
-              </h1>
+              <div class="hero__topline">
+                <span>
+                  BADUNG WASTE INTELLIGENCE
+                </span>
 
-              <div class="hero__lower">
+                <span>
+                  PUBLIC / 01
+                </span>
+              </div>
 
-                <div class="hero__description">
+              <div class="hero__headline">
+
+                <p class="hero__overline">
+                  SEBUAH ARSIP DIGITAL TENTANG
+                </p>
+
+                <h1>
+                  Cara kita
+                  <span>melihat</span>
+                  <em>sampah.</em>
+                </h1>
+
+              </div>
+
+
+              <div class="hero__bottom">
+
+                <div class="hero__statement">
+                  <span class="hero__statement-line"></span>
 
                   <p>
-                    BINSIGHT menghubungkan informasi
-                    persampahan Kabupaten Badung dalam
-                    satu ruang digital — dari lokasi,
-                    data, organisasi, material,
-                    sampai laporan masyarakat.
+                    BINSIGHT menyusun informasi
+                    persampahan Kabupaten Badung
+                    melalui hubungan antara tempat,
+                    data, manusia, dan material.
                   </p>
 
-                  <div class="hero__buttons">
+                  <a
+                    class="hero__link"
+                    href={siteHref("/map")}
+                  >
+                    Mulai menjelajah
 
-                    <a
-                      class="button button--blue"
-                      href={siteHref("/map")}
-                    >
-                      Jelajahi BINSIGHT
-
-                      <ArrowUpRight
-                        size={17}
-                        stroke-width={2}
-                        aria-hidden="true"
-                      />
-                    </a>
-
-                    <a
-                      class="button button--line"
-                      href={siteHref("/company")}
-                    >
-                      Tentang platform
-                    </a>
-
-                  </div>
-
+                    <ArrowRight
+                      size={16}
+                      stroke-width={1.8}
+                      aria-hidden="true"
+                    />
+                  </a>
                 </div>
 
 
                 <div
-                  class="hero__signal"
-                  aria-label="Ringkasan sistem BINSIGHT"
+                  class="specimen"
+                  aria-label="Ringkasan konteks BINSIGHT"
                 >
 
-                  <div class="signal-head">
+                  <div class="specimen__top">
                     <span>
-                      PLATFORM SIGNAL
+                      SPECIMEN / 001
                     </span>
 
                     <span>
-                      LIVE
+                      ACTIVE
                     </span>
                   </div>
 
-                  <div class="signal-main">
+                  <div class="specimen__canvas">
 
-                    <div class="signal-title">
-                      <span>BADUNG</span>
+                    <div
+                      class="orbit orbit--one"
+                      aria-hidden="true"
+                    ></div>
+
+                    <div
+                      class="orbit orbit--two"
+                      aria-hidden="true"
+                    ></div>
+
+                    <div
+                      class="orbit orbit--three"
+                      aria-hidden="true"
+                    ></div>
+
+                    <div
+                      class="orbit-line orbit-line--one"
+                      aria-hidden="true"
+                    ></div>
+
+                    <div
+                      class="orbit-line orbit-line--two"
+                      aria-hidden="true"
+                    ></div>
+
+                    <div class="node node--center">
+                      <span></span>
+                      BADUNG
+                    </div>
+
+                    <div class="node node--place">
+                      <i></i>
+                      PLACE
+                    </div>
+
+                    <div class="node node--data">
+                      <i></i>
+                      DATA
+                    </div>
+
+                    <div class="node node--people">
+                      <i></i>
+                      PEOPLE
+                    </div>
+
+                    <div class="node node--material">
+                      <i></i>
+                      MATERIAL
+                    </div>
+
+                    <div class="specimen__caption">
+                      <small>
+                        RELATIONSHIP FIELD
+                      </small>
 
                       <strong>
-                        CONTEXT
+                        PLACE + DATA + PEOPLE
                       </strong>
                     </div>
 
-                    <div
-                      class="signal-bars"
-                      aria-hidden="true"
-                    >
-                      <span style="--size: 76%;"></span>
-                      <span style="--size: 51%;"></span>
-                      <span style="--size: 84%;"></span>
-                      <span style="--size: 63%;"></span>
-                      <span style="--size: 91%;"></span>
-                      <span style="--size: 44%;"></span>
-                      <span style="--size: 68%;"></span>
-                      <span style="--size: 58%;"></span>
-                      <span style="--size: 82%;"></span>
-                      <span style="--size: 72%;"></span>
-                    </div>
-
-                    <div class="signal-axis">
-                      <span>PLACE</span>
-                      <span>DATA</span>
-                      <span>PEOPLE</span>
-                    </div>
-
                   </div>
 
-                  <div class="signal-foot">
+                  <div class="specimen__bottom">
 
                     <span>
-                      INFORMATION SYSTEM
+                      CONTEXT FIELD
                     </span>
 
-                    <strong>
-                      ACTIVE
-                    </strong>
+                    <span>
+                      4 NODES
+                    </span>
 
                   </div>
 
                 </div>
 
               </div>
-            </div>
 
+            </div>
           </div>
         </section>
 
 
-        <!-- =========================
-             INTRO
-        ========================== -->
+        <!-- =========================================
+             INTRO / MANIFESTO
+        ========================================== -->
 
-        <section class="intro">
+        <section class="manifesto">
+
           <div class="shell">
 
-            <div class="section-marker">
-              <span>02</span>
-              <span>ABOUT THE PLATFORM</span>
+            <div class="section-code">
+              <span>
+                01
+              </span>
+
+              <span>
+                MANIFESTO
+              </span>
+
+              <span>
+                WHY BINSIGHT
+              </span>
             </div>
 
-            <div class="intro__grid">
+            <div class="manifesto__layout">
 
-              <div class="intro__headline">
+              <div class="manifesto__number">
+                01
+              </div>
 
-                <span class="big-number">
-                  01
-                </span>
+              <div class="manifesto__headline">
+
+                <p class="micro-label">
+                  SYSTEM / CONTEXT
+                </p>
 
                 <h2>
-                  Sampah adalah
-                  <em>konteks.</em>
+                  Persampahan
+                  <span>bukan satu benda.</span>
                 </h2>
 
               </div>
 
-              <div class="intro__copy">
+              <div class="manifesto__copy">
 
-                <p class="lead">
-                  Persampahan tidak berdiri sebagai
-                  satu masalah yang terpisah.
+                <p class="manifesto__lead">
+                  Ia adalah hubungan.
                 </p>
 
                 <p>
-                  Ada material, lokasi, pengelola,
-                  kebiasaan, proses, dan kondisi
-                  lingkungan yang semuanya
-                  saling berhubungan.
+                  Ada material yang berbeda,
+                  tempat yang berbeda, pihak yang
+                  bergerak, proses pengelolaan,
+                  dan kondisi lingkungan yang
+                  terus berubah.
                 </p>
 
                 <p>
-                  BINSIGHT menyatukan hubungan tersebut
-                  menjadi informasi yang lebih mudah
-                  ditemukan dan dipahami.
+                  BINSIGHT mencoba membuat
+                  hubungan tersebut terlihat.
                 </p>
 
                 <a
-                  class="arrow-link"
+                  class="text-arrow"
                   href={siteHref("/company")}
                 >
-                  Kenali BINSIGHT
+                  Tentang BINSIGHT
 
                   <span>
                     <ArrowUpRight
                       size={15}
-                      stroke-width={2}
+                      stroke-width={1.8}
                       aria-hidden="true"
                     />
                   </span>
@@ -606,68 +691,78 @@ const currentYear = new Date().getFullYear();
         </section>
 
 
-        <!-- =========================
-             SERVICES
-        ========================== -->
+        <!-- =========================================
+             SERVICES / ARCHIVE INDEX
+        ========================================== -->
 
-        <section class="services">
+        <section class="archive">
+
           <div class="shell">
 
-            <div class="section-marker">
-              <span>03</span>
-              <span>EXPLORE</span>
+            <div class="section-code">
+              <span>
+                02
+              </span>
+
+              <span>
+                ARCHIVE
+              </span>
+
+              <span>
+                EXPLORE
+              </span>
             </div>
 
-            <div class="services__intro">
+            <div class="archive__header">
 
               <div>
-
-                <p class="mini-label">
-                  WHAT YOU CAN EXPLORE
+                <p class="micro-label">
+                  BINSIGHT / INDEX
                 </p>
 
                 <h2>
-                  Empat pintu.
-                  <em>Satu ekosistem.</em>
+                  Empat cara
+                  <span>masuk ke sistem.</span>
                 </h2>
-
               </div>
 
               <p>
-                Setiap bagian memberikan sudut pandang
-                yang berbeda tanpa memisahkan
-                hubungan antar informasi.
+                Bukan halaman yang berdiri sendiri.
+                Setiap bagian memberikan sudut
+                pandang berbeda terhadap konteks
+                yang sama.
               </p>
 
             </div>
 
-            <div class="service-list">
+
+            <div class="archive-list">
 
               {services.map((service) => {
                 const Icon = service.icon;
 
                 return (
                   <a
-                    class="service-row"
+                    class="archive-row"
                     href={siteHref(service.href)}
                   >
 
-                    <div class="service-row__number">
+                    <div class="archive-row__number">
                       {service.number}
                     </div>
 
-                    <div class="service-row__icon">
+                    <div class="archive-row__symbol">
                       <Icon
                         size={22}
-                        stroke-width={1.8}
+                        stroke-width={1.5}
                         aria-hidden="true"
                       />
                     </div>
 
-                    <div class="service-row__main">
+                    <div class="archive-row__content">
 
                       <small>
-                        {service.detail}
+                        {service.code}
                       </small>
 
                       <h3>
@@ -680,16 +775,16 @@ const currentYear = new Date().getFullYear();
 
                     </div>
 
-                    <div class="service-row__action">
+                    <div class="archive-row__arrow">
 
                       <span>
-                        Explore
+                        OPEN
                       </span>
 
                       <div>
                         <ArrowUpRight
-                          size={18}
-                          stroke-width={2}
+                          size={17}
+                          stroke-width={1.8}
                           aria-hidden="true"
                         />
                       </div>
@@ -706,176 +801,121 @@ const currentYear = new Date().getFullYear();
         </section>
 
 
-        <!-- =========================
-             FLOW
-        ========================== -->
+        <!-- =========================================
+             SYSTEM / FLOW
+        ========================================== -->
 
-        <section class="flow">
+        <section class="system">
+
           <div class="shell">
 
-            <div class="section-marker section-marker--light">
-              <span>04</span>
-              <span>HOW IT CONNECTS</span>
+            <div class="section-code section-code--light">
+              <span>
+                03
+              </span>
+
+              <span>
+                SYSTEM
+              </span>
+
+              <span>
+                RELATIONSHIP
+              </span>
             </div>
 
-            <div class="flow__header">
+            <div class="system__header">
 
               <div>
-
-                <p class="mini-label mini-label--light">
-                  INFORMATION FLOW
+                <p class="micro-label micro-label--light">
+                  INFORMATION STRUCTURE
                 </p>
 
                 <h2>
-                  Lihat.
-                  <span>Pahami.</span>
-                  Bertindak.
+                  Satu isu.
+                  <span>
+                    Banyak hubungan.
+                  </span>
                 </h2>
-
               </div>
 
-              <p>
-                Informasi di BINSIGHT dibangun sebagai
-                rangkaian konteks, bukan sekadar
-                kumpulan halaman.
-              </p>
+              <div class="system__aside">
+                <span>
+                  CONTEXT ENGINE
+                </span>
+
+                <p>
+                  Informasi menjadi lebih bermakna
+                  ketika setiap elemen dapat dibaca
+                  bersama elemen lainnya.
+                </p>
+              </div>
 
             </div>
 
-            <div class="flow-line">
 
-              <div class="flow-step">
+            <div class="constellation">
 
-                <span class="flow-step__number">
-                  01
-                </span>
-
-                <div class="flow-step__circle">
-                  <Map
-                    size={21}
-                    stroke-width={1.8}
-                    aria-hidden="true"
-                  />
-                </div>
-
-                <small>PLACE</small>
+              <div class="constellation__center">
+                <small>
+                  BINSIGHT
+                </small>
 
                 <strong>
-                  Lokasi
+                  CONTEXT
                 </strong>
 
-                <p>
-                  Di mana kondisi ditemukan?
-                </p>
-
+                <span>
+                  BADUNG
+                </span>
               </div>
 
               <div
-                class="flow-arrow"
+                class="constellation__line constellation__line--one"
                 aria-hidden="true"
-              >
-                <ArrowRight
-                  size={20}
-                  stroke-width={1.8}
-                />
-              </div>
-
-              <div class="flow-step">
-
-                <span class="flow-step__number">
-                  02
-                </span>
-
-                <div class="flow-step__circle">
-                  <ChartColumn
-                    size={21}
-                    stroke-width={1.8}
-                    aria-hidden="true"
-                  />
-                </div>
-
-                <small>DATA</small>
-
-                <strong>
-                  Informasi
-                </strong>
-
-                <p>
-                  Apa yang tercatat?
-                </p>
-
-              </div>
+              ></div>
 
               <div
-                class="flow-arrow"
+                class="constellation__line constellation__line--two"
                 aria-hidden="true"
-              >
-                <ArrowRight
-                  size={20}
-                  stroke-width={1.8}
-                />
-              </div>
-
-              <div class="flow-step">
-
-                <span class="flow-step__number">
-                  03
-                </span>
-
-                <div class="flow-step__circle">
-                  <Building2
-                    size={21}
-                    stroke-width={1.8}
-                    aria-hidden="true"
-                  />
-                </div>
-
-                <small>NETWORK</small>
-
-                <strong>
-                  Orang
-                </strong>
-
-                <p>
-                  Siapa yang bergerak?
-                </p>
-
-              </div>
+              ></div>
 
               <div
-                class="flow-arrow"
+                class="constellation__line constellation__line--three"
                 aria-hidden="true"
-              >
-                <ArrowRight
-                  size={20}
-                  stroke-width={1.8}
-                />
+              ></div>
+
+              <div
+                class="constellation__line constellation__line--four"
+                aria-hidden="true"
+              ></div>
+
+              <div class="constellation__node constellation__node--one">
+                <span>01</span>
+                <strong>PLACE</strong>
+                <small>LOKASI</small>
               </div>
 
-              <div class="flow-step">
+              <div class="constellation__node constellation__node--two">
+                <span>02</span>
+                <strong>DATA</strong>
+                <small>INFORMASI</small>
+              </div>
 
-                <span class="flow-step__number">
-                  04
-                </span>
+              <div class="constellation__node constellation__node--three">
+                <span>03</span>
+                <strong>PEOPLE</strong>
+                <small>ORGANISASI</small>
+              </div>
 
-                <div class="flow-step__circle">
-                  <FileText
-                    size={21}
-                    stroke-width={1.8}
-                    aria-hidden="true"
-                  />
-                </div>
+              <div class="constellation__node constellation__node--four">
+                <span>04</span>
+                <strong>MATERIAL</strong>
+                <small>SAMPAH</small>
+              </div>
 
-                <small>ACTION</small>
-
-                <strong>
-                  Laporan
-                </strong>
-
-                <p>
-                  Apa yang bisa disampaikan?
-                </p>
-
+              <div class="constellation__legend">
+                <span></span>
+                CONNECTED CONTEXT
               </div>
 
             </div>
@@ -884,57 +924,77 @@ const currentYear = new Date().getFullYear();
         </section>
 
 
-        <!-- =========================
+        <!-- =========================================
              PRINCIPLES
-        ========================== -->
+        ========================================== -->
 
         <section class="principles">
+
           <div class="shell">
 
-            <div class="section-marker">
-              <span>05</span>
-              <span>PRINCIPLES</span>
+            <div class="section-code">
+              <span>
+                04
+              </span>
+
+              <span>
+                PRINCIPLES
+              </span>
+
+              <span>
+                DESIGN NOTES
+              </span>
             </div>
 
             <div class="principles__headline">
 
-              <p class="mini-label">
-                DESIGNING FOR TRUST
+              <p class="micro-label">
+                INFORMATION / TRUST
               </p>
 
               <h2>
-                Informasi publik
-                <em>harus terasa jelas.</em>
+                Dirancang untuk
+                <span>
+                  informasi publik.
+                </span>
               </h2>
 
             </div>
 
+
             <div class="principles__grid">
 
-              {principles.map((item) => (
-                <article class="principle">
+              {principles.map((principle) => (
+                <article class="principle-card">
 
-                  <div class="principle__top">
+                  <div class="principle-card__top">
 
                     <span>
-                      {item.number}
+                      {principle.number}
                     </span>
 
-                    <ArrowDownRight
-                      size={17}
-                      stroke-width={1.8}
-                      aria-hidden="true"
-                    />
+                    <span>
+                      {principle.label}
+                    </span>
 
                   </div>
 
-                  <h3>
-                    {item.title}
-                  </h3>
+                  <div class="principle-card__body">
 
-                  <p>
-                    {item.text}
-                  </p>
+                    <h3>
+                      {principle.title}
+                    </h3>
+
+                    <p>
+                      {principle.text}
+                    </p>
+
+                  </div>
+
+                  <div
+                    class="principle-card__line"
+                    aria-hidden="true"
+                  ></div>
 
                 </article>
               ))}
@@ -945,87 +1005,74 @@ const currentYear = new Date().getFullYear();
         </section>
 
 
-        <!-- =========================
-             NETWORK
-        ========================== -->
+        <!-- =========================================
+             ORGANIZATIONS / DIRECTORY
+        ========================================== -->
 
-        <section class="network">
+        <section class="directory">
+
           <div class="shell">
 
-            <div class="section-marker">
-              <span>06</span>
-              <span>NETWORK</span>
+            <div class="section-code">
+              <span>
+                05
+              </span>
+
+              <span>
+                DIRECTORY
+              </span>
+
+              <span>
+                NETWORK
+              </span>
             </div>
 
-            <div class="network__header">
+            <div class="directory__header">
 
               <div>
-
-                <p class="mini-label">
-                  ECOSYSTEM DIRECTORY
+                <p class="micro-label">
+                  PEOPLE / ORGANIZATION
                 </p>
 
                 <h2>
                   Siapa yang
-                  <em>bergerak?</em>
-                </h2>
-
-              </div>
-
-              <div class="network__side">
-
-                <p>
-                  Kenali organisasi dan pihak yang
-                  terlibat dalam pengelolaan
-                  persampahan dan lingkungan.
-                </p>
-
-                <a
-                  class="arrow-link"
-                  href={siteHref("/organizations")}
-                >
-                  Lihat semua organisasi
-
                   <span>
-                    <ArrowUpRight
-                      size={15}
-                      stroke-width={2}
-                      aria-hidden="true"
-                    />
+                    bergerak?
                   </span>
-                </a>
-
+                </h2>
               </div>
+
+              <p>
+                Ekosistem persampahan juga terdiri
+                dari pihak yang menjalankan,
+                mendukung, mendidik, dan mengelola.
+              </p>
 
             </div>
 
 
-            <div class="directory">
+            <div class="directory-table">
 
-              <div class="directory__head">
-
-                <span>INDEX</span>
+              <div class="directory-table__head">
+                <span>NO.</span>
                 <span>ORGANIZATION</span>
                 <span>TYPE</span>
                 <span>AREA</span>
                 <span>STATUS</span>
                 <span></span>
-
               </div>
 
-
-              {organizations.map((organization, index) => (
+              {organizations.map((organization) => (
                 <a
-                  class="directory__row"
+                  class="directory-table__row"
                   href={siteHref("/organizations")}
                 >
 
-                  <span class="directory__index">
-                    {String(index + 1).padStart(2, "0")}
+                  <span class="directory-table__number">
+                    {organization.number}
                   </span>
 
-                  <span class="directory__name">
-
+                  <span class="directory-table__name">
                     <strong>
                       {organization.name}
                     </strong>
@@ -1033,41 +1080,38 @@ const currentYear = new Date().getFullYear();
                     <small>
                       PUBLIC ORGANIZATION
                     </small>
-
                   </span>
 
-                  <span class="directory__type">
+                  <span class="directory-table__type">
                     {organization.type}
                   </span>
 
-                  <span class="directory__area">
+                  <span class="directory-table__area">
                     {organization.area}
                   </span>
 
                   <span
                     class:list={[
-                      "directory__status",
+                      "directory-table__status",
                       organization.verified &&
                         "is-verified",
                     ]}
                   >
-
                     <ShieldCheck
                       size={14}
-                      stroke-width={1.8}
+                      stroke-width={1.7}
                       aria-hidden="true"
                     />
 
                     {organization.verified
-                      ? "TERVERIFIKASI"
-                      : "CONTOH"}
-
+                      ? "VERIFIED"
+                      : "EXAMPLE"}
                   </span>
 
                   <ArrowUpRight
-                    class="directory__arrow"
+                    class="directory-table__arrow"
                     size={18}
-                    stroke-width={1.8}
+                    stroke-width={1.7}
                     aria-hidden="true"
                   />
 
@@ -1076,7 +1120,7 @@ const currentYear = new Date().getFullYear();
 
             </div>
 
-            <p class="data-note">
+            <p class="preview-note">
               Data organisasi di atas merupakan
               contoh visual untuk kebutuhan preview.
             </p>
@@ -1085,83 +1129,95 @@ const currentYear = new Date().getFullYear();
         </section>
 
 
-        <!-- =========================
+        <!-- =========================================
              MATERIALS
-        ========================== -->
+        ========================================== -->
 
         <section class="materials">
+
           <div class="shell">
 
-            <div class="section-marker">
-              <span>07</span>
-              <span>MATERIAL KNOWLEDGE</span>
+            <div class="section-code">
+              <span>
+                06
+              </span>
+
+              <span>
+                MATERIAL
+              </span>
+
+              <span>
+                KNOWLEDGE
+              </span>
             </div>
 
-            <div class="materials__layout">
+            <div class="materials__header">
 
-              <div class="materials__intro">
-
-                <p class="mini-label">
-                  MATERIAL LIBRARY
+              <div>
+                <p class="micro-label">
+                  MATERIAL INDEX
                 </p>
 
                 <h2>
-                  Kenali apa yang
-                  <em>kita buang.</em>
+                  Semua material
+                  <span>
+                    punya karakter.
+                  </span>
                 </h2>
-
-                <p>
-                  Setiap material memiliki
-                  karakteristik dan kebutuhan
-                  pengelolaan yang berbeda.
-                </p>
-
-                <a
-                  class="material-button"
-                  href={siteHref("/waste")}
-                >
-                  Lihat jenis sampah
-
-                  <ArrowUpRight
-                    size={17}
-                    stroke-width={2}
-                    aria-hidden="true"
-                  />
-                </a>
-
               </div>
 
-              <div
-                class="material-cloud"
-                aria-label="Kategori sampah"
-              >
+              <p>
+                Mengenali kategori sampah membantu
+                memahami bahwa setiap material
+                memiliki kebutuhan pengelolaan
+                yang berbeda.
+              </p>
 
-                {wasteCategories.map((category, index) => (
+            </div>
+
+
+            <div class="material-index">
+
+              <div class="material-index__rail">
+                <span>
+                  MATERIAL
+                </span>
+
+                <span>
+                  01 — 05
+                </span>
+              </div>
+
+              <div class="material-index__items">
+
+                {materials.map((material) => (
                   <a
                     class:list={[
-                      "material-chip",
-                      `material-chip--${index + 1}`,
+                      "material-row",
+                      `material-row--${material.size}`,
                     ]}
                     href={siteHref("/waste")}
                   >
 
-                    <span>
-                      {String(index + 1).padStart(2, "0")}
+                    <span class="material-row__number">
+                      {material.number}
                     </span>
 
-                    <strong>
-                      {category.label}
-                    </strong>
+                    <span class="material-row__name">
+                      {material.name}
+                    </span>
 
-                    <small>
-                      {category.type}
-                    </small>
+                    <span class="material-row__code">
+                      {material.code}
+                    </span>
 
-                    <ArrowUpRight
-                      size={17}
-                      stroke-width={1.8}
-                      aria-hidden="true"
-                    />
+                    <span class="material-row__arrow">
+                      <ArrowUpRight
+                        size={16}
+                        stroke-width={1.8}
+                        aria-hidden="true"
+                      />
+                    </span>
 
                   </a>
                 ))}
@@ -1174,68 +1230,65 @@ const currentYear = new Date().getFullYear();
         </section>
 
 
-        <!-- =========================
+        <!-- =========================================
              CONTEXT INDEX
-             Penutup non-CTA
-        ========================== -->
+        ========================================== -->
 
-        <section class="context-index">
+        <section class="context">
+
           <div class="shell">
 
-            <div class="section-marker">
-              <span>08</span>
-              <span>CONTEXT INDEX</span>
+            <div class="section-code">
+              <span>
+                07
+              </span>
+
+              <span>
+                CONTEXT
+              </span>
+
+              <span>
+                FIELD NOTES
+              </span>
             </div>
 
-            <div class="context-index__header">
+            <div class="context__headline">
 
-              <div>
-
-                <p class="mini-label">
-                  BINSIGHT SYSTEM
-                </p>
-
-                <h2>
-                  Empat konteks.
-                  <em>Satu pandangan.</em>
-                </h2>
-
-              </div>
-
-              <p>
-                BINSIGHT mempertemukan tempat,
-                informasi, manusia, dan material
-                agar isu persampahan dapat dilihat
-                secara lebih utuh.
+              <p class="micro-label">
+                FINAL READING
               </p>
 
+              <h2>
+                Melihat lebih jauh
+                <span>
+                  dari satu sudut.
+                </span>
+              </h2>
+
             </div>
 
 
-            <div class="context-grid">
+            <div class="context__grid">
 
               {contextItems.map((item) => (
-                <a
-                  class="context-card"
-                  href={siteHref(item.href)}
-                >
+                <article class="context-item">
 
-                  <div class="context-card__top">
+                  <div class="context-item__top">
 
                     <span>
                       {item.number}
                     </span>
 
-                    <ArrowUpRight
-                      size={18}
-                      stroke-width={1.8}
+                    <ArrowDown
+                      size={16}
+                      stroke-width={1.6}
                       aria-hidden="true"
                     />
 
                   </div>
 
                   <small>
-                    {item.label}
+                    {item.code}
                   </small>
 
                   <h3>
@@ -1243,11 +1296,29 @@ const currentYear = new Date().getFullYear();
                   </h3>
 
                   <p>
-                    {item.text}
+                    {item.description}
                   </p>
 
-                </a>
+                </article>
               ))}
+
+            </div>
+
+            <div class="context__signature">
+
+              <div>
+                <span>
+                  BINSIGHT
+                </span>
+
+                <strong>
+                  BADUNG WASTE INTELLIGENCE
+                </strong>
+              </div>
+
+              <span>
+                END OF INDEX / 07
+              </span>
 
             </div>
 
@@ -1257,11 +1328,12 @@ const currentYear = new Date().getFullYear();
       </main>
 
 
-      <!-- =========================
+      <!-- =========================================
            FOOTER
-      ========================== -->
+      ========================================== -->
 
       <footer class="footer">
+
         <div class="shell">
 
           <div class="footer__top">
@@ -1269,11 +1341,14 @@ const currentYear = new Date().getFullYear();
             <div class="footer__brand">
 
               <a
-                class="brand"
+                class="brand brand--footer"
                 href={siteHref("/")}
               >
 
-                <span class="brand__symbol">
+                <span
+                  class="brand__mark"
+                  aria-hidden="true"
+                >
                   B
                 </span>
 
@@ -1301,25 +1376,25 @@ const currentYear = new Date().getFullYear();
             </div>
 
 
-            <div class="footer__nav">
+            <div class="footer__navigation">
 
               <div>
 
                 <small>
-                  EXPLORE
+                  INDEX
                 </small>
 
                 {footerLinks.map((link) => (
                   <a href={siteHref(link.href)}>
-
-                    {link.label}
+                    <span>
+                      {link.label}
+                    </span>
 
                     <ArrowUpRight
-                      size={14}
-                      stroke-width={1.8}
+                      size={13}
+                      stroke-width={1.7}
                       aria-hidden="true"
                     />
-
                   </a>
                 ))}
 
@@ -1354,7 +1429,7 @@ const currentYear = new Date().getFullYear();
           <div class="footer__bottom">
 
             <span>
-              BINSIGHT / BADUNG WASTE INTELLIGENCE
+              BINSIGHT / INDEX 07
             </span>
 
             <span>
@@ -1367,9 +1442,9 @@ const currentYear = new Date().getFullYear();
       </footer>
 
 
-      <!-- =========================
+      <!-- =========================================
            ONLY REPORT ENTRY POINT
-      ========================== -->
+      ========================================== -->
 
       <a
         class="floating-report"
@@ -1377,28 +1452,30 @@ const currentYear = new Date().getFullYear();
         aria-label="Buat laporan kondisi persampahan"
       >
 
-        <span class="floating-report__icon">
+        <span class="floating-report__mark">
           <TriangleAlert
-            size={19}
+            size={18}
             stroke-width={2}
             aria-hidden="true"
           />
         </span>
 
-        <span class="floating-report__label">
+        <span class="floating-report__text">
+
           <small>
-            LAPORAN MASYARAKAT
+            COMMUNITY INPUT
           </small>
 
           <strong>
             Buat laporan
           </strong>
+
         </span>
 
         <span class="floating-report__arrow">
           <ArrowUpRight
             size={16}
-            stroke-width={2}
+            stroke-width={1.9}
             aria-hidden="true"
           />
         </span>
@@ -1448,6 +1525,7 @@ const currentYear = new Date().getFullYear();
       panel.hidden = !open;
 
       if (open) {
+
         openIcon?.setAttribute(
           "hidden",
           ""
@@ -1458,13 +1536,17 @@ const currentYear = new Date().getFullYear();
         );
 
         if (openIcon) {
-          openIcon.style.display = "none";
+          openIcon.style.display =
+            "none";
         }
 
         if (closeIcon) {
-          closeIcon.style.display = "block";
+          closeIcon.style.display =
+            "block";
         }
+
       } else {
+
         openIcon?.removeAttribute(
           "hidden"
         );
@@ -1475,12 +1557,15 @@ const currentYear = new Date().getFullYear();
         );
 
         if (openIcon) {
-          openIcon.style.display = "block";
+          openIcon.style.display =
+            "block";
         }
 
         if (closeIcon) {
-          closeIcon.style.display = "none";
+          closeIcon.style.display =
+            "none";
         }
+
       }
 
       document.body.classList.toggle(
@@ -1514,14 +1599,18 @@ const currentYear = new Date().getFullYear();
       .forEach((link) => {
         link.addEventListener(
           "click",
-          () => setMenu(false)
+          () => {
+            setMenu(false);
+          }
         );
       });
 
     window.addEventListener(
       "resize",
       () => {
-        if (window.innerWidth > 980) {
+        if (
+          window.innerWidth > 980
+        ) {
           setMenu(false);
         }
       }
@@ -1539,11 +1628,15 @@ const currentYear = new Date().getFullYear();
 
 
   <style>
+    /* =========================================
+       ROOT
+    ========================================== */
+
     :global(:root) {
       color-scheme: light;
 
       font-family:
-        Manrope,
+        "Space Grotesk",
         Inter,
         ui-sans-serif,
         system-ui,
@@ -1556,15 +1649,21 @@ const currentYear = new Date().getFullYear();
 
     :global(html) {
       scroll-behavior: smooth;
-      background: #f4efe8;
+
+      background:
+        #ebe4d6;
     }
 
     :global(body) {
       min-width: 320px;
+
       margin: 0;
 
-      background: #f4efe8;
-      color: #17181b;
+      background:
+        #ebe4d6;
+
+      color:
+        #191916;
     }
 
     :global(body.menu-open) {
@@ -1573,49 +1672,79 @@ const currentYear = new Date().getFullYear();
 
     :global(a) {
       color: inherit;
+
       text-decoration: none;
     }
 
     :global(button),
     :global(a) {
-      -webkit-tap-highlight-color: transparent;
+      -webkit-tap-highlight-color:
+        transparent;
     }
 
 
-    /* =========================
+    /* =========================================
        SYSTEM
-    ========================== */
+    ========================================== */
 
     .site {
-      --bg: #f4efe8;
-      --paper: #fffdf8;
-      --paper-2: #ece7de;
+      --paper:
+        #ebe4d6;
 
-      --ink: #17181b;
-      --muted: #6d6c69;
-      --soft: #98948d;
+      --paper-light:
+        #f4efe5;
 
-      --line: #d9d2c7;
+      --paper-white:
+        #fbf9f3;
 
-      --blue: #2754ff;
-      --blue-dark: #193bd0;
+      --ink:
+        #191916;
 
-      --orange: #ff6947;
-      --yellow: #f6c84b;
+      --ink-soft:
+        #5d5a52;
 
-      --dark: #161a26;
+      --muted:
+        #858077;
 
-      --max: 1260px;
+      --line:
+        #cfc7b8;
+
+      --line-dark:
+        #45433d;
+
+      --rust:
+        #bd4e3e;
+
+      --rust-light:
+        #e4a091;
+
+      --yellow:
+        #e8cb69;
+
+      --sage:
+        #99a98a;
+
+      --dark:
+        #171815;
+
+      --max:
+        1280px;
 
       min-height: 100vh;
 
       overflow: clip;
 
-      background: var(--bg);
-      color: var(--ink);
+      background:
+        var(--paper);
 
-      -webkit-font-smoothing: antialiased;
-      text-rendering: optimizeLegibility;
+      color:
+        var(--ink);
+
+      -webkit-font-smoothing:
+        antialiased;
+
+      text-rendering:
+        optimizeLegibility;
     }
 
     .shell {
@@ -1625,38 +1754,44 @@ const currentYear = new Date().getFullYear();
           calc(100% - 56px)
         );
 
-      margin: 0 auto;
+      margin:
+        0 auto;
     }
 
 
-    /* =========================
+    /* =========================================
        HEADER
-    ========================== */
+    ========================================== */
 
     .header {
       position: sticky;
+
       top: 0;
+
       z-index: 100;
 
       border-bottom:
         1px solid
-        rgba(23, 24, 27, 0.1);
+        rgba(
+          25,
+          25,
+          22,
+          0.12
+        );
 
       background:
         rgba(
-          244,
-          239,
-          232,
+          235,
+          228,
+          214,
           0.9
         );
 
       backdrop-filter:
-        blur(18px);
+        blur(16px);
     }
 
     .header__inner {
-      min-height: 84px;
-
       display: grid;
 
       grid-template-columns:
@@ -1666,7 +1801,11 @@ const currentYear = new Date().getFullYear();
 
       align-items: center;
 
-      gap: 30px;
+      min-height:
+        82px;
+
+      gap:
+        28px;
     }
 
     .brand {
@@ -1674,32 +1813,45 @@ const currentYear = new Date().getFullYear();
 
       align-items: center;
 
-      gap: 11px;
+      gap:
+        11px;
 
-      width: fit-content;
+      width:
+        fit-content;
     }
 
-    .brand__symbol {
+    .brand__mark {
       display: grid;
 
-      width: 41px;
-      height: 41px;
+      width:
+        40px;
 
-      place-items: center;
+      height:
+        40px;
 
-      border-radius: 13px;
+      place-items:
+        center;
 
-      background: var(--blue);
-      color: #fff;
+      border:
+        1px solid
+        var(--ink);
+
+      background:
+        var(--ink);
+
+      color:
+        var(--paper);
 
       font-family:
-        "DM Serif Display",
+        "Bodoni Moda",
         Georgia,
         serif;
 
-      font-size: 24px;
+      font-size:
+        23px;
 
-      line-height: 1;
+      line-height:
+        1;
     }
 
     .brand__copy {
@@ -1707,27 +1859,34 @@ const currentYear = new Date().getFullYear();
 
       flex-direction: column;
 
-      gap: 2px;
+      gap:
+        2px;
     }
 
     .brand__copy strong {
-      font-size: 16px;
-      font-weight: 800;
+      font-size:
+        15px;
 
-      letter-spacing: -0.045em;
+      font-weight:
+        700;
+
+      letter-spacing:
+        -0.04em;
     }
 
     .brand__copy small {
-      color: var(--muted);
+      color:
+        var(--muted);
 
       font-family:
-        "DM Mono",
+        "IBM Plex Mono",
         monospace;
 
-      font-size: 7px;
-      font-weight: 500;
+      font-size:
+        6px;
 
-      letter-spacing: 0.09em;
+      letter-spacing:
+        0.1em;
     }
 
     .desktop-nav {
@@ -1735,102 +1894,134 @@ const currentYear = new Date().getFullYear();
 
       align-items: center;
 
-      padding: 5px;
-
-      border:
-        1px solid
-        var(--line);
-
-      border-radius: 999px;
-
-      background:
-        rgba(
-          255,
-          253,
-          248,
-          0.72
-        );
+      gap:
+        24px;
     }
 
-    .desktop-nav__item {
-      min-height: 38px;
+    .desktop-nav__link {
+      position: relative;
 
       display: inline-flex;
 
       align-items: center;
 
-      padding: 0 16px;
+      min-height:
+        42px;
 
-      border-radius: 999px;
+      color:
+        #68645c;
 
-      color: #686763;
+      font-size:
+        10px;
 
-      font-size: 11px;
-      font-weight: 700;
+      font-weight:
+        600;
+
+      letter-spacing:
+        0.015em;
+    }
+
+    .desktop-nav__link::after {
+      position: absolute;
+
+      right: 0;
+      bottom: 8px;
+      left: 0;
+
+      height:
+        1px;
+
+      content:
+        "";
+
+      background:
+        var(--ink);
+
+      transform:
+        scaleX(0);
+
+      transform-origin:
+        left;
 
       transition:
-        color 160ms ease,
-        background 160ms ease;
+        transform
+        160ms ease;
     }
 
-    .desktop-nav__item:hover {
-      color: var(--ink);
+    .desktop-nav__link:hover,
+    .desktop-nav__link.is-active {
+      color:
+        var(--ink);
     }
 
-    .desktop-nav__item.is-active {
-      background: var(--ink);
-      color: #fff;
+    .desktop-nav__link:hover::after,
+    .desktop-nav__link.is-active::after {
+      transform:
+        scaleX(1);
     }
 
-    .header__actions {
+    .header__tools {
       display: flex;
 
       align-items: center;
 
-      gap: 8px;
+      gap:
+        7px;
     }
 
-    .header-search,
-    .menu-trigger {
+    .search-button,
+    .menu-button {
       display: grid;
 
-      width: 42px;
-      height: 42px;
+      width:
+        40px;
 
-      place-items: center;
+      height:
+        40px;
+
+      place-items:
+        center;
 
       border:
         1px solid
         var(--line);
 
-      border-radius: 50%;
+      background:
+        var(--paper-light);
 
-      background: var(--paper);
+      color:
+        var(--ink);
 
-      cursor: pointer;
+      cursor:
+        pointer;
 
       transition:
-        background 160ms ease,
-        transform 160ms ease;
+        background
+        160ms ease,
+        transform
+        160ms ease;
     }
 
-    .header-search:hover,
-    .menu-trigger:hover {
-      background: #fff;
+    .search-button:hover,
+    .menu-button:hover {
+      background:
+        var(--paper-white);
 
       transform:
-        translateY(-1px);
+        translateY(
+          -1px
+        );
     }
 
-    .menu-trigger {
+    .menu-button {
       display: none;
     }
 
-    .menu-trigger svg {
+    .menu-button svg {
       display: block;
     }
 
-    .menu-trigger svg[hidden] {
+    .menu-button svg[hidden] {
       display: none !important;
     }
 
@@ -1839,61 +2030,79 @@ const currentYear = new Date().getFullYear();
         1px solid
         var(--line);
 
-      background: var(--paper);
+      background:
+        var(--paper-light);
     }
 
     .mobile-panel__inner {
       padding:
-        24px 0 30px;
+        26px 0 30px;
     }
 
-    .mobile-panel__intro {
+    .mobile-panel__head {
       display: flex;
 
-      flex-direction: column;
+      align-items:
+        flex-end;
 
-      gap: 5px;
+      justify-content:
+        space-between;
 
-      margin-bottom: 20px;
+      gap:
+        20px;
+
+      padding-bottom:
+        18px;
+
+      border-bottom:
+        1px solid
+        var(--line);
     }
 
-    .mobile-panel__intro small {
-      color: var(--soft);
+    .mobile-panel__head span {
+      color:
+        var(--muted);
 
       font-family:
-        "DM Mono",
+        "IBM Plex Mono",
         monospace;
 
-      font-size: 8px;
+      font-size:
+        7px;
 
-      letter-spacing: 0.1em;
+      letter-spacing:
+        0.1em;
     }
 
-    .mobile-panel__intro span {
-      font-size: 11px;
-      font-weight: 800;
+    .mobile-panel__head strong {
+      font-family:
+        "Bodoni Moda",
+        Georgia,
+        serif;
+
+      font-size:
+        22px;
+
+      font-weight:
+        400;
     }
 
     .mobile-nav {
       display: grid;
-
-      border-top:
-        1px solid
-        var(--line);
     }
 
     .mobile-nav a {
       display: grid;
 
       grid-template-columns:
-        32px
-        1fr;
+        36px
+        minmax(0, 1fr);
 
-      align-items: center;
+      align-items:
+        center;
 
-      gap: 10px;
-
-      min-height: 64px;
+      min-height:
+        62px;
 
       border-bottom:
         1px solid
@@ -1901,103 +2110,215 @@ const currentYear = new Date().getFullYear();
     }
 
     .mobile-nav a span {
-      color: var(--soft);
+      color:
+        var(--muted);
 
       font-family:
-        "DM Mono",
+        "IBM Plex Mono",
         monospace;
 
-      font-size: 8px;
+      font-size:
+        7px;
     }
 
     .mobile-nav a strong {
-      font-size: 18px;
-      font-weight: 800;
+      font-size:
+        20px;
 
-      letter-spacing: -0.04em;
+      font-weight:
+        600;
+
+      letter-spacing:
+        -0.045em;
+    }
+
+    .mobile-panel__footer {
+      display: flex;
+
+      justify-content:
+        space-between;
+
+      gap:
+        20px;
+
+      padding-top:
+        22px;
+
+      color:
+        var(--muted);
+
+      font-family:
+        "IBM Plex Mono",
+        monospace;
+
+      font-size:
+        7px;
+
+      letter-spacing:
+        0.06em;
     }
 
 
-    /* =========================
+    /* =========================================
        HERO
-    ========================== */
+    ========================================== */
 
     .hero {
       position: relative;
+
+      min-height:
+        850px;
 
       border-bottom:
         1px solid
         var(--line);
 
       background:
-        radial-gradient(
-          circle at 74% 28%,
-          rgba(
-            39,
-            84,
-            255,
-            0.08
-          ),
-          transparent 25%
-        );
+        var(--paper);
+
+      overflow:
+        hidden;
     }
 
-    .hero__inner {
-      position: relative;
+    .hero::before {
+      position: absolute;
 
-      min-height: 780px;
+      inset:
+        0;
+
+      content:
+        "";
+
+      opacity:
+        0.3;
+
+      background-image:
+        linear-gradient(
+          rgba(
+            25,
+            25,
+            22,
+            0.045
+          )
+          1px,
+          transparent 1px
+        ),
+        linear-gradient(
+          90deg,
+          rgba(
+            25,
+            25,
+            22,
+            0.045
+          )
+          1px,
+          transparent 1px
+        );
+
+      background-size:
+        44px
+        44px;
+
+      pointer-events:
+        none;
+    }
+
+    .hero__grain {
+      position: absolute;
+
+      width:
+        420px;
+
+      height:
+        420px;
+
+      right:
+        -170px;
+
+      top:
+        120px;
+
+      border-radius:
+        50%;
+
+      background:
+        var(--rust);
+
+      opacity:
+        0.08;
+
+      filter:
+        blur(
+          20px
+        );
+
+      pointer-events:
+        none;
+    }
+
+    .hero__grid {
+      position: relative;
 
       display: grid;
 
       grid-template-columns:
-        50px
+        54px
         minmax(0, 1fr);
 
-      align-items: stretch;
+      min-height:
+        850px;
     }
 
-    .hero__side-label {
+    .hero__index {
       display: flex;
 
-      flex-direction: column;
+      flex-direction:
+        column;
 
-      align-items: center;
+      align-items:
+        center;
 
-      justify-content: space-between;
+      justify-content:
+        space-between;
 
       padding:
-        70px 0 46px;
+        70px
+        0
+        42px;
 
       border-right:
         1px solid
         var(--line);
 
-      color: var(--soft);
+      color:
+        var(--muted);
 
       font-family:
-        "DM Mono",
+        "IBM Plex Mono",
         monospace;
 
-      font-size: 7px;
+      font-size:
+        7px;
 
-      letter-spacing: 0.1em;
+      letter-spacing:
+        0.08em;
 
-      text-transform: uppercase;
+      text-transform:
+        uppercase;
     }
 
-    .hero__side-label
-      span:first-child {
-      color: var(--ink);
+    .hero__index-number {
+      color:
+        var(--ink);
 
-      font-size: 10px;
-      font-weight: 600;
+      font-size:
+        10px;
     }
 
-    .hero__side-label
-      span:nth-child(2),
-    .hero__side-label
-      span:nth-child(3) {
-      writing-mode: vertical-rl;
+    .hero__index-label,
+    .hero__index-location {
+      writing-mode:
+        vertical-rl;
 
       transform:
         rotate(
@@ -2005,1024 +2326,915 @@ const currentYear = new Date().getFullYear();
         );
     }
 
-    .hero__content {
-      padding:
-        92px 0 96px 74px;
+    .hero__index-location {
+      text-align:
+        center;
     }
 
-    .hero__eyebrow {
-      display: inline-flex;
-
-      align-items: center;
-
-      gap: 9px;
-
-      margin: 0;
-
-      color: var(--muted);
-
-      font-family:
-        "DM Mono",
-        monospace;
-
-      font-size: 8px;
-      font-weight: 600;
-
-      letter-spacing: 0.1em;
-    }
-
-    .hero__eyebrow span {
-      width: 26px;
-      height: 1px;
-
-      background:
-        var(--blue);
-    }
-
-    .hero h1 {
-      max-width: 870px;
-
-      margin:
-        30px 0 0;
-
-      font-family:
-        "DM Serif Display",
-        Georgia,
-        serif;
-
-      font-size:
-        clamp(
-          72px,
-          9vw,
-          138px
-        );
-
-      font-weight: 400;
-
-      line-height: 0.84;
-
-      letter-spacing: -0.065em;
-    }
-
-    .hero h1 em,
-    .hero h1 strong {
-      display: block;
-
-      font-weight: 400;
-    }
-
-    .hero h1 em {
-      margin-left: 10%;
-
-      color:
-        var(--blue);
-
-      font-style: italic;
-    }
-
-    .hero h1 strong {
-      margin-left: 4%;
-
-      color:
-        var(--orange);
-    }
-
-    .hero__lower {
-      display: grid;
-
-      grid-template-columns:
-        minmax(280px, 0.75fr)
-        minmax(360px, 1fr);
-
-      gap: 80px;
-
-      align-items: end;
-
-      margin-top: 76px;
-    }
-
-    .hero__description p {
-      max-width: 480px;
-
-      margin: 0;
-
-      color: #54534f;
-
-      font-size: 15px;
-
-      line-height: 1.85;
-    }
-
-    .hero__buttons {
-      display: flex;
-
-      flex-wrap: wrap;
-
-      gap: 9px;
-
-      margin-top: 26px;
-    }
-
-    .button {
-      min-height: 47px;
-
-      display: inline-flex;
-
-      align-items: center;
-      justify-content: center;
-
-      gap: 8px;
-
-      padding: 0 17px;
-
-      border-radius: 999px;
-
-      font-size: 10px;
-      font-weight: 800;
-
-      transition:
-        transform 160ms ease,
-        box-shadow 160ms ease;
-    }
-
-    .button:hover {
-      transform:
-        translateY(-2px);
-    }
-
-    .button--blue {
-      background:
-        var(--blue);
-
-      color: #fff;
-
-      box-shadow:
-        0 8px 20px
-        rgba(
-          39,
-          84,
-          255,
-          0.18
-        );
-    }
-
-    .button--line {
-      border:
-        1px solid
-        var(--line);
-
-      background:
-        var(--paper);
-    }
-
-    .hero__signal {
-      overflow: hidden;
-
-      border:
-        1px solid
-        #cfc7bb;
-
-      border-radius: 24px;
-
-      background:
-        rgba(
-          255,
-          253,
-          248,
-          0.78
-        );
-
-      box-shadow:
-        0 22px 60px
-        rgba(
-          31,
-          34,
-          39,
-          0.08
-        );
-    }
-
-    .signal-head,
-    .signal-foot {
-      min-height: 50px;
-
-      display: flex;
-
-      align-items: center;
-      justify-content: space-between;
-
-      gap: 18px;
-
-      padding: 0 18px;
-
-      color: var(--muted);
-
-      font-family:
-        "DM Mono",
-        monospace;
-
-      font-size: 7px;
-      font-weight: 600;
-
-      letter-spacing: 0.1em;
-    }
-
-    .signal-head {
-      border-bottom:
-        1px solid
-        var(--line);
-    }
-
-    .signal-head span:last-child {
-      color: #177642;
-    }
-
-    .signal-main {
-      position: relative;
-
-      min-height: 300px;
+    .hero__main {
+      min-width:
+        0;
 
       padding:
-        28px 24px;
-
-      background:
-        linear-gradient(
-          180deg,
-          rgba(
-            39,
-            84,
-            255,
-            0.035
-          ),
-          transparent
-        );
+        50px
+        0
+        72px
+        72px;
     }
 
-    .signal-title {
+    .hero__topline {
       display: flex;
 
-      align-items: baseline;
+      justify-content:
+        space-between;
 
-      justify-content: space-between;
+      gap:
+        20px;
 
-      gap: 20px;
-    }
-
-    .signal-title span {
-      color: var(--muted);
-
-      font-family:
-        "DM Mono",
-        monospace;
-
-      font-size: 8px;
-
-      letter-spacing: 0.08em;
-    }
-
-    .signal-title strong {
-      color: var(--ink);
-
-      font-family:
-        "DM Serif Display",
-        Georgia,
-        serif;
-
-      font-size: 34px;
-      font-weight: 400;
-
-      letter-spacing: -0.04em;
-    }
-
-    .signal-bars {
-      position: absolute;
-
-      right: 24px;
-      bottom: 54px;
-      left: 24px;
-
-      height: 150px;
-
-      display: flex;
-
-      align-items: flex-end;
-
-      gap: 7px;
+      padding-bottom:
+        15px;
 
       border-bottom:
         1px solid
         var(--line);
-    }
-
-    .signal-bars span {
-      flex: 1;
-
-      height:
-        var(--size);
-
-      min-width: 4px;
-
-      border-radius:
-        5px 5px 0 0;
-
-      background:
-        linear-gradient(
-          180deg,
-          var(--blue),
-          #6884ff
-        );
-
-      opacity: 0.88;
-    }
-
-    .signal-bars span:nth-child(3n) {
-      background:
-        var(--orange);
-    }
-
-    .signal-bars span:nth-child(5n) {
-      background:
-        var(--yellow);
-    }
-
-    .signal-axis {
-      position: absolute;
-
-      right: 24px;
-      bottom: 22px;
-      left: 24px;
-
-      display: flex;
-
-      justify-content: space-between;
-
-      color: var(--soft);
-
-      font-family:
-        "DM Mono",
-        monospace;
-
-      font-size: 7px;
-
-      letter-spacing: 0.08em;
-    }
-
-    .signal-foot {
-      border-top:
-        1px solid
-        var(--line);
-    }
-
-    .signal-foot strong {
-      color:
-        var(--blue);
-    }
-
-
-    /* =========================
-       COMMON
-    ========================== */
-
-    .section-marker {
-      display: flex;
-
-      align-items: center;
-
-      gap: 12px;
-
-      color: #89847c;
-
-      font-family:
-        "DM Mono",
-        monospace;
-
-      font-size: 8px;
-      font-weight: 600;
-
-      letter-spacing: 0.11em;
-
-      text-transform: uppercase;
-    }
-
-    .section-marker span:first-child {
-      color:
-        var(--blue);
-    }
-
-    .section-marker::after {
-      content: "";
-
-      width: 34px;
-      height: 1px;
-
-      background:
-        var(--line);
-    }
-
-    .section-marker--light {
-      color: #9197a9;
-    }
-
-    .section-marker--light
-      span:first-child {
-      color:
-        var(--yellow);
-    }
-
-    .mini-label {
-      margin: 0;
 
       color:
         var(--muted);
 
       font-family:
-        "DM Mono",
+        "IBM Plex Mono",
         monospace;
 
-      font-size: 8px;
-      font-weight: 600;
+      font-size:
+        7px;
 
-      letter-spacing: 0.1em;
+      letter-spacing:
+        0.09em;
 
-      text-transform: uppercase;
+      text-transform:
+        uppercase;
     }
 
-    .mini-label--light {
-      color: #9399aa;
-    }
+    .hero__overline {
+      margin:
+        56px 0
+        15px;
 
-
-    /* =========================
-       INTRO
-    ========================== */
-
-    .intro {
-      padding:
-        120px 0;
-
-      border-bottom:
-        1px solid
-        var(--line);
-
-      background:
-        var(--paper);
-    }
-
-    .intro__grid {
-      display: grid;
-
-      grid-template-columns:
-        minmax(0, 1.15fr)
-        minmax(300px, 0.62fr);
-
-      gap: 100px;
-
-      margin-top: 55px;
-    }
-
-    .intro__headline {
-      position: relative;
-
-      padding-left: 74px;
-    }
-
-    .big-number {
-      position: absolute;
-
-      top: 0;
-      left: 0;
-
-      color: #c6c0b7;
+      color:
+        var(--rust);
 
       font-family:
-        "DM Mono",
+        "IBM Plex Mono",
         monospace;
 
-      font-size: 10px;
+      font-size:
+        8px;
+
+      letter-spacing:
+        0.11em;
+
+      text-transform:
+        uppercase;
     }
 
-    .intro h2,
-    .services h2,
-    .principles h2,
-    .network h2,
-    .materials h2,
-    .context-index h2,
-    .flow h2 {
-      margin: 0;
+    .hero h1 {
+      max-width:
+        930px;
+
+      margin:
+        0;
 
       font-family:
-        "DM Serif Display",
+        "Bodoni Moda",
         Georgia,
         serif;
 
       font-size:
         clamp(
-          52px,
-          6vw,
-          88px
+          80px,
+          10vw,
+          154px
         );
 
-      font-weight: 400;
+      font-weight:
+        400;
 
-      line-height: 0.93;
+      line-height:
+        0.78;
 
-      letter-spacing: -0.055em;
+      letter-spacing:
+        -0.075em;
     }
 
-    .intro h2 em,
-    .services h2 em,
-    .principles h2 em,
-    .network h2 em,
-    .materials h2 em,
-    .context-index h2 em {
-      color:
-        var(--blue);
-
-      font-style: italic;
+    .hero h1 span,
+    .hero h1 em {
+      display:
+        block;
     }
 
-    .intro__copy {
-      padding-top: 12px;
+    .hero h1 span {
+      margin-left:
+        12%;
     }
 
-    .intro__copy p {
-      margin:
-        0 0 20px;
-
-      color: #65615b;
-
-      font-size: 14px;
-
-      line-height: 1.82;
-    }
-
-    .intro__copy .lead {
-      margin-bottom: 28px;
+    .hero h1 em {
+      margin-left:
+        5%;
 
       color:
-        var(--ink);
+        var(--rust);
 
-      font-size: 18px;
-
-      font-weight: 700;
-
-      line-height: 1.55;
+      font-style:
+        italic;
     }
 
-    .arrow-link {
-      display: inline-flex;
-
-      align-items: center;
-
-      gap: 8px;
-
-      margin-top: 7px;
-
-      font-size: 10px;
-      font-weight: 800;
-    }
-
-    .arrow-link span {
+    .hero__bottom {
       display: grid;
 
-      width: 31px;
-      height: 31px;
+      grid-template-columns:
+        minmax(
+          230px,
+          0.7fr
+        )
+        minmax(
+          380px,
+          0.95fr
+        );
 
-      place-items: center;
+      align-items:
+        end;
+
+      gap:
+        84px;
+
+      margin-top:
+        88px;
+    }
+
+    .hero__statement {
+      max-width:
+        430px;
+    }
+
+    .hero__statement-line {
+      display:
+        block;
+
+      width:
+        42px;
+
+      height:
+        2px;
+
+      margin-bottom:
+        18px;
+
+      background:
+        var(--rust);
+    }
+
+    .hero__statement p {
+      margin:
+        0;
+
+      color:
+        var(--ink-soft);
+
+      font-size:
+        13px;
+
+      line-height:
+        1.85;
+    }
+
+    .hero__link {
+      display:
+        inline-flex;
+
+      align-items:
+        center;
+
+      gap:
+        10px;
+
+      margin-top:
+        23px;
+
+      padding-bottom:
+        6px;
+
+      border-bottom:
+        1px solid
+        var(--ink);
+
+      font-size:
+        10px;
+
+      font-weight:
+        700;
+    }
+
+    .hero__link svg {
+      transition:
+        transform
+        160ms ease;
+    }
+
+    .hero__link:hover svg {
+      transform:
+        translateX(
+          3px
+        );
+    }
+
+
+    /* SPECIMEN */
+
+    .specimen {
+      overflow:
+        hidden;
 
       border:
         1px solid
         var(--line);
 
-      border-radius: 50%;
-
-      transition:
-        transform 160ms ease,
-        background 160ms ease;
-    }
-
-    .arrow-link:hover span {
-      transform:
-        translate(
-          2px,
-          -2px
-        );
-
       background:
-        var(--yellow);
+        var(--paper-light);
     }
 
+    .specimen__top,
+    .specimen__bottom {
+      display:
+        flex;
 
-    /* =========================
-       SERVICES
-    ========================== */
+      align-items:
+        center;
 
-    .services {
+      justify-content:
+        space-between;
+
+      gap:
+        20px;
+
+      min-height:
+        42px;
+
       padding:
-        120px 0;
+        0 15px;
 
+      color:
+        var(--muted);
+
+      font-family:
+        "IBM Plex Mono",
+        monospace;
+
+      font-size:
+        7px;
+
+      letter-spacing:
+        0.08em;
+    }
+
+    .specimen__top {
       border-bottom:
         1px solid
         var(--line);
     }
 
-    .services__intro {
-      display: grid;
-
-      grid-template-columns:
-        minmax(0, 1fr)
-        330px;
-
-      gap: 60px;
-
-      margin-top: 52px;
-      margin-bottom: 54px;
+    .specimen__top span:last-child {
+      color:
+        var(--rust);
     }
 
-    .services__intro > p {
-      max-width: 320px;
+    .specimen__canvas {
+      position:
+        relative;
 
-      margin: 0;
+      min-height:
+        318px;
 
-      align-self: end;
+      overflow:
+        hidden;
 
-      color: #65615b;
-
-      font-size: 13px;
-
-      line-height: 1.8;
+      background:
+        linear-gradient(
+          140deg,
+          #dfd5c4,
+          #f4efe5
+        );
     }
 
-    .services h2 em {
-      display: block;
+    .orbit {
+      position:
+        absolute;
+
+      border:
+        1px solid
+        rgba(
+          25,
+          25,
+          22,
+          0.22
+        );
+
+      border-radius:
+        50%;
     }
 
-    .service-list {
+    .orbit--one {
+      width:
+        320px;
+
+      height:
+        320px;
+
+      top:
+        0;
+
+      left:
+        16%;
+    }
+
+    .orbit--two {
+      width:
+        230px;
+
+      height:
+        230px;
+
+      top:
+        44px;
+
+      left:
+        calc(16% + 45px);
+    }
+
+    .orbit--three {
+      width:
+        126px;
+
+      height:
+        126px;
+
+      top:
+        95px;
+
+      left:
+        calc(16% + 97px);
+    }
+
+    .orbit-line {
+      position:
+        absolute;
+
+      width:
+        1px;
+
+      height:
+        440px;
+
+      background:
+        rgba(
+          25,
+          25,
+          22,
+          0.16
+        );
+
+      transform-origin:
+        center;
+    }
+
+    .orbit-line--one {
+      top:
+        -70px;
+
+      left:
+        54%;
+
+      transform:
+        rotate(
+          38deg
+        );
+    }
+
+    .orbit-line--two {
+      top:
+        -60px;
+
+      left:
+        54%;
+
+      transform:
+        rotate(
+          -48deg
+        );
+    }
+
+    .node {
+      position:
+        absolute;
+
+      display:
+        inline-flex;
+
+      align-items:
+        center;
+
+      gap:
+        7px;
+
+      padding:
+        7px 9px;
+
+      border:
+        1px solid
+        var(--ink);
+
+      background:
+        var(--paper-white);
+
+      color:
+        var(--ink);
+
+      font-family:
+        "IBM Plex Mono",
+        monospace;
+
+      font-size:
+        7px;
+
+      letter-spacing:
+        0.05em;
+
+      box-shadow:
+        4px
+        4px
+        0
+        rgba(
+          25,
+          25,
+          22,
+          0.1
+        );
+    }
+
+    .node--center {
+      top:
+        132px;
+
+      left:
+        calc(
+          16%
+          + 117px
+        );
+
+      padding:
+        13px
+        15px;
+
+      flex-direction:
+        column;
+
+      gap:
+        4px;
+
+      background:
+        var(--ink);
+
+      color:
+        var(--paper-white);
+
+      font-size:
+        9px;
+    }
+
+    .node--center span {
+      width:
+        7px;
+
+      height:
+        7px;
+
+      border-radius:
+        50%;
+
+      background:
+        var(--rust);
+    }
+
+    .node i {
+      width:
+        6px;
+
+      height:
+        6px;
+
+      border-radius:
+        50%;
+
+      background:
+        var(--rust);
+    }
+
+    .node--place {
+      top:
+        72px;
+
+      left:
+        15px;
+    }
+
+    .node--data {
+      top:
+        38px;
+
+      right:
+        19px;
+    }
+
+    .node--people {
+      bottom:
+        37px;
+
+      left:
+        25px;
+    }
+
+    .node--material {
+      right:
+        17px;
+
+      bottom:
+        64px;
+    }
+
+    .specimen__caption {
+      position:
+        absolute;
+
+      right:
+        16px;
+
+      bottom:
+        14px;
+
+      display:
+        flex;
+
+      flex-direction:
+        column;
+
+      gap:
+        4px;
+
+      padding:
+        9px
+        11px;
+
+      background:
+        rgba(
+          251,
+          249,
+          243,
+          0.9
+        );
+
+      border:
+        1px solid
+        rgba(
+          25,
+          25,
+          22,
+          0.15
+        );
+    }
+
+    .specimen__caption small,
+    .specimen__caption strong {
+      font-family:
+        "IBM Plex Mono",
+        monospace;
+    }
+
+    .specimen__caption small {
+      color:
+        var(--muted);
+
+      font-size:
+        6px;
+
+      letter-spacing:
+        0.08em;
+    }
+
+    .specimen__caption strong {
+      font-size:
+        7px;
+
+      letter-spacing:
+        0.05em;
+    }
+
+    .specimen__bottom {
       border-top:
         1px solid
         var(--line);
     }
 
-    .service-row {
-      position: relative;
 
-      display: grid;
+    /* =========================================
+       COMMON SECTION CODE
+    ========================================== */
+
+    .section-code {
+      display:
+        grid;
 
       grid-template-columns:
-        56px
-        62px
-        minmax(0, 1fr)
-        120px;
+        38px
+        auto
+        minmax(
+          20px,
+          1fr
+        );
 
-      align-items: center;
+      align-items:
+        center;
 
-      gap: 20px;
-
-      min-height: 176px;
-
-      border-bottom:
-        1px solid
-        var(--line);
-
-      transition:
-        background 180ms ease,
-        padding 180ms ease;
-    }
-
-    .service-row:hover {
-      padding-left: 16px;
-      padding-right: 16px;
-
-      border-radius: 18px;
-
-      background:
-        #ece8ff;
-    }
-
-    .service-row__number {
-      align-self: start;
-
-      padding-top: 27px;
-
-      color: #9b958d;
-
-      font-family:
-        "DM Mono",
-        monospace;
-
-      font-size: 9px;
-    }
-
-    .service-row__icon {
-      display: grid;
-
-      width: 50px;
-      height: 50px;
-
-      place-items: center;
-
-      border:
-        1px solid
-        #d3ccc1;
-
-      border-radius: 15px;
-
-      background:
-        var(--paper);
+      gap:
+        11px;
 
       color:
-        var(--blue);
-    }
-
-    .service-row__main small {
-      color: #9a958e;
+        var(--muted);
 
       font-family:
-        "DM Mono",
+        "IBM Plex Mono",
         monospace;
 
-      font-size: 7px;
+      font-size:
+        7px;
 
-      letter-spacing: 0.1em;
+      letter-spacing:
+        0.1em;
+
+      text-transform:
+        uppercase;
     }
 
-    .service-row__main h3 {
-      margin:
-        8px 0 7px;
+    .section-code span:first-child {
+      color:
+        var(--rust);
 
-      font-size: 24px;
-
-      font-weight: 800;
-
-      letter-spacing: -0.05em;
+      font-size:
+        9px;
     }
 
-    .service-row__main p {
-      max-width: 640px;
+    .section-code::after {
+      height:
+        1px;
 
-      margin: 0;
+      content:
+        "";
 
-      color: #6c6862;
-
-      font-size: 11px;
-
-      line-height: 1.7;
-    }
-
-    .service-row__action {
-      display: flex;
-
-      align-items: center;
-
-      justify-content: flex-end;
-
-      gap: 8px;
-
-      color: #7c7771;
-
-      font-family:
-        "DM Mono",
-        monospace;
-
-      font-size: 7px;
-
-      letter-spacing: 0.08em;
-
-      text-transform: uppercase;
-    }
-
-    .service-row__action > div {
-      display: grid;
-
-      width: 38px;
-      height: 38px;
-
-      place-items: center;
-
-      border:
-        1px solid
+      background:
         var(--line);
-
-      border-radius: 50%;
-
-      background:
-        var(--paper);
-
-      transition:
-        background 160ms ease,
-        transform 160ms ease;
     }
 
-    .service-row:hover
-      .service-row__action > div {
+    .section-code--light {
+      color:
+        #888a81;
+    }
+
+    .section-code--light::after {
       background:
-        var(--blue);
+        #3b3c37;
+    }
 
-      color: #fff;
+    .section-code--light
+      span:first-child {
+      color:
+        var(--rust-light);
+    }
 
-      transform:
-        translate(
-          2px,
-          -2px
-        );
+    .micro-label {
+      margin:
+        0;
+
+      color:
+        var(--muted);
+
+      font-family:
+        "IBM Plex Mono",
+        monospace;
+
+      font-size:
+        7px;
+
+      letter-spacing:
+        0.1em;
+
+      text-transform:
+        uppercase;
+    }
+
+    .micro-label--light {
+      color:
+        #888a81;
     }
 
 
-    /* =========================
-       FLOW
-    ========================== */
+    /* =========================================
+       MANIFESTO
+    ========================================== */
 
-    .flow {
+    .manifesto {
       padding:
-        116px 0;
+        126px
+        0;
 
       border-bottom:
         1px solid
-        #292e3e;
+        var(--line);
 
       background:
-        var(--dark);
-
-      color: #fff;
+        var(--paper-light);
     }
 
-    .flow__header {
-      display: grid;
+    .manifesto__layout {
+      display:
+        grid;
 
       grid-template-columns:
-        minmax(0, 1fr)
-        330px;
+        55px
+        minmax(
+          0,
+          1fr
+        )
+        minmax(
+          280px,
+          0.54fr
+        );
 
-      gap: 60px;
+      gap:
+        58px;
 
-      margin-top: 52px;
-
-      margin-bottom: 64px;
+      margin-top:
+        65px;
     }
 
-    .flow h2 {
-      max-width: 750px;
+    .manifesto__number {
+      color:
+        #b9b0a1;
 
-      margin-top: 13px;
+      font-family:
+        "Bodoni Moda",
+        Georgia,
+        serif;
+
+      font-size:
+        82px;
+
+      line-height:
+        0.8;
+    }
+
+    .manifesto__headline {
+      max-width:
+        720px;
+    }
+
+    .manifesto__headline h2,
+    .archive h2,
+    .system h2,
+    .principles h2,
+    .directory h2,
+    .materials h2,
+    .context h2 {
+      margin:
+        14px 0
+        0;
+
+      font-family:
+        "Bodoni Moda",
+        Georgia,
+        serif;
 
       font-size:
         clamp(
           54px,
-          6vw,
-          89px
+          6.4vw,
+          94px
         );
 
-      line-height: 0.91;
+      font-weight:
+        400;
+
+      line-height:
+        0.9;
+
+      letter-spacing:
+        -0.06em;
     }
 
-    .flow h2 span {
+    .manifesto__headline h2 span,
+    .archive h2 span,
+    .system h2 span,
+    .principles h2 span,
+    .directory h2 span,
+    .materials h2 span,
+    .context h2 span {
+      display:
+        block;
+
       color:
-        var(--yellow);
+        var(--rust);
 
-      font-style: italic;
+      font-style:
+        italic;
     }
 
-    .flow__header > p {
-      margin: 0;
-
-      align-self: end;
-
-      color: #abb0bc;
-
-      font-size: 13px;
-
-      line-height: 1.8;
+    .manifesto__copy {
+      padding-top:
+        52px;
     }
 
-    .flow-line {
-      display: grid;
+    .manifesto__lead {
+      margin:
+        0 0 18px;
 
-      grid-template-columns:
-        1fr
-        50px
-        1fr
-        50px
-        1fr
-        50px
-        1fr;
+      font-size:
+        20px;
 
-      align-items: center;
+      font-weight:
+        600;
 
-      border-top:
-        1px solid
-        #353b4e;
-
-      border-bottom:
-        1px solid
-        #353b4e;
+      letter-spacing:
+        -0.035em;
     }
 
-    .flow-step {
-      position: relative;
+    .manifesto__copy p:not(.manifesto__lead) {
+      margin:
+        0 0 17px;
 
-      min-width: 0;
+      color:
+        var(--ink-soft);
 
-      padding:
-        34px 20px
-        38px 0;
+      font-size:
+        13px;
+
+      line-height:
+        1.8;
     }
 
-    .flow-step:not(:first-child) {
-      padding-left: 20px;
+    .text-arrow {
+      display:
+        inline-flex;
+
+      align-items:
+        center;
+
+      gap:
+        8px;
+
+      margin-top:
+        8px;
+
+      font-size:
+        10px;
+
+      font-weight:
+        700;
     }
 
-    .flow-step__number {
-      position: absolute;
+    .text-arrow span {
+      display:
+        grid;
 
-      top: 16px;
-      right: 0;
+      width:
+        31px;
 
-      color: #697084;
+      height:
+        31px;
 
-      font-family:
-        "DM Mono",
-        monospace;
-
-      font-size: 7px;
-    }
-
-    .flow-step__circle {
-      display: grid;
-
-      width: 46px;
-      height: 46px;
-
-      place-items: center;
-
-      margin-bottom: 18px;
+      place-items:
+        center;
 
       border:
         1px solid
-        #454b5c;
-
-      border-radius: 50%;
-
-      color:
-        var(--yellow);
-    }
-
-    .flow-step small {
-      display: block;
-
-      color: #858c9f;
-
-      font-family:
-        "DM Mono",
-        monospace;
-
-      font-size: 7px;
-
-      letter-spacing: 0.1em;
-    }
-
-    .flow-step strong {
-      display: block;
-
-      margin-top: 5px;
-
-      color: #fff;
-
-      font-size: 19px;
-
-      font-weight: 800;
-
-      letter-spacing: -0.04em;
-    }
-
-    .flow-step p {
-      max-width: 170px;
-
-      margin:
-        7px 0 0;
-
-      color: #9198a8;
-
-      font-size: 10px;
-
-      line-height: 1.6;
-    }
-
-    .flow-arrow {
-      display: grid;
-
-      place-items: center;
-
-      color: #687186;
+        var(--line);
     }
 
 
-    /* =========================
-       PRINCIPLES
-    ========================== */
+    /* =========================================
+       ARCHIVE
+    ========================================== */
 
-    .principles {
+    .archive {
       padding:
-        120px 0;
+        126px
+        0;
 
       border-bottom:
         1px solid
@@ -3032,343 +3244,1142 @@ const currentYear = new Date().getFullYear();
         var(--paper);
     }
 
-    .principles__headline {
-      max-width: 800px;
-
-      margin-top: 50px;
-    }
-
-    .principles__headline h2 {
-      margin-top: 13px;
-    }
-
-    .principles__headline h2 em {
-      display: block;
-    }
-
-    .principles__grid {
-      display: grid;
+    .archive__header {
+      display:
+        grid;
 
       grid-template-columns:
-        repeat(
-          3,
-          minmax(0, 1fr)
-        );
-
-      gap: 12px;
-
-      margin-top: 62px;
-    }
-
-    .principle {
-      min-height: 305px;
-
-      padding:
-        22px
-        22px
-        26px;
-
-      border:
-        1px solid
-        var(--line);
-
-      border-radius: 20px;
-
-      background:
-        var(--bg);
-
-      transition:
-        transform 180ms ease,
-        background 180ms ease;
-    }
-
-    .principle:nth-child(2) {
-      transform:
-        translateY(
-          26px
-        );
-    }
-
-    .principle:hover {
-      transform:
-        translateY(
-          -4px
-        );
-
-      background:
-        #e8efff;
-    }
-
-    .principle:nth-child(2):hover {
-      transform:
-        translateY(
-          21px
-        );
-    }
-
-    .principle__top {
-      display: flex;
-
-      align-items: center;
-
-      justify-content: space-between;
-
-      color: #8a857e;
-    }
-
-    .principle__top span {
-      font-family:
-        "DM Mono",
-        monospace;
-
-      font-size: 8px;
-    }
-
-    .principle h3 {
-      margin:
-        74px 0 0;
-
-      font-size: 26px;
-      font-weight: 800;
-
-      letter-spacing: -0.05em;
-    }
-
-    .principle p {
-      max-width: 320px;
-
-      margin:
-        12px 0 0;
-
-      color: #69655f;
-
-      font-size: 12px;
-
-      line-height: 1.75;
-    }
-
-
-    /* =========================
-       NETWORK
-    ========================== */
-
-    .network {
-      padding:
-        120px 0;
-
-      border-bottom:
-        1px solid
-        var(--line);
-
-      background:
-        #e9e4db;
-    }
-
-    .network__header {
-      display: grid;
-
-      grid-template-columns:
-        minmax(0, 1fr)
+        minmax(
+          0,
+          1fr
+        )
         340px;
 
-      gap: 70px;
+      gap:
+        70px;
 
-      margin-top: 52px;
-
-      margin-bottom: 54px;
+      margin:
+        55px
+        0
+        58px;
     }
 
-    .network h2 {
-      margin-top: 12px;
+    .archive__header > p {
+      align-self:
+        end;
+
+      margin:
+        0;
+
+      color:
+        var(--ink-soft);
+
+      font-size:
+        13px;
+
+      line-height:
+        1.8;
     }
 
-    .network h2 em {
-      display: block;
-    }
-
-    .network__side {
-      align-self: end;
-    }
-
-    .network__side p {
-      margin: 0;
-
-      color: #67635d;
-
-      font-size: 13px;
-
-      line-height: 1.8;
-    }
-
-    .network__side .arrow-link {
-      margin-top: 16px;
-    }
-
-    .directory {
+    .archive-list {
       border-top:
         1px solid
         var(--ink);
     }
 
-    .directory__head,
-    .directory__row {
-      display: grid;
+    .archive-row {
+      display:
+        grid;
 
       grid-template-columns:
-        55px
-        minmax(0, 1.2fr)
-        150px
-        120px
-        150px
-        24px;
+        58px
+        62px
+        minmax(
+          0,
+          1fr
+        )
+        120px;
 
-      gap: 16px;
+      align-items:
+        center;
 
-      align-items: center;
+      gap:
+        18px;
+
+      min-height:
+        178px;
+
+      border-bottom:
+        1px solid
+        var(--line);
+
+      transition:
+        background
+        170ms ease,
+        padding
+        170ms ease;
     }
 
-    .directory__head {
-      min-height: 44px;
+    .archive-row:hover {
+      padding-left:
+        15px;
 
-      color: #858077;
+      padding-right:
+        15px;
+
+      background:
+        #e5dbca;
+    }
+
+    .archive-row__number {
+      align-self:
+        start;
+
+      padding-top:
+        28px;
+
+      color:
+        #a19a8e;
 
       font-family:
-        "DM Mono",
+        "IBM Plex Mono",
         monospace;
 
-      font-size: 7px;
-
-      letter-spacing: 0.08em;
-
-      text-transform: uppercase;
+      font-size:
+        8px;
     }
 
-    .directory__row {
-      min-height: 88px;
+    .archive-row__symbol {
+      display:
+        grid;
+
+      width:
+        50px;
+
+      height:
+        50px;
+
+      place-items:
+        center;
+
+      border:
+        1px solid
+        var(--ink);
+
+      background:
+        var(--paper-light);
+
+      color:
+        var(--rust);
+    }
+
+    .archive-row__content small {
+      color:
+        var(--muted);
+
+      font-family:
+        "IBM Plex Mono",
+        monospace;
+
+      font-size:
+        7px;
+
+      letter-spacing:
+        0.09em;
+    }
+
+    .archive-row__content h3 {
+      margin:
+        7px 0
+        7px;
+
+      font-size:
+        27px;
+
+      font-weight:
+        700;
+
+      letter-spacing:
+        -0.055em;
+    }
+
+    .archive-row__content p {
+      max-width:
+        650px;
+
+      margin:
+        0;
+
+      color:
+        var(--ink-soft);
+
+      font-size:
+        11px;
+
+      line-height:
+        1.72;
+    }
+
+    .archive-row__arrow {
+      display:
+        flex;
+
+      align-items:
+        center;
+
+      justify-content:
+        flex-end;
+
+      gap:
+        9px;
+
+      color:
+        var(--muted);
+
+      font-family:
+        "IBM Plex Mono",
+        monospace;
+
+      font-size:
+        7px;
+
+      letter-spacing:
+        0.08em;
+    }
+
+    .archive-row__arrow div {
+      display:
+        grid;
+
+      width:
+        38px;
+
+      height:
+        38px;
+
+      place-items:
+        center;
+
+      border:
+        1px solid
+        var(--line);
+
+      background:
+        var(--paper-light);
+    }
+
+    .archive-row:hover
+      .archive-row__arrow div {
+      background:
+        var(--rust);
+
+      color:
+        #fff;
+
+      border-color:
+        var(--rust);
+    }
+
+
+    /* =========================================
+       SYSTEM
+    ========================================== */
+
+    .system {
+      padding:
+        122px
+        0;
+
+      border-bottom:
+        1px solid
+        #343631;
+
+      background:
+        var(--dark);
+
+      color:
+        #f5f1e8;
+    }
+
+    .system__header {
+      display:
+        grid;
+
+      grid-template-columns:
+        minmax(
+          0,
+          1fr
+        )
+        320px;
+
+      gap:
+        65px;
+
+      margin:
+        54px 0
+        62px;
+    }
+
+    .system__aside {
+      align-self:
+        end;
+    }
+
+    .system__aside > span {
+      display:
+        block;
+
+      color:
+        #898b82;
+
+      font-family:
+        "IBM Plex Mono",
+        monospace;
+
+      font-size:
+        7px;
+
+      letter-spacing:
+        0.1em;
+    }
+
+    .system__aside p {
+      margin:
+        10px 0 0;
+
+      color:
+        #aaa99e;
+
+      font-size:
+        12px;
+
+      line-height:
+        1.8;
+    }
+
+    .system h2 span {
+      color:
+        var(--rust-light);
+    }
+
+    .constellation {
+      position:
+        relative;
+
+      min-height:
+        530px;
+
+      border:
+        1px solid
+        #363831;
+
+      background:
+        radial-gradient(
+          circle at center,
+          rgba(
+            190,
+            78,
+            62,
+            0.09
+          ),
+          transparent 23%
+        );
+    }
+
+    .constellation::before {
+      position:
+        absolute;
+
+      inset:
+        0;
+
+      content:
+        "";
+
+      opacity:
+        0.2;
+
+      background-image:
+        radial-gradient(
+          #70736a 0.7px,
+          transparent 0.7px
+        );
+
+      background-size:
+        17px 17px;
+    }
+
+    .constellation__center {
+      position:
+        absolute;
+
+      top:
+        50%;
+
+      left:
+        50%;
+
+      z-index:
+        3;
+
+      display:
+        flex;
+
+      width:
+        175px;
+
+      height:
+        175px;
+
+      flex-direction:
+        column;
+
+      align-items:
+        center;
+
+      justify-content:
+        center;
+
+      border:
+        1px solid
+        #6c6e65;
+
+      border-radius:
+        50%;
+
+      background:
+        #1d1f1b;
+
+      transform:
+        translate(
+          -50%,
+          -50%
+        );
+
+      box-shadow:
+        0
+        0
+        0
+        14px
+        rgba(
+          25,
+          26,
+          22,
+          0.3
+        );
+    }
+
+    .constellation__center::before {
+      position:
+        absolute;
+
+      inset:
+        12px;
+
+      content:
+        "";
+
+      border:
+        1px solid
+        #383b34;
+
+      border-radius:
+        50%;
+    }
+
+    .constellation__center small {
+      position:
+        relative;
+
+      color:
+        #96998e;
+
+      font-family:
+        "IBM Plex Mono",
+        monospace;
+
+      font-size:
+        7px;
+
+      letter-spacing:
+        0.1em;
+    }
+
+    .constellation__center strong {
+      position:
+        relative;
+
+      margin:
+        5px 0;
+
+      color:
+        #fff;
+
+      font-family:
+        "Bodoni Moda",
+        Georgia,
+        serif;
+
+      font-size:
+        27px;
+
+      font-weight:
+        400;
+    }
+
+    .constellation__center span {
+      position:
+        relative;
+
+      color:
+        var(--rust-light);
+
+      font-family:
+        "IBM Plex Mono",
+        monospace;
+
+      font-size:
+        7px;
+
+      letter-spacing:
+        0.1em;
+    }
+
+    .constellation__line {
+      position:
+        absolute;
+
+      left:
+        50%;
+
+      top:
+        50%;
+
+      width:
+        1px;
+
+      height:
+        41%;
+
+      z-index:
+        1;
+
+      background:
+        #4b4d45;
+
+      transform-origin:
+        top;
+    }
+
+    .constellation__line--one {
+      transform:
+        translateY(
+          -100%
+        )
+        rotate(
+          27deg
+        );
+    }
+
+    .constellation__line--two {
+      transform:
+        translateY(
+          -100%
+        )
+        rotate(
+          117deg
+        );
+    }
+
+    .constellation__line--three {
+      transform:
+        translateY(
+          -100%
+        )
+        rotate(
+          207deg
+        );
+    }
+
+    .constellation__line--four {
+      transform:
+        translateY(
+          -100%
+        )
+        rotate(
+          297deg
+        );
+    }
+
+    .constellation__node {
+      position:
+        absolute;
+
+      z-index:
+        4;
+
+      display:
+        flex;
+
+      min-width:
+        110px;
+
+      min-height:
+        72px;
+
+      flex-direction:
+        column;
+
+      justify-content:
+        center;
+
+      padding:
+        11px;
+
+      border:
+        1px solid
+        #484b44;
+
+      background:
+        #1d1f1b;
+
+      box-shadow:
+        5px
+        5px
+        0
+        rgba(
+          0,
+          0,
+          0,
+          0.18
+        );
+    }
+
+    .constellation__node span,
+    .constellation__node small {
+      color:
+        #888b82;
+
+      font-family:
+        "IBM Plex Mono",
+        monospace;
+
+      font-size:
+        6px;
+
+      letter-spacing:
+        0.08em;
+    }
+
+    .constellation__node strong {
+      margin:
+        5px 0 2px;
+
+      font-size:
+        12px;
+
+      font-weight:
+        600;
+    }
+
+    .constellation__node--one {
+      top:
+        72px;
+
+      left:
+        15%;
+    }
+
+    .constellation__node--two {
+      top:
+        58px;
+
+      right:
+        14%;
+    }
+
+    .constellation__node--three {
+      right:
+        13%;
+
+      bottom:
+        72px;
+    }
+
+    .constellation__node--four {
+      bottom:
+        54px;
+
+      left:
+        15%;
+    }
+
+    .constellation__legend {
+      position:
+        absolute;
+
+      right:
+        17px;
+
+      top:
+        16px;
+
+      display:
+        flex;
+
+      align-items:
+        center;
+
+      gap:
+        8px;
+
+      color:
+        #7d8077;
+
+      font-family:
+        "IBM Plex Mono",
+        monospace;
+
+      font-size:
+        6px;
+
+      letter-spacing:
+        0.08em;
+    }
+
+    .constellation__legend span {
+      width:
+        6px;
+
+      height:
+        6px;
+
+      border-radius:
+        50%;
+
+      background:
+        var(--rust-light);
+    }
+
+
+    /* =========================================
+       PRINCIPLES
+    ========================================== */
+
+    .principles {
+      padding:
+        126px
+        0;
+
+      border-bottom:
+        1px solid
+        var(--line);
+
+      background:
+        var(--paper-light);
+    }
+
+    .principles__headline {
+      max-width:
+        820px;
+
+      margin-top:
+        55px;
+    }
+
+    .principles__grid {
+      display:
+        grid;
+
+      grid-template-columns:
+        repeat(
+          3,
+          minmax(
+            0,
+            1fr
+          )
+        );
+
+      gap:
+        0;
+
+      margin-top:
+        65px;
 
       border-top:
         1px solid
-        rgba(
-          23,
-          24,
-          27,
-          0.13
-        );
-
-      transition:
-        background 160ms ease,
-        padding 160ms ease;
+        var(--ink);
     }
 
-    .directory__row:hover {
-      padding-left: 12px;
-      padding-right: 12px;
+    .principle-card {
+      min-height:
+        330px;
 
-      border-radius: 16px;
+      padding:
+        20px
+        28px
+        24px
+        0;
+
+      border-right:
+        1px solid
+        var(--line);
+    }
+
+    .principle-card
+      + .principle-card {
+      padding-left:
+        28px;
+    }
+
+    .principle-card:last-child {
+      border-right:
+        0;
+
+      padding-right:
+        0;
+    }
+
+    .principle-card__top {
+      display:
+        flex;
+
+      align-items:
+        center;
+
+      justify-content:
+        space-between;
+
+      gap:
+        10px;
+
+      color:
+        var(--muted);
+
+      font-family:
+        "IBM Plex Mono",
+        monospace;
+
+      font-size:
+        7px;
+
+      letter-spacing:
+        0.08em;
+    }
+
+    .principle-card__body {
+      margin-top:
+        82px;
+    }
+
+    .principle-card h3 {
+      margin:
+        0;
+
+      font-family:
+        "Bodoni Moda",
+        Georgia,
+        serif;
+
+      font-size:
+        35px;
+
+      font-weight:
+        400;
+
+      line-height:
+        0.95;
+
+      letter-spacing:
+        -0.045em;
+    }
+
+    .principle-card p {
+      max-width:
+        310px;
+
+      margin:
+        16px 0 0;
+
+      color:
+        var(--ink-soft);
+
+      font-size:
+        11px;
+
+      line-height:
+        1.75;
+    }
+
+    .principle-card__line {
+      width:
+        38px;
+
+      height:
+        2px;
+
+      margin-top:
+        22px;
+
+      background:
+        var(--rust);
+    }
+
+
+    /* =========================================
+       DIRECTORY
+    ========================================== */
+
+    .directory {
+      padding:
+        126px
+        0;
+
+      border-bottom:
+        1px solid
+        var(--line);
 
       background:
         var(--paper);
     }
 
-    .directory__index {
-      color: #918b82;
+    .directory__header {
+      display:
+        grid;
+
+      grid-template-columns:
+        minmax(
+          0,
+          1fr
+        )
+        340px;
+
+      gap:
+        70px;
+
+      margin-top:
+        55px;
+
+      margin-bottom:
+        55px;
+    }
+
+    .directory__header > p {
+      align-self:
+        end;
+
+      margin:
+        0;
+
+      color:
+        var(--ink-soft);
+
+      font-size:
+        13px;
+
+      line-height:
+        1.8;
+    }
+
+    .directory-table {
+      border-top:
+        1px solid
+        var(--ink);
+    }
+
+    .directory-table__head,
+    .directory-table__row {
+      display:
+        grid;
+
+      grid-template-columns:
+        55px
+        minmax(
+          0,
+          1.3fr
+        )
+        150px
+        120px
+        145px
+        24px;
+
+      align-items:
+        center;
+
+      gap:
+        15px;
+    }
+
+    .directory-table__head {
+      min-height:
+        44px;
+
+      color:
+        var(--muted);
 
       font-family:
-        "DM Mono",
+        "IBM Plex Mono",
         monospace;
 
-      font-size: 8px;
+      font-size:
+        7px;
+
+      letter-spacing:
+        0.08em;
+
+      text-transform:
+        uppercase;
     }
 
-    .directory__name {
-      min-width: 0;
+    .directory-table__row {
+      min-height:
+        88px;
 
-      display: flex;
+      border-top:
+        1px solid
+        var(--line);
 
-      flex-direction: column;
-
-      gap: 4px;
+      transition:
+        background
+        160ms ease,
+        padding
+        160ms ease;
     }
 
-    .directory__name strong {
-      overflow: hidden;
+    .directory-table__row:hover {
+      padding-left:
+        10px;
 
-      text-overflow: ellipsis;
+      padding-right:
+        10px;
 
-      white-space: nowrap;
-
-      font-size: 15px;
-
-      font-weight: 800;
-
-      letter-spacing: -0.035em;
+      background:
+        #ded5c4;
     }
 
-    .directory__name small,
-    .directory__type,
-    .directory__area,
-    .directory__status {
+    .directory-table__number {
+      color:
+        #989084;
+
       font-family:
-        "DM Mono",
+        "IBM Plex Mono",
         monospace;
 
-      font-size: 7px;
-
-      letter-spacing: 0.06em;
-
-      text-transform: uppercase;
+      font-size:
+        8px;
     }
 
-    .directory__name small,
-    .directory__type,
-    .directory__area {
-      color: #7e7972;
+    .directory-table__name {
+      display:
+        flex;
+
+      min-width:
+        0;
+
+      flex-direction:
+        column;
+
+      gap:
+        4px;
     }
 
-    .directory__status {
-      display: inline-flex;
+    .directory-table__name strong {
+      overflow:
+        hidden;
 
-      align-items: center;
+      text-overflow:
+        ellipsis;
 
-      justify-content: center;
+      white-space:
+        nowrap;
 
-      gap: 5px;
+      font-size:
+        15px;
 
-      min-height: 28px;
+      font-weight:
+        700;
 
-      padding: 0 7px;
+      letter-spacing:
+        -0.035em;
+    }
+
+    .directory-table__name small,
+    .directory-table__type,
+    .directory-table__area,
+    .directory-table__status {
+      font-family:
+        "IBM Plex Mono",
+        monospace;
+
+      font-size:
+        7px;
+
+      letter-spacing:
+        0.06em;
+
+      text-transform:
+        uppercase;
+    }
+
+    .directory-table__name small,
+    .directory-table__type,
+    .directory-table__area {
+      color:
+        var(--muted);
+    }
+
+    .directory-table__status {
+      display:
+        inline-flex;
+
+      align-items:
+        center;
+
+      justify-content:
+        center;
+
+      gap:
+        5px;
+
+      min-height:
+        27px;
+
+      padding:
+        0 8px;
 
       border:
         1px solid
-        #cdc7bc;
-
-      border-radius: 999px;
-
-      color: #817c75;
-
-      white-space: nowrap;
-    }
-
-    .directory__status.is-verified {
-      border-color:
-        #9eb4ff;
-
-      background:
-        #dfe6ff;
+        var(--line);
 
       color:
-        #304fca;
+        var(--muted);
+
+      white-space:
+        nowrap;
     }
 
-    .directory__arrow {
-      color: #8c867e;
+    .directory-table__status.is-verified {
+      border-color:
+        #aa7770;
+
+      background:
+        #ead3cf;
+
+      color:
+        #883d32;
+    }
+
+    .directory-table__arrow {
+      color:
+        #8b847a;
 
       transition:
-        transform 160ms ease;
+        transform
+        160ms ease;
     }
 
-    .directory__row:hover
-      .directory__arrow {
+    .directory-table__row:hover
+      .directory-table__arrow {
       transform:
         translate(
           2px,
@@ -3376,25 +4387,283 @@ const currentYear = new Date().getFullYear();
         );
     }
 
-    .data-note {
+    .preview-note {
       margin:
         15px 0 0;
 
-      color: #8f8a82;
+      color:
+        #8d867b;
 
-      font-size: 9px;
+      font-size:
+        9px;
 
-      line-height: 1.6;
+      line-height:
+        1.6;
     }
 
 
-    /* =========================
-       MATERIALS
-    ========================== */
+    /* =========================================
+       MATERIAL INDEX
+    ========================================== */
 
     .materials {
       padding:
-        120px 0;
+        126px
+        0;
+
+      border-bottom:
+        1px solid
+        var(--line);
+
+      background:
+        var(--paper-light);
+    }
+
+    .materials__header {
+      display:
+        grid;
+
+      grid-template-columns:
+        minmax(
+          0,
+          1fr
+        )
+        340px;
+
+      gap:
+        70px;
+
+      margin-top:
+        55px;
+
+      margin-bottom:
+        58px;
+    }
+
+    .materials__header > p {
+      align-self:
+        end;
+
+      margin:
+        0;
+
+      color:
+        var(--ink-soft);
+
+      font-size:
+        13px;
+
+      line-height:
+        1.8;
+    }
+
+    .material-index {
+      display:
+        grid;
+
+      grid-template-columns:
+        80px
+        minmax(
+          0,
+          1fr
+        );
+
+      border-top:
+        1px solid
+        var(--ink);
+    }
+
+    .material-index__rail {
+      display:
+        flex;
+
+      flex-direction:
+        column;
+
+      justify-content:
+        space-between;
+
+      padding:
+        17px
+        0;
+
+      border-right:
+        1px solid
+        var(--line);
+
+      color:
+        var(--muted);
+
+      font-family:
+        "IBM Plex Mono",
+        monospace;
+
+      font-size:
+        7px;
+
+      letter-spacing:
+        0.08em;
+    }
+
+    .material-index__items {
+      display:
+        grid;
+    }
+
+    .material-row {
+      position:
+        relative;
+
+      display:
+        grid;
+
+      grid-template-columns:
+        48px
+        minmax(
+          180px,
+          0.8fr
+        )
+        minmax(
+          180px,
+          0.65fr
+        )
+        32px;
+
+      align-items:
+        center;
+
+      gap:
+        16px;
+
+      min-height:
+        100px;
+
+      border-bottom:
+        1px solid
+        var(--line);
+
+      transition:
+        background
+        160ms ease,
+        padding
+        160ms ease;
+    }
+
+    .material-row:hover {
+      padding-left:
+        12px;
+
+      padding-right:
+        12px;
+
+      background:
+        #ded5c4;
+    }
+
+    .material-row--wide {
+      min-height:
+        136px;
+    }
+
+    .material-row--medium {
+      min-height:
+        113px;
+    }
+
+    .material-row--small {
+      min-height:
+        86px;
+    }
+
+    .material-row__number {
+      color:
+        #9b9388;
+
+      font-family:
+        "IBM Plex Mono",
+        monospace;
+
+      font-size:
+        8px;
+    }
+
+    .material-row__name {
+      font-family:
+        "Bodoni Moda",
+        Georgia,
+        serif;
+
+      font-size:
+        clamp(
+          27px,
+          3.1vw,
+          42px
+        );
+
+      font-weight:
+        400;
+
+      line-height:
+        0.9;
+
+      letter-spacing:
+        -0.05em;
+    }
+
+    .material-row__code {
+      color:
+        var(--muted);
+
+      font-family:
+        "IBM Plex Mono",
+        monospace;
+
+      font-size:
+        7px;
+
+      letter-spacing:
+        0.08em;
+    }
+
+    .material-row__arrow {
+      display:
+        grid;
+
+      width:
+        31px;
+
+      height:
+        31px;
+
+      place-items:
+        center;
+
+      border:
+        1px solid
+        var(--line);
+    }
+
+    .material-row:hover
+      .material-row__arrow {
+      background:
+        var(--rust);
+
+      border-color:
+        var(--rust);
+
+      color:
+        #fff;
+    }
+
+
+    /* =========================================
+       CONTEXT
+    ========================================== */
+
+    .context {
+      padding:
+        126px
+        0;
 
       border-bottom:
         1px solid
@@ -3404,827 +4673,684 @@ const currentYear = new Date().getFullYear();
         var(--paper);
     }
 
-    .materials__layout {
-      display: grid;
+    .context__headline {
+      max-width:
+        850px;
 
-      grid-template-columns:
-        minmax(320px, 0.72fr)
-        minmax(0, 1fr);
-
-      gap: 90px;
-
-      margin-top: 54px;
+      margin-top:
+        55px;
     }
 
-    .materials__intro {
-      padding-top: 10px;
-    }
-
-    .materials h2 {
-      margin-top: 12px;
-    }
-
-    .materials h2 em {
-      display: block;
-    }
-
-    .materials__intro
-      > p:not(.mini-label) {
-      max-width: 420px;
-
-      margin:
-        26px 0 30px;
-
-      color: #69655f;
-
-      font-size: 13px;
-
-      line-height: 1.8;
-    }
-
-    .material-button {
-      display: inline-flex;
-
-      align-items: center;
-
-      gap: 9px;
-
-      min-height: 45px;
-
-      padding: 0 15px;
-
-      border-radius: 999px;
-
-      background:
-        var(--ink);
-
-      color: #fff;
-
-      font-size: 10px;
-
-      font-weight: 800;
-    }
-
-    .material-cloud {
-      position: relative;
-
-      min-height: 490px;
-    }
-
-    .material-chip {
-      position: absolute;
-
-      display: flex;
-
-      flex-direction: column;
-
-      justify-content: space-between;
-
-      min-width: 190px;
-
-      min-height: 150px;
-
-      padding:
-        16px 18px;
-
-      border:
-        1px solid
-        rgba(
-          23,
-          24,
-          27,
-          0.1
-        );
-
-      border-radius: 22px;
-
-      box-shadow:
-        0 20px 35px
-        rgba(
-          24,
-          25,
-          29,
-          0.07
-        );
-
-      transition:
-        transform 180ms ease,
-        box-shadow 180ms ease;
-    }
-
-    .material-chip:hover {
-      transform:
-        translateY(
-          -7px
-        )
-        rotate(
-          0deg
-        ) !important;
-
-      box-shadow:
-        0 26px 44px
-        rgba(
-          24,
-          25,
-          29,
-          0.12
-        );
-    }
-
-    .material-chip span {
-      font-family:
-        "DM Mono",
-        monospace;
-
-      font-size: 7px;
-
-      opacity: 0.65;
-    }
-
-    .material-chip strong {
-      margin-top: auto;
-
-      font-size: 22px;
-
-      font-weight: 800;
-
-      letter-spacing: -0.05em;
-    }
-
-    .material-chip small {
-      margin-top: 3px;
-
-      font-family:
-        "DM Mono",
-        monospace;
-
-      font-size: 6px;
-
-      letter-spacing: 0.08em;
-
-      opacity: 0.65;
-    }
-
-    .material-chip svg {
-      position: absolute;
-
-      top: 16px;
-      right: 16px;
-    }
-
-    .material-chip--1 {
-      top: 20px;
-      left: 8%;
-
-      background:
-        #dfe7ff;
-
-      color:
-        #223fbd;
-
-      transform:
-        rotate(
-          -6deg
-        );
-    }
-
-    .material-chip--2 {
-      top: 0;
-      right: 2%;
-
-      background:
-        #ffd9ce;
-
-      color:
-        #9f3720;
-
-      transform:
-        rotate(
-          5deg
-        );
-    }
-
-    .material-chip--3 {
-      top: 175px;
-      left: 34%;
-
-      background:
-        #f6de8d;
-
-      color:
-        #7d5f0b;
-
-      transform:
-        rotate(
-          2deg
-        );
-    }
-
-    .material-chip--4 {
-      right: 12%;
-      bottom: 12px;
-
-      background:
-        #d9f0e2;
-
-      color:
-        #276246;
-
-      transform:
-        rotate(
-          -4deg
-        );
-    }
-
-    .material-chip--5 {
-      bottom: 0;
-      left: 2%;
-
-      background:
-        #ddd9d1;
-
-      color:
-        #55514b;
-
-      transform:
-        rotate(
-          6deg
-        );
-    }
-
-
-    /* =========================
-       CONTEXT INDEX
-    ========================== */
-
-    .context-index {
-      padding:
-        120px 0;
-
-      border-bottom:
-        1px solid
-        var(--line);
-
-      background:
-        #f0ebe3;
-    }
-
-    .context-index__header {
-      display: grid;
-
-      grid-template-columns:
-        minmax(0, 1fr)
-        340px;
-
-      gap: 70px;
-
-      align-items: end;
-
-      margin-top: 52px;
-
-      margin-bottom: 58px;
-    }
-
-    .context-index h2 {
-      margin-top: 12px;
-    }
-
-    .context-index h2 em {
-      display: block;
-    }
-
-    .context-index__header > p {
-      margin: 0;
-
-      color: #6b6760;
-
-      font-size: 13px;
-
-      line-height: 1.8;
-    }
-
-    .context-grid {
-      display: grid;
+    .context__grid {
+      display:
+        grid;
 
       grid-template-columns:
         repeat(
           4,
-          minmax(0, 1fr)
+          minmax(
+            0,
+            1fr
+          )
         );
 
-      gap: 12px;
+      gap:
+        0;
+
+      margin-top:
+        65px;
+
+      border-top:
+        1px solid
+        var(--ink);
     }
 
-    .context-card {
-      display: flex;
-
-      flex-direction: column;
-
-      min-height: 265px;
+    .context-item {
+      min-height:
+        248px;
 
       padding:
-        20px;
+        19px
+        23px
+        22px 0;
 
-      border:
+      border-right:
         1px solid
-        #d5cec3;
-
-      border-radius: 20px;
-
-      background:
-        rgba(
-          255,
-          253,
-          248,
-          0.75
-        );
-
-      transition:
-        transform 180ms ease,
-        background 180ms ease,
-        box-shadow 180ms ease;
+        var(--line);
     }
 
-    .context-card:nth-child(2) {
-      transform:
-        translateY(
-          22px
-        );
+    .context-item
+      + .context-item {
+      padding-left:
+        23px;
     }
 
-    .context-card:nth-child(4) {
-      transform:
-        translateY(
-          10px
-        );
+    .context-item:last-child {
+      padding-right:
+        0;
+
+      border-right:
+        0;
     }
 
-    .context-card:hover {
-      transform:
-        translateY(
-          -5px
-        );
+    .context-item__top {
+      display:
+        flex;
 
-      background:
-        #fff;
+      justify-content:
+        space-between;
 
-      box-shadow:
-        0 18px 35px
-        rgba(
-          31,
-          32,
-          35,
-          0.07
-        );
+      align-items:
+        center;
+
+      color:
+        var(--muted);
     }
 
-    .context-card:nth-child(2):hover {
-      transform:
-        translateY(
-          17px
-        );
-    }
-
-    .context-card:nth-child(4):hover {
-      transform:
-        translateY(
-          5px
-        );
-    }
-
-    .context-card__top {
-      display: flex;
-
-      align-items: center;
-
-      justify-content: space-between;
-
-      color: #8c867e;
-    }
-
-    .context-card__top span {
+    .context-item__top span {
       font-family:
-        "DM Mono",
+        "IBM Plex Mono",
         monospace;
 
-      font-size: 8px;
+      font-size:
+        7px;
     }
 
-    .context-card > small {
-      margin-top: 70px;
+    .context-item > small {
+      display:
+        block;
 
-      color: #8d877f;
+      margin-top:
+        72px;
+
+      color:
+        var(--rust);
 
       font-family:
-        "DM Mono",
+        "IBM Plex Mono",
         monospace;
 
-      font-size: 7px;
+      font-size:
+        7px;
 
-      letter-spacing: 0.1em;
+      letter-spacing:
+        0.09em;
     }
 
-    .context-card h3 {
+    .context-item h3 {
       margin:
-        7px 0 0;
+        7px 0
+        0;
 
       font-family:
-        "DM Serif Display",
+        "Bodoni Moda",
         Georgia,
         serif;
 
-      font-size: 31px;
+      font-size:
+        32px;
 
-      font-weight: 400;
+      font-weight:
+        400;
 
-      letter-spacing: -0.04em;
+      line-height:
+        0.95;
+
+      letter-spacing:
+        -0.045em;
     }
 
-    .context-card p {
-      max-width: 220px;
+    .context-item p {
+      max-width:
+        240px;
 
       margin:
         9px 0 0;
 
-      color: #6b6760;
-
-      font-size: 11px;
-
-      line-height: 1.7;
-    }
-
-
-    /* =========================
-       FOOTER
-    ========================== */
-
-    .footer {
-      background:
-        #ece7de;
-    }
-
-    .footer__top {
-      display: grid;
-
-      grid-template-columns:
-        minmax(0, 1fr)
-        minmax(360px, 0.75fr);
-
-      gap: 100px;
-
-      padding:
-        75px 0 60px;
-    }
-
-    .footer__brand p {
-      max-width: 430px;
-
-      margin:
-        20px 0 0;
-
-      color: #6b6760;
-
-      font-size: 12px;
-
-      line-height: 1.8;
-    }
-
-    .footer__nav {
-      display: grid;
-
-      grid-template-columns:
-        1fr 1fr;
-
-      gap: 45px;
-    }
-
-    .footer__nav > div {
-      display: flex;
-
-      flex-direction: column;
-
-      align-items: flex-start;
-
-      gap: 8px;
-    }
-
-    .footer__nav small {
-      margin-bottom: 9px;
-
-      color: #928d85;
-
-      font-family:
-        "DM Mono",
-        monospace;
-
-      font-size: 7px;
-
-      letter-spacing: 0.09em;
-    }
-
-    .footer__nav a {
-      display: inline-flex;
-
-      align-items: center;
-
-      gap: 7px;
-
-      font-size: 11px;
-
-      font-weight: 700;
-    }
-
-    .footer__nav a:hover {
       color:
-        var(--blue);
+        var(--ink-soft);
+
+      font-size:
+        10px;
+
+      line-height:
+        1.7;
     }
 
-    .footer__nav span {
-      color: #706b64;
+    .context__signature {
+      display:
+        flex;
 
-      font-family:
-        "DM Mono",
-        monospace;
+      align-items:
+        flex-end;
 
-      font-size: 7px;
+      justify-content:
+        space-between;
 
-      letter-spacing: 0.05em;
-    }
+      gap:
+        20px;
 
-    .footer__bottom {
-      display: flex;
-
-      align-items: center;
-
-      justify-content: space-between;
-
-      gap: 20px;
-
-      min-height: 58px;
+      padding-top:
+        42px;
 
       border-top:
         1px solid
         var(--line);
 
-      color: #817b73;
+      margin-top:
+        35px;
+    }
+
+    .context__signature div {
+      display:
+        flex;
+
+      flex-direction:
+        column;
+
+      gap:
+        5px;
+    }
+
+    .context__signature div span {
+      color:
+        var(--rust);
 
       font-family:
-        "DM Mono",
+        "IBM Plex Mono",
         monospace;
 
-      font-size: 7px;
+      font-size:
+        7px;
 
-      font-weight: 600;
+      letter-spacing:
+        0.08em;
+    }
 
-      letter-spacing: 0.08em;
+    .context__signature div strong {
+      font-family:
+        "Bodoni Moda",
+        Georgia,
+        serif;
+
+      font-size:
+        23px;
+
+      font-weight:
+        400;
+    }
+
+    .context__signature > span {
+      color:
+        var(--muted);
+
+      font-family:
+        "IBM Plex Mono",
+        monospace;
+
+      font-size:
+        7px;
+
+      letter-spacing:
+        0.08em;
     }
 
 
-    /* =========================
-       FLOATING REPORT
-    ========================== */
+    /* =========================================
+       FOOTER
+    ========================================== */
 
-    .floating-report {
-      position: fixed;
+    .footer {
+      background:
+        #ded6c7;
+    }
 
-      right: 22px;
-      bottom: 22px;
+    .footer__top {
+      display:
+        grid;
 
-      z-index: 120;
+      grid-template-columns:
+        minmax(
+          0,
+          1fr
+        )
+        minmax(
+          360px,
+          0.7fr
+        );
 
-      display: inline-flex;
-
-      align-items: center;
-
-      gap: 10px;
-
-      min-height: 64px;
+      gap:
+        90px;
 
       padding:
-        8px 9px 8px 10px;
+        72px
+        0
+        58px;
+    }
+
+    .footer__brand p {
+      max-width:
+        440px;
+
+      margin:
+        21px 0 0;
+
+      color:
+        #68635a;
+
+      font-size:
+        11px;
+
+      line-height:
+        1.8;
+    }
+
+    .footer__navigation {
+      display:
+        grid;
+
+      grid-template-columns:
+        1fr
+        1fr;
+
+      gap:
+        42px;
+    }
+
+    .footer__navigation > div {
+      display:
+        flex;
+
+      flex-direction:
+        column;
+
+      align-items:
+        flex-start;
+
+      gap:
+        8px;
+    }
+
+    .footer__navigation small {
+      margin-bottom:
+        10px;
+
+      color:
+        #8b8377;
+
+      font-family:
+        "IBM Plex Mono",
+        monospace;
+
+      font-size:
+        7px;
+
+      letter-spacing:
+        0.08em;
+    }
+
+    .footer__navigation a {
+      display:
+        inline-flex;
+
+      align-items:
+        center;
+
+      gap:
+        7px;
+
+      font-size:
+        10px;
+
+      font-weight:
+        600;
+    }
+
+    .footer__navigation a:hover {
+      color:
+        var(--rust);
+    }
+
+    .footer__navigation span {
+      color:
+        #6c665d;
+
+      font-family:
+        "IBM Plex Mono",
+        monospace;
+
+      font-size:
+        7px;
+
+      letter-spacing:
+        0.05em;
+    }
+
+    .footer__bottom {
+      display:
+        flex;
+
+      align-items:
+        center;
+
+      justify-content:
+        space-between;
+
+      gap:
+        20px;
+
+      min-height:
+        58px;
+
+      border-top:
+        1px solid
+        #c4baaa;
+
+      color:
+        #847c71;
+
+      font-family:
+        "IBM Plex Mono",
+        monospace;
+
+      font-size:
+        7px;
+
+      letter-spacing:
+        0.08em;
+    }
+
+
+    /* =========================================
+       FLOATING REPORT
+       ONE AND ONLY REPORT ENTRY
+    ========================================== */
+
+    .floating-report {
+      position:
+        fixed;
+
+      right:
+        22px;
+
+      bottom:
+        22px;
+
+      z-index:
+        120;
+
+      display:
+        inline-grid;
+
+      grid-template-columns:
+        42px
+        minmax(
+          95px,
+          1fr
+        )
+        31px;
+
+      align-items:
+        center;
+
+      gap:
+        9px;
+
+      min-width:
+        218px;
+
+      min-height:
+        62px;
+
+      padding:
+        8px;
 
       border:
         1px solid
-        #b44b32;
-
-      border-radius: 18px;
+        #87392f;
 
       background:
-        var(--orange);
+        var(--rust);
 
-      color: #fff;
+      color:
+        #fff;
 
       box-shadow:
-        0 15px 34px
+        7px
+        7px
+        0
         rgba(
-          31,
-          32,
-          35,
-          0.2
+          25,
+          25,
+          22,
+          0.17
         );
 
       transition:
-        transform 180ms ease,
-        box-shadow 180ms ease,
-        background 180ms ease;
+        transform
+        170ms ease,
+        box-shadow
+        170ms ease;
     }
 
     .floating-report:hover {
       transform:
-        translateY(
-          -4px
+        translate(
+          -2px,
+          -3px
         );
 
-      background:
-        #f25837;
-
       box-shadow:
-        0 20px 40px
+        9px
+        10px
+        0
         rgba(
-          31,
-          32,
-          35,
-          0.25
+          25,
+          25,
+          22,
+          0.18
         );
     }
 
-    .floating-report__icon {
-      display: grid;
+    .floating-report__mark {
+      display:
+        grid;
 
-      width: 44px;
-      height: 44px;
+      width:
+        42px;
 
-      place-items: center;
+      height:
+        42px;
 
-      border-radius: 14px;
+      place-items:
+        center;
 
       background:
-        rgba(
-          23,
-          24,
-          27,
-          0.92
-        );
+        var(--ink);
 
       color:
         var(--yellow);
     }
 
-    .floating-report__label {
-      display: flex;
+    .floating-report__text {
+      display:
+        flex;
 
-      flex-direction: column;
+      flex-direction:
+        column;
 
-      min-width: 96px;
+      gap:
+        3px;
 
-      gap: 3px;
+      min-width:
+        0;
     }
 
-    .floating-report__label small {
+    .floating-report__text small {
       color:
         rgba(
           255,
           255,
           255,
-          0.68
+          0.65
         );
 
       font-family:
-        "DM Mono",
+        "IBM Plex Mono",
         monospace;
 
-      font-size: 6px;
+      font-size:
+        6px;
 
-      letter-spacing: 0.09em;
+      letter-spacing:
+        0.08em;
     }
 
-    .floating-report__label strong {
-      color: #fff;
+    .floating-report__text strong {
+      font-size:
+        11px;
 
-      font-size: 11px;
-
-      font-weight: 800;
+      font-weight:
+        700;
     }
 
     .floating-report__arrow {
-      display: grid;
+      display:
+        grid;
 
-      width: 32px;
-      height: 32px;
+      width:
+        31px;
 
-      place-items: center;
+      height:
+        31px;
 
-      border-radius: 50%;
+      place-items:
+        center;
+
+      border:
+        1px solid
+        rgba(
+          255,
+          255,
+          255,
+          0.28
+        );
 
       background:
         rgba(
           255,
           255,
           255,
-          0.18
+          0.1
         );
     }
 
 
-    /* =========================
-       ACCESSIBILITY
-    ========================== */
+    /* =========================================
+       FOCUS
+    ========================================== */
 
     :global(a:focus-visible),
     :global(button:focus-visible) {
       outline:
-        3px solid
-        rgba(
-          39,
-          84,
-          255,
-          0.42
-        );
+        2px solid
+        var(--rust);
 
-      outline-offset: 4px;
+      outline-offset:
+        4px;
     }
 
 
-    /* =========================
+    /* =========================================
        TABLET
-    ========================== */
+    ========================================== */
 
-    @media (max-width: 1050px) {
+    @media (max-width: 1080px) {
 
       .desktop-nav {
-        display: none;
+        gap:
+          16px;
       }
 
-      .header__inner {
+      .hero__bottom {
         grid-template-columns:
-          1fr auto;
+          1fr;
 
-        gap: 10px;
-      }
-
-      .menu-trigger {
-        display: grid;
-      }
-
-      .hero__lower {
-        grid-template-columns: 1fr;
-
-        gap: 40px;
+        gap:
+          45px;
       }
 
       .hero__signal {
-        max-width: 680px;
+        max-width:
+          700px;
       }
 
-      .services__intro,
-      .flow__header,
-      .network__header,
-      .materials__layout,
-      .context-index__header,
-      .footer__top {
-        grid-template-columns: 1fr;
-
-        gap: 42px;
-      }
-
-      .directory__head,
-      .directory__row {
+      .manifesto__layout {
         grid-template-columns:
-          48px
-          minmax(0, 1fr)
-          120px
-          110px
-          135px
-          20px;
+          45px
+          minmax(
+            0,
+            1fr
+          )
+          minmax(
+            260px,
+            0.55fr
+          );
+
+        gap:
+          42px;
       }
 
-      .flow-line {
+      .archive__header,
+      .system__header,
+      .directory__header,
+      .materials__header {
         grid-template-columns:
           1fr
-          35px
-          1fr
-          35px
-          1fr
-          35px
-          1fr;
+          300px;
       }
 
-      .context-grid {
+      .context__grid {
         grid-template-columns:
           repeat(
             2,
-            minmax(0, 1fr)
+            minmax(
+              0,
+              1fr
+            )
           );
+      }
+
+      .context-item:nth-child(2) {
+        border-right:
+          0;
+      }
+
+      .context-item:nth-child(3),
+      .context-item:nth-child(4) {
+        border-top:
+          1px solid
+          var(--line);
+      }
+
+      .context-item:nth-child(3) {
+        padding-left:
+          0;
+      }
+
+      .context-item:nth-child(4) {
+        padding-left:
+          23px;
       }
 
     }
 
 
-    /* =========================
+    /* =========================================
        MOBILE
-    ========================== */
+    ========================================== */
 
-    @media (max-width: 700px) {
+    @media (max-width: 760px) {
 
       .shell {
         width:
@@ -4234,441 +5360,738 @@ const currentYear = new Date().getFullYear();
           );
       }
 
+
+      /* HEADER */
+
       .header__inner {
-        min-height: 70px;
+        min-height:
+          68px;
       }
 
-      .brand__symbol {
-        width: 37px;
-        height: 37px;
+      .brand__mark {
+        width:
+          36px;
 
-        border-radius: 11px;
+        height:
+          36px;
+
+        font-size:
+          21px;
       }
 
       .brand__copy strong {
-        font-size: 14px;
+        font-size:
+          14px;
       }
 
       .brand__copy small {
-        display: none;
+        display:
+          none;
       }
 
-      .header-search {
-        display: none;
+      .desktop-nav,
+      .search-button {
+        display:
+          none;
       }
 
-      .header__actions {
-        gap: 6px;
+      .header__inner {
+        grid-template-columns:
+          1fr
+          auto;
+      }
+
+      .menu-button {
+        display:
+          grid;
       }
 
 
-      /* Hero */
+      /* HERO */
 
-      .hero__inner {
-        min-height: auto;
-
-        grid-template-columns: 1fr;
+      .hero,
+      .hero__grid {
+        min-height:
+          auto;
       }
 
-      .hero__side-label {
-        display: none;
+      .hero__grid {
+        display:
+          block;
       }
 
-      .hero__content {
+      .hero__index {
+        display:
+          none;
+      }
+
+      .hero__main {
         padding:
-          55px 0 60px;
+          40px
+          0
+          54px;
+      }
+
+      .hero__topline {
+        min-height:
+          34px;
+      }
+
+      .hero__overline {
+        margin:
+          45px
+          0
+          13px;
       }
 
       .hero h1 {
-        margin-top: 23px;
-
         font-size:
           clamp(
-            58px,
+            60px,
             18vw,
-            92px
+            94px
           );
 
-        line-height: 0.86;
+        line-height:
+          0.81;
+      }
+
+      .hero h1 span {
+        margin-left:
+          7%;
       }
 
       .hero h1 em {
-        margin-left: 7%;
+        margin-left:
+          2%;
       }
 
-      .hero h1 strong {
-        margin-left: 2%;
+      .hero__bottom {
+        margin-top:
+          52px;
       }
 
-      .hero__lower {
-        margin-top: 52px;
+      .hero__statement {
+        max-width:
+          none;
       }
 
-      .hero__buttons {
-        flex-direction: column;
+      .hero__statement p {
+        font-size:
+          12px;
       }
 
-      .button {
-        width: 100%;
+      .specimen__canvas {
+        min-height:
+          290px;
       }
 
-      .signal-main {
-        min-height: 250px;
+      .orbit--one {
+        width:
+          275px;
+
+        height:
+          275px;
+
+        left:
+          10px;
       }
 
-      .signal-title strong {
-        font-size: 29px;
+      .orbit--two {
+        width:
+          200px;
+
+        height:
+          200px;
+
+        left:
+          47px;
+      }
+
+      .orbit--three {
+        width:
+          108px;
+
+        height:
+          108px;
+
+        left:
+          93px;
+      }
+
+      .node--center {
+        left:
+          108px;
+
+        top:
+          113px;
+      }
+
+      .node--place {
+        top:
+          46px;
+      }
+
+      .node--people {
+        bottom:
+          30px;
+      }
+
+      .node--data {
+        right:
+          11px;
+      }
+
+      .node--material {
+        right:
+          10px;
+
+        bottom:
+          45px;
       }
 
 
-      /* Sections */
+      /* SHARED */
 
-      .section-marker {
-        font-size: 7px;
+      .section-code {
+        grid-template-columns:
+          28px
+          auto
+          minmax(
+            12px,
+            1fr
+          );
+
+        font-size:
+          6px;
       }
 
-      .intro,
-      .services,
+      .manifesto,
+      .archive,
+      .system,
       .principles,
-      .network,
+      .directory,
       .materials,
-      .context-index {
+      .context {
         padding:
-          78px 0;
+          80px
+          0;
       }
 
-      .intro__grid {
-        grid-template-columns: 1fr;
 
-        gap: 40px;
+      /* MANIFESTO */
 
-        margin-top: 40px;
+      .manifesto__layout {
+        grid-template-columns:
+          1fr;
+
+        gap:
+          30px;
+
+        margin-top:
+          42px;
       }
 
-      .intro__headline {
-        padding-left: 52px;
+      .manifesto__number {
+        display:
+          none;
       }
 
-      .intro h2,
-      .services h2,
+      .manifesto__copy {
+        padding-top:
+          0;
+      }
+
+      .manifesto__headline h2,
+      .archive h2,
+      .system h2,
       .principles h2,
-      .network h2,
+      .directory h2,
       .materials h2,
-      .context-index h2,
-      .flow h2 {
+      .context h2 {
         font-size:
           clamp(
             48px,
             14vw,
-            68px
+            69px
           );
       }
 
 
-      /* Services */
+      /* ARCHIVE */
 
-      .services__intro {
-        margin-top: 38px;
-        margin-bottom: 38px;
-      }
-
-      .service-row {
+      .archive__header,
+      .system__header,
+      .directory__header,
+      .materials__header {
         grid-template-columns:
-          34px
-          48px
-          minmax(0, 1fr);
+          1fr;
 
-        gap: 11px;
+        gap:
+          27px;
 
-        min-height: 166px;
+        margin-top:
+          40px;
+
+        margin-bottom:
+          42px;
       }
 
-      .service-row:hover {
-        padding-left: 8px;
-        padding-right: 8px;
+      .archive-row {
+        grid-template-columns:
+          31px
+          45px
+          minmax(
+            0,
+            1fr
+          );
+
+        gap:
+          10px;
+
+        min-height:
+          160px;
       }
 
-      .service-row__number {
-        padding-top: 24px;
+      .archive-row:hover {
+        padding-left:
+          7px;
+
+        padding-right:
+          7px;
       }
 
-      .service-row__icon {
-        width: 44px;
-        height: 44px;
+      .archive-row__symbol {
+        width:
+          43px;
 
-        border-radius: 13px;
+        height:
+          43px;
       }
 
-      .service-row__main h3 {
-        font-size: 19px;
+      .archive-row__content h3 {
+        font-size:
+          19px;
       }
 
-      .service-row__main p {
-        font-size: 10px;
+      .archive-row__content p {
+        font-size:
+          10px;
       }
 
-      .service-row__action {
-        display: none;
+      .archive-row__arrow {
+        display:
+          none;
       }
 
 
-      /* Flow */
+      /* SYSTEM */
 
-      .flow {
+      .system {
         padding:
-          80px 0;
+          82px
+          0;
       }
 
-      .flow__header {
-        margin-top: 38px;
-        margin-bottom: 42px;
+      .system__aside {
+        max-width:
+          350px;
       }
 
-      .flow-line {
-        display: grid;
-
-        grid-template-columns: 1fr;
+      .constellation {
+        min-height:
+          500px;
       }
 
-      .flow-step,
-      .flow-step:not(:first-child) {
-        padding:
-          26px 0 30px;
+      .constellation__center {
+        width:
+          132px;
+
+        height:
+          132px;
       }
 
-      .flow-arrow {
-        display: none;
+      .constellation__center strong {
+        font-size:
+          21px;
       }
 
-      .flow-step {
-        border-bottom:
-          1px solid
-          #353b4e;
+      .constellation__node {
+        min-width:
+          91px;
+
+        min-height:
+          62px;
       }
 
-      .flow-step:last-child {
-        border-bottom: 0;
+      .constellation__node--one {
+        left:
+          5%;
+
+        top:
+          70px;
+      }
+
+      .constellation__node--two {
+        right:
+          5%;
+
+        top:
+          65px;
+      }
+
+      .constellation__node--three {
+        right:
+          5%;
+
+        bottom:
+          65px;
+      }
+
+      .constellation__node--four {
+        left:
+          5%;
+
+        bottom:
+          50px;
       }
 
 
-      /* Principles */
+      /* PRINCIPLES */
 
       .principles__headline {
-        margin-top: 38px;
+        margin-top:
+          40px;
       }
 
       .principles__grid {
-        grid-template-columns: 1fr;
+        grid-template-columns:
+          1fr;
 
-        margin-top: 40px;
+        margin-top:
+          42px;
       }
 
-      .principle:nth-child(2) {
-        transform: none;
-      }
+      .principle-card,
+      .principle-card
+        + .principle-card,
+      .principle-card:last-child {
+        min-height:
+          240px;
 
-      .principle:nth-child(2):hover {
-        transform:
-          translateY(
-            -4px
-          );
-      }
+        padding:
+          23px
+          0;
 
-      .principle {
-        min-height: 240px;
-      }
+        border-right:
+          0;
 
-      .principle h3 {
-        margin-top: 52px;
-      }
-
-
-      /* Network */
-
-      .network__header {
-        margin-top: 38px;
-        margin-bottom: 38px;
-      }
-
-      .directory {
-        border-top:
+        border-bottom:
           1px solid
-          var(--ink);
+          var(--line);
       }
 
-      .directory__head {
-        display: none;
+      .principle-card:last-child {
+        border-bottom:
+          0;
       }
 
-      .directory__row {
+      .principle-card__body {
+        margin-top:
+          55px;
+      }
+
+
+      /* DIRECTORY */
+
+      .directory-table__head {
+        display:
+          none;
+      }
+
+      .directory-table__row {
         grid-template-columns:
           28px
-          minmax(0, 1fr)
+          minmax(
+            0,
+            1fr
+          )
           20px;
 
-        min-height: 82px;
+        min-height:
+          82px;
 
-        gap: 11px;
+        gap:
+          10px;
       }
 
-      .directory__type,
-      .directory__area,
-      .directory__status {
-        display: none;
+      .directory-table__type,
+      .directory-table__area,
+      .directory-table__status {
+        display:
+          none;
       }
 
-      .directory__row:hover {
-        padding-left: 6px;
-        padding-right: 6px;
-      }
+      .directory-table__row:hover {
+        padding-left:
+          6px;
 
-      .directory__name strong {
-        font-size: 14px;
-      }
-
-
-      /* Materials */
-
-      .materials__layout {
-        margin-top: 40px;
-      }
-
-      .material-cloud {
-        min-height: 630px;
-      }
-
-      .material-chip {
-        min-width: 155px;
-        min-height: 128px;
-      }
-
-      .material-chip strong {
-        font-size: 18px;
-      }
-
-      .material-chip--1 {
-        top: 5px;
-        left: 2%;
-      }
-
-      .material-chip--2 {
-        top: 102px;
-        right: 0;
-      }
-
-      .material-chip--3 {
-        top: 220px;
-        left: 17%;
-      }
-
-      .material-chip--4 {
-        right: 0;
-        bottom: 105px;
-      }
-
-      .material-chip--5 {
-        bottom: 0;
-        left: 3%;
+        padding-right:
+          6px;
       }
 
 
-      /* Context */
+      /* MATERIAL */
 
-      .context-index__header {
-        margin-top: 38px;
-        margin-bottom: 40px;
-      }
-
-      .context-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .context-card {
-        min-height: 215px;
-      }
-
-      .context-card:nth-child(2),
-      .context-card:nth-child(4) {
-        transform: none;
-      }
-
-      .context-card:hover,
-      .context-card:nth-child(2):hover,
-      .context-card:nth-child(4):hover {
-        transform:
-          translateY(
-            -4px
+      .material-index {
+        grid-template-columns:
+          45px
+          minmax(
+            0,
+            1fr
           );
       }
 
-      .context-card > small {
-        margin-top: 45px;
+      .material-index__rail {
+        padding:
+          14px
+          0;
+      }
+
+      .material-row {
+        grid-template-columns:
+          29px
+          minmax(
+            0,
+            1fr
+          )
+          31px;
+
+        min-height:
+          90px;
+
+        gap:
+          8px;
+      }
+
+      .material-row--wide {
+        min-height:
+          115px;
+      }
+
+      .material-row--medium {
+        min-height:
+          100px;
+      }
+
+      .material-row--small {
+        min-height:
+          82px;
+      }
+
+      .material-row:hover {
+        padding-left:
+          7px;
+
+        padding-right:
+          7px;
+      }
+
+      .material-row__name {
+        font-size:
+          24px;
+      }
+
+      .material-row__code {
+        display:
+          none;
       }
 
 
-      /* Footer */
+      /* CONTEXT */
+
+      .context__headline {
+        margin-top:
+          40px;
+      }
+
+      .context__grid {
+        grid-template-columns:
+          1fr;
+
+        margin-top:
+          42px;
+      }
+
+      .context-item,
+      .context-item
+        + .context-item,
+      .context-item:last-child {
+        min-height:
+          210px;
+
+        padding:
+          20px
+          0;
+
+        border-right:
+          0;
+
+        border-bottom:
+          1px solid
+          var(--line);
+      }
+
+      .context-item:last-child {
+        border-bottom:
+          0;
+      }
+
+      .context-item:nth-child(3),
+      .context-item:nth-child(4) {
+        border-top:
+          0;
+      }
+
+      .context-item > small {
+        margin-top:
+          47px;
+      }
+
+      .context__signature {
+        align-items:
+          flex-start;
+
+        flex-direction:
+          column;
+
+        gap:
+          18px;
+
+        padding-top:
+          27px;
+      }
+
+
+      /* FOOTER */
 
       .footer__top {
+        grid-template-columns:
+          1fr;
+
+        gap:
+          45px;
+
         padding:
-          56px 0 42px;
+          55px
+          0
+          42px;
       }
 
-      .footer__nav {
-        grid-template-columns: 1fr;
+      .footer__navigation {
+        grid-template-columns:
+          1fr;
 
-        gap: 32px;
+        gap:
+          30px;
       }
 
       .footer__bottom {
-        min-height: 85px;
+        align-items:
+          flex-start;
 
-        align-items: flex-start;
+        flex-direction:
+          column;
 
-        justify-content: center;
+        justify-content:
+          center;
 
-        flex-direction: column;
+        min-height:
+          78px;
 
-        gap: 8px;
+        padding:
+          12px
+          0;
+
+        gap:
+          7px;
       }
 
 
-      /* Floating report */
+      /* FLOATING REPORT */
 
       .floating-report {
-        right: 14px;
-        bottom: 14px;
+        right:
+          14px;
 
-        width: 54px;
-        height: 54px;
+        bottom:
+          14px;
 
-        min-height: 54px;
+        min-width:
+          54px;
 
-        padding: 0;
+        width:
+          54px;
 
-        justify-content: center;
+        height:
+          54px;
 
-        border-radius: 50%;
+        min-height:
+          54px;
+
+        padding:
+          0;
+
+        display:
+          grid;
+
+        grid-template-columns:
+          1fr;
+
+        place-items:
+          center;
+
+        border-radius:
+          0;
+
+        box-shadow:
+          5px
+          5px
+          0
+          rgba(
+            25,
+            25,
+            22,
+            0.17
+          );
       }
 
-      .floating-report__icon {
-        width: 44px;
-        height: 44px;
+      .floating-report__mark {
+        width:
+          42px;
 
-        border-radius: 50%;
+        height:
+          42px;
       }
 
-      .floating-report__label,
+      .floating-report__text,
       .floating-report__arrow {
-        display: none;
+        display:
+          none;
       }
 
     }
 
 
+    /* =========================================
+       REDUCED MOTION
+    ========================================== */
+
     @media (prefers-reduced-motion: reduce) {
 
       :global(html) {
-        scroll-behavior: auto;
+        scroll-behavior:
+          auto;
       }
 
       :global(*) {
