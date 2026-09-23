@@ -8,7 +8,6 @@ import {
   Map,
   Menu,
   Recycle,
-  ShieldCheck,
   X,
 } from "@lucide/astro";
 
@@ -37,33 +36,33 @@ const siteHref = (path: string) => {
 const services = [
   {
     no: "01",
-    title: "Peta Persampahan",
-    short: "PETA",
-    text: "Jelajahi informasi persampahan berdasarkan lokasi dan wilayah di Kabupaten Badung.",
+    title: "Peta",
+    label: "SPATIAL",
+    text: "Lihat persampahan berdasarkan lokasi dan wilayah di Kabupaten Badung.",
     href: "/map",
     icon: Map,
   },
   {
     no: "02",
-    title: "Data & Informasi",
-    short: "DATA",
-    text: "Temukan informasi dalam bentuk yang lebih terstruktur, ringkas, dan mudah dibaca.",
+    title: "Data",
+    label: "INSIGHT",
+    text: "Temukan informasi persampahan dalam satu ruang yang mudah dipahami.",
     href: "/dashboard",
     icon: ChartColumn,
   },
   {
     no: "03",
-    title: "Jaringan Organisasi",
-    short: "NETWORK",
-    text: "Kenali organisasi dan pihak yang membentuk ekosistem persampahan Badung.",
+    title: "Organisasi",
+    label: "NETWORK",
+    text: "Kenali pihak dan jaringan yang membentuk ekosistem persampahan.",
     href: "/organizations",
     icon: Building2,
   },
   {
     no: "04",
-    title: "Material & Edukasi",
-    short: "MATERIAL",
-    text: "Pelajari kategori material dan pahami karakter penanganannya.",
+    title: "Material",
+    label: "MATERIAL",
+    text: "Pahami kategori material dan karakter dasar dari setiap jenis sampah.",
     href: "/waste",
     icon: Recycle,
   },
@@ -72,23 +71,20 @@ const services = [
 const areas = [
   {
     no: "01",
-    name: "Kabupaten Badung",
+    name: "Badung",
     type: "KABUPATEN",
-    detail: "Wilayah utama",
     status: "TERSEDIA",
   },
   {
     no: "02",
     name: "Mengwi",
     type: "KECAMATAN",
-    detail: "Area contoh",
     status: "CONTOH",
   },
   {
     no: "03",
     name: "Abiansemal",
     type: "KECAMATAN",
-    detail: "Area contoh",
     status: "CONTOH",
   },
 ];
@@ -96,33 +92,51 @@ const areas = [
 const materials = [
   {
     no: "01",
-    code: "ORG",
     name: "Organik",
-    description: "Material yang berasal dari sisa makhluk hidup.",
+    code: "ORG",
+    detail: "Sisa makanan, tumbuhan, dan material organik.",
   },
   {
     no: "02",
-    code: "ANR",
     name: "Anorganik",
-    description: "Material non-organik dengan karakter yang beragam.",
+    code: "ANR",
+    detail: "Material non-organik dengan berbagai karakter.",
   },
   {
     no: "03",
-    code: "B3",
     name: "Bahan Berbahaya",
-    description: "Material yang memerlukan perhatian dan penanganan khusus.",
+    code: "B3",
+    detail: "Material yang membutuhkan perhatian khusus.",
   },
   {
     no: "04",
-    code: "ELK",
     name: "Elektronik",
-    description: "Perangkat dan komponen elektronik yang sudah tidak digunakan.",
+    code: "ELK",
+    detail: "Perangkat dan komponen elektronik bekas.",
   },
   {
     no: "05",
-    code: "RES",
     name: "Residu",
-    description: "Material tersisa yang tidak masuk kategori lainnya.",
+    code: "RES",
+    detail: "Material sisa yang tidak masuk kategori lain.",
+  },
+];
+
+const principles = [
+  {
+    no: "01",
+    title: "Kontekstual",
+    text: "Informasi ditempatkan bersama lokasi dan konteks yang relevan.",
+  },
+  {
+    no: "02",
+    title: "Terbuka",
+    text: "Informasi publik disusun agar mudah ditemukan dan dipahami.",
+  },
+  {
+    no: "03",
+    title: "Bertanggung jawab",
+    text: "Penyajian informasi memperhatikan sumber, konteks, dan penggunaannya.",
   },
 ];
 
@@ -148,7 +162,7 @@ const currentYear = new Date().getFullYear();
 
     <meta
       name="theme-color"
-      content="#f5f6f1"
+      content="#f4f5ef"
     />
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -159,7 +173,7 @@ const currentYear = new Date().getFullYear();
     />
 
     <link
-      href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap"
       rel="stylesheet"
     />
   </head>
@@ -183,13 +197,13 @@ const currentYear = new Date().getFullYear();
               class="brand__mark"
               aria-hidden="true"
             >
-              <span></span>
-              <span></span>
-              <span></span>
-              <span></span>
+              <i></i>
+              <i></i>
+              <i></i>
+              <i></i>
             </span>
 
-            <span class="brand__name">
+            <span class="brand__text">
               BINSIGHT
             </span>
           </a>
@@ -200,7 +214,7 @@ const currentYear = new Date().getFullYear();
           >
             <a
               href={siteHref("/")}
-              class="desktop-nav__active"
+              class="is-active"
             >
               Beranda
             </a>
@@ -220,21 +234,17 @@ const currentYear = new Date().getFullYear();
             <a href={siteHref("/waste")}>
               Material
             </a>
-
-            <a href="#tentang">
-              Tentang
-            </a>
           </nav>
 
-          <div class="header__actions">
+          <div class="header__right">
 
-            <span class="header__region">
+            <span class="header__location">
               BADUNG / BALI
             </span>
 
             <a
-              class="header__report"
               href={siteHref("/reports/create")}
+              class="header__action"
             >
               Laporan
               <ArrowUpRight
@@ -273,38 +283,45 @@ const currentYear = new Date().getFullYear();
         >
           <div class="page-width mobile-nav__inner">
 
-            <div class="mobile-nav__label">
-              MENU
+            <div class="mobile-nav__top">
+              <span>MAIN MENU</span>
+              <span>01 — 06</span>
             </div>
 
             <a href={siteHref("/")}>
-              <span>01</span>
-              Beranda
+              <small>01</small>
+              <span>Beranda</span>
+              <ArrowRight size={16} />
             </a>
 
             <a href={siteHref("/map")}>
-              <span>02</span>
-              Peta
+              <small>02</small>
+              <span>Peta</span>
+              <ArrowRight size={16} />
             </a>
 
             <a href={siteHref("/dashboard")}>
-              <span>03</span>
-              Data
+              <small>03</small>
+              <span>Data</span>
+              <ArrowRight size={16} />
             </a>
 
             <a href={siteHref("/organizations")}>
-              <span>04</span>
-              Organisasi
+              <small>04</small>
+              <span>Organisasi</span>
+              <ArrowRight size={16} />
             </a>
 
             <a href={siteHref("/waste")}>
-              <span>05</span>
-              Material
+              <small>05</small>
+              <span>Material</span>
+              <ArrowRight size={16} />
             </a>
 
             <a href="#tentang">
-              <span>06</span>
-              Tentang
+              <small>06</small>
+              <span>Tentang</span>
+              <ArrowRight size={16} />
             </a>
 
           </div>
@@ -319,261 +336,277 @@ const currentYear = new Date().getFullYear();
         ==================================================== -->
 
         <section class="hero">
-          <div class="page-width">
 
-            <div class="hero__topline">
-              <span>PUBLIC INFORMATION PLATFORM</span>
-              <span>DENPASAR REGION / 2026</span>
+          <div class="page-width hero__top">
+            <div>
+              <span>BADUNG WASTE INTELLIGENCE</span>
             </div>
 
-            <div class="hero__grid">
+            <div>
+              <span>PUBLIC INFORMATION PLATFORM</span>
+            </div>
+          </div>
 
-              <div class="hero__copy">
 
-                <div class="hero__index">
-                  <span>01</span>
-                  <span>INTRODUCTION</span>
-                </div>
+          <div class="page-width hero__grid">
 
-                <p class="hero__eyebrow">
-                  BADUNG WASTE INTELLIGENCE
-                </p>
+            <div class="hero__main">
 
-                <h1>
-                  Memahami
-                  <span>persampahan</span>
-                  dimulai dari
-                  <strong>konteks.</strong>
-                </h1>
+              <div class="hero__index">
+                <span>01</span>
+                <span>OVERVIEW</span>
+              </div>
 
-                <p class="hero__description">
-                  BINSIGHT adalah ruang informasi publik yang
-                  menghubungkan lokasi, data, organisasi, material,
-                  edukasi, dan laporan persampahan Kabupaten Badung.
-                </p>
+              <h1>
+                Kenali
+                <span>persampahan</span>
+                Badung.
+              </h1>
 
-                <div class="hero__buttons">
+              <p class="hero__intro">
+                BINSIGHT menyatukan informasi tentang lokasi,
+                data, organisasi, material, dan kondisi persampahan
+                Kabupaten Badung dalam satu ruang publik.
+              </p>
 
-                  <a
-                    class="button button--primary"
-                    href={siteHref("/map")}
-                  >
-                    Jelajahi peta
-                    <ArrowRight
-                      size={17}
-                      strokeWidth={1.8}
-                    />
-                  </a>
+              <div class="hero__actions">
 
-                  <a
-                    class="button button--secondary"
-                    href={siteHref("/dashboard")}
-                  >
-                    Buka data
-                    <ArrowUpRight
-                      size={17}
-                      strokeWidth={1.8}
-                    />
-                  </a>
+                <a
+                  href={siteHref("/map")}
+                  class="button button--dark"
+                >
+                  Jelajahi peta
+                  <ArrowRight
+                    size={17}
+                    strokeWidth={1.8}
+                  />
+                </a>
 
-                </div>
+                <a
+                  href={siteHref("/dashboard")}
+                  class="button button--light"
+                >
+                  Lihat data
+                  <ArrowUpRight
+                    size={16}
+                    strokeWidth={1.8}
+                  />
+                </a>
 
               </div>
 
+            </div>
 
-              <div
-                class="hero__visual"
-                aria-label="Visual konteks wilayah BINSIGHT"
-              >
 
-                <div class="visual__header">
-                  <span>FIELD VIEW</span>
-                  <span>01 / 04</span>
+            <div class="hero__interface">
+
+              <div class="interface__bar">
+                <span>LIVE CONTEXT</span>
+
+                <div>
+                  <i></i>
+                  <span>SYSTEM READY</span>
+                </div>
+              </div>
+
+              <div class="interface__body">
+
+                <div class="interface__axis interface__axis--vertical">
+                  <span>N</span>
+                  <span>S</span>
                 </div>
 
-                <div class="visual__canvas">
+                <div class="interface__axis interface__axis--horizontal">
+                  <span>W</span>
+                  <span>E</span>
+                </div>
 
-                  <div class="map-grid"></div>
+                <div class="interface__grid"></div>
 
-                  <div class="map-shape map-shape--a"></div>
-                  <div class="map-shape map-shape--b"></div>
-                  <div class="map-shape map-shape--c"></div>
+                <div class="interface__shape interface__shape--one"></div>
+                <div class="interface__shape interface__shape--two"></div>
 
-                  <div class="map-route"></div>
+                <div class="interface__cross interface__cross--one">
+                  <span></span>
+                  <i></i>
+                </div>
 
-                  <div class="map-point map-point--one">
-                    <i></i>
-                    <span>01</span>
+                <div class="interface__cross interface__cross--two">
+                  <span></span>
+                  <i></i>
+                </div>
+
+                <div class="interface__cross interface__cross--three">
+                  <span></span>
+                  <i></i>
+                </div>
+
+                <div class="interface__center">
+
+                  <div class="interface__center-ring">
+                    <span></span>
                   </div>
 
-                  <div class="map-point map-point--two">
-                    <i></i>
-                    <span>02</span>
-                  </div>
+                  <small>REGION</small>
 
-                  <div class="map-point map-point--three">
-                    <i></i>
-                    <span>03</span>
-                  </div>
+                  <strong>
+                    BADUNG
+                  </strong>
 
-                  <div class="visual__center">
-                    <small>REGION</small>
-                    <strong>BADUNG</strong>
-                    <span>BALI</span>
-                  </div>
-
-                  <div class="visual__compass">
-                    <span>N</span>
-                    <span>+</span>
-                    <span>E</span>
-                  </div>
+                  <span>
+                    BALI / INDONESIA
+                  </span>
 
                 </div>
 
-                <div class="visual__footer">
+                <div class="interface__legend">
+                  <div>
+                    <i></i>
+                    <span>AREA</span>
+                  </div>
 
                   <div>
-                    <span class="mono-label">CONTEXT</span>
-                    <strong>MAP / DATA / PEOPLE</strong>
+                    <i></i>
+                    <span>CONTEXT</span>
                   </div>
 
-                  <span class="status-dot"></span>
+                  <div>
+                    <i></i>
+                    <span>NETWORK</span>
+                  </div>
+                </div>
 
+              </div>
+
+              <div class="interface__bottom">
+
+                <div>
+                  <small>COORDINATES</small>
+                  <strong>03° 28' S / 115° 08' E</strong>
+                </div>
+
+                <div>
+                  <small>VIEW</small>
+                  <strong>REGIONAL</strong>
                 </div>
 
               </div>
 
             </div>
 
-            <div class="hero__rail">
+          </div>
 
-              <div class="hero__rail-item">
-                <span>01</span>
-                <small>LOCATION</small>
-              </div>
 
-              <div class="hero__rail-item">
-                <span>02</span>
-                <small>INFORMATION</small>
-              </div>
+          <div class="page-width hero__signal">
 
-              <div class="hero__rail-item">
-                <span>03</span>
-                <small>NETWORK</small>
-              </div>
+            <div>
+              <span>01</span>
+              <small>LOCATION</small>
+            </div>
 
-              <div class="hero__rail-item">
-                <span>04</span>
-                <small>REPORT</small>
-              </div>
+            <div>
+              <span>02</span>
+              <small>DATA</small>
+            </div>
 
+            <div>
+              <span>03</span>
+              <small>NETWORK</small>
+            </div>
+
+            <div>
+              <span>04</span>
+              <small>MATERIAL</small>
+            </div>
+
+            <div>
+              <span>05</span>
+              <small>REPORT</small>
             </div>
 
           </div>
+
         </section>
 
 
         <!-- ===================================================
-             INTRO STRIP
+             STATEMENT
         ==================================================== -->
 
-        <section class="signal">
-          <div class="page-width signal__grid">
+        <section class="statement">
 
-            <div class="signal__intro">
-              <span class="section-kicker">
-                02 / WHY BINSIGHT
-              </span>
+          <div class="page-width statement__grid">
+
+            <div class="statement__meta">
+              <span>02</span>
+              <small>THE CONTEXT</small>
+            </div>
+
+            <div class="statement__content">
+
+              <p class="statement__eyebrow">
+                SATU ISU, BANYAK KONTEKS.
+              </p>
 
               <h2>
-                Satu isu.
-                <span>Banyak konteks.</span>
+                Persampahan
+                <span>perlu dilihat</span>
+                secara utuh.
               </h2>
-            </div>
 
-            <div class="signal__cards">
+              <div class="statement__lower">
 
-              <article class="signal-card">
-                <span>01</span>
+                <p>
+                  Informasi tentang sampah tidak hanya berbicara
+                  tentang material. Ia juga berkaitan dengan tempat,
+                  manusia, organisasi, dan kondisi di sekitarnya.
+                </p>
 
-                <div>
-                  <strong>
-                    Lokasi
-                  </strong>
+                <p>
+                  BINSIGHT menyatukan konteks tersebut agar informasi
+                  publik dapat dibaca dengan lebih jelas dan
+                  digunakan dengan lebih baik.
+                </p>
 
-                  <p>
-                    Informasi lebih bermakna ketika
-                    ditempatkan pada ruang yang tepat.
-                  </p>
-                </div>
-              </article>
-
-              <article class="signal-card">
-                <span>02</span>
-
-                <div>
-                  <strong>
-                    Data
-                  </strong>
-
-                  <p>
-                    Informasi disusun agar lebih mudah
-                    dibaca, ditemukan, dan dibandingkan.
-                  </p>
-                </div>
-              </article>
-
-              <article class="signal-card">
-                <span>03</span>
-
-                <div>
-                  <strong>
-                    Manusia
-                  </strong>
-
-                  <p>
-                    Organisasi dan masyarakat merupakan
-                    bagian dari ekosistem persampahan.
-                  </p>
-                </div>
-              </article>
+              </div>
 
             </div>
 
           </div>
+
         </section>
 
 
         <!-- ===================================================
-             SERVICES
+             MODULES
         ==================================================== -->
 
-        <section class="explore">
+        <section class="modules">
+
           <div class="page-width">
 
-            <div class="section-header">
+            <div class="modules__head">
 
               <div>
-                <span class="section-kicker">
+                <span class="section-label">
                   03 / EXPLORE
                 </span>
 
                 <h2>
-                  Empat ruang
-                  <span>untuk dijelajahi.</span>
+                  Pilih ruang
+                  <span>yang ingin dilihat.</span>
                 </h2>
               </div>
 
               <p>
-                BINSIGHT dirancang untuk membantu pengguna
-                berpindah dari satu konteks informasi ke konteks
-                lainnya tanpa kehilangan gambaran besarnya.
+                Mulai dari satu kebutuhan, kemudian lanjutkan
+                ke konteks yang berhubungan dengannya.
               </p>
 
             </div>
 
 
-            <div class="service-grid">
+            <div class="module-grid">
 
               {
                 services.map((service) => {
@@ -582,25 +615,41 @@ const currentYear = new Date().getFullYear();
                   return (
                     <a
                       href={siteHref(service.href)}
-                      class={`service-card service-card--${service.no}`}
+                      class="module-card"
                     >
 
-                      <div class="service-card__top">
-                        <span>{service.no}</span>
+                      <div class="module-card__top">
 
-                        <span class="service-card__type">
-                          {service.short}
+                        <span class="module-card__number">
+                          {service.no}
                         </span>
+
+                        <span class="module-card__label">
+                          {service.label}
+                        </span>
+
                       </div>
 
-                      <div class="service-card__icon">
-                        <Icon
-                          size={27}
+
+                      <div class="module-card__middle">
+
+                        <div class="module-card__icon">
+                          <Icon
+                            size={25}
+                            strokeWidth={1.7}
+                          />
+                        </div>
+
+                        <ArrowUpRight
+                          class="module-card__arrow"
+                          size={18}
                           strokeWidth={1.6}
                         />
+
                       </div>
 
-                      <div class="service-card__body">
+
+                      <div class="module-card__content">
 
                         <h3>
                           {service.title}
@@ -612,15 +661,17 @@ const currentYear = new Date().getFullYear();
 
                       </div>
 
-                      <div class="service-card__bottom">
+
+                      <div class="module-card__footer">
+
                         <span>
-                          BUKA MODUL
+                          OPEN MODULE
                         </span>
 
-                        <ArrowUpRight
-                          size={18}
-                          strokeWidth={1.6}
-                        />
+                        <span>
+                          BINSIGHT / {service.no}
+                        </span>
+
                       </div>
 
                     </a>
@@ -631,76 +682,75 @@ const currentYear = new Date().getFullYear();
             </div>
 
           </div>
+
         </section>
 
 
         <!-- ===================================================
-             CONTEXT
+             DARK CONTEXT SECTION
         ==================================================== -->
 
-        <section class="context">
-          <div class="page-width context__grid">
+        <section class="dark-section">
 
-            <div class="context__side">
+          <div class="page-width">
 
-              <span class="section-kicker section-kicker--light">
-                04 / THE CONTEXT
-              </span>
+            <div class="dark-section__top">
 
-              <span class="context__side-number">
-                04
-              </span>
+              <div class="dark-section__meta">
+                <span>04</span>
+                <small>THE IDEA</small>
+              </div>
 
-              <div class="context__side-line"></div>
-
-              <small>
-                BADUNG<br />
-                BALI<br />
-                INDONESIA
-              </small>
+              <div class="dark-section__label">
+                BADUNG / WASTE / INTELLIGENCE
+              </div>
 
             </div>
 
 
-            <div class="context__content">
+            <div class="dark-section__headline">
 
-              <div class="context__heading">
-                <p class="context__lead">
-                  Persampahan bukan persoalan yang berdiri sendiri.
-                </p>
+              <p>
+                Memahami lingkungan berarti
+                memahami hubungan di dalamnya.
+              </p>
 
-                <h2>
-                  Ia bergerak
-                  <span>di antara tempat,</span>
-                  manusia,
-                  <span>dan material.</span>
-                </h2>
-              </div>
+              <h2>
+                MAP
+                <span>+</span>
+                DATA
+                <span>+</span>
+                PEOPLE
+                <span>+</span>
+                MATERIAL
+              </h2>
 
-              <div class="context__bottom">
+            </div>
 
-                <p>
-                  Karena itu, BINSIGHT tidak hanya menyajikan
-                  satu jenis informasi. Platform ini menyusun
-                  berbagai konteks agar pengguna dapat melihat
-                  hubungan di antara informasi yang tersedia.
-                </p>
 
-                <div class="context__formula">
-                  <span>LOCATION</span>
-                  <i>+</i>
-                  <span>DATA</span>
-                  <i>+</i>
-                  <span>NETWORK</span>
-                  <i>+</i>
-                  <span>MATERIAL</span>
-                </div>
+            <div class="dark-section__bottom">
 
-              </div>
+              <p>
+                Platform tidak berhenti pada satu titik informasi.
+                Setiap bagian dirancang untuk membantu pengguna
+                berpindah dari satu konteks ke konteks berikutnya.
+              </p>
+
+              <a
+                href={siteHref("/map")}
+                class="dark-section__link"
+              >
+                Lihat konteks
+                <ArrowRight
+                  size={16}
+                  strokeWidth={1.7}
+                />
+              </a>
 
             </div>
 
           </div>
+
         </section>
 
 
@@ -709,97 +759,109 @@ const currentYear = new Date().getFullYear();
         ==================================================== -->
 
         <section class="method">
+
           <div class="page-width">
 
             <div class="method__header">
 
               <div>
-                <span class="section-kicker">
-                  05 / HOW IT WORKS
+                <span class="section-label">
+                  05 / PROCESS
                 </span>
 
                 <h2>
                   Dari pertanyaan
-                  <span>menjadi pemahaman.</span>
+                  <span>menjadi konteks.</span>
                 </h2>
               </div>
 
               <p>
-                Pengalaman BINSIGHT dibuat sesederhana mungkin:
-                temukan informasi, pahami konteksnya, lalu
-                hubungkan dengan informasi lainnya.
+                Pengalaman BINSIGHT dibangun sebagai alur sederhana
+                yang mengikuti kebutuhan pengguna.
               </p>
 
             </div>
 
 
-            <div class="timeline">
+            <div class="method__grid">
 
-              <article class="timeline__item">
+              <article class="method-card">
 
-                <div class="timeline__index">
+                <div class="method-card__number">
                   01
                 </div>
 
-                <div class="timeline__marker">
+                <div class="method-card__marker">
                   <span></span>
                 </div>
 
-                <div class="timeline__copy">
-                  <small>LANGKAH PERTAMA</small>
+                <div class="method-card__body">
+
+                  <small>
+                    LANGKAH PERTAMA
+                  </small>
 
                   <h3>
                     Temukan
                   </h3>
 
                   <p>
-                    Mulai dari lokasi, wilayah, data,
-                    organisasi, atau kategori material
-                    yang ingin Anda ketahui.
+                    Cari lokasi, wilayah, data,
+                    organisasi, atau material
+                    yang ingin diketahui.
                   </p>
+
                 </div>
 
               </article>
 
 
-              <article class="timeline__item">
+              <article class="method-card">
 
-                <div class="timeline__index">
+                <div class="method-card__number">
                   02
                 </div>
 
-                <div class="timeline__marker">
+                <div class="method-card__marker">
                   <span></span>
                 </div>
 
-                <div class="timeline__copy">
-                  <small>LANGKAH KEDUA</small>
+                <div class="method-card__body">
+
+                  <small>
+                    LANGKAH KEDUA
+                  </small>
 
                   <h3>
                     Pahami
                   </h3>
 
                   <p>
-                    Baca informasi yang tersedia dan
-                    lihat konteks yang berada di baliknya.
+                    Baca informasi yang tersedia
+                    dan lihat konteks yang
+                    berada di baliknya.
                   </p>
+
                 </div>
 
               </article>
 
 
-              <article class="timeline__item">
+              <article class="method-card">
 
-                <div class="timeline__index">
+                <div class="method-card__number">
                   03
                 </div>
 
-                <div class="timeline__marker">
+                <div class="method-card__marker">
                   <span></span>
                 </div>
 
-                <div class="timeline__copy">
-                  <small>LANGKAH KETIGA</small>
+                <div class="method-card__body">
+
+                  <small>
+                    LANGKAH KETIGA
+                  </small>
 
                   <h3>
                     Hubungkan
@@ -807,9 +869,10 @@ const currentYear = new Date().getFullYear();
 
                   <p>
                     Kaitkan informasi dengan wilayah,
-                    material, organisasi, dan pengalaman
-                    masyarakat.
+                    material, organisasi, dan
+                    pengalaman masyarakat.
                   </p>
+
                 </div>
 
               </article>
@@ -817,6 +880,7 @@ const currentYear = new Date().getFullYear();
             </div>
 
           </div>
+
         </section>
 
 
@@ -824,78 +888,110 @@ const currentYear = new Date().getFullYear();
              AREAS
         ==================================================== -->
 
-        <section class="areas">
+        <section class="coverage">
+
           <div class="page-width">
 
-            <div class="areas__header">
+            <div class="coverage__head">
 
               <div>
-                <span class="section-kicker">
+                <span class="section-label">
                   06 / COVERAGE
                 </span>
 
                 <h2>
-                  Badung
-                  <span>dalam konteks.</span>
+                  Melihat Badung
+                  <span>dari dekat.</span>
                 </h2>
               </div>
 
               <p>
-                Jelajahi informasi berdasarkan wilayah untuk
-                mendapatkan gambaran yang lebih dekat dengan
-                kondisi lokal.
+                Informasi dapat dilihat berdasarkan wilayah
+                untuk memahami konteks lokal secara lebih dekat.
               </p>
 
             </div>
 
 
-            <div class="areas__list">
+            <div class="coverage__body">
 
-              {
-                areas.map((area) => (
-                  <a
-                    class="area-card"
-                    href={siteHref("/map")}
-                  >
+              <div class="coverage__map">
 
-                    <div class="area-card__number">
-                      {area.no}
-                    </div>
+                <div class="coverage__map-grid"></div>
 
-                    <div class="area-card__main">
+                <div class="coverage__outline coverage__outline--one"></div>
+                <div class="coverage__outline coverage__outline--two"></div>
+                <div class="coverage__outline coverage__outline--three"></div>
 
-                      <span>
-                        {area.type}
-                      </span>
+                <div class="coverage__label coverage__label--badung">
+                  <span></span>
+                  BADUNG
+                </div>
 
-                      <h3>
-                        {area.name}
-                      </h3>
+                <div class="coverage__label coverage__label--mengwi">
+                  <span></span>
+                  MENGWI
+                </div>
 
-                      <p>
-                        {area.detail}
-                      </p>
+                <div class="coverage__label coverage__label--abiansemal">
+                  <span></span>
+                  ABIANSEMAL
+                </div>
 
-                    </div>
+                <div class="coverage__center">
+                  <small>AREA VIEW</small>
+                  <strong>BADUNG</strong>
+                  <span>01 / 03</span>
+                </div>
 
-                    <div class="area-card__status">
-                      <span>
+              </div>
+
+
+              <div class="coverage__list">
+
+                {
+                  areas.map((area) => (
+                    <a
+                      href={siteHref("/map")}
+                      class="coverage-row"
+                    >
+
+                      <div class="coverage-row__number">
+                        {area.no}
+                      </div>
+
+                      <div class="coverage-row__name">
+
+                        <small>
+                          {area.type}
+                        </small>
+
+                        <strong>
+                          {area.name}
+                        </strong>
+
+                      </div>
+
+                      <div class="coverage-row__status">
+                        <span></span>
                         {area.status}
-                      </span>
+                      </div>
 
                       <ArrowUpRight
                         size={18}
                         strokeWidth={1.6}
                       />
-                    </div>
 
-                  </a>
-                ))
-              }
+                    </a>
+                  ))
+                }
+
+              </div>
 
             </div>
 
           </div>
+
         </section>
 
 
@@ -903,79 +999,76 @@ const currentYear = new Date().getFullYear();
              MATERIALS
         ==================================================== -->
 
-        <section class="materials">
+        <section class="material">
+
           <div class="page-width">
 
-            <div class="materials__header">
+            <div class="material__head">
 
-              <div class="materials__title">
-                <span class="section-kicker">
+              <div>
+                <span class="section-label">
                   07 / MATERIAL
                 </span>
 
                 <h2>
-                  Setiap material
-                  <span>punya konteksnya.</span>
+                  Kenali
+                  <span>materialnya.</span>
                 </h2>
               </div>
 
-              <div class="materials__description">
-
+              <div>
                 <p>
-                  Mengenal kategori material membantu memahami
-                  bahwa setiap jenis sampah memiliki karakter
-                  dan kebutuhan penanganan yang berbeda.
+                  Setiap material memiliki karakter dan kebutuhan
+                  penanganan yang berbeda. Kenali kategorinya
+                  sebelum melihat konteks lainnya.
                 </p>
 
                 <a
                   href={siteHref("/waste")}
-                  class="text-link"
+                  class="inline-link"
                 >
-                  Lihat seluruh kategori
+                  Lihat semua kategori
                   <ArrowRight
                     size={16}
-                    strokeWidth={1.8}
+                    strokeWidth={1.7}
                   />
                 </a>
-
               </div>
 
             </div>
 
 
-            <div class="material-list">
+            <div class="material__list">
 
               {
                 materials.map((material) => (
                   <a
-                    class="material-item"
                     href={siteHref("/waste")}
+                    class="material-row"
                   >
 
-                    <div class="material-item__no">
+                    <div class="material-row__number">
                       {material.no}
                     </div>
 
-                    <div class="material-item__code">
+                    <div class="material-row__code">
                       {material.code}
                     </div>
 
-                    <div class="material-item__main">
-                      <h3>
+                    <div class="material-row__name">
+                      <strong>
                         {material.name}
-                      </h3>
+                      </strong>
 
                       <p>
-                        {material.description}
+                        {material.detail}
                       </p>
                     </div>
 
-                    <div class="material-item__arrow">
-                      <ArrowUpRight
-                        size={19}
-                        strokeWidth={1.6}
-                      />
-                    </div>
+                    <ArrowUpRight
+                      size={19}
+                      strokeWidth={1.6}
+                    />
 
                   </a>
                 ))
@@ -984,41 +1077,37 @@ const currentYear = new Date().getFullYear();
             </div>
 
           </div>
+
         </section>
 
 
         <!-- ===================================================
-             ABOUT / PRINCIPLES
+             ABOUT
         ==================================================== -->
 
         <section
           class="about"
           id="tentang"
         >
+
           <div class="page-width">
 
             <div class="about__header">
 
               <div>
-                <span class="section-kicker">
-                  08 / ABOUT BINSIGHT
+                <span class="section-label">
+                  08 / ABOUT
                 </span>
 
                 <h2>
-                  Dibuat untuk
-                  <span>informasi publik.</span>
+                  Dibangun
+                  <span>untuk digunakan.</span>
                 </h2>
               </div>
 
               <div class="about__badge">
-                <ShieldCheck
-                  size={19}
-                  strokeWidth={1.7}
-                />
-
-                <span>
-                  PUBLIC INFORMATION
-                </span>
+                <span></span>
+                PUBLIC INFORMATION
               </div>
 
             </div>
@@ -1028,92 +1117,85 @@ const currentYear = new Date().getFullYear();
 
               <div class="about__statement">
 
-                <p class="about__number">
-                  01
-                </p>
+                <span class="about__statement-number">
+                  08
+                </span>
 
-                <blockquote>
-                  “Informasi yang baik bukan hanya
-                  mudah ditemukan, tetapi juga
-                  mudah dipahami.”
-                </blockquote>
+                <p>
+                  BINSIGHT mengutamakan informasi
+                  yang jelas, relevan, dan dapat
+                  dipahami oleh publik.
+                </p>
 
               </div>
 
 
-              <div class="about__principles">
+              <div class="principle-list">
 
-                <article>
-                  <span>01</span>
+                {
+                  principles.map((principle) => (
+                    <article class="principle">
 
-                  <div>
-                    <h3>
-                      Kontekstual
-                    </h3>
+                      <span class="principle__number">
+                        {principle.no}
+                      </span>
 
-                    <p>
-                      Informasi ditempatkan bersama
-                      lokasi dan konteks yang relevan.
-                    </p>
-                  </div>
-                </article>
+                      <div>
 
-                <article>
-                  <span>02</span>
+                        <h3>
+                          {principle.title}
+                        </h3>
 
-                  <div>
-                    <h3>
-                      Terbuka
-                    </h3>
+                        <p>
+                          {principle.text}
+                        </p>
 
-                    <p>
-                      Informasi publik disusun agar
-                      mudah ditemukan dan dipahami.
-                    </p>
-                  </div>
-                </article>
+                      </div>
 
-                <article>
-                  <span>03</span>
+                      <ArrowUpRight
+                        size={16}
+                        strokeWidth={1.5}
+                      />
 
-                  <div>
-                    <h3>
-                      Bertanggung jawab
-                    </h3>
-
-                    <p>
-                      Penyajian memperhatikan sumber,
-                      konteks, dan cara penggunaannya.
-                    </p>
-                  </div>
-                </article>
+                    </article>
+                  ))
+                }
 
               </div>
 
             </div>
 
           </div>
+
         </section>
 
 
         <!-- ===================================================
-             CTA
+             FINAL CTA
         ==================================================== -->
 
-        <section class="cta">
-          <div class="page-width cta__inner">
+        <section class="final">
 
-            <div class="cta__label">
-              <span>09</span>
-              <span>BINSIGHT / NEXT</span>
+          <div class="page-width final__inner">
+
+            <div class="final__top">
+              <span>
+                09 / BINSIGHT
+              </span>
+
+              <span>
+                BADUNG WASTE INTELLIGENCE
+              </span>
             </div>
 
-            <div class="cta__content">
+
+            <div class="final__main">
 
               <div>
+
                 <p>
-                  Mulai dari apa yang
-                  ingin Anda ketahui.
+                  MULAI DARI INFORMASI YANG
+                  INGIN ANDA KETAHUI.
                 </p>
 
                 <h2>
@@ -1121,15 +1203,17 @@ const currentYear = new Date().getFullYear();
                   <span>Pahami.</span>
                   Jaga Badung.
                 </h2>
+
               </div>
 
+
               <a
-                class="cta__button"
                 href={siteHref("/map")}
+                class="final__button"
               >
                 Jelajahi BINSIGHT
                 <ArrowUpRight
-                  size={20}
+                  size={19}
                   strokeWidth={1.7}
                 />
               </a>
@@ -1137,6 +1221,7 @@ const currentYear = new Date().getFullYear();
             </div>
 
           </div>
+
         </section>
 
       </main>
@@ -1148,7 +1233,7 @@ const currentYear = new Date().getFullYear();
 
       <footer class="footer">
 
-        <div class="page-width footer__top">
+        <div class="page-width footer__grid">
 
           <div class="footer__identity">
 
@@ -1160,13 +1245,13 @@ const currentYear = new Date().getFullYear();
                 class="brand__mark"
                 aria-hidden="true"
               >
-                <span></span>
-                <span></span>
-                <span></span>
-                <span></span>
+                <i></i>
+                <i></i>
+                <i></i>
+                <i></i>
               </span>
 
-              <span class="brand__name">
+              <span class="brand__text">
                 BINSIGHT
               </span>
             </a>
@@ -1252,19 +1337,20 @@ const currentYear = new Date().getFullYear();
       ====================================================== -->
 
       <a
-        class="floating-report"
         href={siteHref("/reports/create")}
+        class="floating-report"
         aria-label="Buat laporan masyarakat"
       >
 
         <span class="floating-report__icon">
           <FileText
-            size={18}
+            size={17}
             strokeWidth={1.8}
           />
         </span>
 
-        <span class="floating-report__copy">
+        <span class="floating-report__text">
+
           <small>
             LAPORAN MASYARAKAT
           </small>
@@ -1272,6 +1358,7 @@ const currentYear = new Date().getFullYear();
           <strong>
             Buat laporan
           </strong>
+
         </span>
 
         <ArrowUpRight
@@ -1284,22 +1371,26 @@ const currentYear = new Date().getFullYear();
     </div>
 
 
-    <!-- =======================================================
-         MENU SCRIPT
-    ======================================================== -->
-
     <script>
       const menuButton =
-        document.querySelector<HTMLButtonElement>(".menu-button");
+        document.querySelector<HTMLButtonElement>(
+          ".menu-button"
+        );
 
       const mobileNav =
-        document.querySelector<HTMLElement>(".mobile-nav");
+        document.querySelector<HTMLElement>(
+          ".mobile-nav"
+        );
 
       const menuOpen =
-        document.querySelector<SVGElement>("[data-menu-open]");
+        document.querySelector<SVGElement>(
+          "[data-menu-open]"
+        );
 
       const menuClose =
-        document.querySelector<SVGElement>("[data-menu-close]");
+        document.querySelector<SVGElement>(
+          "[data-menu-close]"
+        );
 
       const updateMenu = (open: boolean) => {
         if (!menuButton || !mobileNav) {
@@ -1322,63 +1413,71 @@ const currentYear = new Date().getFullYear();
         );
 
         if (menuOpen) {
-          menuOpen.style.display = open
-            ? "none"
-            : "block";
+          menuOpen.style.display =
+            open ? "none" : "block";
         }
 
         if (menuClose) {
-          menuClose.style.display = open
-            ? "block"
-            : "none";
+          menuClose.style.display =
+            open ? "block" : "none";
         }
       };
 
       updateMenu(false);
 
-      menuButton?.addEventListener("click", () => {
-        const current =
-          menuButton.getAttribute("aria-expanded") === "true";
+      menuButton?.addEventListener(
+        "click",
+        () => {
+          const isOpen =
+            menuButton.getAttribute(
+              "aria-expanded"
+            ) === "true";
 
-        updateMenu(!current);
-      });
+          updateMenu(!isOpen);
+        }
+      );
 
       document
-        .querySelectorAll<HTMLAnchorElement>(".mobile-nav a")
+        .querySelectorAll<HTMLAnchorElement>(
+          ".mobile-nav a"
+        )
         .forEach((link) => {
-          link.addEventListener("click", () => {
-            updateMenu(false);
-          });
+          link.addEventListener(
+            "click",
+            () => updateMenu(false)
+          );
         });
 
-      window.addEventListener("resize", () => {
-        if (window.innerWidth > 860) {
-          updateMenu(false);
+      window.addEventListener(
+        "resize",
+        () => {
+          if (window.innerWidth > 860) {
+            updateMenu(false);
+          }
         }
-      });
+      );
     </script>
 
 
     <style>
       :root {
-        --bg: #f5f6f1;
-        --bg-soft: #eceee7;
+        --bg: #f4f5ef;
+        --bg-soft: #e9ebe3;
         --surface: #ffffff;
 
-        --ink: #101820;
-        --ink-soft: #4f5960;
-        --muted: #7a8287;
-        --line: #d6dad4;
+        --ink: #131719;
+        --ink-soft: #4f585d;
+        --muted: #7d8588;
 
-        --navy: #10232f;
-        --navy-2: #183443;
+        --line: #d4d8d3;
 
-        --lime: #c7ee45;
-        --lime-soft: #e6f6ae;
+        --dark: #17282f;
+        --dark-soft: #21404b;
 
-        --blue: #4f7cff;
+        --lime: #d6f45f;
+        --blue: #466cff;
 
-        --page: 1280px;
+        --page: 1260px;
       }
 
 
@@ -1403,7 +1502,7 @@ const currentYear = new Date().getFullYear();
 
         color: var(--ink);
 
-        font-family: "Inter", sans-serif;
+        font-family: "Manrope", sans-serif;
 
         -webkit-font-smoothing: antialiased;
         text-rendering: optimizeLegibility;
@@ -1424,14 +1523,16 @@ const currentYear = new Date().getFullYear();
 
       .site {
         min-height: 100vh;
+
         overflow: clip;
       }
 
       .page-width {
-        width: min(
-          calc(100% - 64px),
-          var(--page)
-        );
+        width:
+          min(
+            calc(100% - 64px),
+            var(--page)
+          );
 
         margin-inline: auto;
       }
@@ -1446,16 +1547,16 @@ const currentYear = new Date().getFullYear();
 
         top: 0;
 
-        z-index: 1000;
+        z-index: 500;
 
         background:
-          rgba(245, 246, 241, 0.9);
+          rgba(244, 245, 239, 0.9);
 
         backdrop-filter: blur(18px);
 
         border-bottom:
           1px solid
-          rgba(16, 24, 32, 0.1);
+          var(--line);
       }
 
       .header__inner {
@@ -1465,7 +1566,7 @@ const currentYear = new Date().getFullYear();
 
         align-items: center;
 
-        gap: 28px;
+        gap: 26px;
       }
 
       .brand {
@@ -1479,8 +1580,8 @@ const currentYear = new Date().getFullYear();
       }
 
       .brand__mark {
-        width: 25px;
-        height: 25px;
+        width: 27px;
+        height: 27px;
 
         display: grid;
 
@@ -1493,32 +1594,32 @@ const currentYear = new Date().getFullYear();
         gap: 2px;
       }
 
-      .brand__mark span {
+      .brand__mark i {
+        display: block;
+
         background: var(--ink);
       }
 
-      .brand__mark span:nth-child(2) {
+      .brand__mark i:nth-child(2) {
         background: var(--lime);
       }
 
-      .brand__mark span:nth-child(3) {
+      .brand__mark i:nth-child(3) {
         background: var(--blue);
       }
 
-      .brand__mark span:nth-child(4) {
+      .brand__mark i:nth-child(4) {
         background: var(--ink);
       }
 
-      .brand__name {
-        font-family: "Space Grotesk", sans-serif;
-
+      .brand__text {
         font-size: 15px;
-
-        font-weight: 700;
 
         line-height: 1;
 
-        letter-spacing: 0.02em;
+        font-weight: 800;
+
+        letter-spacing: -0.03em;
       }
 
       .desktop-nav {
@@ -1526,16 +1627,16 @@ const currentYear = new Date().getFullYear();
 
         align-items: center;
 
-        gap: 25px;
+        gap: 28px;
 
-        margin-left: auto;
-        margin-right: auto;
+        margin-inline: auto;
       }
 
       .desktop-nav a {
         position: relative;
 
-        color: #677077;
+        color:
+          #687075;
 
         font-size: 11px;
 
@@ -1549,54 +1650,47 @@ const currentYear = new Date().getFullYear();
         color: var(--ink);
       }
 
-      .desktop-nav__active {
-        color: var(--ink) !important;
+      .desktop-nav a.is-active {
+        color: var(--ink);
       }
 
-      .desktop-nav__active::before {
+      .desktop-nav a.is-active::after {
         content: "";
 
         position: absolute;
 
-        width: 5px;
-        height: 5px;
-
-        left: 50%;
+        left: 0;
+        right: 0;
 
         bottom: -12px;
 
-        transform:
-          translateX(-50%);
+        height: 2px;
 
-        border-radius: 999px;
-
-        background: var(--lime);
+        background: var(--blue);
       }
 
-      .header__actions {
+      .header__right {
         display: flex;
 
         align-items: center;
 
-        gap: 16px;
+        gap: 15px;
       }
 
-      .header__region {
-        color: #7d8589;
+      .header__location {
+        color: #8a9194;
 
         font-family: "DM Mono", monospace;
 
         font-size: 7px;
 
         letter-spacing: 0.08em;
-
-        white-space: nowrap;
       }
 
-      .header__report {
+      .header__action {
         min-height: 38px;
 
-        padding: 0 13px;
+        padding-inline: 13px;
 
         display: inline-flex;
 
@@ -1617,8 +1711,8 @@ const currentYear = new Date().getFullYear();
           background 160ms ease;
       }
 
-      .header__report:hover {
-        background: var(--navy-2);
+      .header__action:hover {
+        background: var(--dark);
       }
 
       .menu-button {
@@ -1630,8 +1724,6 @@ const currentYear = new Date().getFullYear();
         align-items: center;
         justify-content: center;
 
-        padding: 0;
-
         border:
           1px solid
           var(--line);
@@ -1641,6 +1733,8 @@ const currentYear = new Date().getFullYear();
         color: var(--ink);
 
         cursor: pointer;
+
+        padding: 0;
       }
 
       .menu-button [data-menu-close] {
@@ -1655,12 +1749,21 @@ const currentYear = new Date().getFullYear();
           var(--line);
       }
 
-      .mobile-nav__inner {
-        padding: 13px 0 18px;
+      .mobile-nav--open {
+        display: block;
       }
 
-      .mobile-nav__label {
-        padding: 5px 0 12px;
+      .mobile-nav__inner {
+        padding: 16px 0 20px;
+      }
+
+      .mobile-nav__top {
+        min-height: 34px;
+
+        display: flex;
+
+        align-items: center;
+        justify-content: space-between;
 
         color: var(--muted);
 
@@ -1672,15 +1775,20 @@ const currentYear = new Date().getFullYear();
       }
 
       .mobile-nav a {
-        min-height: 54px;
+        min-height: 57px;
 
         display: grid;
 
-        grid-template-columns: 34px 1fr;
+        grid-template-columns:
+          34px
+          minmax(0, 1fr)
+          20px;
 
         align-items: center;
 
-        border-bottom:
+        gap: 10px;
+
+        border-top:
           1px solid
           var(--line);
 
@@ -1689,7 +1797,7 @@ const currentYear = new Date().getFullYear();
         font-weight: 700;
       }
 
-      .mobile-nav a span {
+      .mobile-nav a small {
         color: var(--muted);
 
         font-family: "DM Mono", monospace;
@@ -1697,28 +1805,10 @@ const currentYear = new Date().getFullYear();
         font-size: 8px;
       }
 
+      .mobile-nav a svg {
+        justify-self: end;
 
-      /* =====================================================
-         SHARED
-      ====================================================== */
-
-      .section-kicker {
-        display: inline-block;
-
-        color: #717a7f;
-
-        font-family: "DM Mono", monospace;
-
-        font-size: 8px;
-
-        line-height: 1;
-
-        letter-spacing: 0.1em;
-      }
-
-      .section-kicker--light {
-        color:
-          rgba(255, 255, 255, 0.52);
+        color: var(--blue);
       }
 
 
@@ -1730,8 +1820,8 @@ const currentYear = new Date().getFullYear();
         background: var(--bg);
       }
 
-      .hero__topline {
-        min-height: 46px;
+      .hero__top {
+        min-height: 44px;
 
         display: flex;
 
@@ -1742,7 +1832,7 @@ const currentYear = new Date().getFullYear();
           1px solid
           var(--line);
 
-        color: #788084;
+        color: #858d90;
 
         font-family: "DM Mono", monospace;
 
@@ -1752,36 +1842,36 @@ const currentYear = new Date().getFullYear();
       }
 
       .hero__grid {
-        min-height: 690px;
+        min-height: 650px;
 
         display: grid;
 
         grid-template-columns:
-          minmax(0, 1.08fr)
-          minmax(400px, 0.92fr);
+          minmax(0, 1fr)
+          minmax(420px, 0.84fr);
 
-        gap: 70px;
+        gap: 75px;
 
         align-items: center;
       }
 
-      .hero__copy {
-        padding: 75px 0;
+      .hero__main {
+        padding: 80px 0;
       }
 
       .hero__index {
-        margin-bottom: 30px;
-
         display: flex;
 
         align-items: center;
 
-        gap: 14px;
+        gap: 12px;
+
+        margin-bottom: 28px;
       }
 
       .hero__index span:first-child {
-        width: 27px;
-        height: 27px;
+        width: 28px;
+        height: 28px;
 
         display: grid;
 
@@ -1808,34 +1898,22 @@ const currentYear = new Date().getFullYear();
         letter-spacing: 0.09em;
       }
 
-      .hero__eyebrow {
-        margin: 0 0 22px;
-
-        color: var(--navy);
-
-        font-family: "DM Mono", monospace;
-
-        font-size: 9px;
-
-        letter-spacing: 0.09em;
-      }
-
       .hero h1 {
-        max-width: 750px;
+        max-width: 760px;
 
         margin: 0;
 
         font-family: "Space Grotesk", sans-serif;
 
         font-size: clamp(
-          58px,
-          7.4vw,
-          102px
+          64px,
+          8vw,
+          108px
         );
 
-        line-height: 0.92;
+        line-height: 0.88;
 
-        letter-spacing: -0.07em;
+        letter-spacing: -0.075em;
 
         font-weight: 600;
       }
@@ -1843,43 +1921,35 @@ const currentYear = new Date().getFullYear();
       .hero h1 span {
         display: block;
 
-        color: var(--navy);
+        color: var(--dark);
       }
 
-      .hero h1 strong {
-        display: block;
-
-        color: var(--blue);
-
-        font-weight: 600;
-      }
-
-      .hero__description {
+      .hero__intro {
         max-width: 520px;
 
-        margin: 38px 0 0;
+        margin: 34px 0 0;
 
         color: var(--ink-soft);
 
-        font-size: 15px;
+        font-size: 14px;
 
-        line-height: 1.8;
+        line-height: 1.85;
       }
 
-      .hero__buttons {
-        margin-top: 34px;
+      .hero__actions {
+        margin-top: 31px;
 
         display: flex;
 
-        flex-wrap: wrap;
-
         gap: 10px;
+
+        flex-wrap: wrap;
       }
 
       .button {
         min-height: 50px;
 
-        padding: 0 18px;
+        padding-inline: 18px;
 
         display: inline-flex;
 
@@ -1890,7 +1960,7 @@ const currentYear = new Date().getFullYear();
 
         font-size: 10px;
 
-        font-weight: 700;
+        font-weight: 800;
 
         transition:
           transform 160ms ease,
@@ -1902,17 +1972,17 @@ const currentYear = new Date().getFullYear();
         transform: translateY(-2px);
       }
 
-      .button--primary {
+      .button--dark {
         background: var(--ink);
 
         color: white;
       }
 
-      .button--primary:hover {
-        background: var(--navy);
+      .button--dark:hover {
+        background: var(--dark);
       }
 
-      .button--secondary {
+      .button--light {
         border:
           1px solid
           var(--line);
@@ -1922,25 +1992,26 @@ const currentYear = new Date().getFullYear();
         color: var(--ink);
       }
 
-      .button--secondary:hover {
+      .button--light:hover {
         border-color: var(--ink);
       }
 
-      .hero__visual {
+      .hero__interface {
         position: relative;
 
-        width: 100%;
-
-        background: var(--navy);
+        background: var(--dark);
 
         color: white;
+
+        box-shadow:
+          18px 18px 0
+          rgba(19, 23, 25, 0.06);
       }
 
-      .visual__header,
-      .visual__footer {
-        min-height: 47px;
+      .interface__bar {
+        min-height: 49px;
 
-        padding: 0 20px;
+        padding-inline: 18px;
 
         display: flex;
 
@@ -1949,7 +2020,10 @@ const currentYear = new Date().getFullYear();
 
         border-bottom:
           1px solid
-          rgba(255, 255, 255, 0.12);
+          rgba(255,255,255,0.12);
+
+        color:
+          rgba(255,255,255,0.43);
 
         font-family: "DM Mono", monospace;
 
@@ -1958,182 +2032,206 @@ const currentYear = new Date().getFullYear();
         letter-spacing: 0.08em;
       }
 
-      .visual__header {
-        color:
-          rgba(255, 255, 255, 0.46);
-      }
-
-      .visual__canvas {
-        position: relative;
-
-        min-height: 500px;
-
-        overflow: hidden;
-
-        background:
-          #122834;
-      }
-
-      .map-grid {
-        position: absolute;
-
-        inset: 0;
-
-        opacity: 0.28;
-
-        background-image:
-          linear-gradient(
-            rgba(255,255,255,0.06) 1px,
-            transparent 1px
-          ),
-          linear-gradient(
-            90deg,
-            rgba(255,255,255,0.06) 1px,
-            transparent 1px
-          );
-
-        background-size:
-          38px 38px;
-      }
-
-      .map-shape {
-        position: absolute;
-
-        border:
-          1px solid
-          rgba(199, 238, 69, 0.35);
-
-        background:
-          rgba(199, 238, 69, 0.035);
-
-        transform: rotate(-16deg);
-      }
-
-      .map-shape--a {
-        width: 290px;
-        height: 390px;
-
-        left: 85px;
-        top: 55px;
-
-        border-radius:
-          50% 38% 56% 42%;
-      }
-
-      .map-shape--b {
-        width: 210px;
-        height: 250px;
-
-        right: 45px;
-        top: 110px;
-
-        border-radius:
-          42% 58% 38% 62%;
-
-        transform:
-          rotate(22deg);
-      }
-
-      .map-shape--c {
-        width: 170px;
-        height: 190px;
-
-        left: 210px;
-        bottom: 22px;
-
-        border-radius:
-          56% 44% 60% 40%;
-
-        transform:
-          rotate(29deg);
-      }
-
-      .map-route {
-        position: absolute;
-
-        left: 72px;
-        right: 55px;
-        top: 52%;
-
-        height: 2px;
-
-        background:
-          rgba(255, 255, 255, 0.14);
-
-        transform: rotate(-14deg);
-      }
-
-      .map-route::after {
-        content: "";
-
-        position: absolute;
-
-        left: 0;
-        top: 0;
-
-        width: 44%;
-
-        height: 2px;
-
-        background: var(--lime);
-      }
-
-      .map-point {
-        position: absolute;
-
-        z-index: 2;
-
+      .interface__bar > div {
         display: flex;
-
-        flex-direction: column;
 
         align-items: center;
 
-        gap: 5px;
-
-        font-family: "DM Mono", monospace;
-
-        font-size: 7px;
+        gap: 7px;
       }
 
-      .map-point i {
-        width: 13px;
-        height: 13px;
-
-        display: block;
-
-        border:
-          3px solid
-          var(--navy);
+      .interface__bar i {
+        width: 6px;
+        height: 6px;
 
         border-radius: 50%;
 
         background: var(--lime);
-
-        box-shadow:
-          0 0 0 1px
-          rgba(199, 238, 69, 0.5);
       }
 
-      .map-point--one {
-        top: 25%;
-        left: 31%;
+      .interface__body {
+        position: relative;
+
+        min-height: 445px;
+
+        overflow: hidden;
+
+        background:
+          #1a313b;
       }
 
-      .map-point--two {
-        top: 48%;
-        right: 24%;
+      .interface__grid {
+        position: absolute;
+
+        inset: 0;
+
+        opacity: 0.32;
+
+        background-image:
+          linear-gradient(
+            rgba(255,255,255,0.05) 1px,
+            transparent 1px
+          ),
+          linear-gradient(
+            90deg,
+            rgba(255,255,255,0.05) 1px,
+            transparent 1px
+          );
+
+        background-size: 40px 40px;
       }
 
-      .map-point--three {
-        bottom: 18%;
-        left: 48%;
+      .interface__shape {
+        position: absolute;
+
+        border:
+          1px solid
+          rgba(214,244,95,0.2);
+
+        background:
+          rgba(214,244,95,0.025);
+
+        transform: rotate(-14deg);
       }
 
-      .visual__center {
+      .interface__shape--one {
+        width: 280px;
+        height: 350px;
+
+        left: 78px;
+        top: 53px;
+
+        border-radius:
+          52% 48% 58% 42%;
+      }
+
+      .interface__shape--two {
+        width: 180px;
+        height: 220px;
+
+        right: 35px;
+        top: 105px;
+
+        border-radius:
+          40% 60% 35% 65%;
+
+        transform:
+          rotate(18deg);
+      }
+
+      .interface__axis {
         position: absolute;
 
         z-index: 3;
+
+        display: flex;
+
+        justify-content: space-between;
+
+        color:
+          rgba(255,255,255,0.3);
+
+        font-family: "DM Mono", monospace;
+
+        font-size: 6px;
+      }
+
+      .interface__axis--vertical {
+        top: 18px;
+        bottom: 18px;
+
+        left: 16px;
+
+        flex-direction: column;
+      }
+
+      .interface__axis--horizontal {
+        left: 55px;
+        right: 55px;
+
+        bottom: 14px;
+      }
+
+      .interface__cross {
+        position: absolute;
+
+        z-index: 5;
+
+        width: 24px;
+        height: 24px;
+      }
+
+      .interface__cross span,
+      .interface__cross i {
+        position: absolute;
+
+        background: var(--lime);
+      }
+
+      .interface__cross span {
+        left: 50%;
+        top: 0;
+        bottom: 0;
+
+        width: 1px;
+
+        transform:
+          translateX(-50%);
+      }
+
+      .interface__cross i {
+        top: 50%;
+        left: 0;
+        right: 0;
+
+        height: 1px;
+
+        transform:
+          translateY(-50%);
+      }
+
+      .interface__cross::after {
+        content: "";
+
+        position: absolute;
+
+        left: 50%;
+        top: 50%;
+
+        width: 6px;
+        height: 6px;
+
+        transform:
+          translate(-50%, -50%);
+
+        border:
+          1px solid
+          var(--lime);
+
+        border-radius: 50%;
+
+        background: var(--dark);
+      }
+
+      .interface__cross--one {
+        left: 28%;
+        top: 25%;
+      }
+
+      .interface__cross--two {
+        right: 22%;
+        top: 47%;
+      }
+
+      .interface__cross--three {
+        left: 43%;
+        bottom: 18%;
+      }
+
+      .interface__center {
+        position: absolute;
+
+        z-index: 4;
 
         left: 50%;
         top: 50%;
@@ -2143,56 +2241,18 @@ const currentYear = new Date().getFullYear();
 
         display: flex;
 
-        flex-direction: column;
-
         align-items: center;
+
+        flex-direction: column;
 
         text-align: center;
       }
 
-      .visual__center small {
-        margin-bottom: 7px;
+      .interface__center-ring {
+        width: 62px;
+        height: 62px;
 
-        color:
-          rgba(255, 255, 255, 0.48);
-
-        font-family: "DM Mono", monospace;
-
-        font-size: 7px;
-
-        letter-spacing: 0.14em;
-      }
-
-      .visual__center strong {
-        font-family: "Space Grotesk", sans-serif;
-
-        font-size: 47px;
-
-        line-height: 0.9;
-
-        letter-spacing: -0.06em;
-      }
-
-      .visual__center span {
-        margin-top: 9px;
-
-        color: var(--lime);
-
-        font-family: "DM Mono", monospace;
-
-        font-size: 8px;
-
-        letter-spacing: 0.12em;
-      }
-
-      .visual__compass {
-        position: absolute;
-
-        top: 24px;
-        right: 22px;
-
-        width: 42px;
-        height: 42px;
+        margin-bottom: 12px;
 
         display: grid;
 
@@ -2200,531 +2260,261 @@ const currentYear = new Date().getFullYear();
 
         border:
           1px solid
-          rgba(255, 255, 255, 0.16);
+          rgba(214,244,95,0.35);
 
+        border-radius: 50%;
+      }
+
+      .interface__center-ring span {
+        width: 13px;
+        height: 13px;
+
+        border-radius: 50%;
+
+        background: var(--lime);
+
+        box-shadow:
+          0 0 0 7px
+          rgba(214,244,95,0.08);
+      }
+
+      .interface__center small {
         color:
-          rgba(255, 255, 255, 0.5);
+          rgba(255,255,255,0.4);
 
         font-family: "DM Mono", monospace;
 
-        font-size: 6px;
+        font-size: 7px;
+
+        letter-spacing: 0.12em;
       }
 
-      .visual__compass span:nth-child(2) {
+      .interface__center strong {
+        margin-top: 7px;
+
+        font-family: "Space Grotesk", sans-serif;
+
+        font-size: 37px;
+
+        line-height: 0.95;
+
+        letter-spacing: -0.06em;
+      }
+
+      .interface__center > span {
+        margin-top: 8px;
+
         color: var(--lime);
+
+        font-family: "DM Mono", monospace;
+
+        font-size: 7px;
+
+        letter-spacing: 0.08em;
       }
 
-      .visual__footer {
-        border-top:
-          1px solid
-          rgba(255, 255, 255, 0.12);
+      .interface__legend {
+        position: absolute;
 
-        border-bottom: 0;
+        z-index: 5;
 
-        color:
-          rgba(255, 255, 255, 0.5);
+        left: 20px;
+        bottom: 18px;
+
+        display: flex;
+
+        gap: 16px;
       }
 
-      .visual__footer > div {
+      .interface__legend div {
         display: flex;
 
         align-items: center;
 
-        gap: 10px;
-      }
+        gap: 6px;
 
-      .mono-label {
         color:
-          rgba(255, 255, 255, 0.34);
+          rgba(255,255,255,0.43);
+
+        font-family: "DM Mono", monospace;
+
+        font-size: 6px;
+
+        letter-spacing: 0.06em;
       }
 
-      .visual__footer strong {
-        color:
-          rgba(255, 255, 255, 0.82);
+      .interface__legend i {
+        width: 5px;
+        height: 5px;
 
-        font-weight: 500;
-      }
-
-      .status-dot {
-        width: 7px;
-        height: 7px;
+        display: block;
 
         border-radius: 50%;
 
         background: var(--lime);
       }
 
-      .hero__rail {
-        min-height: 74px;
+      .interface__legend div:nth-child(2) i {
+        background: white;
+      }
+
+      .interface__legend div:nth-child(3) i {
+        background: var(--blue);
+      }
+
+      .interface__bottom {
+        min-height: 57px;
+
+        padding: 0 18px;
+
+        display: grid;
+
+        grid-template-columns: 1fr 1fr;
+
+        align-items: center;
+
+        border-top:
+          1px solid
+          rgba(255,255,255,0.12);
+      }
+
+      .interface__bottom div {
+        display: grid;
+
+        gap: 4px;
+      }
+
+      .interface__bottom div:last-child {
+        justify-items: end;
+      }
+
+      .interface__bottom small {
+        color:
+          rgba(255,255,255,0.3);
+
+        font-family: "DM Mono", monospace;
+
+        font-size: 6px;
+
+        letter-spacing: 0.08em;
+      }
+
+      .interface__bottom strong {
+        color:
+          rgba(255,255,255,0.75);
+
+        font-family: "DM Mono", monospace;
+
+        font-size: 7px;
+
+        font-weight: 500;
+
+        letter-spacing: 0.05em;
+      }
+
+      .hero__signal {
+        min-height: 72px;
 
         display: grid;
 
         grid-template-columns:
-          repeat(4, 1fr);
+          repeat(5, 1fr);
 
         border-top:
           1px solid
           var(--line);
       }
 
-      .hero__rail-item {
-        min-height: 74px;
-
+      .hero__signal > div {
         display: flex;
 
         align-items: center;
-
         justify-content: center;
 
-        gap: 12px;
+        gap: 10px;
 
         border-right:
           1px solid
           var(--line);
       }
 
-      .hero__rail-item:last-child {
+      .hero__signal > div:last-child {
         border-right: 0;
       }
 
-      .hero__rail-item span {
+      .hero__signal span {
         font-family: "DM Mono", monospace;
 
-        font-size: 9px;
-
-        color: var(--ink);
+        font-size: 8px;
       }
 
-      .hero__rail-item small {
+      .hero__signal small {
         color: var(--muted);
 
         font-family: "DM Mono", monospace;
 
-        font-size: 7px;
+        font-size: 6px;
 
         letter-spacing: 0.08em;
       }
 
 
       /* =====================================================
-         SIGNAL
+         STATEMENT
       ====================================================== */
 
-      .signal {
-        padding: 110px 0;
-
-        background: var(--navy);
-
-        color: white;
-      }
-
-      .signal__grid {
-        display: grid;
-
-        grid-template-columns:
-          minmax(260px, 0.7fr)
-          minmax(0, 1.3fr);
-
-        gap: 90px;
-      }
-
-      .signal__intro h2 {
-        max-width: 480px;
-
-        margin: 22px 0 0;
-
-        font-family: "Space Grotesk", sans-serif;
-
-        font-size: clamp(
-          46px,
-          5vw,
-          70px
-        );
-
-        line-height: 0.95;
-
-        letter-spacing: -0.065em;
-
-        font-weight: 600;
-      }
-
-      .signal__intro h2 span {
-        display: block;
-
-        color: var(--lime);
-      }
-
-      .signal__cards {
-        display: grid;
-
-        grid-template-columns:
-          repeat(3, minmax(0, 1fr));
-
-        border-top:
-          1px solid
-          rgba(255,255,255,0.13);
-
-        border-bottom:
-          1px solid
-          rgba(255,255,255,0.13);
-      }
-
-      .signal-card {
-        min-height: 275px;
-
-        padding: 22px;
-
-        display: flex;
-
-        flex-direction: column;
-
-        justify-content: space-between;
-
-        border-right:
-          1px solid
-          rgba(255,255,255,0.13);
-      }
-
-      .signal-card:last-child {
-        border-right: 0;
-      }
-
-      .signal-card > span {
-        color:
-          rgba(255,255,255,0.38);
-
-        font-family: "DM Mono", monospace;
-
-        font-size: 8px;
-      }
-
-      .signal-card strong {
-        display: block;
-
-        font-family: "Space Grotesk", sans-serif;
-
-        font-size: 24px;
-
-        font-weight: 600;
-      }
-
-      .signal-card p {
-        max-width: 220px;
-
-        margin: 10px 0 0;
-
-        color:
-          rgba(255,255,255,0.56);
-
-        font-size: 12px;
-
-        line-height: 1.75;
-      }
-
-
-      /* =====================================================
-         EXPLORE
-      ====================================================== */
-
-      .explore {
-        padding: 120px 0;
+      .statement {
+        padding: 118px 0;
 
         background: var(--surface);
-      }
-
-      .section-header {
-        margin-bottom: 55px;
-
-        display: grid;
-
-        grid-template-columns:
-          minmax(0, 1fr)
-          360px;
-
-        gap: 70px;
-
-        align-items: end;
-      }
-
-      .section-header h2 {
-        max-width: 700px;
-
-        margin: 19px 0 0;
-
-        font-family: "Space Grotesk", sans-serif;
-
-        font-size: clamp(
-          48px,
-          5.5vw,
-          78px
-        );
-
-        line-height: 0.93;
-
-        letter-spacing: -0.07em;
-
-        font-weight: 600;
-      }
-
-      .section-header h2 span {
-        display: block;
-
-        color: var(--blue);
-      }
-
-      .section-header > p {
-        margin: 0;
-
-        color: var(--ink-soft);
-
-        font-size: 14px;
-
-        line-height: 1.8;
-      }
-
-      .service-grid {
-        display: grid;
-
-        grid-template-columns:
-          repeat(2, minmax(0, 1fr));
-
-        gap: 12px;
-      }
-
-      .service-card {
-        position: relative;
-
-        min-height: 350px;
-
-        padding: 24px;
-
-        display: flex;
-
-        flex-direction: column;
-
-        overflow: hidden;
-
-        border:
-          1px solid
-          var(--line);
-
-        background: var(--bg);
-
-        transition:
-          transform 180ms ease,
-          border-color 180ms ease,
-          background 180ms ease;
-      }
-
-      .service-card:hover {
-        transform: translateY(-4px);
-
-        border-color: var(--ink);
-
-        background: white;
-      }
-
-      .service-card--01 {
-        min-height: 430px;
-      }
-
-      .service-card--02 {
-        transform-origin: center;
-      }
-
-      .service-card--02:hover {
-        transform: translateY(-4px);
-      }
-
-      .service-card--03 {
-        min-height: 310px;
-      }
-
-      .service-card--04 {
-        min-height: 310px;
-      }
-
-      .service-card__top {
-        display: flex;
-
-        align-items: center;
-        justify-content: space-between;
-      }
-
-      .service-card__top > span:first-child {
-        color: var(--muted);
-
-        font-family: "DM Mono", monospace;
-
-        font-size: 8px;
-      }
-
-      .service-card__type {
-        padding: 6px 8px;
-
-        background: white;
-
-        border:
-          1px solid
-          var(--line);
-
-        color: var(--muted);
-
-        font-family: "DM Mono", monospace;
-
-        font-size: 7px;
-
-        letter-spacing: 0.08em;
-      }
-
-      .service-card__icon {
-        width: 60px;
-        height: 60px;
-
-        margin-top: auto;
-
-        margin-bottom: 23px;
-
-        display: grid;
-
-        place-items: center;
-
-        background: var(--ink);
-
-        color: var(--lime);
-      }
-
-      .service-card__body h3 {
-        max-width: 420px;
-
-        margin: 0;
-
-        font-family: "Space Grotesk", sans-serif;
-
-        font-size: 30px;
-
-        line-height: 1;
-
-        letter-spacing: -0.045em;
-
-        font-weight: 600;
-      }
-
-      .service-card__body p {
-        max-width: 450px;
-
-        margin: 13px 0 0;
-
-        color: var(--ink-soft);
-
-        font-size: 12px;
-
-        line-height: 1.75;
-      }
-
-      .service-card__bottom {
-        margin-top: 31px;
-
-        padding-top: 15px;
-
-        display: flex;
-
-        align-items: center;
-        justify-content: space-between;
-
-        border-top:
-          1px solid
-          var(--line);
-
-        color: var(--ink);
-
-        font-family: "DM Mono", monospace;
-
-        font-size: 7px;
-
-        letter-spacing: 0.08em;
-      }
-
-
-      /* =====================================================
-         CONTEXT
-      ====================================================== */
-
-      .context {
-        padding: 120px 0;
-
-        background: var(--bg-soft);
-
-        border-top:
-          1px solid
-          var(--line);
 
         border-bottom:
           1px solid
           var(--line);
       }
 
-      .context__grid {
+      .statement__grid {
         display: grid;
 
         grid-template-columns:
           170px
           minmax(0, 1fr);
 
-        gap: 70px;
+        gap: 78px;
       }
 
-      .context__side {
-        min-height: 520px;
-
+      .statement__meta {
         display: flex;
 
         flex-direction: column;
+
+        gap: 7px;
       }
 
-      .context__side-number {
-        margin-top: auto;
+      .statement__meta span {
+        color: var(--blue);
 
-        color: rgba(16, 24, 32, 0.12);
+        font-family: "DM Mono", monospace;
 
-        font-family: "Space Grotesk", sans-serif;
-
-        font-size: 130px;
-
-        line-height: 0.8;
-
-        letter-spacing: -0.1em;
+        font-size: 9px;
       }
 
-      .context__side-line {
-        width: 44px;
-        height: 2px;
-
-        margin-top: 20px;
-
-        background: var(--blue);
-      }
-
-      .context__side > small {
-        margin-top: 16px;
-
+      .statement__meta small {
         color: var(--muted);
 
         font-family: "DM Mono", monospace;
 
-        font-size: 7px;
-
-        line-height: 1.9;
+        font-size: 6px;
 
         letter-spacing: 0.09em;
       }
 
-      .context__content {
-        max-width: 860px;
+      .statement__content {
+        max-width: 880px;
       }
 
-      .context__lead {
-        margin: 0 0 22px;
+      .statement__eyebrow {
+        margin: 0 0 24px;
 
         color: var(--muted);
 
@@ -2732,22 +2522,105 @@ const currentYear = new Date().getFullYear();
 
         font-size: 8px;
 
-        letter-spacing: 0.08em;
-
-        text-transform: uppercase;
+        letter-spacing: 0.1em;
       }
 
-      .context__heading h2 {
-        max-width: 840px;
+      .statement h2 {
+        max-width: 900px;
 
         margin: 0;
 
         font-family: "Space Grotesk", sans-serif;
 
         font-size: clamp(
-          48px,
-          5.7vw,
-          79px
+          53px,
+          6.2vw,
+          84px
+        );
+
+        line-height: 0.93;
+
+        letter-spacing: -0.075em;
+
+        font-weight: 600;
+      }
+
+      .statement h2 span {
+        display: block;
+
+        color: var(--dark);
+      }
+
+      .statement__lower {
+        max-width: 730px;
+
+        margin-top: 42px;
+
+        display: grid;
+
+        grid-template-columns:
+          1fr
+          1fr;
+
+        gap: 40px;
+      }
+
+      .statement__lower p {
+        margin: 0;
+
+        color: var(--ink-soft);
+
+        font-size: 13px;
+
+        line-height: 1.8;
+      }
+
+
+      /* =====================================================
+         MODULES
+      ====================================================== */
+
+      .modules {
+        padding: 120px 0;
+
+        background: var(--bg);
+      }
+
+      .modules__head {
+        margin-bottom: 58px;
+
+        display: grid;
+
+        grid-template-columns:
+          minmax(0, 1fr)
+          350px;
+
+        gap: 80px;
+
+        align-items: end;
+      }
+
+      .section-label {
+        color: var(--muted);
+
+        font-family: "DM Mono", monospace;
+
+        font-size: 7px;
+
+        letter-spacing: 0.1em;
+      }
+
+      .modules__head h2 {
+        max-width: 700px;
+
+        margin: 18px 0 0;
+
+        font-family: "Space Grotesk", sans-serif;
+
+        font-size: clamp(
+          49px,
+          5.5vw,
+          78px
         );
 
         line-height: 0.94;
@@ -2757,62 +2630,334 @@ const currentYear = new Date().getFullYear();
         font-weight: 600;
       }
 
-      .context__heading h2 span {
+      .modules__head h2 span {
+        display: block;
+
         color: var(--blue);
       }
 
-      .context__bottom {
-        margin-top: 70px;
-
-        display: grid;
-
-        grid-template-columns:
-          minmax(0, 1fr)
-          250px;
-
-        gap: 70px;
-
-        align-items: end;
-      }
-
-      .context__bottom > p {
-        max-width: 570px;
-
+      .modules__head > p {
         margin: 0;
 
         color: var(--ink-soft);
 
-        font-size: 14px;
+        font-size: 13px;
 
-        line-height: 1.85;
+        line-height: 1.8;
       }
 
-      .context__formula {
-        padding-top: 17px;
+      .module-grid {
+        display: grid;
+
+        grid-template-columns:
+          repeat(2, minmax(0, 1fr));
+
+        gap: 12px;
+      }
+
+      .module-card {
+        min-height: 350px;
+
+        padding: 23px;
 
         display: flex;
 
-        flex-wrap: wrap;
+        flex-direction: column;
 
-        gap: 7px 9px;
+        border:
+          1px solid
+          var(--line);
+
+        background: var(--surface);
+
+        transition:
+          transform 170ms ease,
+          border-color 170ms ease,
+          box-shadow 170ms ease;
+      }
+
+      .module-card:hover {
+        transform: translateY(-4px);
+
+        border-color: var(--ink);
+
+        box-shadow:
+          12px 12px 0
+          rgba(19, 23, 25, 0.045);
+      }
+
+      .module-card__top,
+      .module-card__footer {
+        display: flex;
+
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .module-card__number {
+        color: var(--muted);
+
+        font-family: "DM Mono", monospace;
+
+        font-size: 8px;
+      }
+
+      .module-card__label {
+        padding: 6px 8px;
+
+        border:
+          1px solid
+          var(--line);
+
+        color: var(--muted);
+
+        font-family: "DM Mono", monospace;
+
+        font-size: 6px;
+
+        letter-spacing: 0.08em;
+      }
+
+      .module-card__middle {
+        margin-top: auto;
+
+        display: flex;
+
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .module-card__icon {
+        width: 58px;
+        height: 58px;
+
+        display: grid;
+
+        place-items: center;
+
+        background: var(--dark);
+
+        color: var(--lime);
+      }
+
+      .module-card__arrow {
+        color: var(--blue);
+      }
+
+      .module-card__content {
+        margin-top: 22px;
+      }
+
+      .module-card__content h3 {
+        margin: 0;
+
+        font-family: "Space Grotesk", sans-serif;
+
+        font-size: 29px;
+
+        line-height: 1;
+
+        letter-spacing: -0.05em;
+
+        font-weight: 600;
+      }
+
+      .module-card__content p {
+        max-width: 470px;
+
+        margin: 11px 0 0;
+
+        color: var(--ink-soft);
+
+        font-size: 12px;
+
+        line-height: 1.75;
+      }
+
+      .module-card__footer {
+        margin-top: 29px;
+
+        padding-top: 14px;
 
         border-top:
           1px solid
-          var(--ink);
+          var(--line);
+
+        color: var(--muted);
+
+        font-family: "DM Mono", monospace;
+
+        font-size: 6px;
+
+        letter-spacing: 0.08em;
+      }
+
+
+      /* =====================================================
+         DARK SECTION
+      ====================================================== */
+
+      .dark-section {
+        padding: 105px 0;
+
+        background: var(--dark);
+
+        color: white;
+      }
+
+      .dark-section__top {
+        display: flex;
+
+        align-items: center;
+
+        justify-content: space-between;
+
+        gap: 20px;
+
+        padding-bottom: 26px;
+
+        border-bottom:
+          1px solid
+          rgba(255,255,255,0.12);
+      }
+
+      .dark-section__meta {
+        display: flex;
+
+        align-items: center;
+
+        gap: 11px;
+      }
+
+      .dark-section__meta span {
+        width: 26px;
+        height: 26px;
+
+        display: grid;
+
+        place-items: center;
+
+        border:
+          1px solid
+          rgba(255,255,255,0.35);
+
+        border-radius: 50%;
+
+        color: var(--lime);
+
+        font-family: "DM Mono", monospace;
+
+        font-size: 8px;
+      }
+
+      .dark-section__meta small,
+      .dark-section__label {
+        color:
+          rgba(255,255,255,0.38);
 
         font-family: "DM Mono", monospace;
 
         font-size: 7px;
 
-        line-height: 1.6;
-
-        letter-spacing: 0.06em;
+        letter-spacing: 0.09em;
       }
 
-      .context__formula i {
-        color: var(--blue);
+      .dark-section__headline {
+        padding:
+          76px
+          0
+          66px;
+      }
 
-        font-style: normal;
+      .dark-section__headline p {
+        max-width: 420px;
+
+        margin: 0 0 30px;
+
+        color:
+          rgba(255,255,255,0.5);
+
+        font-family: "DM Mono", monospace;
+
+        font-size: 8px;
+
+        line-height: 1.7;
+
+        letter-spacing: 0.08em;
+
+        text-transform: uppercase;
+      }
+
+      .dark-section__headline h2 {
+        max-width: 1050px;
+
+        margin: 0;
+
+        font-family: "Space Grotesk", sans-serif;
+
+        font-size: clamp(
+          48px,
+          6.8vw,
+          95px
+        );
+
+        line-height: 0.88;
+
+        letter-spacing: -0.08em;
+
+        font-weight: 600;
+      }
+
+      .dark-section__headline h2 span {
+        color: var(--lime);
+      }
+
+      .dark-section__bottom {
+        display: flex;
+
+        align-items: flex-end;
+        justify-content: space-between;
+
+        gap: 40px;
+
+        padding-top: 23px;
+
+        border-top:
+          1px solid
+          rgba(255,255,255,0.12);
+      }
+
+      .dark-section__bottom p {
+        max-width: 510px;
+
+        margin: 0;
+
+        color:
+          rgba(255,255,255,0.53);
+
+        font-size: 13px;
+
+        line-height: 1.8;
+      }
+
+      .dark-section__link {
+        min-height: 46px;
+
+        padding: 0 14px;
+
+        display: inline-flex;
+
+        align-items: center;
+
+        gap: 9px;
+
+        background: white;
+
+        color: var(--ink);
+
+        font-size: 10px;
+
+        font-weight: 700;
       }
 
 
@@ -2821,7 +2966,7 @@ const currentYear = new Date().getFullYear();
       ====================================================== */
 
       .method {
-        padding: 125px 0;
+        padding: 120px 0;
 
         background: var(--surface);
       }
@@ -2831,7 +2976,7 @@ const currentYear = new Date().getFullYear();
 
         grid-template-columns:
           minmax(0, 1fr)
-          380px;
+          340px;
 
         gap: 80px;
 
@@ -2839,16 +2984,16 @@ const currentYear = new Date().getFullYear();
       }
 
       .method__header h2 {
-        max-width: 680px;
+        max-width: 690px;
 
-        margin: 20px 0 0;
+        margin: 18px 0 0;
 
         font-family: "Space Grotesk", sans-serif;
 
         font-size: clamp(
           48px,
           5.4vw,
-          75px
+          76px
         );
 
         line-height: 0.94;
@@ -2869,49 +3014,35 @@ const currentYear = new Date().getFullYear();
 
         color: var(--ink-soft);
 
-        font-size: 14px;
+        font-size: 13px;
 
         line-height: 1.8;
       }
 
-      .timeline {
-        position: relative;
+      .method__grid {
+        margin-top: 78px;
 
-        margin-top: 85px;
+        display: grid;
+
+        grid-template-columns:
+          repeat(3, minmax(0, 1fr));
 
         border-top:
           1px solid
           var(--ink);
       }
 
-      .timeline::before {
-        content: "";
-
-        position: absolute;
-
-        left: 0;
-        right: 0;
-
-        top: 45px;
-
-        height: 1px;
-
-        background: var(--line);
-      }
-
-      .timeline__item {
-        position: relative;
+      .method-card {
+        min-height: 305px;
 
         display: grid;
 
         grid-template-columns:
-          90px
-          60px
+          48px
+          44px
           minmax(0, 1fr);
 
-        gap: 18px;
-
-        min-height: 330px;
+        gap: 15px;
 
         padding-top: 22px;
 
@@ -2920,20 +3051,11 @@ const currentYear = new Date().getFullYear();
           var(--line);
       }
 
-      .timeline {
-        display: grid;
-
-        grid-template-columns:
-          repeat(3, 1fr);
-      }
-
-      .timeline__item:last-child {
+      .method-card:last-child {
         border-right: 0;
       }
 
-      .timeline__index {
-        padding-left: 2px;
-
+      .method-card__number {
         color: var(--muted);
 
         font-family: "DM Mono", monospace;
@@ -2941,21 +3063,15 @@ const currentYear = new Date().getFullYear();
         font-size: 8px;
       }
 
-      .timeline__marker {
+      .method-card__marker {
         position: relative;
 
-        z-index: 2;
-
-        width: 38px;
-        height: 38px;
-
-        margin-top: -8px;
+        width: 35px;
+        height: 35px;
 
         display: grid;
 
         place-items: center;
-
-        background: var(--surface);
 
         border:
           1px solid
@@ -2964,39 +3080,39 @@ const currentYear = new Date().getFullYear();
         border-radius: 50%;
       }
 
-      .timeline__marker span {
-        width: 9px;
-        height: 9px;
+      .method-card__marker span {
+        width: 8px;
+        height: 8px;
 
         border-radius: 50%;
 
         background: var(--lime);
       }
 
-      .timeline__copy {
+      .method-card__body {
         padding:
-          48px
+          42px
           30px
           30px
           0;
       }
 
-      .timeline__copy small {
+      .method-card__body small {
         color: var(--muted);
 
         font-family: "DM Mono", monospace;
 
-        font-size: 7px;
+        font-size: 6px;
 
         letter-spacing: 0.08em;
       }
 
-      .timeline__copy h3 {
-        margin: 17px 0 0;
+      .method-card__body h3 {
+        margin: 15px 0 0;
 
         font-family: "Space Grotesk", sans-serif;
 
-        font-size: 34px;
+        font-size: 32px;
 
         line-height: 1;
 
@@ -3005,10 +3121,10 @@ const currentYear = new Date().getFullYear();
         font-weight: 600;
       }
 
-      .timeline__copy p {
-        max-width: 260px;
+      .method-card__body p {
+        max-width: 270px;
 
-        margin: 14px 0 0;
+        margin: 13px 0 0;
 
         color: var(--ink-soft);
 
@@ -3019,16 +3135,392 @@ const currentYear = new Date().getFullYear();
 
 
       /* =====================================================
-         AREAS
+         COVERAGE
       ====================================================== */
 
-      .areas {
+      .coverage {
         padding: 120px 0;
 
         background: var(--bg);
       }
 
-      .areas__header {
+      .coverage__head {
+        display: grid;
+
+        grid-template-columns:
+          minmax(0, 1fr)
+          340px;
+
+        gap: 80px;
+
+        align-items: end;
+
+        margin-bottom: 55px;
+      }
+
+      .coverage__head h2 {
+        max-width: 680px;
+
+        margin: 18px 0 0;
+
+        font-family: "Space Grotesk", sans-serif;
+
+        font-size: clamp(
+          48px,
+          5.5vw,
+          77px
+        );
+
+        line-height: 0.94;
+
+        letter-spacing: -0.07em;
+
+        font-weight: 600;
+      }
+
+      .coverage__head h2 span {
+        color: var(--blue);
+      }
+
+      .coverage__head > p {
+        margin: 0;
+
+        color: var(--ink-soft);
+
+        font-size: 13px;
+
+        line-height: 1.8;
+      }
+
+      .coverage__body {
+        display: grid;
+
+        grid-template-columns:
+          1.05fr
+          0.95fr;
+
+        gap: 12px;
+      }
+
+      .coverage__map {
+        position: relative;
+
+        min-height: 470px;
+
+        overflow: hidden;
+
+        background: var(--dark);
+
+        color: white;
+      }
+
+      .coverage__map-grid {
+        position: absolute;
+
+        inset: 0;
+
+        opacity: 0.25;
+
+        background-image:
+          linear-gradient(
+            rgba(255,255,255,0.06) 1px,
+            transparent 1px
+          ),
+          linear-gradient(
+            90deg,
+            rgba(255,255,255,0.06) 1px,
+            transparent 1px
+          );
+
+        background-size: 35px 35px;
+      }
+
+      .coverage__outline {
+        position: absolute;
+
+        border:
+          1px solid
+          rgba(214,244,95,0.28);
+
+        background:
+          rgba(214,244,95,0.03);
+
+        transform: rotate(-17deg);
+      }
+
+      .coverage__outline--one {
+        width: 290px;
+        height: 330px;
+
+        left: 90px;
+        top: 66px;
+
+        border-radius:
+          56% 44% 58% 42%;
+      }
+
+      .coverage__outline--two {
+        width: 190px;
+        height: 220px;
+
+        right: 85px;
+        top: 105px;
+
+        border-radius:
+          40% 60% 45% 55%;
+
+        transform:
+          rotate(18deg);
+      }
+
+      .coverage__outline--three {
+        width: 150px;
+        height: 170px;
+
+        left: 245px;
+        bottom: 36px;
+
+        border-radius:
+          60% 40% 53% 47%;
+
+        transform:
+          rotate(31deg);
+      }
+
+      .coverage__label {
+        position: absolute;
+
+        z-index: 3;
+
+        display: flex;
+
+        align-items: center;
+
+        gap: 8px;
+
+        color:
+          rgba(255,255,255,0.6);
+
+        font-family: "DM Mono", monospace;
+
+        font-size: 6px;
+
+        letter-spacing: 0.08em;
+      }
+
+      .coverage__label span {
+        width: 7px;
+        height: 7px;
+
+        border-radius: 50%;
+
+        background: var(--lime);
+      }
+
+      .coverage__label--badung {
+        top: 26%;
+        left: 31%;
+      }
+
+      .coverage__label--mengwi {
+        right: 23%;
+        top: 48%;
+      }
+
+      .coverage__label--abiansemal {
+        left: 46%;
+        bottom: 19%;
+      }
+
+      .coverage__center {
+        position: absolute;
+
+        left: 50%;
+        top: 50%;
+
+        transform:
+          translate(-50%, -50%);
+
+        display: flex;
+
+        align-items: center;
+
+        flex-direction: column;
+
+        text-align: center;
+      }
+
+      .coverage__center small {
+        color:
+          rgba(255,255,255,0.38);
+
+        font-family: "DM Mono", monospace;
+
+        font-size: 6px;
+
+        letter-spacing: 0.1em;
+      }
+
+      .coverage__center strong {
+        margin-top: 8px;
+
+        font-family: "Space Grotesk", sans-serif;
+
+        font-size: 38px;
+
+        line-height: 0.95;
+
+        letter-spacing: -0.06em;
+      }
+
+      .coverage__center span {
+        margin-top: 8px;
+
+        color: var(--lime);
+
+        font-family: "DM Mono", monospace;
+
+        font-size: 7px;
+
+        letter-spacing: 0.07em;
+      }
+
+      .coverage__list {
+        border-top:
+          1px solid
+          var(--ink);
+
+        border-bottom:
+          1px solid
+          var(--line);
+
+        background: var(--surface);
+      }
+
+      .coverage-row {
+        min-height: 156px;
+
+        padding-inline: 20px;
+
+        display: grid;
+
+        grid-template-columns:
+          48px
+          minmax(0, 1fr)
+          100px
+          22px;
+
+        gap: 16px;
+
+        align-items: center;
+
+        border-bottom:
+          1px solid
+          var(--line);
+
+        transition:
+          background 160ms ease;
+      }
+
+      .coverage-row:last-child {
+        border-bottom: 0;
+      }
+
+      .coverage-row:hover {
+        background: var(--bg);
+      }
+
+      .coverage-row__number {
+        color: var(--muted);
+
+        font-family: "DM Mono", monospace;
+
+        font-size: 8px;
+      }
+
+      .coverage-row__name small {
+        display: block;
+
+        color: var(--muted);
+
+        font-family: "DM Mono", monospace;
+
+        font-size: 6px;
+
+        letter-spacing: 0.08em;
+      }
+
+      .coverage-row__name strong {
+        display: block;
+
+        margin-top: 10px;
+
+        font-family: "Space Grotesk", sans-serif;
+
+        font-size: 23px;
+
+        line-height: 1;
+
+        letter-spacing: -0.04em;
+
+        font-weight: 600;
+      }
+
+      .coverage-row__status {
+        display: flex;
+
+        align-items: center;
+
+        gap: 7px;
+
+        color: var(--dark);
+
+        font-family: "DM Mono", monospace;
+
+        font-size: 6px;
+
+        letter-spacing: 0.07em;
+      }
+
+      .coverage-row__status span {
+        width: 6px;
+        height: 6px;
+
+        display: block;
+
+        border-radius: 50%;
+
+        background: var(--lime);
+
+        border:
+          1px solid
+          rgba(0,0,0,0.12);
+      }
+
+      .coverage-row svg {
+        justify-self: end;
+
+        color: var(--blue);
+      }
+
+
+      /* =====================================================
+         MATERIAL
+      ====================================================== */
+
+      .material {
+        padding: 120px 0;
+
+        background: var(--bg-soft);
+
+        border-top:
+          1px solid
+          var(--line);
+      }
+
+      .material__head {
+        margin-bottom: 57px;
+
         display: grid;
 
         grid-template-columns:
@@ -3038,17 +3530,17 @@ const currentYear = new Date().getFullYear();
         gap: 80px;
 
         align-items: end;
-
-        margin-bottom: 55px;
       }
 
-      .areas__header h2 {
-        margin: 19px 0 0;
+      .material__head h2 {
+        max-width: 680px;
+
+        margin: 18px 0 0;
 
         font-family: "Space Grotesk", sans-serif;
 
         font-size: clamp(
-          48px,
+          49px,
           5.5vw,
           76px
         );
@@ -3060,194 +3552,23 @@ const currentYear = new Date().getFullYear();
         font-weight: 600;
       }
 
-      .areas__header h2 span {
-        color: var(--blue);
-      }
-
-      .areas__header p {
-        margin: 0;
-
-        color: var(--ink-soft);
-
-        font-size: 14px;
-
-        line-height: 1.8;
-      }
-
-      .areas__list {
-        display: grid;
-
-        grid-template-columns:
-          repeat(3, minmax(0, 1fr));
-
-        gap: 10px;
-      }
-
-      .area-card {
-        min-height: 325px;
-
-        padding: 22px;
-
-        display: flex;
-
-        flex-direction: column;
-
-        border:
-          1px solid
-          var(--line);
-
-        background: var(--surface);
-
-        transition:
-          transform 170ms ease,
-          border-color 170ms ease;
-      }
-
-      .area-card:hover {
-        transform: translateY(-4px);
-
-        border-color: var(--ink);
-      }
-
-      .area-card__number {
-        color: var(--muted);
-
-        font-family: "DM Mono", monospace;
-
-        font-size: 8px;
-      }
-
-      .area-card__main {
-        margin-top: auto;
-      }
-
-      .area-card__main > span {
-        color: var(--muted);
-
-        font-family: "DM Mono", monospace;
-
-        font-size: 7px;
-
-        letter-spacing: 0.08em;
-      }
-
-      .area-card__main h3 {
-        margin: 11px 0 0;
-
-        font-family: "Space Grotesk", sans-serif;
-
-        font-size: 30px;
-
-        line-height: 0.98;
-
-        letter-spacing: -0.05em;
-
-        font-weight: 600;
-      }
-
-      .area-card__main p {
-        margin: 11px 0 0;
-
-        color: var(--muted);
-
-        font-size: 11px;
-      }
-
-      .area-card__status {
-        margin-top: 28px;
-
-        padding-top: 14px;
-
-        display: flex;
-
-        align-items: center;
-        justify-content: space-between;
-
-        border-top:
-          1px solid
-          var(--line);
-      }
-
-      .area-card__status span {
-        color: var(--navy);
-
-        font-family: "DM Mono", monospace;
-
-        font-size: 7px;
-
-        letter-spacing: 0.08em;
-      }
-
-
-      /* =====================================================
-         MATERIALS
-      ====================================================== */
-
-      .materials {
-        padding: 120px 0;
-
-        background: var(--bg-soft);
-
-        border-top:
-          1px solid
-          var(--line);
-
-        border-bottom:
-          1px solid
-          var(--line);
-      }
-
-      .materials__header {
-        display: grid;
-
-        grid-template-columns:
-          minmax(0, 1fr)
-          350px;
-
-        gap: 80px;
-
-        align-items: end;
-
-        margin-bottom: 58px;
-      }
-
-      .materials__title h2 {
-        max-width: 720px;
-
-        margin: 19px 0 0;
-
-        font-family: "Space Grotesk", sans-serif;
-
-        font-size: clamp(
-          48px,
-          5.3vw,
-          74px
-        );
-
-        line-height: 0.94;
-
-        letter-spacing: -0.07em;
-
-        font-weight: 600;
-      }
-
-      .materials__title h2 span {
+      .material__head h2 span {
         display: block;
 
         color: var(--blue);
       }
 
-      .materials__description > p {
+      .material__head > div:last-child > p {
         margin: 0;
 
         color: var(--ink-soft);
 
-        font-size: 14px;
+        font-size: 13px;
 
         line-height: 1.8;
       }
 
-      .text-link {
+      .inline-link {
         margin-top: 22px;
 
         display: inline-flex;
@@ -3256,35 +3577,33 @@ const currentYear = new Date().getFullYear();
 
         gap: 8px;
 
-        color: var(--ink);
-
         font-size: 10px;
 
         font-weight: 700;
       }
 
-      .text-link:hover {
+      .inline-link:hover {
         text-decoration: underline;
 
         text-underline-offset: 4px;
       }
 
-      .material-list {
+      .material__list {
         border-top:
           1px solid
           var(--ink);
       }
 
-      .material-item {
-        min-height: 105px;
+      .material-row {
+        min-height: 103px;
 
         display: grid;
 
         grid-template-columns:
+          55px
           70px
-          80px
           minmax(0, 1fr)
-          40px;
+          22px;
 
         gap: 18px;
 
@@ -3292,20 +3611,20 @@ const currentYear = new Date().getFullYear();
 
         border-bottom:
           1px solid
-          rgba(16,24,32,0.14);
+          rgba(19,23,25,0.15);
 
         transition:
           background 160ms ease,
           padding 160ms ease;
       }
 
-      .material-item:hover {
-        padding-inline: 14px;
+      .material-row:hover {
+        padding-inline: 12px;
 
         background: var(--surface);
       }
 
-      .material-item__no {
+      .material-row__number {
         color: var(--muted);
 
         font-family: "DM Mono", monospace;
@@ -3313,22 +3632,20 @@ const currentYear = new Date().getFullYear();
         font-size: 8px;
       }
 
-      .material-item__code {
+      .material-row__code {
         color: var(--blue);
 
         font-family: "DM Mono", monospace;
 
-        font-size: 8px;
+        font-size: 7px;
 
         letter-spacing: 0.08em;
       }
 
-      .material-item__main h3 {
-        margin: 0;
-
+      .material-row__name strong {
         font-family: "Space Grotesk", sans-serif;
 
-        font-size: 22px;
+        font-size: 21px;
 
         line-height: 1;
 
@@ -3337,16 +3654,18 @@ const currentYear = new Date().getFullYear();
         font-weight: 600;
       }
 
-      .material-item__main p {
+      .material-row__name p {
         margin: 7px 0 0;
 
         color: var(--muted);
 
-        font-size: 11px;
+        font-size: 10px;
       }
 
-      .material-item__arrow {
+      .material-row svg {
         justify-self: end;
+
+        color: var(--blue);
       }
 
 
@@ -3355,33 +3674,33 @@ const currentYear = new Date().getFullYear();
       ====================================================== */
 
       .about {
-        padding: 125px 0;
+        padding: 120px 0;
 
         background: var(--surface);
       }
 
       .about__header {
+        margin-bottom: 58px;
+
         display: flex;
 
         align-items: flex-end;
         justify-content: space-between;
 
-        gap: 50px;
-
-        margin-bottom: 65px;
+        gap: 40px;
       }
 
       .about__header h2 {
-        max-width: 680px;
+        max-width: 690px;
 
-        margin: 19px 0 0;
+        margin: 18px 0 0;
 
         font-family: "Space Grotesk", sans-serif;
 
         font-size: clamp(
-          48px,
-          5.3vw,
-          74px
+          49px,
+          5.5vw,
+          76px
         );
 
         line-height: 0.94;
@@ -3398,15 +3717,15 @@ const currentYear = new Date().getFullYear();
       }
 
       .about__badge {
-        min-height: 42px;
+        min-height: 40px;
 
-        padding: 0 13px;
+        padding-inline: 12px;
 
         display: inline-flex;
 
         align-items: center;
 
-        gap: 9px;
+        gap: 8px;
 
         border:
           1px solid
@@ -3416,86 +3735,113 @@ const currentYear = new Date().getFullYear();
 
         font-family: "DM Mono", monospace;
 
-        font-size: 7px;
+        font-size: 6px;
+
+        letter-spacing: 0.08em;
 
         white-space: nowrap;
+      }
+
+      .about__badge span {
+        width: 6px;
+        height: 6px;
+
+        display: block;
+
+        border-radius: 50%;
+
+        background: var(--lime);
       }
 
       .about__grid {
         display: grid;
 
         grid-template-columns:
-          0.9fr
-          1.1fr;
+          0.8fr
+          1.2fr;
 
-        gap: 90px;
+        gap: 12px;
       }
 
       .about__statement {
-        padding:
-          28px
-          30px
-          38px;
+        min-height: 420px;
 
-        background: var(--navy);
+        padding: 24px;
+
+        display: flex;
+
+        flex-direction: column;
+
+        justify-content: space-between;
+
+        background: var(--dark);
 
         color: white;
       }
 
-      .about__number {
-        margin: 0;
-
+      .about__statement-number {
         color:
-          rgba(255,255,255,0.37);
+          rgba(255,255,255,0.34);
 
         font-family: "DM Mono", monospace;
 
         font-size: 8px;
       }
 
-      .about__statement blockquote {
-        max-width: 450px;
+      .about__statement p {
+        max-width: 400px;
 
-        margin: 120px 0 0;
+        margin: 0;
 
         font-family: "Space Grotesk", sans-serif;
 
         font-size: clamp(
-          28px,
-          3.1vw,
-          43px
+          27px,
+          3vw,
+          42px
         );
 
         line-height: 1.02;
 
-        letter-spacing: -0.045em;
+        letter-spacing: -0.04em;
 
         font-weight: 500;
       }
 
-      .about__principles {
+      .principle-list {
         border-top:
           1px solid
           var(--ink);
+
+        background: var(--surface);
       }
 
-      .about__principles article {
-        min-height: 132px;
+      .principle {
+        min-height: 140px;
+
+        padding: 20px;
 
         display: grid;
 
-        grid-template-columns: 45px 1fr;
+        grid-template-columns:
+          45px
+          minmax(0, 1fr)
+          20px;
 
-        gap: 24px;
+        gap: 18px;
 
-        padding: 22px 0;
+        align-items: start;
 
         border-bottom:
           1px solid
           var(--line);
       }
 
-      .about__principles article > span {
+      .principle:last-child {
+        border-bottom: 0;
+      }
+
+      .principle__number {
         color: var(--blue);
 
         font-family: "DM Mono", monospace;
@@ -3503,12 +3849,12 @@ const currentYear = new Date().getFullYear();
         font-size: 8px;
       }
 
-      .about__principles h3 {
+      .principle h3 {
         margin: 0;
 
         font-family: "Space Grotesk", sans-serif;
 
-        font-size: 24px;
+        font-size: 23px;
 
         line-height: 1;
 
@@ -3517,34 +3863,40 @@ const currentYear = new Date().getFullYear();
         font-weight: 600;
       }
 
-      .about__principles p {
-        max-width: 450px;
+      .principle p {
+        max-width: 470px;
 
         margin: 9px 0 0;
 
         color: var(--muted);
 
-        font-size: 12px;
+        font-size: 11px;
 
         line-height: 1.75;
       }
 
+      .principle > svg {
+        justify-self: end;
+
+        color: var(--blue);
+      }
+
 
       /* =====================================================
-         CTA
+         FINAL
       ====================================================== */
 
-      .cta {
+      .final {
         background: var(--lime);
       }
 
-      .cta__inner {
-        min-height: 490px;
+      .final__inner {
+        min-height: 465px;
 
         padding:
           30px
           0
-          48px;
+          45px;
 
         display: flex;
 
@@ -3553,22 +3905,23 @@ const currentYear = new Date().getFullYear();
         justify-content: space-between;
       }
 
-      .cta__label {
+      .final__top {
         display: flex;
 
         align-items: center;
         justify-content: space-between;
 
-        color: rgba(16,24,32,0.5);
+        color:
+          rgba(19,23,25,0.48);
 
         font-family: "DM Mono", monospace;
 
-        font-size: 8px;
+        font-size: 7px;
 
-        letter-spacing: 0.08em;
+        letter-spacing: 0.09em;
       }
 
-      .cta__content {
+      .final__main {
         display: flex;
 
         align-items: flex-end;
@@ -3577,26 +3930,21 @@ const currentYear = new Date().getFullYear();
         gap: 50px;
       }
 
-      .cta__content p {
-        max-width: 330px;
+      .final__main p {
+        margin: 0 0 18px;
 
-        margin: 0 0 20px;
-
-        color: rgba(16,24,32,0.62);
+        color:
+          rgba(19,23,25,0.52);
 
         font-family: "DM Mono", monospace;
 
-        font-size: 8px;
-
-        line-height: 1.6;
-
-        text-transform: uppercase;
+        font-size: 7px;
 
         letter-spacing: 0.08em;
       }
 
-      .cta__content h2 {
-        max-width: 850px;
+      .final__main h2 {
+        max-width: 900px;
 
         margin: 0;
 
@@ -3608,21 +3956,21 @@ const currentYear = new Date().getFullYear();
           98px
         );
 
-        line-height: 0.88;
+        line-height: 0.87;
 
         letter-spacing: -0.08em;
 
         font-weight: 600;
       }
 
-      .cta__content h2 span {
+      .final__main h2 span {
         color: var(--blue);
       }
 
-      .cta__button {
-        min-height: 55px;
+      .final__button {
+        min-height: 54px;
 
-        padding: 0 19px;
+        padding-inline: 18px;
 
         display: inline-flex;
 
@@ -3646,8 +3994,8 @@ const currentYear = new Date().getFullYear();
           transform 160ms ease;
       }
 
-      .cta__button:hover {
-        background: var(--navy);
+      .final__button:hover {
+        background: var(--dark);
 
         transform: translateY(-2px);
       }
@@ -3663,11 +4011,11 @@ const currentYear = new Date().getFullYear();
         color: white;
       }
 
-      .footer__top {
+      .footer__grid {
         padding:
-          74px
+          72px
           0
-          70px;
+          68px;
 
         display: grid;
 
@@ -3679,26 +4027,26 @@ const currentYear = new Date().getFullYear();
         gap: 70px;
       }
 
-      .brand--footer .brand__name {
+      .brand--footer .brand__text {
         color: white;
       }
 
-      .brand--footer .brand__mark span:nth-child(1),
-      .brand--footer .brand__mark span:nth-child(4) {
+      .brand--footer .brand__mark i:nth-child(1),
+      .brand--footer .brand__mark i:nth-child(4) {
         background: white;
       }
 
       .footer__identity p {
         max-width: 330px;
 
-        margin: 22px 0 0;
+        margin: 21px 0 0;
 
         color:
-          rgba(255,255,255,0.43);
+          rgba(255,255,255,0.42);
 
-        font-size: 12px;
+        font-size: 11px;
 
-        line-height: 1.75;
+        line-height: 1.8;
       }
 
       .footer__column {
@@ -3710,14 +4058,14 @@ const currentYear = new Date().getFullYear();
       }
 
       .footer__column > span {
-        margin-bottom: 18px;
+        margin-bottom: 17px;
 
         color:
-          rgba(255,255,255,0.3);
+          rgba(255,255,255,0.27);
 
         font-family: "DM Mono", monospace;
 
-        font-size: 7px;
+        font-size: 6px;
 
         letter-spacing: 0.09em;
       }
@@ -3726,9 +4074,9 @@ const currentYear = new Date().getFullYear();
         margin-bottom: 11px;
 
         color:
-          rgba(255,255,255,0.66);
+          rgba(255,255,255,0.63);
 
-        font-size: 11px;
+        font-size: 10px;
 
         transition:
           color 160ms ease;
@@ -3739,7 +4087,7 @@ const currentYear = new Date().getFullYear();
       }
 
       .footer__bottom {
-        min-height: 62px;
+        min-height: 63px;
 
         display: grid;
 
@@ -3759,7 +4107,7 @@ const currentYear = new Date().getFullYear();
 
         font-family: "DM Mono", monospace;
 
-        font-size: 7px;
+        font-size: 6px;
 
         letter-spacing: 0.06em;
       }
@@ -3780,10 +4128,10 @@ const currentYear = new Date().getFullYear();
       .floating-report {
         position: fixed;
 
-        right: 22px;
+        right: 21px;
         bottom: 20px;
 
-        z-index: 900;
+        z-index: 400;
 
         min-height: 58px;
 
@@ -3797,14 +4145,14 @@ const currentYear = new Date().getFullYear();
 
         align-items: center;
 
-        gap: 10px;
+        gap: 9px;
 
         background: var(--lime);
 
         color: var(--ink);
 
         box-shadow:
-          0 14px 30px
+          0 15px 30px
           rgba(0,0,0,0.14);
 
         transition:
@@ -3816,7 +4164,7 @@ const currentYear = new Date().getFullYear();
         transform: translateY(-3px);
 
         box-shadow:
-          0 18px 34px
+          0 19px 35px
           rgba(0,0,0,0.17);
       }
 
@@ -3833,24 +4181,24 @@ const currentYear = new Date().getFullYear();
         color: var(--lime);
       }
 
-      .floating-report__copy {
+      .floating-report__text {
         display: grid;
 
-        gap: 4px;
+        gap: 3px;
       }
 
-      .floating-report__copy small {
+      .floating-report__text small {
         color:
-          rgba(16,24,32,0.52);
+          rgba(19,23,25,0.52);
 
         font-family: "DM Mono", monospace;
 
-        font-size: 6px;
+        font-size: 5px;
 
         letter-spacing: 0.07em;
       }
 
-      .floating-report__copy strong {
+      .floating-report__text strong {
         font-size: 10px;
 
         font-weight: 800;
@@ -3870,40 +4218,16 @@ const currentYear = new Date().getFullYear();
         .hero__grid {
           grid-template-columns:
             minmax(0, 1fr)
-            minmax(330px, 0.76fr);
+            minmax(370px, 0.78fr);
 
           gap: 45px;
         }
 
-        .hero h1 {
-          font-size: clamp(
-            55px,
-            7vw,
-            82px
-          );
-        }
-
-        .signal__grid {
-          gap: 50px;
-        }
-
-        .section-header,
+        .modules__head,
         .method__header,
-        .areas__header,
-        .materials__header {
-          grid-template-columns:
-            minmax(0, 1fr)
-            310px;
-
-          gap: 45px;
-        }
-
-        .context__grid {
-          grid-template-columns:
-            130px
-            minmax(0, 1fr);
-
-          gap: 45px;
+        .coverage__head,
+        .material__head {
+          gap: 50px;
         }
 
       }
@@ -3916,31 +4240,25 @@ const currentYear = new Date().getFullYear();
       @media (max-width: 860px) {
 
         .page-width {
-          width: min(
-            calc(100% - 36px),
-            var(--page)
-          );
+          width:
+            min(
+              calc(100% - 34px),
+              var(--page)
+            );
         }
 
         .desktop-nav,
-        .header__report {
+        .header__location,
+        .header__action {
           display: none;
         }
 
-        .header__region {
-          display: none;
-        }
-
-        .header__actions {
+        .header__right {
           margin-left: auto;
         }
 
         .menu-button {
           display: inline-flex;
-        }
-
-        .mobile-nav.mobile-nav--open {
-          display: block;
         }
 
         .hero__grid {
@@ -3951,143 +4269,95 @@ const currentYear = new Date().getFullYear();
           gap: 0;
         }
 
-        .hero__copy {
+        .hero__main {
           padding:
-            72px
+            68px
             0
-            64px;
+            55px;
         }
 
-        .hero__visual {
+        .hero h1 {
+          font-size: clamp(
+            56px,
+            10vw,
+            84px
+          );
+        }
+
+        .hero__interface {
           margin-bottom: 0;
         }
 
-        .hero__rail {
+        .hero__signal {
           grid-template-columns:
-            repeat(2, 1fr);
+            repeat(3, 1fr);
         }
 
-        .hero__rail-item:nth-child(2) {
+        .hero__signal > div:nth-child(3) {
           border-right: 0;
         }
 
-        .hero__rail-item:nth-child(-n + 2) {
+        .hero__signal > div:nth-child(-n + 3) {
           border-bottom:
             1px solid
             var(--line);
         }
 
-        .signal__grid {
+        .statement__grid {
           grid-template-columns: 1fr;
 
-          gap: 48px;
+          gap: 25px;
         }
 
-        .signal__cards {
-          grid-template-columns: 1fr;
+        .statement__meta {
+          flex-direction: row;
+
+          align-items: center;
+
+          gap: 9px;
         }
 
-        .signal-card {
-          min-height: 180px;
-
-          border-right: 0;
-
-          border-bottom:
-            1px solid
-            rgba(255,255,255,0.13);
-        }
-
-        .signal-card:last-child {
-          border-bottom: 0;
-        }
-
-        .section-header,
+        .modules__head,
         .method__header,
-        .areas__header,
-        .materials__header {
+        .coverage__head,
+        .material__head {
           grid-template-columns: 1fr;
 
           gap: 28px;
         }
 
-        .service-grid {
+        .module-grid {
           grid-template-columns: 1fr;
         }
 
-        .service-card,
-        .service-card--01,
-        .service-card--03,
-        .service-card--04 {
-          min-height: 330px;
+        .dark-section__headline {
+          padding-top: 58px;
         }
 
-        .context__grid {
-          grid-template-columns: 1fr;
-
-          gap: 35px;
-        }
-
-        .context__side {
-          min-height: auto;
-        }
-
-        .context__side-number {
-          margin-top: 25px;
-
-          font-size: 92px;
-        }
-
-        .context__bottom {
-          grid-template-columns: 1fr;
-
-          gap: 38px;
-
-          margin-top: 52px;
-        }
-
-        .timeline {
+        .method__grid {
           grid-template-columns: 1fr;
         }
 
-        .timeline::before {
-          display: none;
-        }
-
-        .timeline__item {
-          min-height: auto;
-
-          padding-bottom: 40px;
+        .method-card {
+          min-height: 230px;
 
           border-right: 0;
 
           border-bottom:
             1px solid
             var(--line);
-
-          grid-template-columns:
-            70px
-            60px
-            minmax(0, 1fr);
         }
 
-        .timeline__item:last-child {
+        .method-card:last-child {
           border-bottom: 0;
         }
 
-        .timeline__copy {
-          padding:
-            45px
-            20px
-            20px
-            0;
-        }
-
-        .areas__list {
+        .coverage__body {
           grid-template-columns: 1fr;
         }
 
-        .area-card {
-          min-height: 270px;
+        .coverage__map {
+          min-height: 390px;
         }
 
         .about__header {
@@ -4098,32 +4368,22 @@ const currentYear = new Date().getFullYear();
 
         .about__grid {
           grid-template-columns: 1fr;
-
-          gap: 45px;
         }
 
-        .about__statement {
-          min-height: 370px;
-        }
-
-        .footer__top {
+        .footer__grid {
           grid-template-columns:
             1fr
             1fr;
-
-          gap: 45px;
         }
 
         .footer__identity {
           grid-column: 1 / -1;
         }
 
-        .cta__content {
-          flex-direction: column;
-
+        .final__main {
           align-items: flex-start;
 
-          gap: 35px;
+          flex-direction: column;
         }
 
       }
@@ -4136,183 +4396,253 @@ const currentYear = new Date().getFullYear();
       @media (max-width: 620px) {
 
         .page-width {
-          width: calc(100% - 26px);
+          width:
+            calc(100% - 26px);
         }
 
-        .hero__topline {
+        .hero__top span {
           font-size: 6px;
         }
 
-        .hero__topline span:last-child {
+        .hero__top div:last-child {
           display: none;
         }
 
-        .hero__copy {
+        .hero__main {
           padding:
-            58px
+            54px
             0
-            52px;
+            49px;
         }
 
         .hero h1 {
-          font-size: clamp(
-            46px,
-            13vw,
-            66px
-          );
+          font-size:
+            47px;
         }
 
-        .hero__description {
-          margin-top: 29px;
+        .hero__intro {
+          margin-top: 27px;
 
           font-size: 13px;
         }
 
-        .hero__buttons {
-          flex-direction: column;
+        .hero__actions {
+          width: 100%;
 
-          align-items: stretch;
+          flex-direction: column;
         }
 
         .button {
           width: 100%;
         }
 
-        .visual__canvas {
-          min-height: 350px;
+        .interface__body {
+          min-height: 340px;
         }
 
-        .map-shape--a {
-          width: 190px;
-          height: 260px;
+        .interface__shape--one {
+          width: 205px;
+          height: 255px;
 
           left: 30px;
         }
 
-        .map-shape--b {
-          width: 145px;
-          height: 180px;
+        .interface__shape--two {
+          width: 135px;
+          height: 170px;
 
-          right: 10px;
+          right: 15px;
         }
 
-        .map-shape--c {
-          width: 120px;
-          height: 140px;
-
-          left: 100px;
+        .interface__center strong {
+          font-size: 31px;
         }
 
-        .visual__center strong {
-          font-size: 37px;
+        .hero__signal {
+          grid-template-columns:
+            repeat(2, 1fr);
         }
 
-        .hero__rail-item {
-          min-height: 58px;
+        .hero__signal > div:nth-child(2),
+        .hero__signal > div:nth-child(4) {
+          border-right: 0;
         }
 
-        .hero__rail-item small {
-          font-size: 6px;
+        .hero__signal > div:nth-child(5) {
+          grid-column: 1 / -1;
+
+          border-top:
+            1px solid
+            var(--line);
         }
 
-        .signal,
-        .explore,
-        .context,
+        .statement,
+        .modules,
         .method,
-        .areas,
-        .materials,
+        .coverage,
+        .material,
         .about {
           padding: 82px 0;
         }
 
-        .signal__intro h2,
-        .section-header h2,
-        .context__heading h2,
+        .statement h2,
+        .modules__head h2,
         .method__header h2,
-        .areas__header h2,
-        .materials__title h2,
+        .coverage__head h2,
+        .material__head h2,
         .about__header h2 {
-          font-size: 42px;
+          font-size: 41px;
         }
 
-        .signal-card {
-          min-height: 160px;
+        .statement__lower {
+          grid-template-columns: 1fr;
+
+          gap: 18px;
         }
 
-        .service-card__body h3 {
-          font-size: 25px;
+        .module-card {
+          min-height: 315px;
         }
 
-        .context__heading h2 {
-          line-height: 0.98;
+        .dark-section {
+          padding: 82px 0;
         }
 
-        .context__side-number {
-          font-size: 72px;
+        .dark-section__label {
+          display: none;
         }
 
-        .timeline__item {
+        .dark-section__headline h2 {
+          font-size: 43px;
+        }
+
+        .dark-section__bottom {
+          align-items: flex-start;
+
+          flex-direction: column;
+        }
+
+        .method__grid {
+          margin-top: 54px;
+        }
+
+        .method-card {
           grid-template-columns:
-            46px
-            50px
+            38px
+            45px
             minmax(0, 1fr);
         }
 
-        .timeline__copy h3 {
+        .method-card__body {
+          padding-right: 10px;
+        }
+
+        .coverage__map {
+          min-height: 290px;
+        }
+
+        .coverage__outline--one {
+          width: 200px;
+          height: 230px;
+
+          left: 45px;
+        }
+
+        .coverage__outline--two {
+          width: 130px;
+          height: 155px;
+
+          right: 25px;
+        }
+
+        .coverage__outline--three {
+          width: 110px;
+          height: 120px;
+
+          left: 130px;
+        }
+
+        .coverage__center strong {
           font-size: 29px;
         }
 
-        .material-item {
-          min-height: 96px;
+        .coverage-row {
+          min-height: 128px;
 
           grid-template-columns:
-            35px
-            50px
+            34px
             minmax(0, 1fr)
-            25px;
+            80px
+            19px;
 
           gap: 10px;
         }
 
-        .material-item__main p {
+        .coverage-row__name strong {
+          font-size: 19px;
+        }
+
+        .coverage-row__status {
+          font-size: 5px;
+        }
+
+        .material-row {
+          min-height: 88px;
+
+          grid-template-columns:
+            35px
+            44px
+            minmax(0, 1fr)
+            20px;
+
+          gap: 10px;
+        }
+
+        .material-row__name strong {
+          font-size: 17px;
+        }
+
+        .material-row__name p {
           display: none;
         }
 
-        .material-item__main h3 {
-          font-size: 18px;
-        }
-
         .about__statement {
-          min-height: 330px;
+          min-height: 310px;
         }
 
-        .about__statement blockquote {
-          margin-top: 100px;
+        .principle {
+          min-height: 128px;
 
-          font-size: 31px;
+          grid-template-columns:
+            35px
+            minmax(0, 1fr)
+            16px;
+
+          gap: 12px;
         }
 
-        .cta__inner {
-          min-height: 430px;
-
-          padding:
-            24px
-            0
-            38px;
+        .final__inner {
+          min-height: 410px;
         }
 
-        .cta__content h2 {
-          font-size: 54px;
+        .final__top span:last-child {
+          display: none;
         }
 
-        .cta__button {
+        .final__main h2 {
+          font-size: 53px;
+        }
+
+        .final__button {
           width: 100%;
         }
 
-        .footer__top {
-          grid-template-columns: 1fr 1fr;
+        .footer__grid {
+          grid-template-columns:
+            1fr
+            1fr;
 
-          gap: 38px;
+          gap: 40px;
         }
 
         .footer__bottom {
@@ -4339,7 +4669,7 @@ const currentYear = new Date().getFullYear();
           bottom: 11px;
         }
 
-        .floating-report__copy {
+        .floating-report__text {
           flex: 1;
         }
 
@@ -4352,53 +4682,32 @@ const currentYear = new Date().getFullYear();
 
       @media (max-width: 420px) {
 
-        .brand__name {
-          font-size: 14px;
-        }
-
         .hero h1 {
           font-size: 43px;
         }
 
-        .hero__eyebrow {
-          font-size: 8px;
+        .interface__body {
+          min-height: 280px;
         }
 
-        .visual__canvas {
-          min-height: 285px;
+        .interface__center strong {
+          font-size: 27px;
         }
 
-        .visual__center strong {
-          font-size: 31px;
-        }
-
-        .signal__intro h2,
-        .section-header h2,
-        .context__heading h2,
+        .statement h2,
+        .modules__head h2,
         .method__header h2,
-        .areas__header h2,
-        .materials__title h2,
+        .coverage__head h2,
+        .material__head h2,
         .about__header h2 {
-          font-size: 37px;
+          font-size: 36px;
         }
 
-        .service-card {
-          min-height: 295px;
+        .dark-section__headline h2 {
+          font-size: 38px;
         }
 
-        .service-card__body h3 {
-          font-size: 23px;
-        }
-
-        .area-card {
-          min-height: 245px;
-        }
-
-        .about__statement blockquote {
-          font-size: 28px;
-        }
-
-        .cta__content h2 {
+        .final__main h2 {
           font-size: 47px;
         }
 
