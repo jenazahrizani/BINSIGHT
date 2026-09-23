@@ -4,14 +4,10 @@ import {
   ArrowUpRight,
   Building2,
   ChartColumn,
-  ChevronRight,
-  CircleCheck,
   FileText,
   Map,
   Menu,
   Recycle,
-  Search,
-  ShieldCheck,
   X,
 } from "@lucide/astro";
 
@@ -30,120 +26,89 @@ const siteHref = (path: string) => {
     return path;
   }
 
-  if (path === "/") return `${BASE_URL}/`;
+  if (path === "/") {
+    return `${BASE_URL}/`;
+  }
 
   return `${BASE_URL}${path.startsWith("/") ? path : `/${path}`}`;
 };
 
 const services = [
   {
-    number: "01",
+    no: "01",
     title: "Peta",
-    description:
-      "Lihat informasi persampahan berdasarkan lokasi dan wilayah di Kabupaten Badung.",
+    text: "Lihat persampahan berdasarkan lokasi dan wilayah di Kabupaten Badung.",
     href: "/map",
     icon: Map,
   },
   {
-    number: "02",
+    no: "02",
     title: "Data",
-    description:
-      "Temukan informasi dan data persampahan dalam tampilan yang sederhana.",
+    text: "Temukan informasi persampahan dalam satu ruang yang mudah dibaca.",
     href: "/dashboard",
     icon: ChartColumn,
   },
   {
-    number: "03",
+    no: "03",
     title: "Organisasi",
-    description:
-      "Kenali organisasi dan jaringan yang terkait dengan ekosistem persampahan.",
+    text: "Kenali pihak dan jaringan yang membentuk ekosistem persampahan.",
     href: "/organizations",
     icon: Building2,
   },
   {
-    number: "04",
+    no: "04",
     title: "Material",
-    description:
-      "Pelajari berbagai jenis material sampah dan karakteristik dasarnya.",
+    text: "Pahami berbagai kategori material dan karakter dasarnya.",
     href: "/waste",
     icon: Recycle,
   },
 ];
 
+const principles = [
+  {
+    no: "01",
+    title: "Kontekstual",
+    text: "Informasi ditempatkan bersama lokasi dan konteks yang relevan.",
+  },
+  {
+    no: "02",
+    title: "Terbuka",
+    text: "Informasi publik disusun agar mudah ditemukan dan dipahami.",
+  },
+  {
+    no: "03",
+    title: "Bertanggung jawab",
+    text: "Penyajian informasi memperhatikan sumber, konteks, dan penggunaannya.",
+  },
+];
+
 const areas = [
   {
-    number: "01",
+    no: "01",
     name: "Badung",
-    description:
-      "Informasi tingkat Kabupaten Badung.",
+    type: "KABUPATEN",
     status: "TERSEDIA",
   },
   {
-    number: "02",
+    no: "02",
     name: "Mengwi",
-    description:
-      "Informasi wilayah Kecamatan Mengwi.",
+    type: "KECAMATAN",
     status: "CONTOH",
   },
   {
-    number: "03",
+    no: "03",
     name: "Abiansemal",
-    description:
-      "Informasi wilayah Kecamatan Abiansemal.",
+    type: "KECAMATAN",
     status: "CONTOH",
   },
 ];
 
 const materials = [
-  {
-    name: "Organik",
-    description: "Material yang berasal dari sumber hayati.",
-    code: "ORG",
-  },
-  {
-    name: "Anorganik",
-    description: "Material seperti plastik, kaca, dan logam.",
-    code: "ANR",
-  },
-  {
-    name: "Bahan Berbahaya",
-    description: "Material yang membutuhkan perhatian khusus.",
-    code: "B3",
-  },
-  {
-    name: "Elektronik",
-    description: "Perangkat dan komponen elektronik bekas.",
-    code: "ELK",
-  },
-  {
-    name: "Residu",
-    description: "Material yang tidak termasuk kategori lainnya.",
-    code: "RES",
-  },
-];
-
-const steps = [
-  {
-    number: "01",
-    title: "Temukan",
-    description:
-      "Cari informasi berdasarkan lokasi, kategori, atau area yang ingin diketahui.",
-    icon: Search,
-  },
-  {
-    number: "02",
-    title: "Pahami",
-    description:
-      "Baca informasi secara lebih lengkap untuk memahami konteks yang tersedia.",
-    icon: FileText,
-  },
-  {
-    number: "03",
-    title: "Hubungkan",
-    description:
-      "Gunakan informasi yang tersedia untuk melihat hubungan antarwilayah dan organisasi.",
-    icon: Building2,
-  },
+  ["01", "Organik", "ORG"],
+  ["02", "Anorganik", "ANR"],
+  ["03", "Bahan Berbahaya", "B3"],
+  ["04", "Elektronik", "ELK"],
+  ["05", "Residu", "RES"],
 ];
 
 const currentYear = new Date().getFullYear();
@@ -166,7 +131,10 @@ const currentYear = new Date().getFullYear();
       content="Platform informasi persampahan Kabupaten Badung untuk menemukan, memahami, dan melaporkan kondisi persampahan."
     />
 
-    <meta name="theme-color" content="#f4f7f8" />
+    <meta
+      name="theme-color"
+      content="#f1eee7"
+    />
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link
@@ -176,107 +144,88 @@ const currentYear = new Date().getFullYear();
     />
 
     <link
-      href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap"
+      href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&family=Playfair+Display:wght@500;600;700&display=swap"
       rel="stylesheet"
     />
   </head>
 
   <body>
-    <div class="page">
+    <div class="site">
 
       <!-- =====================================================
            HEADER
       ====================================================== -->
 
-      <header class="site-header">
-        <div class="shell site-header__inner">
+      <header class="header">
+        <div class="page-width header__inner">
 
           <a
             href={siteHref("/")}
-            class="logo"
+            class="brand"
             aria-label="BINSIGHT"
           >
-            <span class="logo__shape">
-              <span></span>
-              <span></span>
-              <span></span>
+            <span class="brand__symbol" aria-hidden="true">
+              <i></i>
+              <i></i>
+              <i></i>
             </span>
 
-            <span class="logo__text">
-              <strong>BINSIGHT</strong>
-              <small>BADUNG WASTE INTELLIGENCE</small>
+            <span class="brand__word">
+              BINSIGHT
             </span>
           </a>
 
           <nav
-            class="navigation"
+            class="desktop-nav"
             aria-label="Navigasi utama"
           >
             <a
-              class="navigation__link navigation__link--active"
+              class="desktop-nav__active"
               href={siteHref("/")}
             >
               Beranda
             </a>
 
-            <a
-              class="navigation__link"
-              href={siteHref("/map")}
-            >
+            <a href={siteHref("/map")}>
               Peta
             </a>
 
-            <a
-              class="navigation__link"
-              href={siteHref("/dashboard")}
-            >
+            <a href={siteHref("/dashboard")}>
               Data
             </a>
 
-            <a
-              class="navigation__link"
-              href={siteHref("/organizations")}
-            >
+            <a href={siteHref("/organizations")}>
               Organisasi
             </a>
 
-            <a
-              class="navigation__link"
-              href="#tentang"
-            >
+            <a href="#tentang">
               Tentang
             </a>
           </nav>
 
-          <div class="site-header__actions">
+          <div class="header__end">
 
-            <a
-              class="search-button"
-              href={siteHref("/dashboard")}
-              aria-label="Buka data"
-            >
-              <Search
-                size={18}
-                strokeWidth={2}
-              />
-              <span>Cari informasi</span>
-            </a>
+            <span class="header__location">
+              BADUNG / BALI
+            </span>
 
             <button
               type="button"
-              class="mobile-menu-button"
-              aria-expanded="false"
-              aria-controls="mobile-navigation"
+              class="menu-button"
               aria-label="Buka menu"
+              aria-expanded="false"
+              aria-controls="mobile-nav"
             >
               <Menu
                 data-menu-open
-                size={21}
+                size={20}
+                strokeWidth={1.8}
               />
 
               <X
                 data-menu-close
-                size={21}
+                size={20}
+                strokeWidth={1.8}
               />
             </button>
 
@@ -285,10 +234,10 @@ const currentYear = new Date().getFullYear();
         </div>
 
         <div
-          class="mobile-navigation"
-          id="mobile-navigation"
+          class="mobile-nav"
+          id="mobile-nav"
         >
-          <div class="shell mobile-navigation__inner">
+          <div class="page-width mobile-nav__inner">
 
             <a href={siteHref("/")}>
               Beranda
@@ -322,107 +271,81 @@ const currentYear = new Date().getFullYear();
         ==================================================== -->
 
         <section class="hero">
-          <div class="shell hero__inner">
+          <div class="page-width hero__inner">
 
-            <div class="hero__content">
+            <div class="hero__rail">
+              <span>01</span>
+              <span>BINSIGHT</span>
+            </div>
 
-              <div class="hero__tag">
-                <span class="hero__tag-dot"></span>
-                PLATFORM INFORMASI PUBLIK
+            <div class="hero__main">
+
+              <div class="eyebrow">
+                BADUNG WASTE INTELLIGENCE
               </div>
 
               <h1>
-                Kenali kondisi
-                <span>persampahan</span>
-                di Badung.
+                Kenali
+                <em>persampahan</em>
+                Badung.
               </h1>
 
-              <p class="hero__lead">
-                BINSIGHT menghadirkan informasi persampahan Kabupaten
-                Badung dalam satu platform yang mudah ditemukan,
-                dipahami, dan digunakan.
-              </p>
+              <div class="hero__lower">
 
-              <div class="hero__buttons">
+                <p>
+                  Platform informasi publik untuk menemukan,
+                  memahami, dan menghubungkan informasi persampahan
+                  Kabupaten Badung.
+                </p>
 
-                <a
-                  class="primary-button"
-                  href={siteHref("/map")}
-                >
-                  Mulai menjelajah
-                  <ArrowRight
-                    size={18}
-                  />
-                </a>
+                <div class="hero__actions">
 
-                <a
-                  class="secondary-button"
-                  href={siteHref("/dashboard")}
-                >
-                  Lihat informasi
-                  <ArrowUpRight
-                    size={17}
-                  />
-                </a>
+                  <a
+                    class="hero-button hero-button--dark"
+                    href={siteHref("/map")}
+                  >
+                    Jelajahi peta
+                    <ArrowRight
+                      size={18}
+                    />
+                  </a>
+
+                  <a
+                    class="hero-button hero-button--line"
+                    href={siteHref("/dashboard")}
+                  >
+                    Lihat data
+                    <ArrowUpRight
+                      size={17}
+                    />
+                  </a>
+
+                </div>
 
               </div>
 
             </div>
 
+            <div class="hero__visual" aria-hidden="true">
 
-            <div class="hero__directory">
-
-              <div class="hero__directory-head">
-                <div>
-                  <span>EXPLORE BINSIGHT</span>
-                  <strong>Pilih informasi yang ingin Anda lihat.</strong>
-                </div>
-
-                <div class="hero__directory-status">
-                  <span></span>
-                  AKTIF
-                </div>
+              <div class="hero__visual-top">
+                <span>WASTE</span>
+                <span>INTELLIGENCE</span>
               </div>
 
+              <div class="hero__visual-word">
+                BADUNG
+              </div>
 
-              <div class="hero__directory-list">
+              <div class="hero__visual-mark">
+                <span></span>
+                <span></span>
+              </div>
 
-                {
-                  services.map((service) => {
-                    const Icon = service.icon;
-
-                    return (
-                      <a
-                        href={siteHref(service.href)}
-                        class="hero-service"
-                      >
-                        <span class="hero-service__number">
-                          {service.number}
-                        </span>
-
-                        <span class="hero-service__icon">
-                          <Icon
-                            size={19}
-                            strokeWidth={2}
-                          />
-                        </span>
-
-                        <span class="hero-service__copy">
-                          <strong>{service.title}</strong>
-                          <small>
-                            {service.description}
-                          </small>
-                        </span>
-
-                        <ChevronRight
-                          size={19}
-                          class="hero-service__arrow"
-                        />
-                      </a>
-                    );
-                  })
-                }
-
+              <div class="hero__visual-bottom">
+                <span>MAP</span>
+                <span>DATA</span>
+                <span>NETWORK</span>
               </div>
 
             </div>
@@ -432,29 +355,69 @@ const currentYear = new Date().getFullYear();
 
 
         <!-- ===================================================
+             TICKER
+        ==================================================== -->
+
+        <div class="ticker">
+          <div class="page-width ticker__inner">
+            <span>INFORMASI</span>
+            <span>LOKASI</span>
+            <span>MATERIAL</span>
+            <span>ORGANISASI</span>
+            <span>EDUKASI</span>
+            <span>LAPORAN</span>
+          </div>
+        </div>
+
+
+        <!-- ===================================================
              INTRO
         ==================================================== -->
 
-        <section class="statement">
-          <div class="shell statement__inner">
+        <section class="intro">
+          <div class="page-width intro__grid">
 
-            <div class="statement__label">
-              <span>01</span>
-              <span>TENTANG PLATFORM</span>
+            <div class="section-index">
+              <span>02</span>
+              <small>TENTANG</small>
             </div>
 
-            <div class="statement__copy">
+            <div class="intro__copy">
+
               <h2>
-                Satu tempat untuk
-                <span>memahami persampahan.</span>
+                Persampahan
+                <span>perlu dilihat</span>
+                secara utuh.
               </h2>
 
-              <p>
-                Informasi persampahan sering tersebar di berbagai tempat.
-                BINSIGHT menyatukannya ke dalam pengalaman digital yang
-                lebih sederhana agar masyarakat dapat memahami konteks
-                persampahan dengan lebih mudah.
-              </p>
+              <div class="intro__description">
+
+                <p>
+                  Informasi tentang sampah tidak hanya berbicara
+                  tentang material. Ia juga berkaitan dengan tempat,
+                  manusia, organisasi, dan kondisi di sekitarnya.
+                </p>
+
+                <p>
+                  BINSIGHT menyatukan konteks tersebut dalam satu
+                  platform agar informasi publik dapat dipahami
+                  dengan lebih jelas.
+                </p>
+
+              </div>
+
+            </div>
+
+            <div class="intro__note">
+              <span>THE IDEA</span>
+
+              <strong>
+                MAP + DATA + PEOPLE
+              </strong>
+
+              <strong>
+                + MATERIAL
+              </strong>
             </div>
 
           </div>
@@ -466,29 +429,33 @@ const currentYear = new Date().getFullYear();
         ==================================================== -->
 
         <section class="services">
-          <div class="shell">
+          <div class="page-width">
 
-            <div class="section-intro">
-              <div class="section-intro__label">
-                <span>02</span>
-                <small>YANG DAPAT ANDA LAKUKAN</small>
+            <div class="section-head">
+
+              <div class="section-index">
+                <span>03</span>
+                <small>EKSPLORASI</small>
               </div>
 
-              <div>
+              <div class="section-head__copy">
+
                 <h2>
-                  Cari. Baca.
-                  <span>Pahami.</span>
+                  Empat cara
+                  <span>untuk mulai.</span>
                 </h2>
 
                 <p>
-                  Gunakan area utama BINSIGHT untuk menemukan jenis
-                  informasi yang Anda perlukan.
+                  Gunakan BINSIGHT sesuai informasi yang sedang
+                  Anda cari.
                 </p>
+
               </div>
+
             </div>
 
 
-            <div class="service-cards">
+            <div class="service-list">
 
               {
                 services.map((service) => {
@@ -497,41 +464,33 @@ const currentYear = new Date().getFullYear();
                   return (
                     <a
                       href={siteHref(service.href)}
-                      class="service-card"
+                      class="service-row"
                     >
 
-                      <div class="service-card__top">
-                        <span>
-                          {service.number}
-                        </span>
+                      <span class="service-row__number">
+                        {service.no}
+                      </span>
 
-                        <div class="service-card__icon">
-                          <Icon
-                            size={24}
-                            strokeWidth={2}
-                          />
-                        </div>
-                      </div>
-
-                      <div class="service-card__content">
-                        <h3>
-                          {service.title}
-                        </h3>
-
-                        <p>
-                          {service.description}
-                        </p>
-                      </div>
-
-                      <div class="service-card__bottom">
-                        <span>
-                          Buka
-                        </span>
-
-                        <ArrowUpRight
-                          size={18}
+                      <span class="service-row__icon">
+                        <Icon
+                          size={22}
+                          strokeWidth={1.7}
                         />
-                      </div>
+                      </span>
+
+                      <span class="service-row__title">
+                        {service.title}
+                      </span>
+
+                      <span class="service-row__text">
+                        {service.text}
+                      </span>
+
+                      <ArrowUpRight
+                        class="service-row__arrow"
+                        size={20}
+                        strokeWidth={1.6}
+                      />
 
                     </a>
                   );
@@ -545,74 +504,81 @@ const currentYear = new Date().getFullYear();
 
 
         <!-- ===================================================
-             HOW IT WORKS
+             METHOD
         ==================================================== -->
 
-        <section class="how-it-works">
-          <div class="shell">
+        <section class="method">
+          <div class="page-width">
 
-            <div class="how-it-works__header">
+            <div class="method__intro">
 
-              <div class="how-it-works__title">
-                <span>03</span>
-
-                <div>
-                  <small>CARA MENGGUNAKAN</small>
-
-                  <h2>
-                    Dari pertanyaan
-                    <span>menjadi pemahaman.</span>
-                  </h2>
-                </div>
+              <div class="section-index section-index--light">
+                <span>04</span>
+                <small>CARA KERJA</small>
               </div>
 
-              <p>
-                BINSIGHT dirancang agar pengguna dapat bergerak dari
-                informasi dasar menuju konteks yang lebih lengkap
-                tanpa proses yang rumit.
-              </p>
+              <div>
+                <h2>
+                  Dari pertanyaan
+                  <span>menjadi konteks.</span>
+                </h2>
+
+                <p>
+                  Pengalaman BINSIGHT dimulai dari kebutuhan sederhana:
+                  menemukan informasi, memahami isinya, kemudian melihat
+                  hubungan yang lebih luas.
+                </p>
+              </div>
 
             </div>
 
 
-            <div class="steps">
+            <div class="method__steps">
 
-              {
-                steps.map((step, index) => {
-                  const Icon = step.icon;
+              <article>
+                <span>01</span>
 
-                  return (
-                    <article class="step">
+                <h3>
+                  Temukan
+                </h3>
 
-                      <div class="step__number">
-                        {step.number}
-                      </div>
+                <p>
+                  Cari lokasi, wilayah, data, atau informasi
+                  yang ingin diketahui.
+                </p>
 
-                      <div class="step__icon">
-                        <Icon
-                          size={23}
-                          strokeWidth={2}
-                        />
-                      </div>
+                <div class="method__line"></div>
+              </article>
 
-                      <h3>
-                        {step.title}
-                      </h3>
 
-                      <p>
-                        {step.description}
-                      </p>
+              <article>
+                <span>02</span>
 
-                      {
-                        index < steps.length - 1 && (
-                          <div class="step__connector"></div>
-                        )
-                      }
+                <h3>
+                  Pahami
+                </h3>
 
-                    </article>
-                  );
-                })
-              }
+                <p>
+                  Baca informasi dan lihat konteks yang
+                  berada di baliknya.
+                </p>
+
+                <div class="method__line"></div>
+              </article>
+
+
+              <article>
+                <span>03</span>
+
+                <h3>
+                  Hubungkan
+                </h3>
+
+                <p>
+                  Hubungkan informasi dengan wilayah,
+                  organisasi, dan material.
+                </p>
+              </article>
 
             </div>
 
@@ -625,73 +591,64 @@ const currentYear = new Date().getFullYear();
         ==================================================== -->
 
         <section class="coverage">
-          <div class="shell">
+          <div class="page-width">
 
-            <div class="coverage__header">
+            <div class="coverage__head">
 
-              <div>
-                <span class="number-label">
-                  04
-                </span>
-
-                <small>
-                  CAKUPAN INFORMASI
-                </small>
-
-                <h2>
-                  Melihat Badung
-                  <span>dari dekat.</span>
-                </h2>
+              <div class="section-index">
+                <span>05</span>
+                <small>WILAYAH</small>
               </div>
 
-              <p>
-                Jelajahi informasi berdasarkan wilayah untuk melihat
-                konteks persampahan yang lebih dekat dengan lokasi Anda.
-              </p>
+              <div>
+                <h2>
+                  Membaca Badung
+                  <span>dari dekat.</span>
+                </h2>
+
+                <p>
+                  Informasi dapat dilihat berdasarkan wilayah
+                  untuk memahami konteks lokal secara lebih dekat.
+                </p>
+              </div>
 
             </div>
 
 
-            <div class="area-list">
+            <div class="area-table">
+
+              <div class="area-table__head">
+                <span>NO.</span>
+                <span>NAMA</span>
+                <span>TIPE</span>
+                <span>STATUS</span>
+                <span></span>
+              </div>
 
               {
                 areas.map((area) => (
                   <a
                     href={siteHref("/map")}
-                    class="area-card"
+                    class="area-table__row"
                   >
+                    <span>{area.no}</span>
 
-                    <div class="area-card__top">
-                      <span>{area.number}</span>
+                    <strong>
+                      {area.name}
+                    </strong>
 
-                      <span class="area-card__status">
-                        <CircleCheck
-                          size={14}
-                        />
-                        {area.status}
-                      </span>
-                    </div>
+                    <span>
+                      {area.type}
+                    </span>
 
-                    <div class="area-card__body">
-                      <h3>
-                        {area.name}
-                      </h3>
+                    <span class="area-status">
+                      {area.status}
+                    </span>
 
-                      <p>
-                        {area.description}
-                      </p>
-                    </div>
-
-                    <div class="area-card__action">
-                      <span>
-                        Lihat wilayah
-                      </span>
-
-                      <ArrowRight
-                        size={17}
-                      />
-                    </div>
-
+                    <ArrowRight
+                      size={18}
+                      strokeWidth={1.7}
+                    />
                   </a>
                 ))
               }
@@ -703,210 +660,175 @@ const currentYear = new Date().getFullYear();
 
 
         <!-- ===================================================
-             MATERIALS
+             MATERIAL
         ==================================================== -->
 
-        <section class="materials">
-          <div class="shell materials__inner">
+        <section class="material">
+          <div class="page-width material__grid">
 
-            <div class="materials__intro">
+            <div class="section-index">
+              <span>06</span>
+              <small>MATERIAL</small>
+            </div>
 
-              <div class="section-intro__label">
-                <span>05</span>
-                <small>PENGETAHUAN MATERIAL</small>
+            <div class="material__content">
+
+              <div class="material__intro">
+
+                <h2>
+                  Kenali
+                  <span>materialnya.</span>
+                </h2>
+
+                <p>
+                  Mengenal kategori sampah membantu memahami bahwa
+                  setiap material memiliki karakter dan kebutuhan
+                  penanganan yang berbeda.
+                </p>
+
+                <a
+                  href={siteHref("/waste")}
+                  class="material__link"
+                >
+                  Lihat semua kategori
+                  <ArrowRight size={17} />
+                </a>
+
               </div>
 
+
+              <div class="material__list">
+
+                {
+                  materials.map((material) => (
+                    <a
+                      href={siteHref("/waste")}
+                      class="material__row"
+                    >
+
+                      <span>
+                        {material[0]}
+                      </span>
+
+                      <strong>
+                        {material[1]}
+                      </strong>
+
+                      <small>
+                        {material[2]}
+                      </small>
+
+                      <ArrowUpRight
+                        size={18}
+                        strokeWidth={1.6}
+                      />
+
+                    </a>
+                  ))
+                }
+
+              </div>
+
+            </div>
+
+          </div>
+        </section>
+
+
+        <!-- ===================================================
+             PRINCIPLES
+        ==================================================== -->
+
+        <section
+          class="principles"
+          id="tentang"
+        >
+          <div class="page-width">
+
+            <div class="principles__head">
+
+              <div class="section-index">
+                <span>07</span>
+                <small>PRINSIP</small>
+              </div>
+
+              <div>
+                <h2>
+                  Dibangun untuk
+                  <span>digunakan.</span>
+                </h2>
+
+                <p>
+                  BINSIGHT menjaga agar pengalaman informasi tetap
+                  sederhana, relevan, dan bertanggung jawab.
+                </p>
+              </div>
+
+            </div>
+
+
+            <div class="principle-list">
+
+              {
+                principles.map((principle) => (
+                  <article class="principle">
+
+                    <span class="principle__number">
+                      {principle.no}
+                    </span>
+
+                    <h3>
+                      {principle.title}
+                    </h3>
+
+                    <p>
+                      {principle.text}
+                    </p>
+
+                  </article>
+                ))
+              }
+
+            </div>
+
+          </div>
+        </section>
+
+
+        <!-- ===================================================
+             FINAL
+        ==================================================== -->
+
+        <section class="final">
+          <div class="page-width final__inner">
+
+            <div class="final__top">
+              <span>08 / BINSIGHT</span>
+
+              <span>
+                BADUNG WASTE INTELLIGENCE
+              </span>
+            </div>
+
+            <div class="final__content">
+
               <h2>
-                Kenali
-                <span>materialnya.</span>
+                Kenali.
+                <em>Pahami.</em>
+                Jaga Badung.
               </h2>
 
-              <p>
-                Mengenal kategori sampah membantu pengguna memahami
-                bahwa setiap material memiliki karakter dan kebutuhan
-                penanganan yang berbeda.
-              </p>
-
               <a
-                href={siteHref("/waste")}
-                class="inline-link"
+                href={siteHref("/map")}
+                class="final__button"
               >
-                Pelajari semua kategori
-                <ArrowRight
-                  size={17}
+                Jelajahi BINSIGHT
+                <ArrowUpRight
+                  size={20}
                 />
               </a>
 
             </div>
-
-
-            <div class="material-list">
-
-              {
-                materials.map((material) => (
-                  <a
-                    href={siteHref("/waste")}
-                    class="material-card"
-                  >
-
-                    <div class="material-card__code">
-                      {material.code}
-                    </div>
-
-                    <div class="material-card__content">
-                      <h3>
-                        {material.name}
-                      </h3>
-
-                      <p>
-                        {material.description}
-                      </p>
-                    </div>
-
-                    <ChevronRight
-                      size={19}
-                      class="material-card__arrow"
-                    />
-
-                  </a>
-                ))
-              }
-
-            </div>
-
-          </div>
-        </section>
-
-
-        <!-- ===================================================
-             TRUST
-        ==================================================== -->
-
-        <section
-          class="trust"
-          id="tentang"
-        >
-          <div class="shell trust__inner">
-
-            <div class="trust__heading">
-
-              <span>06</span>
-
-              <div>
-                <small>
-                  PRINSIP BINSIGHT
-                </small>
-
-                <h2>
-                  Informasi yang
-                  <span>jelas dan bertanggung jawab.</span>
-                </h2>
-              </div>
-
-            </div>
-
-
-            <div class="trust__items">
-
-              <div class="trust-card">
-
-                <div class="trust-card__icon">
-                  <Map
-                    size={22}
-                  />
-                </div>
-
-                <h3>
-                  Berbasis konteks
-                </h3>
-
-                <p>
-                  Informasi tidak berdiri sendiri, tetapi ditempatkan
-                  berdasarkan lokasi dan konteks yang relevan.
-                </p>
-
-              </div>
-
-
-              <div class="trust-card">
-
-                <div class="trust-card__icon">
-                  <ShieldCheck
-                    size={22}
-                  />
-                </div>
-
-                <h3>
-                  Terstruktur
-                </h3>
-
-                <p>
-                  Informasi disusun secara teratur agar lebih mudah
-                  ditemukan, dibaca, dan dipahami.
-                </p>
-
-              </div>
-
-
-              <div class="trust-card">
-
-                <div class="trust-card__icon">
-                  <CircleCheck
-                    size={22}
-                  />
-                </div>
-
-                <h3>
-                  Bertanggung jawab
-                </h3>
-
-                <p>
-                  BINSIGHT mengedepankan penyajian informasi publik
-                  yang jelas dan dapat digunakan secara tepat.
-                </p>
-
-              </div>
-
-            </div>
-
-          </div>
-        </section>
-
-
-        <!-- ===================================================
-             FINAL CTA
-        ==================================================== -->
-
-        <section class="final-section">
-          <div class="shell final-section__inner">
-
-            <div class="final-section__copy">
-
-              <small>
-                BINSIGHT
-              </small>
-
-              <h2>
-                Kenali.
-                <span>Pahami.</span>
-                Jaga Badung.
-              </h2>
-
-              <p>
-                Mulai dari informasi yang paling Anda butuhkan.
-              </p>
-
-            </div>
-
-            <a
-              href={siteHref("/map")}
-              class="final-button"
-            >
-              Jelajahi BINSIGHT
-              <ArrowUpRight
-                size={20}
-              />
-            </a>
 
           </div>
         </section>
@@ -919,84 +841,88 @@ const currentYear = new Date().getFullYear();
       ====================================================== -->
 
       <footer class="footer">
-
-        <div class="shell footer__main">
+        <div class="page-width footer__main">
 
           <div class="footer__identity">
 
             <a
               href={siteHref("/")}
-              class="logo logo--footer"
+              class="brand brand--footer"
             >
-
-              <span class="logo__shape">
-                <span></span>
-                <span></span>
-                <span></span>
+              <span
+                class="brand__symbol"
+                aria-hidden="true"
+              >
+                <i></i>
+                <i></i>
+                <i></i>
               </span>
 
-              <span class="logo__text">
-                <strong>BINSIGHT</strong>
-                <small>BADUNG WASTE INTELLIGENCE</small>
+              <span class="brand__word">
+                BINSIGHT
               </span>
-
             </a>
 
             <p>
-              Platform informasi persampahan Kabupaten Badung.
+              Platform informasi persampahan
+              Kabupaten Badung.
             </p>
 
           </div>
 
 
-          <div class="footer__links">
+          <div class="footer__group">
 
-            <div>
-              <small>JELAJAHI</small>
+            <span>
+              PLATFORM
+            </span>
 
-              <a href={siteHref("/map")}>
-                Peta
-              </a>
+            <a href={siteHref("/map")}>
+              Peta
+            </a>
 
-              <a href={siteHref("/dashboard")}>
-                Data
-              </a>
+            <a href={siteHref("/dashboard")}>
+              Data
+            </a>
 
-              <a href={siteHref("/organizations")}>
-                Organisasi
-              </a>
+            <a href={siteHref("/organizations")}>
+              Organisasi
+            </a>
 
-              <a href={siteHref("/waste")}>
-                Material
-              </a>
-            </div>
+            <a href={siteHref("/waste")}>
+              Material
+            </a>
+
+          </div>
 
 
-            <div>
-              <small>TENTANG</small>
+          <div class="footer__group">
 
-              <a href="#tentang">
-                BINSIGHT
-              </a>
+            <span>
+              INFORMASI
+            </span>
 
-              <a href={siteHref("/map")}>
-                Eksplorasi
-              </a>
-            </div>
+            <a href="#tentang">
+              Tentang BINSIGHT
+            </a>
+
+            <a href={siteHref("/map")}>
+              Eksplorasi
+            </a>
 
           </div>
 
         </div>
 
 
-        <div class="shell footer__bottom">
+        <div class="page-width footer__bottom">
 
           <span>
             © {currentYear} BINSIGHT
           </span>
 
           <span>
-            BADUNG WASTE INTELLIGENCE
+            BADUNG / BALI
           </span>
 
           <span>
@@ -1004,28 +930,24 @@ const currentYear = new Date().getFullYear();
           </span>
 
         </div>
-
       </footer>
 
 
       <!-- =====================================================
-           ONLY REPORT ACTION
+           FLOATING REPORT
       ====================================================== -->
 
       <a
-        href={siteHref("/reports/create")}
         class="floating-report"
+        href={siteHref("/reports/create")}
         aria-label="Buat laporan masyarakat"
       >
+        <FileText
+          size={18}
+          strokeWidth={1.8}
+        />
 
-        <span class="floating-report__mark">
-          <FileText
-            size={19}
-            strokeWidth={2}
-          />
-        </span>
-
-        <span class="floating-report__text">
+        <span>
           <small>
             LAPORAN MASYARAKAT
           </small>
@@ -1036,9 +958,9 @@ const currentYear = new Date().getFullYear();
         </span>
 
         <ArrowUpRight
-          size={18}
+          size={17}
+          strokeWidth={1.7}
         />
-
       </a>
 
     </div>
@@ -1047,12 +969,12 @@ const currentYear = new Date().getFullYear();
     <script>
       const menuButton =
         document.querySelector<HTMLButtonElement>(
-          ".mobile-menu-button"
+          ".menu-button"
         );
 
-      const mobileNavigation =
+      const mobileNav =
         document.querySelector<HTMLElement>(
-          ".mobile-navigation"
+          ".mobile-nav"
         );
 
       const menuOpen =
@@ -1065,8 +987,8 @@ const currentYear = new Date().getFullYear();
           "[data-menu-close]"
         );
 
-      const toggleMenu = (open: boolean) => {
-        if (!menuButton || !mobileNavigation) {
+      const updateMenu = (open: boolean) => {
+        if (!menuButton || !mobileNav) {
           return;
         }
 
@@ -1080,8 +1002,8 @@ const currentYear = new Date().getFullYear();
           open ? "Tutup menu" : "Buka menu"
         );
 
-        mobileNavigation.classList.toggle(
-          "mobile-navigation--open",
+        mobileNav.classList.toggle(
+          "mobile-nav--open",
           open
         );
 
@@ -1098,28 +1020,28 @@ const currentYear = new Date().getFullYear();
         }
       };
 
-      toggleMenu(false);
+      updateMenu(false);
 
       menuButton?.addEventListener(
         "click",
         () => {
-          const current =
+          const open =
             menuButton.getAttribute(
               "aria-expanded"
             ) === "true";
 
-          toggleMenu(!current);
+          updateMenu(!open);
         }
       );
 
       document
         .querySelectorAll<HTMLAnchorElement>(
-          ".mobile-navigation a"
+          ".mobile-nav a"
         )
         .forEach((link) => {
           link.addEventListener(
             "click",
-            () => toggleMenu(false)
+            () => updateMenu(false)
           );
         });
 
@@ -1127,7 +1049,7 @@ const currentYear = new Date().getFullYear();
         "resize",
         () => {
           if (window.innerWidth > 900) {
-            toggleMenu(false);
+            updateMenu(false);
           }
         }
       );
@@ -1136,30 +1058,21 @@ const currentYear = new Date().getFullYear();
 
     <style>
       :root {
-        --bg: #f4f7f8;
-        --white: #ffffff;
+        --paper: #f1eee7;
+        --paper-dark: #e8e4db;
+        --white: #faf9f5;
 
-        --ink: #101828;
-        --ink-soft: #273444;
-        --muted: #687585;
+        --ink: #151515;
+        --muted: #68645d;
+        --line: #cfcac0;
 
-        --blue: #2563eb;
-        --blue-dark: #1747b8;
-        --blue-soft: #eaf1ff;
+        --forest: #183d32;
+        --forest-soft: #294d40;
 
-        --mint: #dff4ea;
-        --mint-dark: #24735a;
+        --coral: #e85b3c;
+        --coral-soft: #f2c3b7;
 
-        --line: #e1e7ec;
-
-        --dark: #101827;
-        --dark-soft: #182335;
-
-        --radius-sm: 12px;
-        --radius-md: 18px;
-        --radius-lg: 26px;
-
-        --shell: 1240px;
+        --page: 1240px;
       }
 
 
@@ -1180,7 +1093,8 @@ const currentYear = new Date().getFullYear();
       body {
         margin: 0;
 
-        background: var(--bg);
+        background: var(--paper);
+
         color: var(--ink);
 
         font-family: "Manrope", sans-serif;
@@ -1202,15 +1116,15 @@ const currentYear = new Date().getFullYear();
         flex-shrink: 0;
       }
 
-      .page {
+      .site {
         min-height: 100vh;
         overflow: clip;
       }
 
-      .shell {
+      .page-width {
         width: min(
-          calc(100% - 48px),
-          var(--shell)
+          calc(100% - 52px),
+          var(--page)
         );
 
         margin-inline: auto;
@@ -1221,206 +1135,176 @@ const currentYear = new Date().getFullYear();
          HEADER
       ====================================================== */
 
-      .site-header {
+      .header {
         position: sticky;
+
         top: 0;
+
         z-index: 100;
 
-        background: rgba(
-          255,
-          255,
-          255,
-          0.88
-        );
+        background:
+          rgba(241, 238, 231, 0.94);
 
-        backdrop-filter: blur(18px);
+        backdrop-filter: blur(15px);
 
         border-bottom:
           1px solid
-          rgba(225, 231, 236, 0.9);
+          var(--line);
       }
 
-      .site-header__inner {
+      .header__inner {
         min-height: 76px;
 
         display: flex;
+
         align-items: center;
         justify-content: space-between;
 
-        gap: 32px;
+        gap: 30px;
       }
 
-      .logo {
+      .brand {
         display: inline-flex;
+
         align-items: center;
 
-        gap: 11px;
+        gap: 12px;
+
         flex-shrink: 0;
       }
 
-      .logo__shape {
-        width: 34px;
-        height: 34px;
+      .brand__symbol {
+        width: 29px;
+        height: 29px;
 
         display: grid;
 
         grid-template-columns:
-          repeat(2, 1fr);
+          repeat(3, 1fr);
 
         grid-template-rows:
-          repeat(2, 1fr);
+          repeat(3, 1fr);
 
-        gap: 3px;
+        gap: 2px;
       }
 
-      .logo__shape span {
+      .brand__symbol i {
         display: block;
 
         background: var(--ink);
-
-        border-radius: 2px;
       }
 
-      .logo__shape span:nth-child(2) {
-        background: var(--blue);
+      .brand__symbol i:nth-child(2) {
+        background: var(--coral);
+
+        grid-column: 2 / 4;
       }
 
-      .logo__shape span:nth-child(3) {
-        background: var(--mint-dark);
+      .brand__symbol i:nth-child(3) {
+        background: var(--forest);
+
+        grid-row: 2 / 4;
       }
 
-      .logo__text {
-        display: grid;
-        gap: 3px;
-      }
+      .brand__word {
+        font-size: 15px;
 
-      .logo__text strong {
-        font-size: 16px;
         line-height: 1;
+
         font-weight: 800;
-        letter-spacing: -0.03em;
+
+        letter-spacing: -0.035em;
       }
 
-      .logo__text small {
-        color: var(--muted);
-
-        font-family: "DM Mono", monospace;
-
-        font-size: 7px;
-        line-height: 1.2;
-
-        letter-spacing: 0.07em;
-      }
-
-      .navigation {
+      .desktop-nav {
         display: flex;
+
         align-items: center;
-        gap: 28px;
+
+        gap: 30px;
+
+        margin-left: auto;
+        margin-right: auto;
       }
 
-      .navigation__link {
+      .desktop-nav a {
         position: relative;
 
-        color: #596575;
+        color: #656159;
 
-        font-size: 13px;
+        font-size: 12px;
+
         font-weight: 600;
 
         transition:
           color 160ms ease;
       }
 
-      .navigation__link:hover,
-      .navigation__link--active {
+      .desktop-nav a:hover,
+      .desktop-nav__active {
         color: var(--ink);
       }
 
-      .navigation__link--active::after {
+      .desktop-nav__active::after {
         content: "";
 
         position: absolute;
 
-        left: 50%;
-        bottom: -12px;
+        left: 0;
+        right: 0;
 
-        width: 5px;
-        height: 5px;
+        bottom: -10px;
 
-        border-radius: 50%;
+        height: 2px;
 
-        background: var(--blue);
-
-        transform: translateX(-50%);
+        background: var(--coral);
       }
 
-      .site-header__actions {
+      .header__end {
         display: flex;
+
         align-items: center;
 
-        gap: 9px;
+        gap: 20px;
       }
 
-      .search-button {
-        min-height: 40px;
+      .header__location {
+        color: #77736b;
 
-        padding: 0 13px;
+        font-family: "DM Mono", monospace;
 
-        display: inline-flex;
-        align-items: center;
+        font-size: 8px;
 
-        gap: 8px;
+        letter-spacing: 0.09em;
 
-        border:
-          1px solid
-          var(--line);
-
-        border-radius:
-          var(--radius-sm);
-
-        background: white;
-
-        color: var(--ink-soft);
-
-        font-size: 11px;
-        font-weight: 600;
-
-        transition:
-          border-color 160ms ease,
-          background 160ms ease;
+        white-space: nowrap;
       }
 
-      .search-button:hover {
-        border-color: #c8d2dc;
-        background: #fafcfd;
-      }
-
-      .mobile-menu-button {
-        width: 40px;
-        height: 40px;
+      .menu-button {
+        width: 38px;
+        height: 38px;
 
         display: none;
 
         align-items: center;
         justify-content: center;
 
-        border:
-          1px solid
-          var(--line);
+        padding: 0;
 
-        border-radius:
-          var(--radius-sm);
+        border: 1px solid var(--line);
 
-        background: white;
+        background: transparent;
+
         color: var(--ink);
 
         cursor: pointer;
       }
 
-      .mobile-menu-button [data-menu-close] {
+      .menu-button [data-menu-close] {
         display: none;
       }
 
-      .mobile-navigation {
+      .mobile-nav {
         display: none;
 
         border-top:
@@ -1428,23 +1312,23 @@ const currentYear = new Date().getFullYear();
           var(--line);
       }
 
-      .mobile-navigation__inner {
-        padding: 8px 0 18px;
+      .mobile-nav__inner {
+        padding: 7px 0 18px;
       }
 
-      .mobile-navigation a {
-        min-height: 51px;
+      .mobile-nav a {
+        min-height: 52px;
 
         display: flex;
+
         align-items: center;
 
         border-bottom:
           1px solid
           var(--line);
 
-        color: var(--ink);
-
         font-size: 14px;
+
         font-weight: 700;
       }
 
@@ -1454,112 +1338,151 @@ const currentYear = new Date().getFullYear();
       ====================================================== */
 
       .hero {
-        padding: 42px 0 60px;
+        background: var(--paper);
+
+        border-bottom:
+          1px solid
+          var(--line);
       }
 
       .hero__inner {
-        min-height: 660px;
+        min-height: 720px;
 
         display: grid;
 
         grid-template-columns:
+          52px
           minmax(0, 1fr)
-          minmax(390px, 0.78fr);
+          minmax(280px, 0.42fr);
 
-        gap: 54px;
+        column-gap: 38px;
+
+        align-items: stretch;
+      }
+
+      .hero__rail {
+        padding-top: 44px;
+
+        display: flex;
+
+        flex-direction: column;
 
         align-items: center;
 
-        padding: 76px;
+        gap: 11px;
 
-        border-radius:
-          var(--radius-lg);
-
-        background:
-          linear-gradient(
-            145deg,
-            #ffffff 0%,
-            #f8fbff 58%,
-            #edf5ff 100%
-          );
-
-        box-shadow:
-          0 18px 55px
-          rgba(22, 40, 69, 0.07);
-
-        border:
+        border-right:
           1px solid
-          rgba(225, 231, 236, 0.8);
+          var(--line);
+
+        color: #89857d;
+
+        font-family: "DM Mono", monospace;
+
+        font-size: 8px;
+
+        letter-spacing: 0.06em;
       }
 
-      .hero__content {
-        max-width: 700px;
+      .hero__rail span:first-child {
+        color: var(--coral);
       }
 
-      .hero__tag {
-        display: inline-flex;
-        align-items: center;
+      .hero__rail span:last-child {
+        writing-mode: vertical-rl;
 
-        gap: 9px;
+        transform: rotate(180deg);
+      }
 
-        margin-bottom: 28px;
+      .hero__main {
+        min-width: 0;
 
-        color: #526071;
+        padding:
+          92px
+          20px
+          82px
+          0;
+
+        display: flex;
+
+        flex-direction: column;
+
+        justify-content: center;
+      }
+
+      .eyebrow {
+        margin-bottom: 29px;
+
+        color: var(--forest);
 
         font-family: "DM Mono", monospace;
 
         font-size: 9px;
 
-        letter-spacing: 0.08em;
-      }
-
-      .hero__tag-dot {
-        width: 7px;
-        height: 7px;
-
-        border-radius: 50%;
-
-        background: var(--blue);
+        letter-spacing: 0.1em;
       }
 
       .hero h1 {
+        max-width: 800px;
+
         margin: 0;
 
-        max-width: 740px;
-
         font-size: clamp(
-          54px,
-          7vw,
-          94px
+          64px,
+          8vw,
+          118px
         );
 
-        line-height: 0.98;
+        line-height: 0.89;
 
-        letter-spacing: -0.065em;
+        letter-spacing: -0.075em;
 
         font-weight: 700;
       }
 
-      .hero h1 span {
+      .hero h1 em {
         display: block;
-        color: var(--blue);
+
+        color: var(--coral);
+
+        font-family: "Playfair Display", serif;
+
+        font-weight: 600;
+
+        font-style: normal;
+
+        letter-spacing: -0.06em;
       }
 
-      .hero__lead {
-        max-width: 640px;
+      .hero__lower {
+        max-width: 770px;
 
-        margin: 32px 0 0;
+        margin-top: 52px;
+
+        display: grid;
+
+        grid-template-columns:
+          minmax(0, 1fr)
+          auto;
+
+        gap: 48px;
+
+        align-items: end;
+      }
+
+      .hero__lower p {
+        max-width: 500px;
+
+        margin: 0;
 
         color: var(--muted);
 
-        font-size: 17px;
+        font-size: 16px;
 
         line-height: 1.75;
       }
 
-      .hero__buttons {
-        margin-top: 36px;
-
+      .hero__actions {
         display: flex;
 
         align-items: center;
@@ -1569,11 +1492,12 @@ const currentYear = new Date().getFullYear();
         flex-wrap: wrap;
       }
 
-      .primary-button,
-      .secondary-button {
-        min-height: 52px;
+      .hero-button {
+        min-height: 49px;
 
-        padding: 0 18px;
+        padding:
+          0
+          17px;
 
         display: inline-flex;
 
@@ -1582,86 +1506,68 @@ const currentYear = new Date().getFullYear();
 
         gap: 10px;
 
-        border-radius:
-          var(--radius-sm);
+        font-size: 11px;
 
-        font-size: 12px;
         font-weight: 800;
+
+        white-space: nowrap;
 
         transition:
           background 160ms ease,
-          border-color 160ms ease,
-          color 160ms ease;
+          color 160ms ease,
+          border-color 160ms ease;
       }
 
-      .primary-button {
-        background: var(--blue);
+      .hero-button--dark {
+        background: var(--ink);
+
         color: white;
       }
 
-      .primary-button:hover {
-        background: var(--blue-dark);
+      .hero-button--dark:hover {
+        background: var(--forest);
       }
 
-      .secondary-button {
+      .hero-button--line {
         border:
           1px solid
           var(--line);
-
-        background: white;
-
-        color: var(--ink);
       }
 
-      .secondary-button:hover {
-        border-color: #c5d0dc;
-        background: #f9fbfd;
+      .hero-button--line:hover {
+        border-color: var(--ink);
       }
 
-      .hero__directory {
-        width: 100%;
+      .hero__visual {
+        min-width: 0;
 
-        border-radius:
-          var(--radius-md);
+        position: relative;
 
-        background: var(--dark);
+        margin-top: 30px;
+        margin-bottom: 30px;
 
-        color: white;
-
-        box-shadow:
-          0 20px 48px
-          rgba(16, 24, 39, 0.13);
-      }
-
-      .hero__directory-head {
-        min-height: 105px;
-
-        padding: 23px 23px 18px;
+        padding: 27px;
 
         display: flex;
 
+        flex-direction: column;
+
         justify-content: space-between;
-        align-items: flex-start;
 
-        gap: 20px;
+        overflow: hidden;
 
-        border-bottom:
-          1px solid
-          rgba(255, 255, 255, 0.1);
+        background: var(--forest);
+
+        color: white;
       }
 
-      .hero__directory-head > div:first-child {
-        display: grid;
-        gap: 7px;
-      }
+      .hero__visual-top {
+        display: flex;
 
-      .hero__directory-head span {
-        color: rgba(
-          255,
-          255,
-          255,
-          0.4
-        );
+        justify-content: space-between;
+
+        color:
+          rgba(255, 255, 255, 0.46);
 
         font-family: "DM Mono", monospace;
 
@@ -1670,228 +1576,291 @@ const currentYear = new Date().getFullYear();
         letter-spacing: 0.08em;
       }
 
-      .hero__directory-head strong {
-        max-width: 280px;
+      .hero__visual-word {
+        margin-left: -8px;
 
-        color: white;
+        color:
+          rgba(255, 255, 255, 0.92);
 
-        font-size: 14px;
+        font-size: clamp(
+          58px,
+          6vw,
+          92px
+        );
 
-        line-height: 1.45;
+        line-height: 0.82;
 
-        font-weight: 700;
+        letter-spacing: -0.08em;
+
+        font-weight: 800;
+
+        writing-mode: vertical-rl;
+
+        transform: rotate(180deg);
       }
 
-      .hero__directory-status {
-        display: inline-flex;
+      .hero__visual-mark {
+        position: absolute;
 
-        align-items: center;
+        right: 38px;
+        top: 50%;
 
-        gap: 7px;
+        width: 120px;
+        height: 120px;
 
-        color: #9ce0c2 !important;
+        border:
+          1px solid
+          rgba(255, 255, 255, 0.24);
+
+        transform:
+          translateY(-50%);
+      }
+
+      .hero__visual-mark::before,
+      .hero__visual-mark::after {
+        content: "";
+
+        position: absolute;
+
+        background:
+          rgba(255, 255, 255, 0.15);
+      }
+
+      .hero__visual-mark::before {
+        top: 50%;
+        left: 0;
+        right: 0;
+
+        height: 1px;
+      }
+
+      .hero__visual-mark::after {
+        top: 0;
+        bottom: 0;
+        left: 50%;
+
+        width: 1px;
+      }
+
+      .hero__visual-mark span {
+        position: absolute;
+
+        width: 30px;
+        height: 30px;
+
+        top: 50%;
+        left: 50%;
+
+        background: var(--coral);
+
+        transform:
+          translate(-50%, -50%);
+      }
+
+      .hero__visual-mark span:last-child {
+        width: 11px;
+        height: 11px;
+
+        background: var(--paper);
+      }
+
+      .hero__visual-bottom {
+        display: flex;
+
+        gap: 14px;
+
+        color:
+          rgba(255, 255, 255, 0.52);
 
         font-family: "DM Mono", monospace;
 
-        font-size: 8px !important;
-      }
+        font-size: 7px;
 
-      .hero__directory-status span {
-        width: 6px;
-        height: 6px;
-
-        border-radius: 50%;
-
-        background: #71d3a5;
-      }
-
-      .hero__directory-list {
-        padding: 10px;
-      }
-
-      .hero-service {
-        min-height: 92px;
-
-        padding: 14px;
-
-        display: grid;
-
-        grid-template-columns:
-          32px
-          44px
-          minmax(0, 1fr)
-          22px;
-
-        align-items: center;
-
-        gap: 12px;
-
-        border-radius:
-          var(--radius-sm);
-
-        transition:
-          background 160ms ease;
-      }
-
-      .hero-service:hover {
-        background:
-          rgba(255, 255, 255, 0.06);
-      }
-
-      .hero-service__number {
-        color: rgba(
-          255,
-          255,
-          255,
-          0.3
-        );
-
-        font-family: "DM Mono", monospace;
-
-        font-size: 9px;
-      }
-
-      .hero-service__icon {
-        width: 44px;
-        height: 44px;
-
-        display: grid;
-        place-items: center;
-
-        border-radius:
-          11px;
-
-        background:
-          rgba(255, 255, 255, 0.08);
-
-        color: #9bbcff;
-      }
-
-      .hero-service__copy {
-        min-width: 0;
-
-        display: grid;
-        gap: 4px;
-      }
-
-      .hero-service__copy strong {
-        color: white;
-
-        font-size: 14px;
-        font-weight: 700;
-      }
-
-      .hero-service__copy small {
-        max-width: 280px;
-
-        overflow: hidden;
-
-        color: rgba(
-          255,
-          255,
-          255,
-          0.46
-        );
-
-        font-size: 10px;
-
-        line-height: 1.45;
-
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-      }
-
-      .hero-service__arrow {
-        color: rgba(
-          255,
-          255,
-          255,
-          0.35
-        );
+        letter-spacing: 0.08em;
       }
 
 
       /* =====================================================
-         STATEMENT
+         TICKER
       ====================================================== */
 
-      .statement {
-        padding: 55px 0 110px;
+      .ticker {
+        background: var(--coral);
+
+        color: white;
       }
 
-      .statement__inner {
+      .ticker__inner {
+        min-height: 47px;
+
         display: grid;
 
         grid-template-columns:
-          180px
-          minmax(0, 850px);
+          repeat(6, 1fr);
 
-        gap: 60px;
+        align-items: center;
       }
 
-      .statement__label {
-        padding-top: 8px;
+      .ticker__inner span {
+        text-align: center;
 
+        font-family: "DM Mono", monospace;
+
+        font-size: 8px;
+
+        letter-spacing: 0.08em;
+      }
+
+      .ticker__inner span + span {
+        border-left:
+          1px solid
+          rgba(255, 255, 255, 0.22);
+      }
+
+
+      /* =====================================================
+         SHARED
+      ====================================================== */
+
+      .section-index {
         display: flex;
+
         flex-direction: column;
 
         gap: 8px;
+
+        padding-top: 5px;
       }
 
-      .statement__label span:first-child {
-        color: var(--blue);
+      .section-index span {
+        color: var(--coral);
 
         font-family: "DM Mono", monospace;
 
         font-size: 10px;
       }
 
-      .statement__label span:last-child {
-        color: #8994a2;
+      .section-index small {
+        color: #8a867e;
 
         font-family: "DM Mono", monospace;
 
-        font-size: 8px;
-
-        line-height: 1.4;
+        font-size: 7px;
 
         letter-spacing: 0.08em;
       }
 
-      .statement__copy h2 {
-        max-width: 860px;
+
+      /* =====================================================
+         INTRO
+      ====================================================== */
+
+      .intro {
+        padding: 125px 0;
+
+        background: var(--white);
+
+        border-bottom:
+          1px solid
+          var(--line);
+      }
+
+      .intro__grid {
+        display: grid;
+
+        grid-template-columns:
+          180px
+          minmax(0, 1fr)
+          185px;
+
+        gap: 45px;
+
+        align-items: start;
+      }
+
+      .intro__copy h2 {
+        max-width: 790px;
 
         margin: 0;
 
         font-size: clamp(
-          42px,
-          5vw,
-          66px
+          47px,
+          5.8vw,
+          78px
         );
 
-        line-height: 1.02;
+        line-height: 0.96;
 
-        letter-spacing: -0.055em;
+        letter-spacing: -0.065em;
 
         font-weight: 700;
       }
 
-      .statement__copy h2 span {
+      .intro__copy h2 span {
         display: block;
-        color: var(--blue);
+
+        color: var(--forest);
       }
 
-      .statement__copy p {
-        max-width: 680px;
+      .intro__description {
+        max-width: 720px;
 
-        margin: 28px 0 0;
+        margin-top: 38px;
+
+        display: grid;
+
+        grid-template-columns:
+          repeat(2, minmax(0, 1fr));
+
+        gap: 35px;
+      }
+
+      .intro__description p {
+        margin: 0;
 
         color: var(--muted);
 
-        font-size: 16px;
+        font-size: 14px;
 
-        line-height: 1.75;
+        line-height: 1.8;
+      }
+
+      .intro__note {
+        padding-top: 6px;
+
+        display: flex;
+
+        flex-direction: column;
+
+        gap: 9px;
+
+        border-top:
+          2px solid
+          var(--forest);
+      }
+
+      .intro__note span {
+        margin-bottom: 8px;
+
+        color: #8a867e;
+
+        font-family: "DM Mono", monospace;
+
+        font-size: 7px;
+
+        letter-spacing: 0.08em;
+      }
+
+      .intro__note strong {
+        color: var(--forest);
+
+        font-family: "DM Mono", monospace;
+
+        font-size: 9px;
+
+        line-height: 1.3;
+
+        letter-spacing: 0.04em;
       }
 
 
@@ -1900,75 +1869,47 @@ const currentYear = new Date().getFullYear();
       ====================================================== */
 
       .services {
-        padding: 105px 0;
+        padding: 125px 0;
 
-        background: white;
+        background: var(--paper);
       }
 
-      .section-intro {
+      .section-head {
         display: grid;
 
         grid-template-columns:
           180px
           minmax(0, 1fr);
 
-        gap: 60px;
+        gap: 45px;
 
-        margin-bottom: 56px;
+        margin-bottom: 61px;
       }
 
-      .section-intro__label {
-        display: flex;
-
-        align-items: flex-start;
-
-        gap: 10px;
-      }
-
-      .section-intro__label span {
-        color: var(--blue);
-
-        font-family: "DM Mono", monospace;
-
-        font-size: 10px;
-      }
-
-      .section-intro__label small {
-        color: #8994a2;
-
-        font-family: "DM Mono", monospace;
-
-        font-size: 8px;
-
-        line-height: 1.45;
-
-        letter-spacing: 0.08em;
-      }
-
-      .section-intro h2 {
+      .section-head__copy h2 {
         margin: 0;
 
         font-size: clamp(
-          42px,
-          5vw,
-          66px
+          48px,
+          5.4vw,
+          73px
         );
 
-        line-height: 1;
+        line-height: 0.96;
 
-        letter-spacing: -0.055em;
+        letter-spacing: -0.065em;
 
         font-weight: 700;
       }
 
-      .section-intro h2 span {
-        color: var(--blue);
+      .section-head__copy h2 span {
+        color: var(--coral);
       }
 
-      .section-intro p {
-        max-width: 610px;
+      .section-head__copy p {
+        max-width: 530px;
 
-        margin: 23px 0 0;
+        margin: 24px 0 0;
 
         color: var(--muted);
 
@@ -1977,87 +1918,66 @@ const currentYear = new Date().getFullYear();
         line-height: 1.7;
       }
 
-      .service-cards {
+      .service-list {
+        border-top:
+          1px solid
+          var(--ink);
+      }
+
+      .service-row {
+        min-height: 136px;
+
         display: grid;
 
         grid-template-columns:
-          repeat(4, minmax(0, 1fr));
+          80px
+          52px
+          220px
+          minmax(0, 1fr)
+          40px;
 
-        gap: 14px;
-      }
+        align-items: center;
 
-      .service-card {
-        min-height: 370px;
+        column-gap: 22px;
 
-        padding: 23px;
-
-        display: flex;
-        flex-direction: column;
-
-        border:
+        border-bottom:
           1px solid
           var(--line);
 
-        border-radius:
-          var(--radius-md);
-
-        background: white;
-
         transition:
-          transform 180ms ease,
-          border-color 180ms ease,
-          box-shadow 180ms ease;
+          background 160ms ease,
+          padding 160ms ease;
       }
 
-      .service-card:hover {
-        transform: translateY(-4px);
+      .service-row:hover {
+        padding-inline: 14px;
 
-        border-color:
-          #cbd6e1;
-
-        box-shadow:
-          0 18px 34px
-          rgba(30, 55, 88, 0.08);
+        background: var(--paper-dark);
       }
 
-      .service-card__top {
-        display: flex;
-
-        align-items: center;
-        justify-content: space-between;
-      }
-
-      .service-card__top > span {
-        color: #9ba7b4;
+      .service-row__number {
+        color: #8c8880;
 
         font-family: "DM Mono", monospace;
 
         font-size: 9px;
       }
 
-      .service-card__icon {
-        width: 47px;
-        height: 47px;
+      .service-row__icon {
+        width: 45px;
+        height: 45px;
 
         display: grid;
+
         place-items: center;
 
-        border-radius:
-          12px;
+        background: var(--forest);
 
-        background: var(--blue-soft);
-
-        color: var(--blue);
+        color: white;
       }
 
-      .service-card__content {
-        margin-top: auto;
-      }
-
-      .service-card__content h3 {
-        margin: 0;
-
-        font-size: 25px;
+      .service-row__title {
+        font-size: 28px;
 
         line-height: 1.1;
 
@@ -2066,8 +1986,8 @@ const currentYear = new Date().getFullYear();
         font-weight: 700;
       }
 
-      .service-card__content p {
-        margin: 14px 0 0;
+      .service-row__text {
+        max-width: 520px;
 
         color: var(--muted);
 
@@ -2076,217 +1996,150 @@ const currentYear = new Date().getFullYear();
         line-height: 1.7;
       }
 
-      .service-card__bottom {
-        margin-top: 28px;
+      .service-row__arrow {
+        justify-self: end;
 
-        padding-top: 17px;
-
-        display: flex;
-
-        align-items: center;
-        justify-content: space-between;
-
-        border-top:
-          1px solid
-          var(--line);
-
-        color: var(--blue);
-
-        font-size: 11px;
-
-        font-weight: 800;
+        color: var(--coral);
       }
 
 
       /* =====================================================
-         HOW IT WORKS
+         METHOD
       ====================================================== */
 
-      .how-it-works {
-        padding: 110px 0;
+      .method {
+        padding: 125px 0;
 
-        background: var(--dark);
+        background: var(--forest);
 
         color: white;
       }
 
-      .how-it-works__header {
+      .section-index--light span {
+        color: var(--coral-soft);
+      }
+
+      .section-index--light small {
+        color:
+          rgba(255, 255, 255, 0.42);
+      }
+
+      .method__intro {
         display: grid;
 
         grid-template-columns:
-          minmax(0, 1fr)
-          390px;
+          180px
+          minmax(0, 730px);
 
-        gap: 70px;
+        gap: 45px;
 
-        align-items: end;
-
-        margin-bottom: 70px;
+        margin-bottom: 75px;
       }
 
-      .how-it-works__title {
-        display: flex;
-
-        align-items: flex-start;
-
-        gap: 15px;
-      }
-
-      .how-it-works__title > span {
-        padding-top: 6px;
-
-        color: #91abda;
-
-        font-family: "DM Mono", monospace;
-
-        font-size: 10px;
-      }
-
-      .how-it-works__title small {
-        color: rgba(
-          255,
-          255,
-          255,
-          0.42
-        );
-
-        font-family: "DM Mono", monospace;
-
-        font-size: 8px;
-
-        letter-spacing: 0.08em;
-      }
-
-      .how-it-works h2 {
-        margin: 20px 0 0;
+      .method__intro h2 {
+        margin: 0;
 
         font-size: clamp(
-          42px,
-          5vw,
-          67px
+          47px,
+          5.3vw,
+          72px
         );
 
-        line-height: 1;
+        line-height: 0.96;
 
-        letter-spacing: -0.06em;
+        letter-spacing: -0.065em;
 
         font-weight: 700;
       }
 
-      .how-it-works h2 span {
+      .method__intro h2 span {
         display: block;
-        color: #80a9ff;
+
+        color: var(--coral-soft);
       }
 
-      .how-it-works__header > p {
-        margin: 0;
+      .method__intro p {
+        max-width: 600px;
 
-        color: rgba(
-          255,
-          255,
-          255,
-          0.57
-        );
+        margin: 27px 0 0;
+
+        color:
+          rgba(255, 255, 255, 0.62);
 
         font-size: 15px;
 
         line-height: 1.75;
       }
 
-      .steps {
+      .method__steps {
         display: grid;
 
         grid-template-columns:
           repeat(3, minmax(0, 1fr));
 
-        gap: 14px;
+        border-top:
+          1px solid
+          rgba(255, 255, 255, 0.16);
       }
 
-      .step {
+      .method__steps article {
         position: relative;
 
         min-height: 305px;
 
-        padding: 27px;
+        padding: 26px 28px 30px;
 
-        border-radius:
-          var(--radius-md);
-
-        background:
-          var(--dark-soft);
-
-        border:
+        border-right:
           1px solid
-          rgba(255, 255, 255, 0.08);
+          rgba(255, 255, 255, 0.12);
       }
 
-      .step__number {
-        color: rgba(
-          255,
-          255,
-          255,
-          0.3
-        );
+      .method__steps article:last-child {
+        border-right: 0;
+      }
+
+      .method__steps article > span {
+        color:
+          rgba(255, 255, 255, 0.38);
 
         font-family: "DM Mono", monospace;
 
         font-size: 9px;
       }
 
-      .step__icon {
-        width: 48px;
-        height: 48px;
+      .method__steps h3 {
+        margin: 72px 0 0;
 
-        margin-top: 45px;
+        font-size: 31px;
 
-        display: grid;
-        place-items: center;
+        line-height: 1;
 
-        border-radius:
-          12px;
-
-        background:
-          rgba(128, 169, 255, 0.12);
-
-        color: #8bb0ff;
+        letter-spacing: -0.045em;
       }
 
-      .step h3 {
-        margin: 28px 0 0;
+      .method__steps p {
+        max-width: 310px;
 
-        font-size: 23px;
+        margin: 15px 0 0;
 
-        letter-spacing: -0.03em;
-      }
-
-      .step p {
-        max-width: 340px;
-
-        margin: 11px 0 0;
-
-        color: rgba(
-          255,
-          255,
-          255,
-          0.5
-        );
+        color:
+          rgba(255, 255, 255, 0.53);
 
         font-size: 13px;
 
         line-height: 1.7;
       }
 
-      .step__connector {
+      .method__line {
         position: absolute;
 
-        top: 50%;
-        right: -26px;
+        bottom: 0;
+        left: 28px;
 
-        width: 38px;
-        height: 1px;
+        width: 42px;
+        height: 2px;
 
-        background:
-          rgba(255, 255, 255, 0.12);
+        background: var(--coral);
       }
 
 
@@ -2295,243 +2148,47 @@ const currentYear = new Date().getFullYear();
       ====================================================== */
 
       .coverage {
-        padding: 110px 0;
+        padding: 125px 0;
 
-        background: var(--bg);
+        background: var(--white);
       }
 
-      .coverage__header {
+      .coverage__head {
         display: grid;
 
         grid-template-columns:
-          minmax(0, 1fr)
-          420px;
+          180px
+          minmax(0, 1fr);
 
-        gap: 70px;
+        gap: 45px;
 
-        align-items: end;
-
-        margin-bottom: 55px;
+        margin-bottom: 61px;
       }
 
-      .number-label {
-        color: var(--blue);
-
-        font-family: "DM Mono", monospace;
-
-        font-size: 10px;
-      }
-
-      .coverage__header small {
-        margin-left: 10px;
-
-        color: #8994a2;
-
-        font-family: "DM Mono", monospace;
-
-        font-size: 8px;
-
-        letter-spacing: 0.08em;
-      }
-
-      .coverage__header h2 {
-        max-width: 760px;
-
-        margin: 25px 0 0;
+      .coverage__head h2 {
+        margin: 0;
 
         font-size: clamp(
-          42px,
-          5vw,
-          67px
+          48px,
+          5.4vw,
+          73px
         );
 
-        line-height: 1;
+        line-height: 0.96;
 
-        letter-spacing: -0.055em;
+        letter-spacing: -0.065em;
 
         font-weight: 700;
       }
 
-      .coverage__header h2 span {
+      .coverage__head h2 span {
         display: block;
-        color: var(--blue);
+
+        color: var(--forest);
       }
 
-      .coverage__header > p {
-        margin: 0;
-
-        color: var(--muted);
-
-        font-size: 15px;
-
-        line-height: 1.75;
-      }
-
-      .area-list {
-        display: grid;
-
-        grid-template-columns:
-          repeat(3, minmax(0, 1fr));
-
-        gap: 14px;
-      }
-
-      .area-card {
-        min-height: 310px;
-
-        padding: 26px;
-
-        display: flex;
-        flex-direction: column;
-
-        border-radius:
-          var(--radius-md);
-
-        background: white;
-
-        border:
-          1px solid
-          var(--line);
-
-        transition:
-          transform 180ms ease,
-          box-shadow 180ms ease,
-          border-color 180ms ease;
-      }
-
-      .area-card:hover {
-        transform: translateY(-4px);
-
-        border-color:
-          #cbd6e1;
-
-        box-shadow:
-          0 18px 36px
-          rgba(30, 55, 88, 0.07);
-      }
-
-      .area-card__top {
-        display: flex;
-
-        align-items: center;
-        justify-content: space-between;
-      }
-
-      .area-card__top > span:first-child {
-        color: #9ba7b4;
-
-        font-family: "DM Mono", monospace;
-
-        font-size: 9px;
-      }
-
-      .area-card__status {
-        display: inline-flex;
-
-        align-items: center;
-
-        gap: 5px;
-
-        color: var(--mint-dark);
-
-        font-family: "DM Mono", monospace;
-
-        font-size: 8px;
-
-        letter-spacing: 0.05em;
-      }
-
-      .area-card__body {
-        margin-top: auto;
-      }
-
-      .area-card__body h3 {
-        margin: 0;
-
-        font-size: 31px;
-
-        line-height: 1.05;
-
-        letter-spacing: -0.045em;
-      }
-
-      .area-card__body p {
-        margin: 13px 0 0;
-
-        color: var(--muted);
-
-        font-size: 13px;
-
-        line-height: 1.65;
-      }
-
-      .area-card__action {
-        margin-top: 26px;
-
-        padding-top: 16px;
-
-        display: flex;
-
-        align-items: center;
-        justify-content: space-between;
-
-        border-top:
-          1px solid
-          var(--line);
-
-        color: var(--blue);
-
-        font-size: 11px;
-
-        font-weight: 800;
-      }
-
-
-      /* =====================================================
-         MATERIALS
-      ====================================================== */
-
-      .materials {
-        padding: 110px 0;
-
-        background: white;
-      }
-
-      .materials__inner {
-        display: grid;
-
-        grid-template-columns:
-          minmax(0, 0.83fr)
-          minmax(0, 1.17fr);
-
-        gap: 100px;
-
-        align-items: start;
-      }
-
-      .materials__intro h2 {
-        margin: 27px 0 0;
-
-        font-size: clamp(
-          42px,
-          5vw,
-          67px
-        );
-
-        line-height: 1;
-
-        letter-spacing: -0.055em;
-
-        font-weight: 700;
-      }
-
-      .materials__intro h2 span {
-        display: block;
-        color: var(--blue);
-      }
-
-      .materials__intro > p {
-        max-width: 460px;
+      .coverage__head p {
+        max-width: 560px;
 
         margin: 23px 0 0;
 
@@ -2542,8 +2199,166 @@ const currentYear = new Date().getFullYear();
         line-height: 1.75;
       }
 
-      .inline-link {
-        margin-top: 28px;
+      .area-table {
+        border-top:
+          1px solid
+          var(--ink);
+      }
+
+      .area-table__head,
+      .area-table__row {
+        display: grid;
+
+        grid-template-columns:
+          90px
+          minmax(0, 1fr)
+          190px
+          160px
+          40px;
+
+        align-items: center;
+
+        column-gap: 20px;
+      }
+
+      .area-table__head {
+        min-height: 45px;
+
+        border-bottom:
+          1px solid
+          var(--line);
+
+        color: #89857d;
+
+        font-family: "DM Mono", monospace;
+
+        font-size: 7px;
+
+        letter-spacing: 0.08em;
+      }
+
+      .area-table__row {
+        min-height: 92px;
+
+        border-bottom:
+          1px solid
+          var(--line);
+
+        transition:
+          background 160ms ease;
+      }
+
+      .area-table__row:hover {
+        background: var(--paper);
+      }
+
+      .area-table__row > span:first-child {
+        color: #8b877f;
+
+        font-family: "DM Mono", monospace;
+
+        font-size: 9px;
+      }
+
+      .area-table__row strong {
+        font-size: 21px;
+
+        letter-spacing: -0.03em;
+      }
+
+      .area-table__row > span:nth-child(3) {
+        color: var(--muted);
+
+        font-family: "DM Mono", monospace;
+
+        font-size: 8px;
+
+        letter-spacing: 0.05em;
+      }
+
+      .area-status {
+        color: var(--forest);
+
+        font-family: "DM Mono", monospace;
+
+        font-size: 8px;
+
+        letter-spacing: 0.05em;
+      }
+
+      .area-table__row > svg {
+        justify-self: end;
+
+        color: var(--coral);
+      }
+
+
+      /* =====================================================
+         MATERIAL
+      ====================================================== */
+
+      .material {
+        padding: 125px 0;
+
+        background: var(--paper-dark);
+      }
+
+      .material__grid {
+        display: grid;
+
+        grid-template-columns:
+          180px
+          minmax(0, 1fr);
+
+        gap: 45px;
+      }
+
+      .material__content {
+        display: grid;
+
+        grid-template-columns:
+          minmax(0, 0.72fr)
+          minmax(0, 1.28fr);
+
+        gap: 80px;
+      }
+
+      .material__intro h2 {
+        margin: 0;
+
+        font-size: clamp(
+          48px,
+          5.2vw,
+          71px
+        );
+
+        line-height: 0.95;
+
+        letter-spacing: -0.065em;
+
+        font-weight: 700;
+      }
+
+      .material__intro h2 span {
+        display: block;
+
+        color: var(--coral);
+      }
+
+      .material__intro p {
+        max-width: 400px;
+
+        margin: 25px 0 0;
+
+        color: var(--muted);
+
+        font-size: 14px;
+
+        line-height: 1.78;
+      }
+
+      .material__link {
+        margin-top: 30px;
 
         display: inline-flex;
 
@@ -2551,244 +2366,191 @@ const currentYear = new Date().getFullYear();
 
         gap: 8px;
 
-        color: var(--blue);
+        color: var(--forest);
 
-        font-size: 12px;
+        font-size: 11px;
 
         font-weight: 800;
       }
 
-      .inline-link:hover {
+      .material__link:hover {
         text-decoration: underline;
+
         text-underline-offset: 4px;
       }
 
-      .material-list {
-        display: flex;
-
-        flex-direction: column;
-
-        gap: 9px;
+      .material__list {
+        border-top:
+          1px solid
+          var(--ink);
       }
 
-      .material-card {
-        min-height: 103px;
-
-        padding: 16px 18px;
+      .material__row {
+        min-height: 92px;
 
         display: grid;
 
         grid-template-columns:
           60px
           minmax(0, 1fr)
-          24px;
+          70px
+          30px;
 
         align-items: center;
 
         gap: 18px;
 
-        border:
+        border-bottom:
           1px solid
-          var(--line);
-
-        border-radius:
-          var(--radius-md);
-
-        background: var(--bg);
-
-        transition:
-          background 160ms ease,
-          border-color 160ms ease;
+          rgba(21, 21, 21, 0.18);
       }
 
-      .material-card:hover {
-        background: #eef4ff;
+      .material__row > span {
+        color: #8a867e;
 
-        border-color: #c9d7f0;
+        font-family: "DM Mono", monospace;
+
+        font-size: 9px;
       }
 
-      .material-card__code {
-        width: 50px;
-        height: 50px;
+      .material__row strong {
+        font-size: 18px;
 
-        display: grid;
-        place-items: center;
+        letter-spacing: -0.02em;
+      }
 
-        border-radius:
-          13px;
-
-        background: white;
-
-        color: var(--blue);
+      .material__row small {
+        color: var(--forest);
 
         font-family: "DM Mono", monospace;
 
         font-size: 8px;
 
-        box-shadow:
-          0 3px 12px
-          rgba(21, 39, 63, 0.05);
+        text-align: right;
       }
 
-      .material-card__content {
-        min-width: 0;
-      }
+      .material__row svg {
+        justify-self: end;
 
-      .material-card__content h3 {
-        margin: 0;
-
-        font-size: 16px;
-
-        line-height: 1.2;
-
-        font-weight: 800;
-      }
-
-      .material-card__content p {
-        max-width: 520px;
-
-        margin: 6px 0 0;
-
-        color: var(--muted);
-
-        font-size: 12px;
-
-        line-height: 1.5;
-      }
-
-      .material-card__arrow {
-        color: #97a3b0;
+        color: var(--coral);
       }
 
 
       /* =====================================================
-         TRUST
+         PRINCIPLES
       ====================================================== */
 
-      .trust {
-        padding: 110px 0;
+      .principles {
+        padding: 125px 0;
 
-        background: var(--mint);
+        background: var(--white);
       }
 
-      .trust__inner {
+      .principles__head {
         display: grid;
 
         grid-template-columns:
-          minmax(0, 0.92fr)
-          minmax(0, 1.08fr);
+          180px
+          minmax(0, 1fr);
 
-        gap: 80px;
+        gap: 45px;
 
-        align-items: start;
+        margin-bottom: 65px;
       }
 
-      .trust__heading {
-        display: flex;
-
-        gap: 15px;
-      }
-
-      .trust__heading > span {
-        color: var(--mint-dark);
-
-        font-family: "DM Mono", monospace;
-
-        font-size: 10px;
-
-        padding-top: 6px;
-      }
-
-      .trust__heading small {
-        color: #56816f;
-
-        font-family: "DM Mono", monospace;
-
-        font-size: 8px;
-
-        letter-spacing: 0.08em;
-      }
-
-      .trust__heading h2 {
-        max-width: 610px;
-
-        margin: 22px 0 0;
+      .principles__head h2 {
+        margin: 0;
 
         font-size: clamp(
-          42px,
-          5vw,
-          64px
+          48px,
+          5.2vw,
+          71px
         );
 
-        line-height: 1;
+        line-height: 0.95;
 
-        letter-spacing: -0.055em;
+        letter-spacing: -0.065em;
 
         font-weight: 700;
       }
 
-      .trust__heading h2 span {
-        display: block;
-
-        color: #207158;
+      .principles__head h2 span {
+        color: var(--forest);
       }
 
-      .trust__items {
+      .principles__head p {
+        max-width: 540px;
+
+        margin: 24px 0 0;
+
+        color: var(--muted);
+
+        font-size: 14px;
+
+        line-height: 1.78;
+      }
+
+      .principle-list {
         display: grid;
 
         grid-template-columns:
           repeat(3, minmax(0, 1fr));
 
-        gap: 10px;
-      }
-
-      .trust-card {
-        min-height: 290px;
-
-        padding: 23px;
-
-        border-radius:
-          var(--radius-md);
-
-        background:
-          rgba(255, 255, 255, 0.72);
-
-        border:
+        border-top:
           1px solid
-          rgba(36, 115, 90, 0.12);
+          var(--ink);
       }
 
-      .trust-card__icon {
-        width: 45px;
-        height: 45px;
+      .principle {
+        min-height: 275px;
 
-        display: grid;
-        place-items: center;
+        padding:
+          25px
+          30px
+          30px
+          0;
 
-        border-radius:
-          12px;
-
-        background: white;
-
-        color: var(--mint-dark);
+        border-right:
+          1px solid
+          var(--line);
       }
 
-      .trust-card h3 {
-        margin: 35px 0 0;
-
-        font-size: 19px;
-
-        line-height: 1.2;
+      .principle + .principle {
+        padding-left: 28px;
       }
 
-      .trust-card p {
-        margin: 11px 0 0;
+      .principle:last-child {
+        border-right: 0;
+      }
 
-        color: #587468;
+      .principle__number {
+        color: var(--coral);
 
-        font-size: 12px;
+        font-family: "DM Mono", monospace;
 
-        line-height: 1.7;
+        font-size: 9px;
+      }
+
+      .principle h3 {
+        margin: 72px 0 0;
+
+        font-size: 28px;
+
+        line-height: 1;
+
+        letter-spacing: -0.04em;
+      }
+
+      .principle p {
+        max-width: 300px;
+
+        margin: 14px 0 0;
+
+        color: var(--muted);
+
+        font-size: 13px;
+
+        line-height: 1.72;
       }
 
 
@@ -2796,37 +2558,34 @@ const currentYear = new Date().getFullYear();
          FINAL
       ====================================================== */
 
-      .final-section {
-        padding: 40px 0 70px;
+      .final {
+        padding: 40px 0 0;
 
-        background: var(--bg);
+        background: var(--coral);
       }
 
-      .final-section__inner {
-        min-height: 400px;
-
-        padding: 65px;
+      .final__inner {
+        min-height: 430px;
 
         display: flex;
 
-        align-items: flex-end;
+        flex-direction: column;
+
         justify-content: space-between;
 
-        gap: 50px;
-
-        border-radius:
-          var(--radius-lg);
-
-        background:
-          linear-gradient(
-            135deg,
-            #dfeaff,
-            #f0f4ff
-          );
+        padding:
+          35px
+          0
+          55px;
       }
 
-      .final-section__copy small {
-        color: var(--blue);
+      .final__top {
+        display: flex;
+
+        justify-content: space-between;
+
+        color:
+          rgba(255, 255, 255, 0.66);
 
         font-family: "DM Mono", monospace;
 
@@ -2835,38 +2594,45 @@ const currentYear = new Date().getFullYear();
         letter-spacing: 0.08em;
       }
 
-      .final-section__copy h2 {
-        max-width: 700px;
+      .final__content {
+        display: flex;
 
-        margin: 22px 0 0;
+        align-items: flex-end;
+        justify-content: space-between;
+
+        gap: 50px;
+      }
+
+      .final__content h2 {
+        max-width: 850px;
+
+        margin: 0;
+
+        color: white;
 
         font-size: clamp(
-          53px,
-          6vw,
-          84px
+          54px,
+          7vw,
+          98px
         );
 
-        line-height: 0.94;
+        line-height: 0.9;
 
-        letter-spacing: -0.06em;
+        letter-spacing: -0.07em;
 
         font-weight: 700;
       }
 
-      .final-section__copy h2 span {
-        color: var(--blue);
+      .final__content h2 em {
+        font-family: "Playfair Display", serif;
+
+        font-style: normal;
+
+        font-weight: 600;
       }
 
-      .final-section__copy p {
-        margin: 25px 0 0;
-
-        color: var(--muted);
-
-        font-size: 15px;
-      }
-
-      .final-button {
-        min-height: 53px;
+      .final__button {
+        min-height: 54px;
 
         padding: 0 20px;
 
@@ -2875,27 +2641,26 @@ const currentYear = new Date().getFullYear();
         align-items: center;
         justify-content: center;
 
-        gap: 10px;
+        gap: 11px;
 
         flex-shrink: 0;
 
-        border-radius:
-          var(--radius-sm);
-
-        background: var(--dark);
+        background: var(--ink);
 
         color: white;
 
-        font-size: 12px;
+        font-size: 11px;
 
         font-weight: 800;
+
+        white-space: nowrap;
 
         transition:
           background 160ms ease;
       }
 
-      .final-button:hover {
-        background: #202d42;
+      .final__button:hover {
+        background: var(--forest);
       }
 
 
@@ -2904,75 +2669,57 @@ const currentYear = new Date().getFullYear();
       ====================================================== */
 
       .footer {
-        background: var(--dark);
+        background: var(--ink);
 
         color: white;
       }
 
       .footer__main {
-        padding: 75px 0;
+        padding:
+          76px
+          0
+          70px;
 
         display: grid;
 
         grid-template-columns:
-          1fr
-          350px;
+          minmax(0, 1fr)
+          170px
+          170px;
 
-        gap: 100px;
+        gap: 70px;
       }
 
-      .logo--footer .logo__shape span:first-child {
-        background: white;
-      }
-
-      .logo--footer .logo__shape span:nth-child(2) {
-        background: #80a9ff;
-      }
-
-      .logo--footer .logo__shape span:nth-child(3) {
-        background: #72bc98;
-      }
-
-      .logo--footer .logo__text strong {
+      .brand--footer .brand__word {
         color: white;
       }
 
-      .logo--footer .logo__text small {
-        color: rgba(
-          255,
-          255,
-          255,
-          0.38
-        );
+      .brand--footer .brand__symbol i:first-child {
+        background: white;
+      }
+
+      .brand--footer .brand__symbol i:nth-child(2) {
+        background: var(--coral);
+      }
+
+      .brand--footer .brand__symbol i:nth-child(3) {
+        background: #71978a;
       }
 
       .footer__identity p {
-        max-width: 380px;
+        max-width: 340px;
 
-        margin: 24px 0 0;
+        margin: 23px 0 0;
 
-        color: rgba(
-          255,
-          255,
-          255,
-          0.48
-        );
+        color:
+          rgba(255, 255, 255, 0.45);
 
         font-size: 13px;
 
-        line-height: 1.65;
+        line-height: 1.7;
       }
 
-      .footer__links {
-        display: grid;
-
-        grid-template-columns:
-          repeat(2, 1fr);
-
-        gap: 40px;
-      }
-
-      .footer__links > div {
+      .footer__group {
         display: flex;
 
         flex-direction: column;
@@ -2980,42 +2727,34 @@ const currentYear = new Date().getFullYear();
         align-items: flex-start;
       }
 
-      .footer__links small {
+      .footer__group > span {
         margin-bottom: 17px;
 
-        color: rgba(
-          255,
-          255,
-          255,
-          0.32
-        );
+        color:
+          rgba(255, 255, 255, 0.3);
 
         font-family: "DM Mono", monospace;
 
-        font-size: 8px;
+        font-size: 7px;
 
         letter-spacing: 0.08em;
       }
 
-      .footer__links a {
+      .footer__group a {
         margin-bottom: 11px;
 
-        color: rgba(
-          255,
-          255,
-          255,
-          0.68
-        );
+        color:
+          rgba(255, 255, 255, 0.67);
 
         font-size: 12px;
       }
 
-      .footer__links a:hover {
+      .footer__group a:hover {
         color: white;
       }
 
       .footer__bottom {
-        min-height: 67px;
+        min-height: 65px;
 
         display: grid;
 
@@ -3028,20 +2767,16 @@ const currentYear = new Date().getFullYear();
 
         border-top:
           1px solid
-          rgba(255, 255, 255, 0.08);
+          rgba(255, 255, 255, 0.1);
 
-        color: rgba(
-          255,
-          255,
-          255,
-          0.3
-        );
+        color:
+          rgba(255, 255, 255, 0.28);
 
         font-family: "DM Mono", monospace;
 
-        font-size: 8px;
+        font-size: 7px;
 
-        letter-spacing: 0.05em;
+        letter-spacing: 0.06em;
       }
 
       .footer__bottom span:nth-child(2) {
@@ -3054,339 +2789,507 @@ const currentYear = new Date().getFullYear();
 
 
       /* =====================================================
-         REPORT
+         FLOATING REPORT
       ====================================================== */
 
       .floating-report {
         position: fixed;
 
-        right: 22px;
+        right: 24px;
         bottom: 22px;
 
         z-index: 120;
 
-        min-height: 62px;
+        min-height: 58px;
 
-        padding: 7px 14px 7px 7px;
+        padding:
+          7px
+          12px
+          7px
+          9px;
 
-        display: flex;
+        display: inline-flex;
 
         align-items: center;
 
         gap: 10px;
 
-        border-radius:
-          15px;
-
-        background: var(--blue);
+        background: var(--forest);
 
         color: white;
 
         box-shadow:
-          0 16px 38px
-          rgba(37, 99, 235, 0.26);
+          0 13px 28px
+          rgba(0, 0, 0, 0.18);
 
         transition:
-          transform 160ms ease,
-          background 160ms ease;
+          background 160ms ease,
+          transform 160ms ease;
       }
 
       .floating-report:hover {
-        transform: translateY(-3px);
+        background: #245347;
 
-        background: var(--blue-dark);
+        transform: translateY(-2px);
       }
 
-      .floating-report__mark {
-        width: 47px;
-        height: 47px;
-
-        display: grid;
-        place-items: center;
-
-        border-radius:
-          11px;
-
-        background:
-          rgba(255, 255, 255, 0.14);
+      .floating-report > svg {
+        color: var(--coral-soft);
       }
 
-      .floating-report__text {
+      .floating-report > span {
         display: grid;
 
         gap: 3px;
       }
 
-      .floating-report__text small {
-        color: rgba(
-          255,
-          255,
-          255,
-          0.62
-        );
+      .floating-report small {
+        color:
+          rgba(255, 255, 255, 0.46);
 
         font-family: "DM Mono", monospace;
 
-        font-size: 7px;
+        font-size: 6px;
 
         letter-spacing: 0.06em;
       }
 
-      .floating-report__text strong {
-        font-size: 12px;
+      .floating-report strong {
+        font-size: 11px;
 
         font-weight: 800;
       }
 
 
       /* =====================================================
-         RESPONSIVE 1100
+         1100
       ====================================================== */
 
       @media (max-width: 1100px) {
-        .navigation {
-          display: none;
-        }
-
-        .mobile-menu-button {
-          display: inline-flex;
-        }
-
-        .mobile-navigation.mobile-navigation--open {
-          display: block;
+        .desktop-nav {
+          gap: 22px;
         }
 
         .hero__inner {
-          grid-template-columns: 1fr;
-
-          min-height: auto;
-
-          padding: 58px;
-        }
-
-        .hero__directory {
-          max-width: 720px;
-        }
-
-        .service-cards {
           grid-template-columns:
-            repeat(2, minmax(0, 1fr));
+            42px
+            minmax(0, 1fr)
+            minmax(250px, 0.4fr);
+
+          column-gap: 25px;
         }
 
-        .materials__inner {
-          gap: 60px;
+        .hero__main {
+          padding-right: 0;
         }
 
-        .trust__inner {
+        .hero__lower {
           grid-template-columns: 1fr;
+          gap: 25px;
+        }
 
+        .hero__actions {
+          justify-content: flex-start;
+        }
+
+        .service-row {
+          grid-template-columns:
+            65px
+            48px
+            180px
+            minmax(0, 1fr)
+            35px;
+
+          column-gap: 17px;
+        }
+
+        .material__content {
           gap: 55px;
         }
       }
 
 
       /* =====================================================
-         RESPONSIVE 900
+         900
       ====================================================== */
 
       @media (max-width: 900px) {
-        .shell {
+        .page-width {
           width: min(
-            calc(100% - 32px),
-            var(--shell)
+            calc(100% - 34px),
+            var(--page)
           );
         }
 
-        .site-header__inner {
-          min-height: 68px;
-        }
-
-        .search-button {
+        .desktop-nav {
           display: none;
         }
 
-        .hero {
-          padding: 20px 0 50px;
+        .header__location {
+          display: none;
+        }
+
+        .menu-button {
+          display: inline-flex;
+        }
+
+        .mobile-nav.mobile-nav--open {
+          display: block;
         }
 
         .hero__inner {
-          gap: 42px;
+          min-height: auto;
 
-          padding: 42px 34px;
-        }
-
-        .hero h1 {
-          font-size: clamp(
-            50px,
-            9vw,
-            72px
-          );
-        }
-
-        .statement__inner,
-        .section-intro {
           grid-template-columns: 1fr;
 
-          gap: 22px;
+          gap: 0;
         }
 
-        .statement {
-          padding-top: 42px;
+        .hero__rail {
+          display: none;
         }
 
-        .statement__label {
-          padding-top: 0;
-
-          flex-direction: row;
-
-          align-items: center;
-
-          gap: 10px;
+        .hero__main {
+          padding:
+            78px
+            0
+            72px;
         }
 
-        .statement__label span:last-child {
-          line-height: 1;
+        .hero__visual {
+          min-height: 330px;
+
+          margin:
+            0
+            0
+            30px;
+        }
+
+        .hero__visual-word {
+          writing-mode: horizontal-tb;
+
+          transform: none;
+
+          margin-left: 0;
+        }
+
+        .hero__visual-mark {
+          right: 44px;
+        }
+
+        .intro__grid,
+        .section-head,
+        .coverage__head,
+        .material__grid,
+        .principles__head,
+        .method__intro {
+          grid-template-columns: 1fr;
+
+          gap: 24px;
+        }
+
+        .intro {
+          padding: 95px 0;
+        }
+
+        .intro__note {
+          max-width: 280px;
         }
 
         .services,
-        .how-it-works,
+        .method,
         .coverage,
-        .materials,
-        .trust {
-          padding: 90px 0;
+        .material,
+        .principles {
+          padding: 95px 0;
         }
 
-        .how-it-works__header {
+        .service-row {
+          min-height: 120px;
+
+          grid-template-columns:
+            55px
+            48px
+            minmax(120px, 0.5fr)
+            minmax(0, 1fr)
+            28px;
+        }
+
+        .method__steps {
+          grid-template-columns: 1fr;
+        }
+
+        .method__steps article {
+          min-height: 235px;
+
+          border-right: 0;
+
+          border-bottom:
+            1px solid
+            rgba(255, 255, 255, 0.12);
+        }
+
+        .method__steps article:last-child {
+          border-bottom: 0;
+        }
+
+        .material__content {
           grid-template-columns: 1fr;
 
-          gap: 25px;
+          gap: 55px;
         }
 
-        .coverage__header {
-          grid-template-columns: 1fr;
-
-          gap: 25px;
-        }
-
-        .materials__inner {
+        .principle-list {
           grid-template-columns: 1fr;
         }
 
-        .final-section__inner {
-          padding: 50px;
+        .principle {
+          min-height: 220px;
+
+          border-right: 0;
+
+          border-bottom:
+            1px solid
+            var(--line);
+
+          padding:
+            25px
+            0
+            30px;
+        }
+
+        .principle + .principle {
+          padding-left: 0;
+        }
+
+        .principle:last-child {
+          border-bottom: 0;
         }
 
         .footer__main {
-          grid-template-columns: 1fr;
+          grid-template-columns:
+            1fr
+            1fr
+            1fr;
+
+          gap: 45px;
         }
 
-        .footer__bottom {
-          grid-template-columns: 1fr;
+        .final__content {
+          align-items: flex-start;
 
-          gap: 8px;
+          flex-direction: column;
 
-          padding: 20px 0;
-        }
-
-        .footer__bottom span:nth-child(2),
-        .footer__bottom span:last-child {
-          text-align: left;
+          gap: 35px;
         }
       }
 
 
       /* =====================================================
-         RESPONSIVE 700
+         700
       ====================================================== */
 
       @media (max-width: 700px) {
-        .hero__inner {
-          padding: 34px 24px;
+        .page-width {
+          width: min(
+            calc(100% - 26px),
+            var(--page)
+          );
+        }
+
+        .hero__main {
+          padding:
+            62px
+            0
+            58px;
         }
 
         .hero h1 {
-          font-size: 48px;
+          font-size: clamp(
+            48px,
+            13vw,
+            68px
+          );
         }
 
-        .hero__lead {
-          font-size: 15px;
+        .hero__lower p {
+          font-size: 14px;
         }
 
-        .hero__buttons {
+        .hero__actions {
+          width: 100%;
+
           flex-direction: column;
 
           align-items: stretch;
         }
 
-        .primary-button,
-        .secondary-button {
+        .hero-button {
           width: 100%;
         }
 
-        .hero-service {
-          grid-template-columns:
-            30px
-            42px
-            minmax(0, 1fr)
-            20px;
-        }
-
-        .hero-service__copy small {
-          font-size: 9px;
-        }
-
-        .service-cards {
-          grid-template-columns: 1fr;
-        }
-
-        .service-card {
+        .hero__visual {
           min-height: 300px;
+
+          padding: 22px;
         }
 
-        .steps {
+        .hero__visual-word {
+          font-size: 58px;
+        }
+
+        .hero__visual-mark {
+          width: 95px;
+          height: 95px;
+
+          right: 28px;
+        }
+
+        .ticker__inner {
+          grid-template-columns:
+            repeat(3, 1fr);
+
+          row-gap: 0;
+        }
+
+        .ticker__inner span {
+          min-height: 42px;
+
+          display: grid;
+          place-items: center;
+        }
+
+        .ticker__inner span:nth-child(4) {
+          border-left: 0;
+        }
+
+        .intro,
+        .services,
+        .method,
+        .coverage,
+        .material,
+        .principles {
+          padding: 78px 0;
+        }
+
+        .intro__copy h2,
+        .section-head__copy h2,
+        .coverage__head h2,
+        .material__intro h2,
+        .principles__head h2,
+        .method__intro h2 {
+          font-size: 43px;
+        }
+
+        .intro__description {
           grid-template-columns: 1fr;
+
+          gap: 18px;
         }
 
-        .step {
-          min-height: 260px;
+        .service-row {
+          min-height: auto;
+
+          grid-template-columns:
+            35px
+            44px
+            minmax(0, 1fr)
+            24px;
+
+          gap: 12px;
+
+          padding:
+            19px
+            0;
         }
 
-        .step__connector {
+        .service-row__title {
+          font-size: 20px;
+        }
+
+        .service-row__text {
           display: none;
         }
 
-        .area-list {
-          grid-template-columns: 1fr;
+        .service-row:hover {
+          padding-inline: 0;
+
+          background: transparent;
         }
 
-        .area-card {
-          min-height: 270px;
+        .area-table {
+          overflow-x: auto;
         }
 
-        .trust__items {
-          grid-template-columns: 1fr;
+        .area-table__head,
+        .area-table__row {
+          min-width: 690px;
         }
 
-        .trust-card {
-          min-height: auto;
+        .material__row {
+          grid-template-columns:
+            45px
+            minmax(0, 1fr)
+            55px
+            25px;
+
+          gap: 12px;
         }
 
-        .final-section {
-          padding: 20px 0 45px;
+        .final {
+          padding-top: 22px;
         }
 
-        .final-section__inner {
-          min-height: auto;
+        .final__inner {
+          min-height: 380px;
 
-          padding: 38px 26px;
-
-          flex-direction: column;
-
-          align-items: flex-start;
+          padding:
+            26px
+            0
+            45px;
         }
 
-        .final-button {
+        .final__top {
+          gap: 20px;
+        }
+
+        .final__top span:last-child {
+          display: none;
+        }
+
+        .final__content h2 {
+          font-size: 52px;
+        }
+
+        .final__button {
           width: 100%;
+        }
+
+        .footer__main {
+          grid-template-columns: 1fr 1fr;
+
+          gap: 42px;
+        }
+
+        .footer__identity {
+          grid-column: 1 / -1;
+        }
+
+        .footer__bottom {
+          min-height: auto;
+
+          grid-template-columns: 1fr;
+
+          gap: 8px;
+
+          padding:
+            18px 0
+            88px;
+        }
+
+        .footer__bottom span:nth-child(2),
+        .footer__bottom span:last-child {
+          text-align: left;
         }
 
         .floating-report {
@@ -3395,159 +3298,115 @@ const currentYear = new Date().getFullYear();
           bottom: 12px;
         }
 
-        .floating-report__text {
+        .floating-report > span {
           flex: 1;
-        }
-
-        .footer__links {
-          grid-template-columns:
-            1fr
-            1fr;
         }
       }
 
 
       /* =====================================================
-         RESPONSIVE 480
+         480
       ====================================================== */
 
       @media (max-width: 480px) {
-        .shell {
-          width: min(
-            calc(100% - 24px),
-            var(--shell)
-          );
+        .brand__word {
+          font-size: 14px;
         }
 
-        .logo__text small {
-          font-size: 6px;
+        .hero__main {
+          padding:
+            53px
+            0
+            48px;
         }
 
-        .hero__inner {
-          padding: 28px 20px;
+        .eyebrow {
+          font-size: 8px;
         }
 
         .hero h1 {
-          font-size: 43px;
-          line-height: 0.99;
+          font-size: 45px;
+
+          line-height: 0.94;
         }
 
-        .hero__directory-head {
-          min-height: auto;
-
-          padding: 20px;
-
-          flex-direction: column;
-
-          gap: 14px;
+        .hero__visual {
+          min-height: 250px;
         }
 
-        .hero__directory-list {
-          padding: 7px;
+        .hero__visual-word {
+          font-size: 46px;
         }
 
-        .hero-service {
-          min-height: 84px;
+        .hero__visual-mark {
+          width: 75px;
+          height: 75px;
 
-          padding: 11px 9px;
+          right: 22px;
+        }
 
-          grid-template-columns:
-            27px
-            38px
-            minmax(0, 1fr)
-            17px;
+        .hero__visual-bottom {
+          gap: 9px;
+        }
+
+        .section-index {
+          flex-direction: row;
+
+          align-items: center;
 
           gap: 9px;
         }
 
-        .hero-service__icon {
-          width: 38px;
-          height: 38px;
+        .intro__copy h2,
+        .section-head__copy h2,
+        .coverage__head h2,
+        .material__intro h2,
+        .principles__head h2,
+        .method__intro h2 {
+          font-size: 39px;
         }
 
-        .hero-service__copy strong {
-          font-size: 13px;
-        }
-
-        .hero-service__copy small {
-          display: none;
-        }
-
-        .statement__copy h2,
-        .section-intro h2,
-        .coverage__header h2,
-        .materials__intro h2,
-        .trust__heading h2 {
-          font-size: 41px;
-        }
-
-        .statement {
-          padding-bottom: 78px;
-        }
-
-        .services,
-        .how-it-works,
-        .coverage,
-        .materials,
-        .trust {
-          padding: 78px 0;
-        }
-
-        .section-intro,
-        .statement__inner {
-          gap: 18px;
-        }
-
-        .how-it-works__title {
-          gap: 11px;
-        }
-
-        .how-it-works h2 {
-          font-size: 40px;
-        }
-
-        .step {
-          padding: 22px;
-        }
-
-        .material-card {
-          min-height: 91px;
-
+        .service-row {
           grid-template-columns:
-            49px
+            28px
+            40px
             minmax(0, 1fr)
-            18px;
-
-          gap: 11px;
-
-          padding: 12px;
+            20px;
         }
 
-        .material-card__code {
-          width: 42px;
-          height: 42px;
+        .service-row__icon {
+          width: 40px;
+          height: 40px;
         }
 
-        .material-card__content h3 {
-          font-size: 14px;
+        .service-row__title {
+          font-size: 18px;
         }
 
-        .material-card__content p {
-          font-size: 10px;
+        .method__steps article {
+          min-height: 220px;
         }
 
-        .final-section__copy h2 {
-          font-size: 48px;
+        .method__steps h3 {
+          margin-top: 58px;
+          font-size: 26px;
+        }
+
+        .material__row strong {
+          font-size: 16px;
+        }
+
+        .principle h3 {
+          margin-top: 55px;
+          font-size: 25px;
+        }
+
+        .final__content h2 {
+          font-size: 46px;
         }
 
         .footer__main {
-          padding: 58px 0;
-        }
-
-        .footer__links {
-          grid-template-columns: 1fr 1fr;
-
-          gap: 25px;
+          padding-top: 58px;
         }
       }
     </style>
